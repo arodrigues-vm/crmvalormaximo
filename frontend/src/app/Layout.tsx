@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 
 import { GRUPOS } from './modulos'
+import { useSessao } from './sessao'
 
 function nomeModuloAtual(caminho: string): string {
   for (const grupo of GRUPOS) {
@@ -17,6 +18,10 @@ function nomeModuloAtual(caminho: string): string {
 export function Layout({ children }: { children: ReactNode }) {
   const [menuAberto, setMenuAberto] = useState(false)
   const { pathname } = useLocation()
+  const { utilizador, sair, pode } = useSessao()
+  const grupos = GRUPOS.map((g) => ({ ...g, modulos: g.modulos.filter((m) => pode(m.chave)) })).filter(
+    (g) => g.modulos.length > 0,
+  )
 
   return (
     <div className="estrutura">
@@ -31,7 +36,7 @@ export function Layout({ children }: { children: ReactNode }) {
           </span>
         </div>
         <nav>
-          {GRUPOS.map((grupo) => (
+          {grupos.map((grupo) => (
             <div key={grupo.nome} className="grupo">
               <p className="grupo-nome">{grupo.nome}</p>
               <ul>
@@ -65,6 +70,17 @@ export function Layout({ children }: { children: ReactNode }) {
             ☰
           </button>
           <h1>{nomeModuloAtual(pathname)}</h1>
+          {utilizador && (
+            <div className="utilizador">
+              <span className="utilizador-nome">
+                {utilizador.nome}
+                <small>{utilizador.perfil_nome}</small>
+              </span>
+              <button className="botao-secundario" onClick={() => void sair()}>
+                Sair
+              </button>
+            </div>
+          )}
         </header>
         <main className="principal">{children}</main>
       </div>

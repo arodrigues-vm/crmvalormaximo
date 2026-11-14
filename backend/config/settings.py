@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_spectacular",
     "apps.core",
+    "apps.contas",
 ]
 
 MIDDLEWARE = [
@@ -77,6 +78,7 @@ DATABASES["default"]["ATOMIC_REQUESTS"] = True
 DATABASES["default"]["CONN_MAX_AGE"] = 60
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+AUTH_USER_MODEL = "contas.Utilizador"
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -98,7 +100,7 @@ MEDIA_ROOT = env.path("CRM_MEDIA_ROOT", default=BASE_DIR / "media_privada")
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.SessionAuthentication",
+        "apps.core.autenticacao.SessaoAutenticacao",
     ],
     # Por omissão tudo exige autenticação; endpoints públicos têm de o
     # declarar explicitamente.
@@ -109,7 +111,19 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 25,
     "COERCE_DECIMAL_TO_STRING": True,
+    "DEFAULT_THROTTLE_CLASSES": ["rest_framework.throttling.ScopedRateThrottle"],
+    "DEFAULT_THROTTLE_RATES": {
+        "entrar": env("CRM_LIMITE_ENTRAR", default="10/min"),
+        "recuperar": env("CRM_LIMITE_RECUPERAR", default="5/hour"),
+    },
 }
+
+# Endereço público da interface (usado nas ligações enviadas por email).
+CRM_URL_FRONTEND = env("CRM_URL_FRONTEND", default="http://localhost:5173")
+
+EMAIL_BACKEND = env("DJANGO_EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
+DEFAULT_FROM_EMAIL = env("DJANGO_DEFAULT_FROM_EMAIL", default="CRM Valor Máximo <nao-responder@localhost>")
+PASSWORD_RESET_TIMEOUT = 60 * 60 * 2  # 2 horas
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "CRM Valor Máximo — API",

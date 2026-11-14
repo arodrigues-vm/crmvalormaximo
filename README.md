@@ -40,6 +40,16 @@ npm install
 npm run dev
 ```
 
+## Utilizadores de demonstração
+
+Dados fictícios, um utilizador por perfil:
+
+```bash
+cd backend && python manage.py criar_utilizadores_demo --password "Escolha-uma-palavra-passe"
+```
+
+Entrar com `admin@demo.local`, `responsavel@demo.local`, `consultor@demo.local` ou `assistente@demo.local`.
+
 ## Testes
 
 ```bash

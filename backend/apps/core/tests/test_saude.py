@@ -15,7 +15,7 @@ def test_saude_responde_ok_sem_autenticacao(client):
 def test_schema_exige_autenticacao(client):
     # A descrição da API não é pública: revela a estrutura de dados.
     resposta = client.get(reverse("schema"))
-    assert resposta.status_code in (401, 403)
+    assert resposta.status_code == 401
 
 
 def test_base_dados_e_postgresql(settings):

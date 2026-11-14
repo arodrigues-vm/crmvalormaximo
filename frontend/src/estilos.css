@@ -72,3 +72,48 @@ body { margin: 0; background: var(--fundo); }
   .principal { padding: 16px; }
   .cabecalho { padding: 12px 16px; }
 }
+
+/* Utilizador no cabeçalho */
+.utilizador { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.utilizador-nome { display: flex; flex-direction: column; text-align: right; font-size: 14px; font-weight: 600; }
+.utilizador-nome small { font-weight: 400; color: var(--texto-suave); font-size: 12px; }
+
+/* Botões */
+.botao-principal {
+  background: var(--azul-marinho); color: #fff; border: 0; border-radius: 8px;
+  padding: 10px 16px; font: inherit; font-weight: 600; cursor: pointer;
+}
+.botao-principal:hover:not(:disabled) { background: var(--azul-marinho-escuro); }
+.botao-principal:disabled { opacity: .55; cursor: not-allowed; }
+.botao-secundario {
+  background: transparent; color: var(--azul-marinho); border: 1px solid var(--borda); border-radius: 8px;
+  padding: 6px 12px; font: inherit; font-size: 14px; cursor: pointer;
+}
+.botao-secundario:hover { border-color: var(--azul-marinho); }
+:focus-visible { outline: 2px solid var(--dourado); outline-offset: 2px; }
+
+/* Formulários */
+.formulario { display: flex; flex-direction: column; gap: 14px; }
+.formulario label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 500; }
+.formulario input {
+  font: inherit; padding: 10px 12px; border: 1px solid var(--borda); border-radius: 8px; background: #fff;
+}
+.formulario input:focus { border-color: var(--azul-marinho); outline: none; box-shadow: 0 0 0 3px rgba(11,37,69,.12); }
+.erro { color: #b42318; background: #fef3f2; border: 1px solid #fecdca; border-radius: 8px; padding: 8px 12px; margin: 0; font-size: 14px; }
+.ajuda { color: var(--texto-suave); font-size: 13px; margin: 0; }
+.ligacao-secundaria { color: var(--azul-marinho); font-size: 14px; text-align: center; }
+.a-carregar { padding: 40px; text-align: center; color: var(--texto-suave); }
+
+/* Páginas públicas (entrar, recuperar) */
+.pagina-publica {
+  min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 24px 16px; background: linear-gradient(160deg, var(--azul-marinho) 0%, var(--azul-marinho-escuro) 100%);
+}
+.caixa-publica { background: var(--superficie); border-radius: 14px; padding: 32px; width: 100%; max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,.25); }
+.caixa-publica h1 { font-size: 20px; color: var(--azul-marinho); margin: 20px 0 16px; }
+.marca-publica { padding: 0; border: 0; color: var(--azul-marinho); }
+.rodape-publico { color: var(--dourado); margin-top: 20px; font-size: 14px; }
+
+@media (max-width: 600px) {
+  .utilizador-nome { display: none; }
+}

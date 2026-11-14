@@ -1,0 +1,10 @@
+Olá {{ user.nome }},
+
+Foi pedida a recuperação de acesso à sua conta no CRM Valor Máximo.
+Para definir uma nova palavra-passe, abra a ligação seguinte:
+
+{{ protocol }}://{{ domain }}/recuperar/{{ uid }}/{{ token }}
+
+Se não fez este pedido, ignore esta mensagem; a sua palavra-passe não foi alterada.
+
+Valor Máximo — Soluções Imobiliárias
