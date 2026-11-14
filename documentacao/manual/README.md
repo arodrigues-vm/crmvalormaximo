@@ -13,7 +13,7 @@ As imagens usam apenas dados fictícios de demonstração.
 | 2 | Navegar na aplicação (menu, fichas, Consulta/Edição) | Em preparação |
 | 3 | [Entidades](03-entidades.md) | Disponível |
 | 4 | [Imóveis](04-imoveis.md) | Disponível |
-| 5 | Angariações (CMI) | Por escrever |
+| 5 | [Angariações (CMI)](05-angariacoes.md) | Disponível |
 | 6 | Oportunidades de Angariação | Por escrever |
 | 7 | Procuras e correspondências | Por escrever |
 | 8 | Visitas e interesses | Por escrever |

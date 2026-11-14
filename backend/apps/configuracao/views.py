@@ -131,3 +131,58 @@ def ordenar(request, chave):
             ValorLista.objects.filter(pk=i).update(ordem=ordem)
     registar("lista.reordenada", modulo=MODULO, request=request, dados={"lista": chave})
     return Response(_lista_json(lista, True))
+
+
+VALIDADORES_PARAMETROS = {
+    # chave: função que valida e normaliza o valor (levanta ValidationError)
+    "cmi_alertas_dias": lambda v: _lista_dias(v),
+}
+
+
+def _lista_dias(v):
+    if not isinstance(v, list) or not v or len(v) > 5:
+        raise serializers.ValidationError("Indique entre 1 e 5 limiares.")
+    try:
+        dias = sorted({int(x) for x in v}, reverse=True)
+    except (TypeError, ValueError) as e:
+        raise serializers.ValidationError("Os limiares têm de ser números inteiros de dias.") from e
+    if any(d < 1 or d > 3650 for d in dias):
+        raise serializers.ValidationError("Cada limiar tem de estar entre 1 e 3650 dias.")
+    return dias
+
+
+@extend_schema(summary="Parâmetros de funcionamento")
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def parametros(request):
+    from .listas_sistema import semear_parametros
+    from .models import Parametro
+
+    semear_parametros()
+    return Response(list(Parametro.objects.values("chave", "nome", "descricao", "modulo", "valor")))
+
+
+class ParametroSerializer(serializers.Serializer):
+    valor = serializers.JSONField()
+
+
+@extend_schema(request=ParametroSerializer)
+@api_view(["PATCH"])
+@permission_classes([IsAuthenticated])
+def alterar_parametro(request, chave):
+    from .models import Parametro
+
+    _exigir_administrar(request)
+    p = Parametro.objects.filter(chave=chave).first()
+    if p is None or chave not in VALIDADORES_PARAMETROS:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    s = ParametroSerializer(data=request.data)
+    s.is_valid(raise_exception=True)
+    try:
+        novo = VALIDADORES_PARAMETROS[chave](s.validated_data["valor"])
+    except serializers.ValidationError as e:
+        raise serializers.ValidationError({"valor": e.detail}) from e
+    antes, p.valor = p.valor, novo
+    p.save()
+    registar("parametro.alterado", modulo=MODULO, objeto=p, request=request, dados={"antes": antes, "depois": novo})
+    return Response({"chave": p.chave, "nome": p.nome, "descricao": p.descricao, "modulo": p.modulo, "valor": p.valor})

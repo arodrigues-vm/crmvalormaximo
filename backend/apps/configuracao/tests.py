@@ -90,3 +90,35 @@ def test_categoria_nao_muda_ao_renomear(api, criar_utilizador):
     api.patch(reverse("listas-valor", args=[v.pk]), {"nome": "Histórico", "categoria": "ativo"}, format="json")
     v.refresh_from_db()
     assert (v.nome, v.categoria) == ("Histórico", "arquivado")
+
+
+def test_todas_as_listas_com_categorias_tem_valores_categorizados(db):
+    from apps.configuracao.listas_sistema import CATEGORIAS, LISTAS, semear_listas
+    from apps.configuracao.models import Lista
+
+    semear_listas()
+    for chave in CATEGORIAS:
+        lista = Lista.objects.get(chave=chave)
+        validas = {c["valor"] for c in lista.categorias}
+        assert validas, chave
+        assert lista.valores.count() == len(LISTAS[chave][3])
+        assert all(v.categoria in validas for v in lista.valores.all()), chave
+
+
+def test_parametros_iniciais(db):
+    from apps.configuracao.models import parametro
+
+    assert parametro("cmi_alertas_dias") == [120, 60, 30]
+
+
+def test_parametros_editaveis_so_pelo_administrador(api, criar_utilizador):
+    api.force_authenticate(criar_utilizador(Perfil.RESPONSAVEL))
+    assert api.get(reverse("parametros")).status_code == 200
+    url = reverse("parametro", args=["cmi_alertas_dias"])
+    assert api.patch(url, {"valor": [90, 30]}, format="json").status_code == 403
+    api.force_authenticate(criar_utilizador(Perfil.ADMINISTRADOR))
+    r = api.patch(url, {"valor": [30, "90", 30]}, format="json")
+    assert r.status_code == 200 and r.json()["valor"] == [90, 30]
+    for invalido in ([], [0], ["x"], [1, 2, 3, 4, 5, 6], "120"):
+        assert api.patch(url, {"valor": invalido}, format="json").status_code == 400, invalido
+    assert RegistoAuditoria.objects.filter(acao="parametro.alterado").exists()

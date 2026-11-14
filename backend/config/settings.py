@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "apps.localizacao",
     "apps.entidades",
     "apps.imoveis",
+    "apps.angariacoes",
 ]
 
 MIDDLEWARE = [

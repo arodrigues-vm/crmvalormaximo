@@ -10,3 +10,4 @@ cryptography==46.0.3
 phonenumbers==9.0.43
 django-simple-history==3.13.0
 pillow==13.0.0
+python-dateutil==4.0.0

@@ -11,7 +11,12 @@ CAT_STATUS = [
 ]
 
 # Listas com categorias: chave -> categorias. Os valores iniciais são pares (nome, categoria).
-CATEGORIAS = {"operacoes": CAT_OPERACAO, "status_imovel": CAT_STATUS}
+CAT_REGIME = [
+    {"valor": "exclusivo", "nome": "Exclusivo"},
+    {"valor": "nao_exclusivo", "nome": "Não exclusivo"},
+]
+
+CATEGORIAS = {"operacoes": CAT_OPERACAO, "status_imovel": CAT_STATUS, "regimes_cmi": CAT_REGIME}
 
 LISTAS = {
     "operacoes": (
@@ -25,6 +30,18 @@ LISTAS = {
         "imoveis",
         "",
         [("Ativo", "ativo"), ("Inativo", "inativo"), ("Arquivado", "arquivado")],
+    ),
+    "regimes_cmi": (
+        "Regimes de contrato (CMI)",
+        "angariacoes",
+        "Regime do contrato de mediação. A categoria Exclusivo impede contratos sobrepostos no mesmo imóvel.",
+        [("Exclusivo", "exclusivo"), ("Não exclusivo", "nao_exclusivo")],
+    ),
+    "papeis_interveniente_cmi": (
+        "Papéis de interveniente (CMI)",
+        "angariacoes",
+        "Qualidade em que cada parte intervém no contrato.",
+        ["Proprietário", "Representante legal", "Procurador"],
     ),
     "tipos_ligacao": (
         "Tipos de ligação externa",
@@ -71,6 +88,15 @@ LISTAS = {
 }  # fmt: skip
 
 
+def semear_parametros():
+    from .models import PARAMETROS, Parametro
+
+    for chave, (nome, modulo, descricao, valor) in PARAMETROS.items():
+        Parametro.objects.get_or_create(
+            chave=chave, defaults={"nome": nome, "modulo": modulo, "descricao": descricao, "valor": valor}
+        )
+
+
 def semear_listas(**kwargs):
     """Cria as listas em falta. Os valores iniciais só são criados quando a lista é nova,
     para nunca repor valores que o Administrador tenha alterado ou desativado."""
@@ -78,7 +104,13 @@ def semear_listas(**kwargs):
 
     for chave, (nome, modulo, descricao, valores) in LISTAS.items():
         lista, criada = Lista.objects.get_or_create(
-            chave=chave, defaults={"nome": nome, "modulo": modulo, "descricao": descricao}
+            chave=chave,
+            defaults={"nome": nome, "modulo": modulo, "descricao": descricao, "categorias": CATEGORIAS.get(chave, [])},
         )
         if criada:
-            ValorLista.objects.bulk_create([ValorLista(lista=lista, nome=v, ordem=i) for i, v in enumerate(valores)])
+            novos = []
+            for ordem, v in enumerate(valores):
+                nome_valor, categoria = v if isinstance(v, tuple) else (v, "")
+                novos.append(ValorLista(lista=lista, nome=nome_valor, categoria=categoria, ordem=ordem))
+            ValorLista.objects.bulk_create(novos)
+    semear_parametros()

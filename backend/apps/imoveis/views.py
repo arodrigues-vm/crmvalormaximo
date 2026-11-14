@@ -47,7 +47,11 @@ def entidades_visiveis(utilizador) -> set[int]:
 
 
 class ImovelViewSet(RegistoViewSet):
-    operacoes_extra = {**RegistoViewSet.operacoes_extra, "fotografia": Operacao.CONSULTAR}
+    operacoes_extra = {
+        **RegistoViewSet.operacoes_extra,
+        "fotografia": Operacao.CONSULTAR,
+        "angariacoes": Operacao.CONSULTAR,
+    }
     modulo = "imoveis"
     modelo = Imovel
     nome_registo = "imovel"
@@ -188,3 +192,29 @@ class ImovelViewSet(RegistoViewSet):
                 armazenamento_privado.delete(nome)
         registar(acao, modulo=self.modulo, objeto=imovel, request=request)
         return Response(self.get_serializer(self.recarregar(imovel)).data)
+
+    @action(detail=True, methods=["get"])
+    def angariacoes(self, request, pk=None):
+        """CMI deste imóvel a que o utilizador tem acesso (os restantes só são contados)."""
+        from apps.angariacoes.models import ESTADOS, Angariacao
+        from apps.angariacoes.servicos import alerta, hoje
+
+        imovel = self.get_object()
+        todos = Angariacao.objects.ativos().filter(imovel=imovel).select_related("regime", "operacao")
+        visiveis = filtrar(request.user, "angariacoes", Operacao.CONSULTAR, todos, campo_partilhas="partilhada_com")
+        dia = hoje()
+        lista = [
+            {
+                "id": a.id,
+                "referencia": a.referencia,
+                "regime": a.regime.nome if a.regime else None,
+                "operacao": a.operacao.nome if a.operacao else None,
+                "data_inicio": a.data_inicio,
+                "data_fim_vigente": a.data_fim_vigente,
+                "estado": a.estado(dia),
+                "estado_nome": ESTADOS[a.estado(dia)],
+                "alerta": alerta(a, dia),
+            }
+            for a in visiveis.order_by("-data_inicio", "-id")
+        ]
+        return Response({"angariacoes": lista, "outros": todos.count() - len(lista)})

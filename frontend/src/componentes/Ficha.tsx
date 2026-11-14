@@ -23,7 +23,7 @@ export function CabecalhoRegisto({
   caminho: string
   referencia: string
   titulo: ReactNode
-  etiqueta?: { texto: string; tipo: 'sucesso' | 'neutra' | 'aviso' }
+  etiqueta?: { texto: string; tipo: 'sucesso' | 'neutra' | 'aviso' | 'perigo' }
   acoes?: ReactNode
 }) {
   return (

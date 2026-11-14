@@ -26,7 +26,7 @@ export const GRUPOS: GrupoModulos[] = [
     modulos: [
       m('entidades', 'Entidades', true),
       m('imoveis', 'Imóveis', true),
-      m('angariacoes', 'Angariações'),
+      m('angariacoes', 'Angariações', true),
       m('oportunidades', 'Oportunidades de Angariação'),
       m('procuras', 'Procuras e Qualificação'),
       m('visitas', 'Visitas'),

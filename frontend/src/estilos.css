@@ -1270,3 +1270,85 @@ fieldset.campo {
     display: none;
   }
 }
+
+/* Angariações */
+.separadores {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--borda);
+}
+.separadores button,
+.separadores a {
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--texto-suave);
+  cursor: pointer;
+  text-decoration: none;
+  margin-bottom: -1px;
+}
+.separadores .ativo,
+.separadores a.active {
+  color: var(--azul-marinho);
+  border-bottom-color: var(--dourado);
+  font-weight: 600;
+}
+.etiqueta-perigo {
+  background: #fef3f2;
+  color: #b42318;
+}
+.alerta-cmi {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: var(--raio);
+  background: #fef3f2;
+  border: 1px solid #fecdca;
+  color: #912018;
+}
+.acoes-bloco {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+.ciclos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ciclos li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  padding-left: 12px;
+  border-left: 3px solid var(--dourado);
+}
+.formulario-dialogo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.lista-proprietarios select {
+  font: inherit;
+  padding: 6px 8px;
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+}
+.parametro {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+.lista-relacoes .botao-secundario,
+a.botao-secundario {
+  text-decoration: none;
+  display: inline-block;
+}

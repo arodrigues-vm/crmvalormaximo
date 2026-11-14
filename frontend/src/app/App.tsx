@@ -6,7 +6,12 @@ import type { Operacao } from '../api/cliente'
 import { EntidadeEditar, EntidadeNova } from '../modulos/entidades/EntidadeFormulario'
 import { EntidadeConsulta } from '../modulos/entidades/EntidadeConsulta'
 import { EntidadesLista } from '../modulos/entidades/EntidadesLista'
+import { AngariacaoConsulta } from '../modulos/angariacoes/AngariacaoConsulta'
+import { AngariacaoEditar, AngariacaoNova } from '../modulos/angariacoes/AngariacaoFormulario'
+import { AngariacoesLista } from '../modulos/angariacoes/AngariacoesLista'
+import { Configuracoes } from '../modulos/configuracoes/Configuracoes'
 import { ListasValores } from '../modulos/configuracoes/ListasValores'
+import { Parametros } from '../modulos/configuracoes/Parametros'
 import { ImoveisLista } from '../modulos/imoveis/ImoveisLista'
 import { ImovelConsulta } from '../modulos/imoveis/ImovelConsulta'
 import { ImovelEditar, ImovelNovo } from '../modulos/imoveis/ImovelFormulario'
@@ -66,11 +71,27 @@ export const rotas: RouteObject[] = [
         ],
       },
       {
+        path: 'angariacoes',
+        element: <ExigeModulo modulo="angariacoes" />,
+        children: [
+          { index: true, element: <AngariacoesLista /> },
+          { path: 'nova', element: <AngariacaoNova /> },
+          { path: ':id', element: <AngariacaoConsulta /> },
+          { path: ':id/editar', element: <AngariacaoEditar /> },
+        ],
+      },
+      {
         path: 'configuracoes',
         element: <ExigeModulo modulo="configuracoes" operacao="administrar" />,
         children: [
-          { index: true, element: <Navigate to="listas" replace /> },
-          { path: 'listas', element: <ListasValores /> },
+          {
+            element: <Configuracoes />,
+            children: [
+              { index: true, element: <Navigate to="listas" replace /> },
+              { path: 'listas', element: <ListasValores /> },
+              { path: 'parametros', element: <Parametros /> },
+            ],
+          },
         ],
       },
       { path: '*', element: <p>Página não encontrada.</p> },

@@ -41,3 +41,14 @@ Depois de criada, a categoria de um valor **não muda** (pode renomeá-lo, reord
 
 A lista **Tipos de ligação externa** (Fotografias, Documentos, Outro) define os tipos usados nas ligações
 para pastas do OneDrive ou de outros serviços.
+
+
+## A.2 Parâmetros
+
+Em **Configurações → Parâmetros** alteram-se parâmetros de funcionamento. Por agora:
+
+- **Avisos de expiração do CMI:** dias antes do fim em que aparecem avisos (por omissão 120, 60 e 30).
+  Escreva os valores separados por vírgulas e carregue em **Guardar**.
+
+As listas **Regimes de contrato (CMI)** (categorias Exclusivo / Não exclusivo) e **Papéis de interveniente
+(CMI)** editam-se em *Listas de valores*.

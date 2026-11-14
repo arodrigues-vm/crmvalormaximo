@@ -59,3 +59,37 @@ def campo_lista(chave: str, **kwargs):
 def campo_lista_multipla(chave: str, **kwargs):
     kwargs.setdefault("blank", True)
     return models.ManyToManyField(ValorLista, related_name="+", limit_choices_to={"lista__chave": chave}, **kwargs)
+
+
+class Parametro(models.Model):
+    """Parâmetro de funcionamento editável pelo Administrador (ex.: limiares de aviso)."""
+
+    chave = models.SlugField(max_length=60, unique=True)
+    nome = models.CharField(max_length=120)
+    descricao = models.CharField(max_length=255, blank=True)
+    modulo = models.CharField(max_length=40)
+    valor = models.JSONField()
+
+    class Meta:
+        ordering = ["modulo", "nome"]
+        verbose_name = "parâmetro"
+        verbose_name_plural = "parâmetros"
+
+    def __str__(self):
+        return self.nome
+
+
+PARAMETROS = {
+    # chave: (nome, módulo, descrição, valor inicial)
+    "cmi_alertas_dias": (
+        "Avisos de expiração do CMI (dias antes do fim)",
+        "angariacoes",
+        "Limiares de aviso; aprovados inicialmente: 120, 60 e 30 dias.",
+        [120, 60, 30],
+    ),
+}
+
+
+def parametro(chave: str):
+    p = Parametro.objects.filter(chave=chave).values_list("valor", flat=True).first()
+    return p if p is not None else PARAMETROS[chave][3]

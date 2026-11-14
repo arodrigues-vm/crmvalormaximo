@@ -11,7 +11,9 @@ import { formatarArea, formatarEuros, formatarPercentagem, momentoPt } from '../
 import { LigacoesExternas } from '../../componentes/LigacoesExternas'
 import { pedido } from '../../api/cliente'
 import { etiquetaStatus, imoveisApi, NOMES_CAMPOS_IMOVEL, tituloImovel } from './api'
+import { AngariacoesDoImovel } from './AngariacoesDoImovel'
 import { FotografiaImovel } from './FotografiaImovel'
+import { useSessao } from '../../app/sessao'
 
 export function ImovelConsulta() {
   const { id = '' } = useParams()
@@ -19,6 +21,7 @@ export function ImovelConsulta() {
   const qc = useQueryClient()
   const [confirmar, setConfirmar] = useState(false)
   const { data: i, error, isLoading } = useQuery({ queryKey: ['imoveis', id], queryFn: () => imoveisApi.obter(id) })
+  const { pode } = useSessao()
   const tiposLigacao = useQuery({
     queryKey: ['listas', 'tipos_ligacao', 'opcoes'],
     queryFn: async () =>
@@ -110,6 +113,10 @@ export function ImovelConsulta() {
             )}
           </>
         )}
+      </Bloco>
+
+      <Bloco titulo="Angariações (CMI)">
+        <AngariacoesDoImovel imovelId={i.id} podeCriar={pode('angariacoes', 'criar')} />
       </Bloco>
 
       <Bloco titulo="Classificação e características">
