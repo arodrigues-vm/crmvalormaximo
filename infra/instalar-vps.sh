@@ -2,7 +2,7 @@
 # Instala (ou atualiza) o CRM Valor Máximo numa VPS Ubuntu 24.04.
 #
 # Pré-requisito: o repositório já clonado em /opt/crm (ver documentacao/INSTALACAO_VPS.md).
-# Uso (como root):   bash /opt/crm/infra/instalar-vps.sh [--demo]
+# Uso:   sudo bash /opt/crm/infra/instalar-vps.sh [--demo]
 #   --demo   cria utilizadores e dados FICTÍCIOS de demonstração (só para a instância de teste).
 #
 # O script é idempotente: pode ser executado de novo para atualizar a aplicação.
@@ -13,8 +13,10 @@ ENV_FICHEIRO="$PASTA/.env.producao"
 DEMO=0
 [[ "${1:-}" == "--demo" ]] && DEMO=1
 
-if [[ $EUID -ne 0 ]]; then echo "Execute como root (sudo -i)."; exit 1; fi
+if [[ $EUID -ne 0 ]]; then echo "Execute com sudo: sudo bash $0 $*"; exit 1; fi
 cd "$PASTA"
+# O repositório pertence ao utilizador que fez o clone; permitir que o git (como root) o leia.
+git config --global --add safe.directory "$PASTA" 2>/dev/null || true
 
 echo "==> 1/6 Pacotes do sistema (Docker, firewall)"
 export DEBIAN_FRONTEND=noninteractive

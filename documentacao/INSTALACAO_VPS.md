@@ -22,7 +22,8 @@ ssh root@IP_DA_VPS
 Na primeira vez pergunta *«Are you sure you want to continue connecting?»*: escreva `yes`. Depois a
 palavra-passe (não aparece enquanto escreve; é normal).
 
-> Se o utilizador não for `root`, depois de entrar escreva `sudo -i` para passar a administrador.
+> **Não entre como administrador para os passos 2 a 4.** Use o seu utilizador normal (ex.: `arodrigues`):
+> a chave do GitHub fica guardada nesse utilizador. Só a instalação (passo 5) usa `sudo`.
 
 ## Passo 2 — Criar a chave de leitura do repositório
 
@@ -52,7 +53,16 @@ PowerShell, selecionar já copia). Esta é a parte **pública** da chave: não �
 
 ## Passo 4 — Descarregar o CRM para a VPS
 
-De volta à VPS:
+De volta à VPS, crie a pasta (como administrador) e entregue-a ao seu utilizador. Troque `arodrigues` pelo
+seu utilizador, se for outro:
+
+```bash
+sudo mkdir -p /opt/crm
+```
+
+```bash
+sudo chown "$USER":"$USER" /opt/crm
+```
 
 ```bash
 git clone -b desenvolvimento git@github.com:arodrigues-vm/crmvalormaximo.git /opt/crm
@@ -63,7 +73,7 @@ Se perguntar *«Are you sure you want to continue connecting?»*, escreva `yes`.
 ## Passo 5 — Instalar
 
 ```bash
-bash /opt/crm/infra/instalar-vps.sh --demo
+sudo bash /opt/crm/infra/instalar-vps.sh --demo
 ```
 
 O script instala o Docker, ativa a firewall (só SSH, HTTP e HTTPS), gera as palavras-passe internas, compila e
@@ -94,7 +104,7 @@ primeira vez.
 Sempre que eu publicar alterações:
 
 ```bash
-cd /opt/crm && git pull && bash infra/instalar-vps.sh
+cd /opt/crm && git pull && sudo bash infra/instalar-vps.sh
 ```
 
 Os dados mantêm-se (ficam em volumes Docker).
@@ -103,6 +113,7 @@ Os dados mantêm-se (ficam em volumes Docker).
 
 | Sintoma | Causa provável | O que fazer |
 |---------|----------------|-------------|
+| `could not create work tree dir '/opt/crm': Permission denied` | Pasta criada sem `sudo` | Fazer os dois comandos `sudo mkdir` e `sudo chown` do passo 4 |
 | `Permission denied (publickey)` no passo 4 | Chave não autorizada no GitHub | Repetir o passo 3 com a linha completa `ssh-ed25519 …` |
 | O endereço não abre | Firewall do painel da Amen | No painel da Amen, permitir as portas 80 e 443 |
 | Aviso de certificado | Certificado ainda a ser emitido | Esperar 2 minutos e recarregar |
@@ -110,11 +121,11 @@ Os dados mantêm-se (ficam em volumes Docker).
 Para ver o estado ou os registos (enviar-me o resultado, se algo falhar):
 
 ```bash
-cd /opt/crm && docker compose -f docker-compose.prod.yml --env-file .env.producao ps
+cd /opt/crm && sudo docker compose -f docker-compose.prod.yml --env-file .env.producao ps
 ```
 
 ```bash
-cd /opt/crm && docker compose -f docker-compose.prod.yml --env-file .env.producao logs --tail 50
+cd /opt/crm && sudo docker compose -f docker-compose.prod.yml --env-file .env.producao logs --tail 50
 ```
 
 ## Segurança desta instância de teste
