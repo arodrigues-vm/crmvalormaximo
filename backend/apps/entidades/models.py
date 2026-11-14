@@ -131,3 +131,53 @@ class TelefoneEntidade(models.Model):
 
     def __str__(self):
         return self.numero_e164
+
+
+class TipoRelacao(models.Model):
+    """Tipo de relação entre entidades, configurável (ex.: Cônjuge, Gerente de / Tem como gerente).
+
+    `nome` lê-se da origem para o destino; `nome_inverso` do destino para a origem.
+    Nas relações simétricas (ex.: Cônjuge) os dois nomes são iguais.
+    """
+
+    nome = models.CharField(max_length=60, unique=True)
+    nome_inverso = models.CharField(max_length=60)
+    simetrica = models.BooleanField(default=False)
+    ativo = models.BooleanField(default=True)
+    ordem = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ["ordem", "nome"]
+        verbose_name = "tipo de relação"
+        verbose_name_plural = "tipos de relação"
+
+    def __str__(self):
+        return self.nome if self.simetrica else f"{self.nome} / {self.nome_inverso}"
+
+    def save(self, *args, **kwargs):
+        if self.simetrica:
+            self.nome_inverso = self.nome
+        super().save(*args, **kwargs)
+
+
+class RelacaoEntidade(models.Model):
+    origem = models.ForeignKey(Entidade, on_delete=models.PROTECT, related_name="relacoes_origem")
+    destino = models.ForeignKey(Entidade, on_delete=models.PROTECT, related_name="relacoes_destino")
+    tipo = models.ForeignKey(TipoRelacao, on_delete=models.PROTECT, related_name="+")
+    observacoes = models.CharField(max_length=255, blank=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    criado_por = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.PROTECT, related_name="+")
+
+    historico = HistoricalRecords()
+
+    class Meta:
+        ordering = ["tipo__ordem", "id"]
+        verbose_name = "relação entre entidades"
+        verbose_name_plural = "relações entre entidades"
+        constraints = [
+            models.UniqueConstraint(fields=["origem", "destino", "tipo"], name="relacao_unica"),
+            models.CheckConstraint(condition=~models.Q(origem=models.F("destino")), name="relacao_sem_propria"),
+        ]
+
+    def __str__(self):
+        return f"{self.origem} — {self.tipo.nome} — {self.destino}"

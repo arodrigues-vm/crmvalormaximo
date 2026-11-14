@@ -27,6 +27,7 @@ Estes estados não são equivalentes.
 | Tarefa | Estado | Notas |
 |--------|--------|-------|
 | F2-01 Entidades | Implementado, testado | Pessoa singular/coletiva, NIF/NIPC validado (PT), telefones múltiplos E.164 com país, email, morada FT-01 + freguesia CAOP, papéis (6 da especificação, configuráveis), origem (configurável, nenhuma instalada), responsável, partilhas, RGPD (consentimento com data, oposição). Pesquisa sem acentos; deteção de duplicados (NIF/email/telefone bloqueiam com confirmação; nome semelhante só avisa; sem revelar dados de registos não acessíveis). Controlo de versão (409), lixeira e restauro, histórico (simple-history) e auditoria com campos alterados, transferência de responsável só com permissão e âmbito. |
+| F2-01c Relações entre entidades | Implementado, testado | D-22. Tipos configuráveis (direto/inverso, simétricos), sem auto-relação nem duplicados (também ao contrário nos simétricos), exige acesso às duas entidades, entidade sem acesso aparece anónima, auditoria e histórico. Seletor pesquisável reutilizável (teclado e toque). |
 | F2-01b Catálogo CAOP2025 | Parcial | Modelos, API e comando `importar_caop` prontos e testados. **Faltam os dados oficiais**: os sites da DGT/dados.gov.pt estão bloqueados neste ambiente. |
 
 ## Limitações conhecidas

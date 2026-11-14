@@ -201,3 +201,14 @@ class DuplicadosPedidoSerializer(serializers.Serializer):
     nome = serializers.CharField(required=False, allow_blank=True)
     telefones = serializers.ListField(child=serializers.DictField(), required=False)
     excluir_id = serializers.IntegerField(required=False)
+
+
+class RelacaoPedidoSerializer(serializers.Serializer):
+    tipo = serializers.IntegerField()
+    entidade = serializers.IntegerField(help_text="A outra entidade da relação.")
+    sentido = serializers.ChoiceField(
+        choices=["direto", "inverso"],
+        default="direto",
+        help_text="direto: esta entidade é a origem (ex.: «Gerente de» X); inverso: é o destino.",
+    )
+    observacoes = serializers.CharField(required=False, allow_blank=True, max_length=255)

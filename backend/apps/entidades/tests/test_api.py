@@ -273,3 +273,85 @@ class TestPesquisaELixeira:
         o = como(api, pessoas.cons).get(reverse("entidade-opcoes")).json()
         assert "Proprietário" in [p["nome"] for p in o["papeis"]]
         assert o["pode_criar"] is True and o["pode_transferir"] is False
+
+
+class TestRelacoes:
+    @pytest.fixture
+    def tipos(self):
+        from apps.entidades.models import TipoRelacao
+
+        return {t.nome: t for t in TipoRelacao.objects.all()}
+
+    def _rel(self, api, u, e, **corpo):
+        return como(api, u).post(reverse("entidade-relacoes", args=[e]), corpo, format="json")
+
+    def test_tipos_iniciais(self, tipos):
+        assert set(tipos) == {"Cônjuge", "Familiar", "Sócio de", "Gerente de"}
+        assert tipos["Cônjuge"].simetrica and tipos["Gerente de"].nome_inverso == "Tem como gerente"
+
+    def test_relacao_assimetrica_aparece_nos_dois_sentidos(self, api, pessoas, tipos):
+        pessoa = criar(api, pessoas.cons)
+        empresa = criar(
+            api, pessoas.cons, tipo_pessoa="coletiva", nome="Empresa Ensaio", nif="", email="", telefones=[]
+        )
+        r = self._rel(api, pessoas.cons, pessoa["id"], tipo=tipos["Gerente de"].id, entidade=empresa["id"])
+        assert r.status_code == 201, r.content
+        assert r.json()[0]["rotulo"] == "Gerente de"
+        assert r.json()[0]["entidade"]["id"] == empresa["id"]
+        lado_empresa = api.get(reverse("entidade-relacoes", args=[empresa["id"]])).json()
+        assert lado_empresa[0]["rotulo"] == "Tem como gerente"
+        assert lado_empresa[0]["entidade"]["id"] == pessoa["id"]
+        assert RegistoAuditoria.objects.filter(acao="entidade.relacao_criada").exists()
+
+    def test_sentido_inverso(self, api, pessoas, tipos):
+        pessoa = criar(api, pessoas.cons)
+        empresa = criar(
+            api, pessoas.cons, tipo_pessoa="coletiva", nome="Empresa Ensaio", nif="", email="", telefones=[]
+        )
+        r = self._rel(
+            api, pessoas.cons, empresa["id"], tipo=tipos["Gerente de"].id, entidade=pessoa["id"], sentido="inverso"
+        )
+        assert r.json()[0]["rotulo"] == "Tem como gerente"
+        assert api.get(reverse("entidade-relacoes", args=[pessoa["id"]])).json()[0]["rotulo"] == "Gerente de"
+
+    def test_simetrica_nao_duplica_ao_contrario(self, api, pessoas, tipos):
+        a = criar(api, pessoas.cons)
+        b = criar(api, pessoas.cons, nome="Maria", nif="", email="", telefones=[])
+        assert self._rel(api, pessoas.cons, a["id"], tipo=tipos["Cônjuge"].id, entidade=b["id"]).status_code == 201
+        r = self._rel(api, pessoas.cons, b["id"], tipo=tipos["Cônjuge"].id, entidade=a["id"])
+        assert r.status_code == 400
+        assert api.get(reverse("entidade-relacoes", args=[b["id"]])).json()[0]["rotulo"] == "Cônjuge"
+
+    def test_nao_relaciona_consigo_propria(self, api, pessoas, tipos):
+        a = criar(api, pessoas.cons)
+        assert self._rel(api, pessoas.cons, a["id"], tipo=tipos["Familiar"].id, entidade=a["id"]).status_code == 400
+
+    def test_exige_acesso_a_outra_entidade_e_nao_revela_dados(self, api, pessoas, tipos):
+        minha = criar(api, pessoas.cons)
+        alheia = criar(api, pessoas.cons_sul, nome="Alheia", nif="", email="x@exemplo.pt", telefones=[])
+        r = self._rel(api, pessoas.cons, minha["id"], tipo=tipos["Familiar"].id, entidade=alheia["id"])
+        assert r.status_code == 400
+        # Uma relação criada por quem vê as duas (admin) não revela a entidade a quem não a pode ver.
+        self._rel(api, pessoas.admin, minha["id"], tipo=tipos["Familiar"].id, entidade=alheia["id"])
+        vistas = como(api, pessoas.cons).get(reverse("entidade-relacoes", args=[minha["id"]])).json()
+        assert vistas == [{"id": vistas[0]["id"], "tipo": tipos["Familiar"].id, "rotulo": "Familiar",
+                           "acessivel": False, "entidade": None, "observacoes": ""}]  # fmt: skip
+
+    def test_assistente_so_le_e_remover_exige_editar(self, api, pessoas, tipos):
+        a = criar(api, pessoas.cons)
+        b = criar(api, pessoas.cons, nome="Maria", nif="", email="", telefones=[])
+        rel = self._rel(api, pessoas.cons, a["id"], tipo=tipos["Familiar"].id, entidade=b["id"]).json()[0]
+        url = reverse("entidade-remover-relacao", args=[a["id"], rel["id"]])
+        assert como(api, pessoas.cons2).delete(url).status_code == 404  # sem acesso à entidade
+        assert como(api, pessoas.cons).delete(url).status_code == 204
+        assert api.get(reverse("entidade-relacoes", args=[b["id"]])).json() == []
+        assert RegistoAuditoria.objects.filter(acao="entidade.relacao_removida").exists()
+
+    def test_entidade_com_relacoes_nao_pode_ser_apagada_fisicamente(self, api, pessoas, tipos):
+        from django.db.models import ProtectedError
+
+        a = criar(api, pessoas.cons)
+        b = criar(api, pessoas.cons, nome="Maria", nif="", email="", telefones=[])
+        self._rel(api, pessoas.cons, a["id"], tipo=tipos["Familiar"].id, entidade=b["id"])
+        with pytest.raises(ProtectedError):
+            Entidade.objects.get(pk=a["id"]).delete()

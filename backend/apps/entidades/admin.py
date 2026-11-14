@@ -1,7 +1,7 @@
 from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
 
-from .models import Entidade, OrigemContacto, PapelEntidade, TelefoneEntidade
+from .models import Entidade, OrigemContacto, PapelEntidade, RelacaoEntidade, TelefoneEntidade, TipoRelacao
 
 
 class TelefoneInline(admin.TabularInline):
@@ -32,3 +32,15 @@ class PapelAdmin(admin.ModelAdmin):
 class OrigemAdmin(admin.ModelAdmin):
     list_display = ["nome", "ativa"]
     list_editable = ["ativa"]
+
+
+@admin.register(TipoRelacao)
+class TipoRelacaoAdmin(admin.ModelAdmin):
+    list_display = ["nome", "nome_inverso", "simetrica", "ordem", "ativo"]
+    list_editable = ["ordem", "ativo"]
+
+
+@admin.register(RelacaoEntidade)
+class RelacaoEntidadeAdmin(SimpleHistoryAdmin):
+    list_display = ["origem", "tipo", "destino", "criado_em"]
+    raw_id_fields = ["origem", "destino"]

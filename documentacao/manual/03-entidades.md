@@ -94,7 +94,37 @@ A ficha abre sempre em **modo de consulta**:
   entidade foi alterada por outra pessoa entretanto»*. Recarregue a ficha e volte a fazer as suas alterações;
   assim nenhuma alteração é perdida sem aviso.
 
-## 3.5 Proteção de dados (RGPD)
+## 3.5 Relações entre entidades
+
+Na secção **Relações** da ficha regista as ligações entre pessoas e empresas: cônjuge, familiar, sócio,
+gerente, etc.
+
+1. Abra a ficha da entidade e, em **Relações**, carregue em **+ Adicionar relação**.
+2. Em **Esta entidade é…**, escolha a relação **do ponto de vista desta entidade**. Por exemplo, na ficha da
+   Ana: *Gerente de* (a Ana é gerente de uma empresa) ou *Tem como gerente* (se a ficha fosse a da empresa).
+3. Em **Entidade relacionada**, escreva parte do nome, NIF ou referência e escolha na lista (também funciona
+   com as setas e Enter).
+4. Carregue em **Adicionar**. A relação fica gravada de imediato.
+
+![Adicionar uma relação](imagens/18-relacao-adicionar.png)
+
+A relação aparece automaticamente nas **duas fichas**, com o nome certo em cada uma: se a Ana é *Gerente de*
+Construções Demonstração, na ficha da empresa aparece *Tem como gerente* Ana.
+
+![Relações de uma entidade](imagens/19-relacoes-lista.png)
+
+- Para remover uma relação, carregue em **✕** ao lado dela e confirme.
+- Se a outra entidade pertencer a um colega a que não tem acesso, verá apenas *«Entidade a que não tem
+  acesso»*, sem nome nem dados.
+- Os tipos de relação disponíveis são **Cônjuge**, **Familiar**, **Sócio de / Tem como sócio** e
+  **Gerente de / Tem como gerente**. O Administrador pode criar outros.
+
+## 3.6 Imóveis da entidade
+
+Os imóveis de que a entidade é proprietária (com a respetiva quota) vão aparecer na ficha quando o módulo
+**Imóveis** estiver disponível.
+
+## 3.7 Proteção de dados (RGPD)
 
 Na secção **Proteção de dados** registe:
 
@@ -104,14 +134,14 @@ Na secção **Proteção de dados** registe:
 
 Criar ou importar um contacto **não** significa que a pessoa deu consentimento.
 
-## 3.6 Eliminar e restaurar
+## 3.8 Eliminar e restaurar
 
 - Na ficha, **Eliminar** envia a entidade para a **lixeira**. Nada é apagado definitivamente.
 - Um utilizador autorizado (por omissão, o Responsável de Equipa ou o Administrador) pode **restaurá-la**.
 - Se a entidade deixou apenas de estar ativa (por exemplo, já não é cliente), prefira desmarcar
   **Entidade ativa** em vez de a eliminar.
 
-## 3.7 Quem pode fazer o quê
+## 3.9 Quem pode fazer o quê
 
 | Ação | Administrador | Responsável de Equipa | Consultor | Assistente |
 |------|:---:|:---:|:---:|:---:|
@@ -120,5 +150,6 @@ Criar ou importar um contacto **não** significa que a pessoa deu consentimento.
 | Eliminar (lixeira) | Sim | Sim (equipa) | Sim (as suas) | Não |
 | Restaurar | Sim | Sim (equipa) | Não | Não |
 | Mudar o responsável | Sim | Dentro da equipa | Não | Não |
+| Adicionar/remover relações | Sim | Sim (equipa) | Sim (as suas) | Sim (atribuídas) |
 
 O Administrador pode ajustar estas permissões.

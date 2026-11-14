@@ -9,6 +9,7 @@ import { Bloco } from '../../componentes/Bloco'
 import { Dado } from '../../componentes/campos'
 import { Dialogo } from '../../componentes/Dialogo'
 import { entidadesApi, NOMES_CAMPOS, type Entidade } from './api'
+import { RelacoesEntidade } from './RelacoesEntidade'
 
 const dataPt = (d: string | null) => (d ? new Date(`${d}T00:00:00`).toLocaleDateString('pt-PT') : null)
 const momentoPt = (d: string) =>
@@ -46,6 +47,7 @@ export function EntidadeConsulta() {
   const qc = useQueryClient()
   const [confirmarEliminar, setConfirmarEliminar] = useState(false)
   const { data: e, error, isLoading } = useQuery({ queryKey: ['entidades', id], queryFn: () => entidadesApi.obter(id) })
+  const opcoes = useQuery({ queryKey: ['entidades', 'opcoes'], queryFn: entidadesApi.opcoes, staleTime: 60_000 })
 
   const eliminar = useMutation({
     mutationFn: () => entidadesApi.eliminar(Number(id)),
@@ -143,6 +145,10 @@ export function EntidadeConsulta() {
           <Dado rotulo="Origem">{e.origem_nome}</Dado>
           <Dado rotulo="Responsável">{e.responsavel_nome}</Dado>
         </dl>
+      </Bloco>
+
+      <Bloco titulo="Relações">
+        <RelacoesEntidade entidadeId={e.id} podeEditar={e.acoes.editar} tipos={opcoes.data?.tipos_relacao ?? []} />
       </Bloco>
 
       <Bloco titulo="Proteção de dados" abertoInicial={false} resumo={CONSENT[e.consentimento_marketing]}>

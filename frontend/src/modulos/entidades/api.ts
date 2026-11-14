@@ -67,6 +67,7 @@ export interface Opcoes {
   tipos_pessoa: { valor: string; nome: string }[]
   consentimentos: { valor: string; nome: string }[]
   tipos_telefone: { valor: string; nome: string }[]
+  tipos_relacao: { id: number; nome: string; nome_inverso: string; simetrica: boolean }[]
   pode_criar: boolean
   pode_transferir: boolean
   pode_restaurar: boolean
@@ -89,6 +90,15 @@ export interface Historico {
   alteracoes: { campo: string; antes: string | null; depois: string | null }[]
 }
 
+export interface Relacao {
+  id: number
+  tipo: number
+  rotulo: string
+  acessivel: boolean
+  entidade: { id: number; referencia: string; nome_completo: string } | null
+  observacoes: string
+}
+
 const BASE = '/api/entidades/'
 
 export const entidadesApi = {
@@ -100,6 +110,18 @@ export const entidadesApi = {
   eliminar: (id: number) => pedido<null>(`${BASE}${id}/`, { method: 'DELETE' }),
   opcoes: () => pedido<Opcoes>(`${BASE}opcoes/`),
   historico: (id: number) => pedido<Historico[]>(`${BASE}${id}/historico/`),
+  relacoes: (id: number) => pedido<Relacao[]>(`${BASE}${id}/relacoes/`),
+  criarRelacao: (id: number, dados: { tipo: number; entidade: number; sentido: string; observacoes: string }) =>
+    pedido<Relacao[]>(`${BASE}${id}/relacoes/`, { json: dados }),
+  removerRelacao: (id: number, relacao: number) =>
+    pedido<null>(`${BASE}${id}/relacoes/${relacao}/`, { method: 'DELETE' }),
+  /** Para seletores pesquisáveis. */
+  procurar: async (termo: string) =>
+    (await pedido<Pagina<EntidadeResumo>>(`${BASE}?${new URLSearchParams({ pesquisa: termo })}`)).results.map((e) => ({
+      id: e.id,
+      titulo: e.nome_completo,
+      detalhe: [e.referencia, e.nif].filter(Boolean).join(' · '),
+    })),
   duplicados: (dados: unknown) =>
     pedido<{ candidatos: Candidato[]; outros: number }>(`${BASE}duplicados/`, { json: dados }),
 }

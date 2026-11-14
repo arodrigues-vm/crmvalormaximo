@@ -13,11 +13,12 @@ from apps.contas.permissoes import PermissaoModulo, ambito_efetivo, filtrar, pod
 from apps.core.auditoria import registar
 from apps.core.validacao import normalizar_telefone
 
-from .models import Entidade, OrigemContacto, PapelEntidade, TelefoneEntidade
+from .models import Entidade, OrigemContacto, PapelEntidade, RelacaoEntidade, TelefoneEntidade, TipoRelacao
 from .serializers import (
     DuplicadosPedidoSerializer,
     EntidadeListaSerializer,
     EntidadeSerializer,
+    RelacaoPedidoSerializer,
 )
 from .servicos import existem_outros_fortes, procurar_duplicados, tem_duplicado_forte
 
@@ -59,6 +60,8 @@ class EntidadeViewSet(
         "duplicados": Operacao.CONSULTAR,
         "historico": Operacao.CONSULTAR,
         "opcoes": Operacao.CONSULTAR,
+        "relacoes": Operacao.CONSULTAR,
+        "remover_relacao": Operacao.EDITAR,
     }
 
     def get_serializer_class(self):
@@ -300,11 +303,102 @@ class EntidadeViewSet(
                 "tipos_pessoa": [{"valor": v, "nome": n} for v, n in Entidade.TipoPessoa.choices],
                 "consentimentos": [{"valor": v, "nome": n} for v, n in Entidade.Consentimento.choices],
                 "tipos_telefone": [{"valor": v, "nome": n} for v, n in TelefoneEntidade.Tipo.choices],
+                "tipos_relacao": list(
+                    TipoRelacao.objects.filter(ativo=True).values("id", "nome", "nome_inverso", "simetrica")
+                ),
                 "pode_criar": PermissaoModulo().has_permission(request, _Vista("create")),
                 "pode_transferir": ambito_efetivo(request.user, MODULO, Operacao.TRANSFERIR) != Ambito.NENHUM,
                 "pode_restaurar": ambito_efetivo(request.user, MODULO, Operacao.RESTAURAR) != Ambito.NENHUM,
             }
         )
+
+    # Relações entre entidades -----------------------------------------------------
+
+    def _visiveis(self):
+        return filtrar(
+            self.request.user,
+            MODULO,
+            Operacao.CONSULTAR,
+            Entidade.objects.ativos(),
+            campo_partilhas="partilhada_com",
+        )
+
+    def _listar_relacoes(self, e):
+        rels = RelacaoEntidade.objects.filter(Q(origem=e) | Q(destino=e)).select_related("tipo", "origem", "destino")
+        visiveis = set(
+            self._visiveis()
+            .filter(pk__in=[r.destino_id if r.origem_id == e.pk else r.origem_id for r in rels])
+            .values_list("pk", flat=True)
+        )
+        resultado = []
+        for r in rels:
+            direta = r.origem_id == e.pk
+            outra = r.destino if direta else r.origem
+            acessivel = outra.pk in visiveis
+            resultado.append(
+                {
+                    "id": r.id,
+                    "tipo": r.tipo_id,
+                    "rotulo": r.tipo.nome if direta else r.tipo.nome_inverso,
+                    "acessivel": acessivel,
+                    # Respeitar as permissões das duas pontas: sem acesso, não revelar dados.
+                    "entidade": {"id": outra.pk, "referencia": outra.referencia, "nome_completo": outra.nome_completo}
+                    if acessivel
+                    else None,
+                    "observacoes": r.observacoes if acessivel else "",
+                }
+            )
+        return resultado
+
+    @extend_schema(request=RelacaoPedidoSerializer)
+    @action(detail=True, methods=["get", "post"])
+    def relacoes(self, request, pk=None):
+        e = self.get_object()
+        if request.method == "GET":
+            return Response(self._listar_relacoes(e))
+        if not pode_no_registo(request.user, MODULO, Operacao.EDITAR, e, campo_partilhas="partilhada_com"):
+            raise PermissionDenied("Não tem permissão para alterar esta entidade.")
+        s = RelacaoPedidoSerializer(data=request.data)
+        s.is_valid(raise_exception=True)
+        d = s.validated_data
+        outra = self._visiveis().filter(pk=d["entidade"]).first()
+        if outra is None:
+            raise serializers.ValidationError({"entidade": "Entidade inexistente ou sem acesso."})
+        if outra.pk == e.pk:
+            raise serializers.ValidationError({"entidade": "Uma entidade não se pode relacionar consigo própria."})
+        tipo = TipoRelacao.objects.filter(pk=d["tipo"], ativo=True).first()
+        if tipo is None:
+            raise serializers.ValidationError({"tipo": "Tipo de relação inválido."})
+        origem, destino = (outra, e) if d["sentido"] == "inverso" and not tipo.simetrica else (e, outra)
+        existe = RelacaoEntidade.objects.filter(tipo=tipo, origem=origem, destino=destino)
+        if tipo.simetrica:
+            existe = RelacaoEntidade.objects.filter(tipo=tipo).filter(
+                Q(origem=e, destino=outra) | Q(origem=outra, destino=e)
+            )
+        if existe.exists():
+            raise serializers.ValidationError({"entidade": "Esta relação já existe."})
+        r = RelacaoEntidade.objects.create(
+            origem=origem, destino=destino, tipo=tipo, observacoes=d.get("observacoes", ""), criado_por=request.user
+        )
+        registar(
+            "entidade.relacao_criada",
+            modulo=MODULO,
+            objeto=e,
+            request=request,
+            dados={"relacao": r.pk, "tipo": tipo.nome, "origem": origem.pk, "destino": destino.pk},
+        )
+        return Response(self._listar_relacoes(e), status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["delete"], url_path=r"relacoes/(?P<relacao_id>\d+)")
+    def remover_relacao(self, request, pk=None, relacao_id=None):
+        e = self.get_object()
+        r = RelacaoEntidade.objects.filter(Q(origem=e) | Q(destino=e), pk=relacao_id).select_related("tipo").first()
+        if r is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        dados = {"relacao": r.pk, "tipo": r.tipo.nome, "origem": r.origem_id, "destino": r.destino_id}
+        r.delete()
+        registar("entidade.relacao_removida", modulo=MODULO, objeto=e, request=request, dados=dados)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 def _texto(v):

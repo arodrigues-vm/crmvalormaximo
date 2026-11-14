@@ -15,6 +15,10 @@ const OPCOES = {
   ],
   consentimentos: [{ valor: 'desconhecido', nome: 'Desconhecido / não recolhido' }],
   tipos_telefone: [{ valor: 'movel', nome: 'Telemóvel' }],
+  tipos_relacao: [
+    { id: 1, nome: 'Cônjuge', nome_inverso: 'Cônjuge', simetrica: true },
+    { id: 4, nome: 'Gerente de', nome_inverso: 'Tem como gerente', simetrica: false },
+  ],
   pode_criar: true,
   pode_transferir: false,
   pode_restaurar: false,
@@ -72,6 +76,7 @@ const base = {
   '/api/telefone/paises/': () => json([{ regiao: 'PT', indicativo: '+351' }]),
   '/api/localizacao/distritos/': () => json([]),
   'POST /api/entidades/duplicados/': () => json({ candidatos: [], outros: 0 }),
+  'GET /api/entidades/7/relacoes/': () => json([]),
 }
 
 afterEach(() => vi.restoreAllMocks())
@@ -187,5 +192,40 @@ describe('Entidades', () => {
     expect(await screen.findByText(/alterada por outra pessoa/)).toBeInTheDocument()
     const patch = pedidos.find((p) => p.metodo === 'PATCH')
     expect((patch?.corpo as { versao: number }).versao).toBe(1)
+  })
+
+  it('relações: mostra sem revelar entidades sem acesso e adiciona no sentido inverso', async () => {
+    const pedidos = simularApi({
+      ...base,
+      'GET /api/entidades/7/': () => json(ENTIDADE),
+      'GET /api/entidades/7/relacoes/': () =>
+        json([{ id: 1, tipo: 1, rotulo: 'Cônjuge', acessivel: false, entidade: null, observacoes: '' }]),
+      'GET /api/entidades/': () =>
+        json({
+          count: 1,
+          results: [{ id: 9, referencia: 'ENT-000009', nome_completo: 'Empresa Ensaio, Lda.', nif: '' }],
+        }),
+      'POST /api/entidades/7/relacoes/': () =>
+        json([
+          {
+            id: 2,
+            tipo: 4,
+            rotulo: 'Tem como gerente',
+            acessivel: true,
+            entidade: { id: 9, referencia: 'ENT-000009', nome_completo: 'Empresa Ensaio, Lda.' },
+            observacoes: '',
+          },
+        ]),
+    })
+    desenhar('/entidades/7')
+    expect(await screen.findByText('Entidade a que não tem acesso')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '+ Adicionar relação' }))
+    fireEvent.change(screen.getByLabelText('Esta entidade é…'), { target: { value: '4:inverso' } })
+    fireEvent.change(screen.getByRole('combobox', { name: 'Entidade relacionada' }), { target: { value: 'empresa' } })
+    fireEvent.mouseDown(await screen.findByRole('option', { name: /Empresa Ensaio/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Adicionar' }))
+    expect(await screen.findByRole('link', { name: /Empresa Ensaio/ })).toBeInTheDocument()
+    const post = pedidos.find((p) => p.metodo === 'POST' && p.url.pathname === '/api/entidades/7/relacoes/')
+    expect(post?.corpo).toEqual({ tipo: 4, sentido: 'inverso', entidade: 9, observacoes: '' })
   })
 })
