@@ -5,13 +5,11 @@ from django.db.models import Prefetch, Q
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import serializers, status
 from rest_framework.decorators import action
-from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 
 from apps.configuracao.campos import opcoes_lista
 from apps.configuracao.models import parametro
 from apps.contas.models import Operacao
-from apps.contas.permissoes import pode_no_registo
 from apps.core.auditoria import registar
 from apps.core.vistas import RegistoViewSet
 from apps.imoveis.views import entidades_visiveis
@@ -37,7 +35,8 @@ class AngariacaoViewSet(RegistoViewSet):
     operacoes_extra = {
         **RegistoViewSet.operacoes_extra,
         "renovar": Operacao.EDITAR,
-        "corrigir": Operacao.APROVAR,
+        # D-28: correção excecional e reabertura por quem pode editar o CMI (com motivo e registo).
+        "corrigir": Operacao.EDITAR,
         "situacao": Operacao.EDITAR,
     }
     campos_auditados = [
@@ -175,7 +174,7 @@ class AngariacaoViewSet(RegistoViewSet):
     @action(detail=True, methods=["post"])
     def corrigir(self, request, pk=None):
         """Correção excecional de um erro de registo nos dados contratuais (não é uma alteração
-        do contrato). Exige permissão de aprovação, motivo e evidência; fica auditada."""
+        do contrato). Exige permissão de edição do CMI, motivo e evidência; fica auditada (D-28)."""
         s = CorrigirSerializer(data=request.data)
         s.is_valid(raise_exception=True)
         d = s.validated_data
@@ -244,11 +243,7 @@ class AngariacaoViewSet(RegistoViewSet):
             if cmi.situacao == nova:
                 raise serializers.ValidationError({"situacao": "O CMI já está nesta situação."})
             if nova == Angariacao.Situacao.EM_CURSO:
-                # Reabrir exige permissão de aprovação e não pode criar sobreposições.
-                if not pode_no_registo(
-                    request.user, self.modulo, Operacao.APROVAR, cmi, campo_partilhas="partilhada_com"
-                ):
-                    raise PermissionDenied("Reabrir um CMI exige permissão de aprovação.")
+                # Reabrir (D-28): permissão de edição (já verificada) e sem criar sobreposições.
                 if cmi.data_inicio and cmi.data_fim_vigente:
                     choques = conflitos(cmi, cmi.data_inicio, cmi.data_fim_vigente)
                     if choques:

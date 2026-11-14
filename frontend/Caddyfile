@@ -1,0 +1,39 @@
+# CRM Valor Máximo — servidor web.
+# CRM_DOMINIO: nome do site (ex.: crm.exemplo.pt ou 203-0-113-10.sslip.io). O Caddy obtém e renova
+# automaticamente o certificado HTTPS (Let's Encrypt).
+{$CRM_DOMINIO} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+
+	# Pedidos grandes: fotografias até 15 MB.
+	request_body {
+		max_size 20MB
+	}
+
+	@servidor path /api/* /admin/* /static/*
+	handle @servidor {
+		reverse_proxy backend:8000
+	}
+
+	handle {
+		root * /srv
+		# Ficheiros da aplicação com nome versionado podem ficar em cache; index.html nunca.
+		@versionados path /assets/*
+		header @versionados Cache-Control "public, max-age=31536000, immutable"
+		try_files {path} /index.html
+		file_server
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

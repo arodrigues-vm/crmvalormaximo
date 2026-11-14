@@ -27,6 +27,8 @@ CSRF_TRUSTED_ORIGINS = env("DJANGO_CSRF_TRUSTED_ORIGINS")
 # Identifica o ambiente (dev / test / producao). Usado para impedir operações
 # indevidas no ambiente errado e para mostrar o ambiente na interface.
 CRM_AMBIENTE = env("CRM_AMBIENTE")
+# Em produção a aplicação está atrás do Caddy: o IP real vem em X-Forwarded-For.
+CRM_CONFIAR_PROXY = env.bool("CRM_CONFIAR_PROXY", default=False)
 
 INSTALLED_APPS = [
     "django.contrib.admin",

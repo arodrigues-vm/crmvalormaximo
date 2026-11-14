@@ -193,8 +193,9 @@ class TestCorrecaoMaterial:
         c = criar(api, pessoas.cons, imovel, **assinado())
         corpo = {"campo": "data_inicio", "valor": str(HOJE - timedelta(days=12)), "motivo": "Erro de digitação",
                  "evidencia": "https://onedrive.live.com/cmi.pdf"}  # fmt: skip
-        assert como(api, pessoas.cons).post(detalhe(c["id"], "corrigir"), corpo).status_code == 403
-        r = como(api, pessoas.resp).post(detalhe(c["id"], "corrigir"), corpo)
+        # D-28: quem pode editar o CMI pode corrigir; quem não o vê, não.
+        assert como(api, pessoas.cons2).post(detalhe(c["id"], "corrigir"), corpo).status_code == 404
+        r = como(api, pessoas.cons).post(detalhe(c["id"], "corrigir"), corpo)
         assert r.status_code == 200, r.content
         d = r.json()
         assert d["data_inicio"] == str(HOJE - timedelta(days=12))
@@ -294,17 +295,16 @@ class TestPermissoesESituacao:
         c = criar(api, pessoas.cons, imovel, **assinado())
         r = como(api, pessoas.cons).post(detalhe(c["id"], "situacao"), {"situacao": "concluida", "motivo": "Vendido"})
         assert r.json()["estado"] == "concluida"
+        # D-28: o consultor responsável pode reabrir; a reabertura fica auditada.
+        r = como(api, pessoas.cons).post(detalhe(c["id"], "situacao"), {"situacao": "em_curso", "motivo": "Desfeito"})
+        assert r.status_code == 200 and r.json()["estado"] == "ativa"
+        assert RegistoAuditoria.objects.filter(acao="angariacao.situacao", dados__para="em_curso").exists()
+        # Quem não tem acesso ao CMI não reabre.
         assert (
-            como(api, pessoas.cons)
-            .post(detalhe(c["id"], "situacao"), {"situacao": "em_curso", "motivo": "x"})
+            como(api, pessoas.cons2)
+            .post(detalhe(c["id"], "situacao"), {"situacao": "concluida", "motivo": "x"})
             .status_code
-            == 403
-        )
-        assert (
-            como(api, pessoas.resp)
-            .post(detalhe(c["id"], "situacao"), {"situacao": "em_curso", "motivo": "Negócio desfeito"})
-            .status_code
-            == 200
+            == 404
         )
 
 

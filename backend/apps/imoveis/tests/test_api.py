@@ -355,3 +355,10 @@ class TestLigacoes:
             format="json",
         )
         assert r.status_code == 404
+
+
+def test_status_vazio_fica_ativo_e_mantem_se_na_edicao(api, pessoas):
+    i = criar(api, pessoas.cons, status=None)
+    assert i["nomes"]["status"] == "Ativo"
+    r = como(api, pessoas.cons).patch(detalhe(i["id"]), {"versao": i["versao"], "status": None}, format="json")
+    assert r.status_code == 200 and r.json()["nomes"]["status"] == "Ativo"

@@ -1,0 +1,57 @@
+# Produção / instância de teste na VPS (Ubuntu 24.04).
+# Uso: docker compose -f docker-compose.prod.yml --env-file .env.producao up -d --build
+# Os segredos ficam em .env.producao (gerado por infra/instalar-vps.sh; nunca vai para o Git).
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - dados_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    # Sem portas publicadas: a base de dados só é acessível dentro da rede interna.
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    env_file: .env.producao
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      DJANGO_DEBUG: "false"
+      CRM_MEDIA_ROOT: /dados/media
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py collectstatic --noinput -v0 &&
+             gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2 --timeout 60 --access-logfile -"
+    volumes:
+      - ficheiros_privados:/dados/media
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build: ./frontend
+    restart: unless-stopped
+    environment:
+      CRM_DOMINIO: ${CRM_DOMINIO}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy_dados:/data
+      - caddy_config:/config
+    depends_on:
+      - backend
+
+volumes:
+  dados_postgres:
+  ficheiros_privados:
+  caddy_dados:
+  caddy_config:

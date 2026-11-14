@@ -46,5 +46,10 @@ Capítulos 1, 3 (Entidades), 4 (Imóveis), 5 (Angariações) e anexo A (listas e
 ## Utilizadores de demonstração (fictícios)
 `python manage.py criar_utilizadores_demo --password <palavra-passe>` cria admin@, responsavel@, consultor@ e assistente@demo.local. Recusa-se a correr em produção. `python manage.py criar_entidades_demo` cria 8 entidades fictícias.
 
+## Infraestrutura
+| Tarefa | Estado | Notas |
+|--------|--------|-------|
+| Instância de teste (D-29) | Implementado, testado localmente com Docker | `docker-compose.prod.yml` (PostgreSQL 16, Django/gunicorn, Caddy com HTTPS automático e cabeçalhos de segurança), `infra/instalar-vps.sh` (Docker, firewall, swap, segredos gerados na VPS, dados demo opcionais), guia `documentacao/INSTALACAO_VPS.md`. IP real do cliente na auditoria atrás do proxy. Instalação na VPS real por fazer (pelo proprietário, com o guia). |
+
 ## Próxima tarefa
 Verificação intermédia do proprietário (D-15) sobre Entidades, Imóveis e CMI. Depois: restantes tarefas da Fase 2 (F2-04 vistas Cartões/Kanban, F2-05 Equipa/Agentes/Agências/Glossário, F2-06 campos históricos, F2-07 importação) e Fase 3. Em paralelo: carregar a CAOP2025; F1-06 (interface de partilha/transferência); F1-07 (motor no-code, âmbito D-13).

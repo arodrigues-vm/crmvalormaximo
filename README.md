@@ -63,6 +63,10 @@ Carregar distritos, concelhos e freguesias a partir de um CSV oficial (colunas `
 cd backend && python manage.py importar_caop caminho/para/caop2025.csv
 ```
 
+## Instalação na VPS
+
+Ver [documentacao/INSTALACAO_VPS.md](documentacao/INSTALACAO_VPS.md).
+
 ## Testes
 
 ```bash

@@ -76,8 +76,7 @@ A renovação **não altera** a data de início original do contrato nem os cicl
 ## 5.5 Datas depois de assinado e correção excecional
 
 Depois de assinado, a data de assinatura, a data de início e o prazo **não se alteram na edição normal**. Se
-foram registados com um erro, um utilizador com permissão de aprovação (por omissão, Responsável de Equipa ou
-Administrador) pode fazer uma **Correção excecional**:
+foram registados com um erro, quem pode editar o CMI pode fazer uma **Correção excecional**:
 
 1. Na ficha, carregue em **Correção excecional**.
 2. Escolha o dado, indique o valor correto, o **motivo** e a **evidência** (por exemplo, o CMI digitalizado).
@@ -92,7 +91,7 @@ quando) e na auditoria.
 
 - **Concluir:** o negócio foi realizado ao abrigo deste contrato.
 - **Cancelar / revogar:** o contrato terminou antes do fim (revogação, rescisão…).
-- **Reabrir:** volta a pôr o contrato em curso (exige permissão de aprovação).
+- **Reabrir:** volta a pôr o contrato em curso.
 
 Em todos os casos é pedido um motivo, que fica registado.
 

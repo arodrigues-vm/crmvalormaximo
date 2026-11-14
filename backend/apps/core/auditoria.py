@@ -1,9 +1,17 @@
+from django.conf import settings
+
 from .models import RegistoAuditoria
 
 
 def _ip(request):
+    """IP do cliente. Atrás do proxy (Caddy), usar o último endereço de X-Forwarded-For,
+    que é o acrescentado pelo próprio proxy (os anteriores podem ser forjados pelo cliente)."""
     if request is None:
         return None
+    if settings.CRM_CONFIAR_PROXY:
+        encaminhado = request.META.get("HTTP_X_FORWARDED_FOR", "")
+        if encaminhado:
+            return encaminhado.split(",")[-1].strip() or None
     return request.META.get("REMOTE_ADDR") or None
 
 

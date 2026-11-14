@@ -79,7 +79,7 @@ class ImovelListaSerializer(serializers.ModelSerializer):
 
 class ImovelSerializer(serializers.ModelSerializer):
     operacao = CampoValorLista("operacoes")
-    status = CampoValorLista("status_imovel", required=False)
+    status = CampoValorLista("status_imovel", required=False, allow_null=True)  # vazio = ativo por omissão
     tem_fotografia = serializers.SerializerMethodField()
     tipo = CampoValorLista("tipos_imovel", allow_null=True, required=False)
     tipologia = CampoValorLista("tipologias", allow_null=True, required=False)
@@ -209,6 +209,8 @@ class ImovelSerializer(serializers.ModelSerializer):
         dados.pop("versao", None)
         proprietarios = dados.pop("proprietarios", None)
         zonas = dados.pop("zonas_exteriores", None)
+        if "status" in dados and dados["status"] is None:
+            dados.pop("status")  # na edição, vazio mantém o status atual
         for k, v in dados.items():
             setattr(imovel, k, v)
         imovel.save()

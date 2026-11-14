@@ -9,7 +9,6 @@ import { Dialogo } from '../../componentes/Dialogo'
 import { CabecalhoRegisto, HistoricoRegisto } from '../../componentes/Ficha'
 import { dataPt, formatarEuros, formatarPercentagem, momentoPt } from '../../componentes/formatar'
 import { LigacoesExternas } from '../../componentes/LigacoesExternas'
-import { useSessao } from '../../app/sessao'
 import { urlFotografia } from '../imoveis/api'
 import { cmiApi, ETIQUETA_ESTADO, NOMES_CAMPOS_CMI, textoAlerta, type Angariacao } from './api'
 
@@ -44,7 +43,6 @@ export function AngariacaoConsulta() {
   const { id = '' } = useParams()
   const navegar = useNavigate()
   const qc = useQueryClient()
-  const { pode } = useSessao()
   const [dialogo, setDialogo] = useState<
     null | 'renovar' | 'corrigir' | 'concluir' | 'cancelar' | 'reabrir' | 'eliminar'
   >(null)
@@ -78,8 +76,8 @@ export function AngariacaoConsulta() {
     qc.invalidateQueries({ queryKey: ['angariacoes', nova.id, 'historico'] })
     setDialogo(null)
   }
-  // A permissão de aprovação é verificada no servidor; aqui só decide se o botão aparece.
-  const podeAprovar = pode('angariacoes', 'aprovar')
+  // D-28: correção excecional e reabertura por quem pode editar o CMI (o servidor volta a verificar).
+  const podeCorrigir = a.acoes.editar
   const emCurso = a.situacao === 'em_curso'
 
   return (
@@ -169,12 +167,12 @@ export function AngariacaoConsulta() {
                 </button>
               </>
             )}
-            {podeAprovar && !emCurso && (
+            {podeCorrigir && !emCurso && (
               <button className="botao-secundario" onClick={() => setDialogo('reabrir')}>
                 Reabrir
               </button>
             )}
-            {podeAprovar && a.assinado && (
+            {podeCorrigir && a.assinado && (
               <button className="botao-secundario" onClick={() => setDialogo('corrigir')}>
                 Correção excecional
               </button>
