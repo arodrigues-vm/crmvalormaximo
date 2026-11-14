@@ -21,8 +21,22 @@ git config --global --add safe.directory "$PASTA" 2>/dev/null || true
 echo "==> 1/6 Pacotes do sistema (Docker, firewall)"
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
-apt-get install -y -qq docker.io docker-compose-v2 ufw git openssl curl >/dev/null
+apt-get install -y -qq ufw git openssl curl >/dev/null
+# Docker: aproveitar o que já existir (ex.: docker-ce do repositório oficial); só instalar se faltar.
+if ! command -v docker >/dev/null 2>&1; then
+  echo "    A instalar o Docker"
+  apt-get install -y -qq docker.io >/dev/null
+fi
+if ! docker compose version >/dev/null 2>&1; then
+  echo "    A instalar o Docker Compose"
+  if dpkg -s docker-ce >/dev/null 2>&1; then
+    apt-get install -y -qq docker-compose-plugin >/dev/null
+  else
+    apt-get install -y -qq docker-compose-v2 >/dev/null
+  fi
+fi
 systemctl enable --now docker >/dev/null
+echo "    $(docker --version) · $(docker compose version | head -1)"
 
 # Com 2 GB de RAM, a compilação da interface pode esgotar a memória: criar 2 GB de swap se não houver.
 if ! swapon --show | grep -q .; then
