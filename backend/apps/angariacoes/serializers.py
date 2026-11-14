@@ -43,6 +43,9 @@ class RenovacaoSerializer(serializers.ModelSerializer):
 class AngariacaoListaSerializer(serializers.ModelSerializer):
     imovel_referencia = serializers.CharField(source="imovel.referencia", read_only=True)
     imovel_descricao = serializers.SerializerMethodField()
+    # Fotografia principal do imóvel (miniatura). A imagem é servida pela API dos imóveis,
+    # que verifica o acesso ao imóvel.
+    imovel_fotografia = serializers.SerializerMethodField()
     operacao_nome = serializers.SerializerMethodField()
     regime_nome = serializers.SerializerMethodField()
     estado = serializers.SerializerMethodField()
@@ -56,8 +59,12 @@ class AngariacaoListaSerializer(serializers.ModelSerializer):
         fields = [
             "id", "referencia", "numero_contrato", "imovel", "imovel_referencia", "imovel_descricao",
             "operacao_nome", "regime_nome", "data_inicio", "data_fim_vigente", "estado", "estado_nome", "alerta",
-            "partes", "responsavel_nome",
+            "partes", "responsavel_nome", "imovel_fotografia",
         ]  # fmt: skip
+
+    def get_imovel_fotografia(self, o) -> dict | None:
+        i = o.imovel
+        return {"imovel": i.pk, "versao": i.versao} if i.fotografia else None
 
     def get_imovel_descricao(self, o) -> str:
         i = o.imovel
@@ -105,7 +112,7 @@ class AngariacaoSerializer(AngariacaoListaSerializer):
             "situacao", "situacao_motivo", "estado", "estado_nome", "alerta", "assinado",
             "modalidade_remuneracao", "valor_remuneracao", "base_contratual", "valor_minimo_remuneracao",
             "taxa_iva", "remuneracao_inclui_iva", "condicoes_pagamento",
-            "intervenientes", "intervenientes_detalhe", "renovacoes", "correcoes",
+            "intervenientes", "intervenientes_detalhe", "renovacoes", "correcoes", "imovel_fotografia",
             "responsavel", "responsavel_nome", "observacoes", "nomes",
             "criado_em", "atualizado_em", "versao", "eliminado_em", "acoes",
         ]  # fmt: skip

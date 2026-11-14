@@ -306,3 +306,12 @@ class TestPermissoesESituacao:
             .status_code
             == 200
         )
+
+
+def test_fotografia_do_imovel_na_lista_e_na_ficha(api, pessoas, imovel):
+    c = criar(api, pessoas.cons, imovel)
+    assert c["imovel_fotografia"] is None
+    Imovel.objects.filter(pk=imovel.pk).update(fotografia="imoveis/x/foto.webp")
+    lista = como(api, pessoas.cons).get(LISTA).json()["results"][0]
+    assert lista["imovel_fotografia"] == {"imovel": imovel.pk, "versao": imovel.versao}
+    assert como(api, pessoas.cons).get(detalhe(c["id"])).json()["imovel_fotografia"]["imovel"] == imovel.pk

@@ -17,7 +17,7 @@ Abra **Angariações** no menu. Use os separadores para filtrar:
 
 ![Lista de angariações](imagens/35-cmi-lista.png)
 
-Pode pesquisar pela referência, n.º de contrato, imóvel, localidade ou nome de uma das partes, e ordenar pela
+Cada linha mostra a miniatura da fotografia principal do imóvel. Pode pesquisar pela referência, n.º de contrato, imóvel, localidade ou nome de uma das partes, e ordenar pela
 data de fim mais próxima.
 
 ## 5.2 Criar uma angariação
@@ -55,6 +55,7 @@ com a referência do outro contrato. Contratos não exclusivos podem coexistir.
 
 ![Ficha da angariação](imagens/31-cmi-consulta.png)
 
+- **Fotografia do imóvel:** aparece ao lado dos dados do contrato; clique nela para abrir a ficha do imóvel.
 - **Avisos de expiração:** quando faltam 120, 60 ou 30 dias (valores configuráveis) para o fim, aparece um aviso
   vermelho no topo da ficha e na lista.
 - **Ciclos de vigência:** o contrato inicial (ciclo 1) e cada renovação (ciclo 2, 3, …).

@@ -11,6 +11,12 @@ export interface Alerta {
   limiar: number
 }
 
+/** Referência à fotografia principal do imóvel (servida pela API dos imóveis). */
+export interface FotografiaImovelRef {
+  imovel: number
+  versao: number
+}
+
 export interface Renovacao {
   id: number
   ciclo: number
@@ -41,6 +47,7 @@ export interface Angariacao {
   imovel: number
   imovel_referencia: string
   imovel_descricao: string
+  imovel_fotografia: FotografiaImovelRef | null
   operacao: number | null
   regime: number | null
   data_assinatura: string | null
@@ -96,6 +103,7 @@ export interface AngariacaoResumo {
   imovel: number
   imovel_referencia: string
   imovel_descricao: string
+  imovel_fotografia: FotografiaImovelRef | null
   operacao_nome: string | null
   regime_nome: string | null
   data_inicio: string | null

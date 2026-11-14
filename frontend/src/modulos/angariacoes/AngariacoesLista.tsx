@@ -4,6 +4,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 
 import { dataPt } from '../../componentes/formatar'
 import { Paginacao } from '../../componentes/Paginacao'
+import { urlFotografia } from '../imoveis/api'
 import { cmiApi, ETIQUETA_ESTADO, textoAlerta } from './api'
 
 const FILTROS: [string, string][] = [
@@ -94,6 +95,7 @@ export function AngariacoesLista() {
         <table className="tabela">
           <thead>
             <tr>
+              <th aria-label="Fotografia do imóvel" />
               <th>Referência</th>
               <th>Imóvel</th>
               <th>Partes</th>
@@ -105,6 +107,18 @@ export function AngariacoesLista() {
           <tbody>
             {lista.data.results.map((a) => (
               <tr key={a.id} onClick={() => navegar(`/angariacoes/${a.id}`)}>
+                <td className="celula-miniatura">
+                  {a.imovel_fotografia ? (
+                    <img
+                      src={urlFotografia(a.imovel_fotografia.imovel, a.imovel_fotografia.versao, true)}
+                      alt=""
+                      loading="lazy"
+                      onError={(e) => (e.currentTarget.style.visibility = 'hidden')}
+                    />
+                  ) : (
+                    <span className="miniatura-vazia" aria-hidden="true" />
+                  )}
+                </td>
                 <td data-rotulo="Referência">
                   <Link to={`/angariacoes/${a.id}`} onClick={(e) => e.stopPropagation()}>
                     {a.referencia}

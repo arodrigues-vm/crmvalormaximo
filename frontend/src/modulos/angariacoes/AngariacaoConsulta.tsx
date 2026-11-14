@@ -10,6 +10,7 @@ import { CabecalhoRegisto, HistoricoRegisto } from '../../componentes/Ficha'
 import { dataPt, formatarEuros, formatarPercentagem, momentoPt } from '../../componentes/formatar'
 import { LigacoesExternas } from '../../componentes/LigacoesExternas'
 import { useSessao } from '../../app/sessao'
+import { urlFotografia } from '../imoveis/api'
 import { cmiApi, ETIQUETA_ESTADO, NOMES_CAMPOS_CMI, textoAlerta, type Angariacao } from './api'
 
 function remuneracao(a: Angariacao): string | null {
@@ -116,55 +117,71 @@ export function AngariacaoConsulta() {
         </p>
       )}
 
-      <Bloco titulo="Contrato">
-        <dl className="grelha-dados">
-          <Dado rotulo="Imóvel">
-            <Link to={`/imoveis/${a.imovel}`}>
-              {a.imovel_referencia} · {a.imovel_descricao}
-            </Link>
-          </Dado>
-          <Dado rotulo="N.º do contrato">{a.numero_contrato}</Dado>
-          <Dado rotulo="Tipo (operação)">{a.nomes.operacao}</Dado>
-          <Dado rotulo="Regime">{a.nomes.regime}</Dado>
-          <Dado rotulo="Data de assinatura">{dataPt(a.data_assinatura)}</Dado>
-          <Dado rotulo="Data de início (original)">{dataPt(a.data_inicio)}</Dado>
-          <Dado rotulo="Prazo">{a.prazo_meses && `${a.prazo_meses} meses`}</Dado>
-          <Dado rotulo="Fim do ciclo inicial">{dataPt(a.data_fim)}</Dado>
-          <Dado rotulo="Fim em vigor">{dataPt(a.data_fim_vigente)}</Dado>
-          <Dado rotulo="Situação">
-            {a.nomes.situacao}
-            {a.situacao_motivo && <small className="ajuda"> — {a.situacao_motivo}</small>}
-          </Dado>
-          <Dado rotulo="Responsável">{a.responsavel_nome}</Dado>
-        </dl>
-        <div className="acoes-bloco">
-          {a.acoes.editar && a.assinado && emCurso && (
-            <button className="botao-principal" onClick={() => setDialogo('renovar')}>
-              Registar renovação
-            </button>
+      <div className="ficha-topo">
+        <Link
+          to={`/imoveis/${a.imovel}`}
+          className="fotografia-imovel"
+          aria-label={`Abrir imóvel ${a.imovel_referencia}`}
+        >
+          {a.imovel_fotografia ? (
+            <img
+              src={urlFotografia(a.imovel_fotografia.imovel, a.imovel_fotografia.versao)}
+              alt={`Fotografia do imóvel ${a.imovel_referencia}`}
+            />
+          ) : (
+            <div className="fotografia-vazia">Imóvel sem fotografia</div>
           )}
-          {a.acoes.editar && emCurso && (
-            <>
-              <button className="botao-secundario" onClick={() => setDialogo('concluir')}>
-                Concluir
+        </Link>
+        <Bloco titulo="Contrato">
+          <dl className="grelha-dados">
+            <Dado rotulo="Imóvel">
+              <Link to={`/imoveis/${a.imovel}`}>
+                {a.imovel_referencia} · {a.imovel_descricao}
+              </Link>
+            </Dado>
+            <Dado rotulo="N.º do contrato">{a.numero_contrato}</Dado>
+            <Dado rotulo="Tipo (operação)">{a.nomes.operacao}</Dado>
+            <Dado rotulo="Regime">{a.nomes.regime}</Dado>
+            <Dado rotulo="Data de assinatura">{dataPt(a.data_assinatura)}</Dado>
+            <Dado rotulo="Data de início (original)">{dataPt(a.data_inicio)}</Dado>
+            <Dado rotulo="Prazo">{a.prazo_meses && `${a.prazo_meses} meses`}</Dado>
+            <Dado rotulo="Fim do ciclo inicial">{dataPt(a.data_fim)}</Dado>
+            <Dado rotulo="Fim em vigor">{dataPt(a.data_fim_vigente)}</Dado>
+            <Dado rotulo="Situação">
+              {a.nomes.situacao}
+              {a.situacao_motivo && <small className="ajuda"> — {a.situacao_motivo}</small>}
+            </Dado>
+            <Dado rotulo="Responsável">{a.responsavel_nome}</Dado>
+          </dl>
+          <div className="acoes-bloco">
+            {a.acoes.editar && a.assinado && emCurso && (
+              <button className="botao-principal" onClick={() => setDialogo('renovar')}>
+                Registar renovação
               </button>
-              <button className="botao-secundario" onClick={() => setDialogo('cancelar')}>
-                Cancelar / revogar
+            )}
+            {a.acoes.editar && emCurso && (
+              <>
+                <button className="botao-secundario" onClick={() => setDialogo('concluir')}>
+                  Concluir
+                </button>
+                <button className="botao-secundario" onClick={() => setDialogo('cancelar')}>
+                  Cancelar / revogar
+                </button>
+              </>
+            )}
+            {podeAprovar && !emCurso && (
+              <button className="botao-secundario" onClick={() => setDialogo('reabrir')}>
+                Reabrir
               </button>
-            </>
-          )}
-          {podeAprovar && !emCurso && (
-            <button className="botao-secundario" onClick={() => setDialogo('reabrir')}>
-              Reabrir
-            </button>
-          )}
-          {podeAprovar && a.assinado && (
-            <button className="botao-secundario" onClick={() => setDialogo('corrigir')}>
-              Correção excecional
-            </button>
-          )}
-        </div>
-      </Bloco>
+            )}
+            {podeAprovar && a.assinado && (
+              <button className="botao-secundario" onClick={() => setDialogo('corrigir')}>
+                Correção excecional
+              </button>
+            )}
+          </div>
+        </Bloco>
+      </div>
 
       <Bloco titulo="Ciclos de vigência">
         {!a.assinado ? (

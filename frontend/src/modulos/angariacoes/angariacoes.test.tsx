@@ -42,6 +42,7 @@ const CMI = {
   imovel: 5,
   imovel_referencia: 'IMO-000005',
   imovel_descricao: 'Apartamento T2 Ensaio',
+  imovel_fotografia: { imovel: 5, versao: 9 },
   operacao: 40,
   regime: 70,
   data_assinatura: '2026-06-01',
@@ -113,6 +114,46 @@ describe('Angariações', () => {
     expect(await screen.findByText('Termina dentro de 16 dias')).toBeInTheDocument()
     expect(screen.getByText('Ciclo 1 — contrato inicial')).toBeInTheDocument()
     expect(screen.getByText(/5 % do valor do negócio/)).toBeInTheDocument()
+    expect(screen.getByAltText('Fotografia do imóvel IMO-000005')).toHaveAttribute(
+      'src',
+      '/api/imoveis/5/fotografia/?v=9',
+    )
+  })
+
+  it('lista mostra a miniatura da fotografia do imóvel', async () => {
+    simularApi({
+      ...base,
+      'GET /api/angariacoes/': () =>
+        json({
+          count: 1,
+          results: [
+            {
+              id: 3,
+              referencia: 'CMI-000003',
+              numero_contrato: '',
+              imovel: 5,
+              imovel_referencia: 'IMO-000005',
+              imovel_descricao: 'Apartamento T2',
+              imovel_fotografia: { imovel: 5, versao: 9 },
+              operacao_nome: 'Venda',
+              regime_nome: 'Exclusivo',
+              data_inicio: null,
+              data_fim_vigente: null,
+              estado: 'por_assinar',
+              estado_nome: 'Por assinar',
+              alerta: null,
+              partes: [],
+              responsavel_nome: 'Consultor Demo',
+            },
+          ],
+        }),
+    })
+    const { container } = desenhar('/angariacoes')
+    await screen.findByText('IMO-000005')
+    expect(container.querySelector('.celula-miniatura img')).toHaveAttribute(
+      'src',
+      '/api/imoveis/5/fotografia/?tamanho=miniatura&v=9',
+    )
   })
 
   it('renovação propõe o dia seguinte ao fim e envia o pedido', async () => {
