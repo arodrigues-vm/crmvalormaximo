@@ -1,0 +1,22 @@
+# Matriz de aceitação AT-01 a AT-16
+
+Critérios completos: Especificação V1.4 §16 (em `fontes/`). Estados: Pendente / Aprovado (testes automáticos) / Reprovado / Aceite (proprietário).
+
+| ID | Cenário | Tarefas | Testes automáticos | Estado |
+|----|---------|---------|--------------------|--------|
+| AT-01 | Sessões, perfis e APIs | F1-04/05; F5-02 | — | Pendente |
+| AT-02 | Partilha e transferência | F1-05/06 | — | Pendente |
+| AT-03 | Registos e vistas | F1-03; F2-04 | — | Pendente |
+| AT-04 | CMI original e renovação | F2-03; F4-04 | — | Pendente |
+| AT-05 | Plano de marketing 45 | F4-03 | — | Pendente |
+| AT-06 | Dashboard e finanças | F3-08; F4-06 | — | Pendente |
+| AT-07 | Pagamentos e estornos | F3-07/08 | — | Pendente |
+| AT-08 | Proposta a partir de Visita | F3-04 | — | Pendente |
+| AT-09 | Transação e estados | F3-05/06 | — | Pendente |
+| AT-10 | Match Imóvel/Procura | F3-02 | — | Pendente |
+| AT-11 | Participantes históricos | F2-02; F3-05/09 | — | Pendente |
+| AT-12 | Importação Excel/Outlook | F2-07; F5-01 | — | Pendente |
+| AT-13 | Configuração no-code | F1-07; F2-05/06; F5-05 | — | Pendente |
+| AT-14 | Brevo e WhatsApp | F4-07/08 | — | Pendente |
+| AT-15 | VPS e segurança | F5-02/03 | — | Pendente |
+| AT-16 | Backup e aprovação | F5-04/06 | — | Pendente |

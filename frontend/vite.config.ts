@@ -1,0 +1,43 @@
+/// <reference types="vitest/config" />
+import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite'
+import { VitePWA } from 'vite-plugin-pwa'
+
+// A PWA da primeira versão é instalável mas exige ligação à Internet (D-07):
+// o service worker não guarda dados do CRM, apenas os ficheiros da aplicação.
+export default defineConfig({
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      manifest: {
+        name: 'CRM Valor Máximo',
+        short_name: 'Valor Máximo',
+        description: 'Valor Máximo — Soluções Imobiliárias',
+        lang: 'pt-PT',
+        theme_color: '#0b2545',
+        background_color: '#f5f7fa',
+        display: 'standalone',
+        start_url: '/',
+        icons: [{ src: '/icone.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' }],
+      },
+      workbox: {
+        navigateFallbackDenylist: [/^\/api\//, /^\/admin\//],
+        runtimeCaching: [],
+      },
+    }),
+  ],
+  server: {
+    port: 5173,
+    proxy: {
+      '/api': process.env.VITE_PROXY_API ?? 'http://localhost:8000',
+      '/admin': process.env.VITE_PROXY_API ?? 'http://localhost:8000',
+      '/static': process.env.VITE_PROXY_API ?? 'http://localhost:8000',
+    },
+  },
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    globals: true,
+  },
+})

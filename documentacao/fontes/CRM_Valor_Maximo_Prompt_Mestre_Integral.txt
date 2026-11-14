@@ -1,0 +1,2594 @@
+VALOR MÁXIMO
+
+SOLUÇÕES IMOBILIÁRIAS
+
+PROMPT MESTRE INTEGRAL
+DE DESENVOLVIMENTO
+
+Especificação funcional, técnica, comercial, financeira, administrativa e operacional
+
+  --------------------------------------------------------------------------------------------------------------------
+  Parâmetro                           Referência
+  ----------------------------------- --------------------------------------------------------------------------------
+  Produto                             CRM Valor Máximo
+
+  Versão consolidada                  14 de novembro de 2026
+
+  Idioma                              Português de Portugal
+
+  Arquitetura                         React + TypeScript (PWA) · Django · PostgreSQL
+
+  Fontes normativas                   Especificação V1.4; Plano de Implementação V1.0
+
+  Ramo atual                          reconstrucao-profissional
+
+  Abrangência                         Funcionalidades existentes, planeadas, segurança, testes e entrada em produção
+  --------------------------------------------------------------------------------------------------------------------
+
+Documento editável de orientação e implementação. As decisões posteriores aprovadas prevalecem sobre versões anteriores nos respetivos temas. Os anexos normativos são reproduzidos para consulta e não constituem prova de implementação.
+
+ÍNDICE
+
+Índice de navegação por temas. Os títulos dos capítulos utilizam estilos do Word, permitindo gerar um índice automático quando necessário.
+
+Fundamentos e módulos comerciais
+
+Capítulos 1–4: missão, identidade, arquitetura, segurança e permissões.
+
+Capítulos 5–12: Entidades, Imóveis, CMI, Oportunidades, Procuras, Visitas, Propostas e Transações.
+
+Operação financeira, Marketing e configuração
+
+Capítulos 13–20: comissões, faturação, Pós-Venda, Tarefas, Agenda, Marketing de Imóveis, renovações e Marketing de Entidades.
+
+Capítulos 21–27: Dashboard, Brevo, WhatsApp, relatórios, notificações, administração, equipa e normalização de contactos.
+
+Fases finais, aceitação e governo do desenvolvimento
+
+Capítulos 28–33: importação, testes de carga, VPS, backups, RGPD, piloto e lançamento.
+
+Capítulos 34–40: critérios AT-01 a AT-16, estado do projeto, qualidade, gestão de quotas, restrições e entregáveis.
+
+Anexos normativos integrais
+
+Anexo I: Especificação Consolidada V1.4 — transcrição integral.
+
+Anexo II: Plano de Implementação V1.0 — transcrição integral.
+
+COMO UTILIZAR ESTE DOCUMENTO
+
+Modo A — Desenvolvimento de raiz: criar uma implementação nova e isolada, preservando o protótipo histórico e exigindo aprovação antes de ações irreversíveis.
+
+Modo B — Continuação: analisar o código real, AGENTS.md, CONTINUIDADE.md, matriz de aceitação e relatórios; implementar somente lacunas. Para o projeto atual, utilizar o Modo B.
+
+Este prompt descreve o resultado esperado de ponta a ponta. Os contratos reais de API, esquemas de dados e decisões específicas que não constem do texto devem ser extraídos das fontes existentes; não devem ser inventados.
+
+CAPÍTULO 1 — MISSÃO E REGRAS FUNDAMENTAIS
+
+Desenvolver um CRM imobiliário profissional para a operação em Portugal, capaz de gerir o ciclo comercial completo, desde Entidades e Imóveis até Marketing, Negociação, Transação, Faturação, Recebimentos e Pós-Venda.
+
+Equipa e responsabilidade
+
+Atua como equipa sénior de análise funcional, UX, arquitetura React/Django/PostgreSQL, segurança, testes, infraestrutura e operações.
+
+-   Entregar aplicação funcional, não apenas protótipo visual
+
+-   Privilegiar integridade, usabilidade, auditabilidade e escalabilidade
+
+-   Documentar lacunas sem preencher decisões comerciais por suposição
+
+Modos de execução
+
+MODO A: desenvolvimento integral de raiz apenas com autorização. MODO B: continuação do código existente, obrigatório no estado atual.
+
+-   No Modo B, inspecionar repositório e migrações antes de alterar
+
+-   Nunca reconstruir um módulo que já funcione
+
+-   Manter histórico Git, protótipo V30.25 e dados anteriores
+
+Hierarquia das fontes
+
+Consultar AGENTS.md, Especificação V1.4, decisões posteriores do proprietário, Plano V1.0, MATRIZ_ACEITACAO.md, CONTINUIDADE.md, relatórios, código e protótipo.
+
+-   Distinguir requisito, implementação e aceitação
+
+-   Resolver divergências com rastreabilidade
+
+-   Não transformar propostas históricas em regras universais
+
+CAPÍTULO 2 — IDENTIDADE E EXPERIÊNCIA DE UTILIZAÇÃO
+
+Marca Valor Máximo — Soluções Imobiliárias. Assinatura «Mais valor para o seu futuro». Azul-marinho e dourado; tipografia Inter e apresentação simples, clara, profissional e responsiva.
+
+Marca e design
+
+Usar o ficheiro aprovado do logótipo VM dourado sobre azul-marinho; não redesenhar por aproximação.
+
+-   Cabeçalhos e menus consistentes
+
+-   Fundos claros, ícones coerentes e contraste adequado
+
+-   Experiência de utilização compatível com PC, tablet e telemóvel
+
+Ficha de consulta e edição
+
+Abrir em Consulta; botão Editar azul-escuro no canto superior direito; Guardar/Cancelar uniformes, edição direta e histórico.
+
+-   Blocos expansíveis e recolhíveis
+
+-   Blocos principais abertos e secundários recolhidos
+
+-   Avisar sobre alterações não guardadas
+
+-   Abrir automaticamente blocos com validações e preservar valores ao recolher
+
+Listas e seletores
+
+Pesquisa, filtros, ordenação, paginação; Lista, Cartões e Kanban quando aplicável. Seletores únicos pesquisáveis.
+
+-   Pesquisa parcial, insensível a acentos e maiúsculas
+
+-   Teclado, rato e toque
+
+-   Guardar identificador do registo, não apenas o nome
+
+-   Proteger contra respostas de pesquisa desatualizadas
+
+Uniformização FT-02
+
+Reaproveitar integralmente os Grupos 1–5 aprovados e validar a consistência em todos os módulos.
+
+-   Sem tabelas que alarguem indevidamente o ecrã no telemóvel
+
+-   Ações, margens, rótulos e blocos uniformes
+
+CAPÍTULO 3 — ARQUITETURA TECNOLÓGICA
+
+Arquitetura aprovada: React + TypeScript, PWA inicialmente online, backend Django, PostgreSQL, validação e serviços de domínio no servidor.
+
+Frontend
+
+Componentes reutilizáveis, tipagem rigorosa, rotas protegidas, UX responsiva, carregamento diferido e testes.
+
+-   Sem regras financeiras ou de autorização confiadas ao browser
+
+-   Gerir estados e mensagens de erro de modo consistente
+
+-   Monitorizar tamanho do bundle e latência
+
+Backend
+
+API segura, autenticação, serviços de negócio, auditoria, idempotência, transações e concorrência.
+
+-   Segurança em todas as operações e registos
+
+-   Não replicar lógica contraditória entre endpoints
+
+-   Registo de eventos relevantes
+
+PostgreSQL
+
+Chaves estáveis, integridade referencial, restrições, índices, migrações aditivas e consultas eficientes.
+
+-   Nunca executar migrações contra base de identidade não confirmada
+
+-   Verificar esquema antes e depois
+
+-   Isolar DEV, TEST e produção
+
+Datas
+
+Referência operacional Europe/Lisbon; USE_TZ=True no servidor; datas civis sem deslocação de dia.
+
+-   Separar datas previstas, efetivas e datas de registo
+
+-   Tratar mudanças de hora e instantes ambíguos
+
+-   PWA instalável, sem sincronização offline na primeira versão
+
+CAPÍTULO 4 — AUTENTICAÇÃO E PERMISSÕES
+
+Perfis aprovados: Administrador, Responsável de Equipa, Consultor e Assistente. A permissão efetiva é determinada por perfil, utilizador, módulo, operação, âmbito e registo.
+
+Acesso
+
+Validação no servidor para consulta, criação, edição, eliminação, partilha, transferência, exportação, aprovação e configuração.
+
+-   Proteção de pesquisas, filtros, contagens, relatórios e anexos
+
+-   Atribuir tarefa não concede acesso ao negócio
+
+-   Assistente por defeito limitado a registos atribuídos/partilhados
+
+Partilhas e transferências
+
+Apenas Administrador ou Responsável autorizado podem permitir transferências dentro do respetivo âmbito.
+
+-   Registar requerente, aprovador, origem, destino, data e motivo
+
+-   Não transferir automaticamente outros registos relacionados
+
+Sessões
+
+Recuperação de acesso segura, sessões protegidas e autenticação individual; MFA quando adequado.
+
+-   Não divulgar segredos, credenciais ou tokens
+
+-   Bloquear acesso via URL direta sem autorização
+
+CAPÍTULO 5 — ENTIDADES
+
+Entidade representa pessoa singular/coletiva que pode assumir vários papéis comerciais sem duplicação de registos.
+
+Identificação
+
+Campos conforme o esquema: referência, tipo de pessoa, nome, NIF/NIPC, data de nascimento quando aplicável, responsável, origem, estado, contactos e morada.
+
+-   Telefones múltiplos, email, preferências e finalidade de contacto
+
+-   Histórico e observações
+
+-   Suporte de papéis comprador, proprietário, vendedor, arrendatário, senhorio e outros
+
+Relações
+
+Navegação autorizada entre Entidades, Imóveis, CMI, Oportunidades, Procuras, Visitas, Interesses, Propostas, Transações, Tarefas, Documentos e Marketing.
+
+-   Respeitar permissões das duas pontas da relação
+
+-   Não duplicar pessoa por papel diferente
+
+Proteção de dados
+
+Guardar origem, fundamento, finalidades, oposição e consentimentos quando exigidos.
+
+-   Importação não significa consentimento
+
+-   Histórico protegido e rastreável
+
+CAPÍTULO 6 — IMÓVEIS
+
+Registar imóveis com referência única, identificação, tipologia, operação comercial, preço, áreas, características, documentação e proprietários.
+
+Ficha
+
+Tipo/subtipo, tipologia, Venda/Arrendamento, estado comercial, condição física, morada, localização, fotografias, áreas e diferenciais.
+
+-   Campos concretos definidos por esquema/especificação
+
+-   Responsável, observações e histórico
+
+-   Galeria documental protegida
+
+Titularidade
+
+Permitir múltiplos proprietários e quotas, preservando as fotografias históricas em operações.
+
+-   Quotas de propriedade não determinam automaticamente destinatários de faturação
+
+-   Alterar proprietário não reescreve negócio concluído
+
+Relações
+
+Associar CMI, Oportunidades, Procuras compatíveis, Visitas, Interesses, Propostas, Transações, Marketing e Tarefas.
+
+-   Permissões e identidades estáveis
+
+CAPÍTULO 7 — ANGARIAÇÕES E CMI
+
+Gerir contratos de mediação imobiliária, respetiva vigência, remuneração, documentos e renovações.
+
+Campos
+
+Imóvel, partes, contrato, tipo, regime, assinatura, início original, prazo, fim, condições de remuneração, IVA, pagamento e estado.
+
+-   Histórico contratual e documentos
+
+-   Vigência e alterações validadas
+
+Correções e renovações
+
+Data original do CMI permanece estável; correção material com motivo, evidência e permissão. Renovação como evento autónomo.
+
+-   Pedir confirmação antes de recalcular tarefas pendentes
+
+-   Preservar tarefas concluídas e históricos
+
+-   Avisos de expiração 120/60/30 dias conforme configuração
+
+Base de Marketing
+
+Plano inicial só após CMI assinado e início confirmado.
+
+-   Não emitir planos automaticamente na formalização
+
+CAPÍTULO 8 — OPORTUNIDADES DE ANGARIAÇÃO
+
+Registar contacto e oportunidade anteriores a um CMI formalizado.
+
+Dados e fluxo
+
+Entidade, imóvel provisório ou existente, responsável, estado, qualificação, origem, motivação, preço indicativo, prazo, interações e tarefas.
+
+-   Não confundir oportunidade com contrato formalizado
+
+-   Transição expressa e auditada para Imóvel/CMI quando aprovada
+
+-   Preservar histórico e relações
+
+CAPÍTULO 9 — PROCURAS E QUALIFICAÇÃO
+
+Captar necessidades de compra/arrendamento e gerar correspondências justificadas com imóveis elegíveis.
+
+Critérios
+
+Entidade, operação, imóveis aceites, tipologia, localizações múltiplas, orçamento, tolerância, requisitos obrigatórios/preferenciais, motivação, urgência e responsável.
+
+-   Distinguir concelhos inteiros e freguesias específicas
+
+-   Filtros e histórico
+
+Correspondências F3-02
+
+Tolerância de 0% a 20% (0% por defeito); obrigatórios excluem; preferências ordenam e explicam.
+
+-   Exemplo de aceitação: 250 000 € + 20% = teto de 300 000 €
+
+-   Exclusão acima do teto
+
+-   Calcular apenas sobre registos visíveis ao utilizador
+
+CAPÍTULO 10 — VISITAS E INTERESSES
+
+Gestão de agenda comercial de visitas e seguimento de potenciais interessados.
+
+Visitas
+
+Imóvel, comprador, participantes, consultor, data, hora opcional, estado, observações e histórico.
+
+-   Vistas Lista/Cartões/Kanban quando aprovadas
+
+-   Reagendamento/cancelamento pelo serviço de origem
+
+-   Agenda apresenta a mesma visita, não uma cópia
+
+Interesses
+
+Entidade, Imóvel, origem, estado/grau de interesse, acompanhamentos, responsável, histórico e observações.
+
+-   Gerar Proposta a partir de Visita só mediante confirmação
+
+CAPÍTULO 11 — PROPOSTAS
+
+Gerir ofertas, contrapropostas e negociação com versões e participantes históricos.
+
+Campos
+
+Imóvel, comprador, titulares, papéis e percentagens confirmadas, valor, condições, datas previstas, estado e histórico.
+
+-   Ação expressa Gerar Proposta a partir da Visita
+
+-   Não guardar antes de confirmação
+
+-   Contrapropostas conservam negociação e histórico
+
+Transição
+
+Gerar Transação apenas de Proposta aceite, com seleção expressa de CMI e proteção contra duplicados.
+
+-   Validação de origem, participantes e direitos
+
+CAPÍTULO 12 — TRANSAÇÕES
+
+Concentrar dados confirmados do negócio, estados, marcos e fotografias históricas.
+
+Dados
+
+Imóvel, Proposta, CMI escolhido, participantes, papéis, quotas, valor acordado, operação e datas previstas/efetivas.
+
+-   Preservar fotografia de participantes mesmo após alteração dos registos atuais
+
+F3-06
+
+Estados de Venda e Arrendamento, CPCV, escritura e formalização; concluir, cancelar ou reabrir com efeitos sugeridos.
+
+-   Só executar efeitos expressamente confirmados sobre Imóvel/CMI
+
+-   Não aplicar cascatas indiscriminadas
+
+-   Auditoria e reversibilidade quando permitido
+
+CAPÍTULO 13 — COMISSÕES, REPARTIÇÕES E EXCEÇÕES
+
+F3-07: cálculo verificável segundo CMI e negócio, repartição configurável por transação e aprovação independente de exceções.
+
+Modalidades
+
+Venda: taxa percentual ou montante fixo. Arrendamento: número de rendas, valor fixo ou percentagem sobre base contratual explícita.
+
+-   Fotografia histórica da base, condições, IVA e versão do CMI
+
+-   Zero confirmado distinto de desconhecido
+
+Repartições
+
+Angariação/Venda; dentro das parcelas, Agências e Consultores, admitindo vários beneficiários e valores fixos/percentuais.
+
+-   Não fixar 50/50 ou 30% universalmente
+
+-   Reconciliar cêntimos com Decimal
+
+Exceções
+
+Pedido justificado, valor original/proposto/final, requerente, aprovador, decisão e momento.
+
+-   Sem autoaprovação
+
+-   Conflito de interesses bloqueia aprovação
+
+-   Correção gera nova versão histórica
+
+CAPÍTULO 14 — FATURAÇÃO, RECEBIMENTOS E ESTORNOS
+
+F3-08: registo interno de documentos externos e livro financeiro imutável; sem emissão de faturação fiscal.
+
+Documentos
+
+Vários documentos por versão exata de apuramento, com emissor, destinatário, tipo, série, número, data, base, IVA, total e referências.
+
+-   Controlo de duplicados e versões
+
+-   Retificações por documento externo próprio
+
+Recebimentos
+
+Parciais, adiantamentos, excessos, valores por afetar e afetações expressas.
+
+-   Base, IVA e total por componente
+
+-   Data efetiva e de registo separadas
+
+-   Saldo faturado por liquidar distinto do ainda não faturado
+
+Estornos
+
+Movimentos inversos ao original, motivo obrigatório, aprovação independente, concorrência e saldos comprometidos por pedidos pendentes.
+
+-   Pedidos parciais compatíveis podem coexistir
+
+-   Recusar excessos com erro funcional, sem falha interna
+
+-   Validar retificações retroativas por componente de IVA e cronologia
+
+Livro
+
+Imutável, auditável, reconciliável por documento, componente e data.
+
+-   Nunca reescrever ou eliminar o original
+
+CAPÍTULO 15 — PÓS-VENDA E DOCUMENTOS TRANSACIONAIS
+
+F3-09: tarefas manuais após marco efetivo e anexos desde a preparação; AT-11 assegura preservação histórica.
+
+Tarefas
+
+Venda: após escritura efetiva. Arrendamento: após formalização efetiva. Responsável, estado, prioridade, prazo, conclusão, notas e histórico.
+
+-   Reabertura/cancelamento da Transação não altera tarefas automaticamente
+
+Documentos
+
+Armazenamento privado, versões, categorias, permissão a cada descarga e auditoria.
+
+-   Ligações aos participantes históricos
+
+-   Revogação de acesso respeitada
+
+-   Políticas de retenção apenas após aprovação jurídica
+
+CAPÍTULO 16 — TAREFAS CENTRALIZADAS
+
+F4-01: tarefas gerais autónomas ou ligadas a uma das oito origens comerciais, mais Pós-Venda e Marketing.
+
+Identidade
+
+Um único identificador, revisão, estado e histórico; Tarefas, ficha de origem e Kanban partilham serviço.
+
+-   Tarefas autónomas sem ficha
+
+-   Pós-Venda obrigatoriamente ligada à Transação
+
+-   Modelos configuráveis por módulo
+
+Gestão
+
+Estado, prioridade, responsável, prazo, conclusão, observações, pesquisa, filtros, paginação, Lista/Cartões/Kanban.
+
+-   Atraso calculado, não estado persistente
+
+-   Permissões próprias para conclusão/reabertura
+
+CAPÍTULO 17 — AGENDA E ALERTAS
+
+F4-02: Dia, Semana, Mês e Lista; compromissos próprios e acontecimentos derivados, sem duplicações.
+
+Compromissos
+
+Início obrigatório, fim opcional, responsável, associação opcional e estados Agendado/Concluído/Cancelado.
+
+-   Histórico, cancelamento e reabertura expressos
+
+Derivados
+
+Visitas, Tarefas, expiração de CMI, CPCV, escritura, formalização e aniversários.
+
+-   A origem é a fonte de verdade
+
+-   Aniversários 29/02 em 28/02 nos anos comuns
+
+-   Permissão Agenda + origem
+
+Avisos locais
+
+Compromisso 1 dia; Visita 1 hora (se houver hora); tarefa no dia; escritura 7 dias; CMI por limiares próprios.
+
+-   Avisos internos distintos de Web Push/email
+
+CAPÍTULO 18 — PLANO DE MARKETING DE IMÓVEIS
+
+F4-03: catálogo original imutável de 45 ocorrências em oito semanas, com designações literais, repetições independentes, inclusão por checkbox e progresso.
+
+Emissão
+
+Ação «Criar plano inicial», Imóvel persistente, CMI assinado, prévia com 45 selecionadas e confirmação.
+
+-   Data-base: início original do CMI
+
+-   Offsets semanais +0,+7,+14,+21,+28,+35,+42,+49 dias
+
+-   Ajustes por tarefa e histórico
+
+-   Recálculo de pendentes após correção exige autorização e preserva concluídas
+
+Indicadores
+
+Contar só incluídas: zero incluídas = neutro; nenhuma concluída = vermelho; parcial = amarelo; todas concluídas = verde.
+
+-   Uma ocorrência partilhada por Marketing, Tarefas e Agenda
+
+-   Concluir/reabrir por permissão específica
+
+Anexo operacional: catálogo original das 45 ocorrências
+
+  -------------------------------------------------------------------------------------------------------------------
+  N.º                     Semana                  Designação original
+  ----------------------- ----------------------- -------------------------------------------------------------------
+  1                       1ª                      Análise Concorencia
+
+  2                       1ª                      Video de pré angariação
+
+  3                       1ª                      Análise swot
+
+  4                       1ª                      Reportagem fotográfica
+
+  5                       1ª                      Reportagem videográfiva
+
+  6                       1ª                      Elaborar da descrição imóvel
+
+  7                       1ª                      Home staging
+
+  8                       1ª                      Plano de marketing
+
+  9                       2ª                      Publicar no site da marca
+
+  10                      2ª                      Buyer/Seller match
+
+  11                      2ª                      Partilha na rede
+
+  12                      2ª                      Publicar nas redes sociais ( Facebook, Insta, Whatsapp, Youtube)
+
+  13                      2ª                      Distribuição de cartas na envolvente
+
+  14                      3ª                      Colocação de placa no imóvel
+
+  15                      3ª                      Partilha com outras agências
+
+  16                      3ª                      Colocação anuncio na montra da loja
+
+  17                      3ª                      Publicar nas redes sociais - anuncio patrocinados
+
+  18                      4ª                      Republicar no site da marca com troca de fotos
+
+  19                      4ª                      Republicar nas redes sociais (Facebook, Insta, Whatsapp, Youtube)
+
+  20                      4ª                      Distribuição de Flyers
+
+  21                      5ª                      Elaboração da ACM
+
+  22                      5ª                      Agendar reunião presencial com o proprietário
+
+  23                      5ª                      Apresentar relatório de atividade ao proprietário
+
+  24                      5ª                      Apresentaçao ACM e discução do asking price
+
+  25                      5ª                      Republicar no site da marca com troca de fotos
+
+  26                      5ª                      Republicar nas redes sociais (Facebook, Insta, Whatsapp, Youtube)
+
+  27                      5ª                      Partilha rede
+
+  28                      5ª                      Partilha com outras agências
+
+  29                      5ª                      Buyer/Seller match
+
+  30                      6ª                      Republicar no site da marca com troca de fotos
+
+  31                      6ª                      Publicar nas redes sociais - anuncio patrocinados
+
+  32                      6ª                      Partilha rede
+
+  33                      6ª                      Partilha com outras agências
+
+  34                      6ª                      Buyer/Seller match
+
+  35                      7ª                      Republicar no site da marca com troca de fotos
+
+  36                      7ª                      Republicar nas redes sociais (Facebook, Insta, Whatsapp, Youtube)
+
+  37                      7ª                      Partilha rede
+
+  38                      7ª                      Partilha com outras agências
+
+  39                      7ª                      Buyer/Seller match
+
+  40                      8ª                      Agendar reunião presencial com o proprietário
+
+  41                      8ª                      Apresentar relatório de atividade ao proprietário
+
+  42                      8ª                      Apresentaçao ACM e discução do asking price
+
+  43                      8ª                      Republicar no site da marca com troca de fotos
+
+  44                      8ª                      Publicar nas redes sociais - anuncio patrocinados
+
+  45                      8ª                      Buyer/Seller match
+  -------------------------------------------------------------------------------------------------------------------
+
+As designações originais, incluindo grafias históricas, foram intencionalmente mantidas. Não corrigir nem fundir ocorrências repetidas sem decisão independente.
+
+CAPÍTULO 19 — RENOVAÇÕES E NOVOS CICLOS DE MARKETING
+
+F4-04: uma renovação válida pode originar novo ciclo após proposta e confirmação expressa.
+
+Escolhas
+
+Origem do novo ciclo: catálogo-padrão atualizado ou seleção do ciclo anterior. Destino das pendentes: manter ativas ou encerrar como «Não executada — Plano substituído».
+
+-   Identidade e datas próprias para cada ciclo
+
+-   Preservar datas, concluídas, responsáveis e histórico anterior
+
+-   Evitar duplicações e pedidos simultâneos
+
+CAPÍTULO 20 — MARKETING DE ENTIDADES
+
+F4-05: motor configurável sem modelos ou campanhas instalados por defeito.
+
+Administração
+
+Planos, objetivos, públicos, segmentos, tarefas, prazos relativos, responsáveis, estados, gatilhos e periodicidade quando prevista.
+
+-   Planos associados a Entidades e tarefas centrais
+
+-   Gatilhos de criação, contacto, qualificação, visita ou negócio, apenas quando configurados
+
+-   Preferências, fundamento e oposição respeitados
+
+Execução
+
+Tarefas de contacto comercial sujeitas à finalidade autorizada; Entidades, Tarefas e Agenda apresentam a mesma ocorrência.
+
+-   Não presumir consentimentos
+
+-   Sem conteúdos predefinidos não aprovados
+
+CAPÍTULO 21 — DASHBOARD E ESTATÍSTICAS CONFIGURÁVEIS — F4-06
+
+Funcionalidade planeada: painel com contadores, widgets, layout e filtros configuráveis por utilizador autorizado.
+
+Widgets
+
+O meu dia, Tarefas, Agenda, CMI a expirar, Visitas futuras, Leads por contactar, Resumo Financeiro, Marketing e Alertas.
+
+-   Ativar/desativar individualmente
+
+-   Reordenar e guardar layout
+
+-   Contadores clicáveis com filtros e acesso protegido
+
+Métricas
+
+Volume Total de vendas por escritura efetiva; número de transações elegíveis; Ticket Médio = Volume/N.º; Volume Este Mês.
+
+-   Comissão Média inclui 0 confirmado e exclui desconhecidos
+
+-   Mostrar denominador e estado sem dados
+
+-   Recebimentos pelas datas efetivas do dinheiro; estornos por movimentos próprios
+
+-   Indicadores de comissão sem IVA
+
+Validação
+
+Reutilizar serviços F3-07/08 e Transações, não duplicar métricas.
+
+-   AT-06; filtros por período, equipa e responsável; sem fuga de contagens
+
+CAPÍTULO 22 — BREVO, REMETENTES E LIMITES — F4-07
+
+Funcionalidade planeada: emails através do Brevo com remetente central, remetentes individuais autorizados e limites internos.
+
+Remetentes
+
+Verificar domínio profissional, SPF/DKIM/DMARC e configurações efetivas; não presumir integração já ativa.
+
+-   Credenciais fora do código
+
+-   Administração de remetentes permitidos
+
+Destinatários
+
+Pré-visualizar quantidade, fundamento, preferências, consentimentos e oposições.
+
+-   Distinguir preparado/submetido/aceite/entregue quando confirmado
+
+-   Registar falhas e tentativas
+
+Limites
+
+Quotas diárias/mensais por consultor e organização; excedentes internos exigem aprovação qualificada.
+
+-   Nunca exceder limites reais do fornecedor
+
+-   Proteção de campanhas contra envios repetidos
+
+-   Testar com simuladores, sem enviar mensagens reais
+
+CAPÍTULO 23 — WHATSAPP, RELATÓRIOS E EXPORTAÇÕES — F4-08
+
+Funcionalidade planeada: abertura direta de WhatsApp e exportações controladas de relatórios e documentos.
+
+WhatsApp
+
+Ligação wa.me; abrir conversa não confirma envio. Não integrar API oficial sem nova decisão.
+
+-   Ações junto a telefones autorizados
+
+Relatórios
+
+Modelos, seleção de módulos, filtros, campos, métricas, colunas, período, ordem e destinatários autorizados.
+
+-   Exportar PDF e Excel/CSV conforme aprovado
+
+-   Dossiês e modelos documentais quando previstos
+
+-   Registar acesso/exportação; proteção dos ficheiros temporários
+
+Segurança
+
+Revalidar permissões à geração e ao descarregamento; impedir inclusão de registos proibidos.
+
+-   AT-14
+
+CAPÍTULO 24 — NOTIFICAÇÕES E CONFIGURAÇÃO OPERACIONAL — F4-09
+
+Funcionalidade planeada: preferências de notificação e automações de servidor, sem presumir emissão quando só foi preparado.
+
+Notificações
+
+Novas leads, tarefas atrasadas, aniversários, CMI a expirar, visitas, compromissos e alertas configurados.
+
+-   Distinguir aviso interno, notificação de navegador/telemóvel, Web Push e email
+
+-   Permissões, consentimento técnico e conectividade quando exigidos
+
+-   Registar tentativa, emissão e entrega conforme prova disponível
+
+Motor de automações
+
+Configurar em administração nome, gatilho, condições, ação, responsável, prazo e ON/OFF.
+
+-   Ações iniciais: criar tarefa, gerar aviso, atualizar campo autorizado e agendar notificação
+
+-   Registar execuções/falhas e impedir duplicações
+
+-   Nenhuma automação contorna permissões ou estados
+
+CAPÍTULO 25 — CONFIGURAÇÕES, GLOSSÁRIO E LIXEIRA
+
+Motor no-code para módulos, menus, campos, relações, secções, filtros, vistas e tipos de tarefas, preservando identificadores estáveis.
+
+Configurações
+
+Texto, telefone, email/URL, inteiro/decimal, moeda, data, seletor, multiseleção, booleano, relação e cálculo.
+
+-   Alterações estruturais com prévia e auditoria
+
+-   Inventário histórico de campos disponível para ativação sem duplicação
+
+Glossário
+
+Termo, Descrição, pesquisa, ordenação inicial por Termo e campos adicionais configuráveis.
+
+-   Permissões de consulta e alteração
+
+Lixeira
+
+Inativação reversível. Eliminação definitiva apenas com direitos qualificados, impacto, dependências, retenção e confirmação inequívoca.
+
+-   Proibir cascatas destrutivas silenciosas
+
+CAPÍTULO 26 — EQUIPA, AGENTES E AGÊNCIAS
+
+Gestão de perfis profissionais, relações comerciais e contas de acesso distintas.
+
+Equipa
+
+Nome, identificação profissional, NIF, contactos, função, perfil e histórico.
+
+-   Não confundir Agente com utilizador de login
+
+Agentes
+
+NIF, contactos, Tipo de Agente, Agência pesquisável e histórico.
+
+-   Filtros Tipo de Agente/Tipo de Agência
+
+-   Ordenação inicial por nome
+
+Agências
+
+Nome, tipo, NIF/NIPC, licença AMI, responsável, contactos, morada e histórico.
+
+-   Rua, número de polícia, complemento, código postal, localidade, Distrito, Concelho e Freguesia
+
+-   Ordenação inicial por nome
+
+CAPÍTULO 27 — LOCALIZAÇÃO, TELEFONES E NORMALIZAÇÃO
+
+Reutilizar a FT-01 e FT-02: catálogo CAOP2025, telefones internacionais e formulários de morada simplificados.
+
+Localização
+
+Distrito/Região Autónoma → Concelho → Freguesia; códigos preservados; seletores pesquisáveis dependentes.
+
+-   Distinguir localidade, morada, zona comercial e naturalidade
+
+Telefones
+
+Indicativo internacional pesquisável + número; validação e normalização E.164 quando aplicável.
+
+-   Portugal +351 por defeito em contactos novos
+
+-   Não exigir extensão na UI, preservar histórico
+
+-   Ícones tel:/WhatsApp/mailto: conforme permissão
+
+CAPÍTULO 28 — IMPORTAÇÃO SELETIVA E MIGRAÇÃO — F5-01
+
+Concluir o motor já parcialmente desenvolvido (F2-07) com importação Excel/CSV, Outlook exportado e fontes reais autorizadas.
+
+Processo
+
+Ficheiro → leitura protegida → seleção de categorias/folhas → mapeamento → conversão → validação → prévia → identificação de duplicados → confirmação → execução → relatório.
+
+-   Seleção de períodos, registos atuais e históricos
+
+-   Preservar relações entre módulos
+
+-   Sem fusão automática nem consentimentos presumidos
+
+-   Lotes auditáveis, canceláveis antes da confirmação
+
+Escala
+
+Ensaiar mais de 2 000 registos fictícios/anonimizados; não impor esse número como limite máximo.
+
+-   AT-12
+
+-   Migração real só após autorização
+
+CAPÍTULO 29 — SEGURANÇA GLOBAL E TESTES DE CARGA — F5-02
+
+Cobrir 16 cenários AT, acessos negativos, API, PDFs, anexos, pesquisa, concorrência, migrabilidade e capacidade.
+
+Matriz
+
+Documentar cenário, dados, perfil, resultado esperado/obtido, severidade e evidência.
+
+-   Zero falhas críticas para aprovação
+
+-   Testes de carga com conjuntos representativos
+
+-   Medição de latência, consultas, CPU, RAM, paginação e armazenamento
+
+-   Não considerar segurança provada apenas pelo frontend
+
+CAPÍTULO 30 — INFRAESTRUTURA AMEN VPS — F5-03
+
+Avaliar VPS Ubuntu 24.04 LTS, referência 2 vCPU/2 GB RAM/75 GB, antes de decidir a configuração final.
+
+Preparação
+
+SSH endurecido, firewall, HTTPS, sessões, logs, monitorização, segregação DEV/TEST/produção e segredos protegidos.
+
+-   Medir RAM/CPU e decidir se são necessários 4 GB ou mais
+
+-   Não contratar upgrade sem aprovação
+
+-   AT-15
+
+CAPÍTULO 31 — BACKUPS E RECUPERAÇÃO — F5-04
+
+Cópias diárias cifradas de PostgreSQL, anexos e configurações, com destino independente e restauro testado.
+
+Proteção
+
+Versões, retenção aprovada, alerta de falhas, acesso restrito e separação das chaves.
+
+-   OneDrive destino externo inicial sujeito a validação
+
+-   Sincronização isolada não substitui backup
+
+-   Evitar duas cópias apenas na mesma unidade física
+
+Recuperação
+
+Restauro em ambiente isolado comprovando schema, dados, migrações, anexos, permissões e configurações.
+
+-   AT-16
+
+-   Documentar procedimento, data e evidências
+
+CAPÍTULO 32 — RGPD, RETENÇÃO E FORNECEDORES — F5-05
+
+Validar legalmente categorias, bases de tratamento, prazos e fornecedores antes de ativar eliminação ou marketing.
+
+Retenção
+
+Regras por contactos, marketing, contratos, imóveis, transações, documentos, financeiro e auditoria.
+
+-   Não inventar prazos legais
+
+-   Impacto e dependências antes de eliminar/anonimizar
+
+Direitos e terceiros
+
+Preparar consulta, retificação, exportação, oposição, anonimização e eliminação controlada; rever alojamento, email, backups e notificações.
+
+-   Conformidade depende de procedimentos organizacionais e validação jurídica
+
+-   AT-13
+
+CAPÍTULO 33 — PILOTO, ACEITAÇÃO E LANÇAMENTO — F5-06
+
+Após desenvolvimento e validação técnica, executar a campanha funcional global pelo proprietário.
+
+Percurso integral
+
+Entidade → Imóvel → CMI → Marketing → Procura → Correspondências → Visita → Proposta → Transação → Comissão → Fatura externa → Recebimento → Pós-Venda.
+
+-   Avaliar também Dashboard, Tarefas, Agenda, Notificações, Relatórios e Configurações
+
+-   Testar no PC e telemóvel real
+
+Aceitação
+
+Registar aprovado/reprovado/pendente, evidências, severidade, responsável e correções.
+
+-   Dados reais e publicação só com autorização formal
+
+-   Falhas críticas resolvidas; riscos residuais expressamente aceites
+
+CAPÍTULO 34 — MATRIZ DE ACEITAÇÃO AT-01 A AT-16
+
+Critérios mínimos obrigatórios de aceitação previstos na Especificação V1.4; não substituem os testes detalhados.
+
+  -------------------------------------------------------------------------------------------------------------------
+  Código                  Tema                       Critério mínimo
+  ----------------------- -------------------------- ----------------------------------------------------------------
+  AT-01                   Sessões, perfis e APIs     Sem login/permissão não acede por URL, API, pesquisa ou anexos
+
+  AT-02                   Partilha e transferência   Assistente limitado e transferência qualificada/auditada
+
+  AT-03                   Registos e vistas          Consulta→Editar, guardas e Lista/Cartões/Kanban seguros
+
+  AT-04                   CMI e renovação            Original preservado, ciclos e tarefas pendentes à escolha
+
+  AT-05                   Marketing 45               45 ocorrências, oito semanas, repetição e contadores
+
+  AT-06                   Dashboard/finanças         Widgets, escritura, zeros confirmados, comissões sem IVA
+
+  AT-07                   Pagamentos/estornos        Parciais, IVA, datas e movimentos preservados
+
+  AT-08                   Proposta de Visita         Prévia, confirmação e sem duplicados
+
+  AT-09                   Transações/estados         Geração expressa, efeitos sugeridos confirmáveis
+
+  AT-10                   Matching                   Obrigatórios/preferenciais e teto de 20%
+
+  AT-11                   Participantes históricos   Titularidade posterior não altera negócio confirmado
+
+  AT-12                   Importação                 >2 000 registos de ensaio, mapa, duplicados e relações
+
+  AT-13                   No-code/Glossário          Campos históricos, dependências e retenção
+
+  AT-14                   Brevo/WhatsApp             Remetentes, limites, consentimentos, abertura ≠ envio
+
+  AT-15                   VPS/segurança              HTTPS, segregação, auditoria e desempenho
+
+  AT-16                   Backups/aceitação          Restauro externo cifrado e autorização formal
+  -------------------------------------------------------------------------------------------------------------------
+
+CAPÍTULO 35 — ESTADO COMUNICADO DO PROJETO
+
+Estes estados são provenientes de relatórios do Codex, não de verificação autónoma deste documento. A continuidade real deve ser confirmada no repositório.
+
+Concluídos tecnicamente
+
+F3-02 a F3-09; F4-01 a F4-05; FT-01 e FT-02 (Grupos 1–5) constam como integrados e validados. A F2-07 teve desenvolvimento parcial.
+
+-   Confirmar restantes F0/F1/F2 e F3-01 por relatórios e código
+
+-   Aceitação funcional manual reservada para o fim
+
+Previstos / por comprovar
+
+F4-06, F4-07, F4-08, F4-09 e F5-01 a F5-06.
+
+-   F4-06/F4-07 autorizadas mas conclusão ainda não comunicada
+
+-   Não inferir resultado de autorizações
+
+DEV
+
+Após desaparecimento da DEV original, nova DEV local PostgreSQL 18.6 na porta 15432 validada; TEST isolado.
+
+-   Dados e anexos da DEV antiga não recuperados
+
+-   Cópia externa independente ainda necessária
+
+CAPÍTULO 36 — QUALIDADE TÉCNICA E REVISÃO
+
+A cada fase executar testes técnicos, regressões proporcionais ao risco, revisão independente quando viável e documentação.
+
+Procedimentos
+
+Inspecionar AGENTS.md, ramo, esquema e dependências; alterar apenas âmbito aprovado.
+
+-   Criar regressão para cada falha
+
+-   Validar servidor, PostgreSQL, interface, API, navegador, segurança e concorrência
+
+-   Retenção de históricos e proteção contra perda de rascunhos
+
+Desempenho
+
+Medir bundle, consultas, memória, latência, filtros, paginação e lazy loading.
+
+-   Não sacrificar segurança por velocidade
+
+CAPÍTULO 37 — GESTÃO EFICIENTE DAS QUOTAS
+
+Agrupar fases relacionadas quando seguro, mas preservar aceitação técnica por fase; não gastar quota em análises ou revisões redundantes.
+
+Método
+
+Reutilizar código, testes já válidos e decisões documentadas; relatórios curtos com detalhes guardados no projeto.
+
+-   Avaliação funcional do proprietário apenas no final
+
+-   Não adiar correções críticas
+
+-   Não dispensar testes financeiros, de autorização ou integridade
+
+CAPÍTULO 38 — RESTRIÇÕES E LIMITES
+
+Sem autorização expressa não executar ações que alterem produção, credenciais, Git protegido ou dados reais.
+
+Proibições
+
+Sem commits/push, publicações, instalações novas, operações destrutivas, migrações sobre base desconhecida, envios reais, importações reais ou alteração de TEST.
+
+-   Não inventar fiscalidade, prazos legais, percentagens ou aprovação
+
+-   Não divulgar segredos em relatórios ou logs
+
+-   Não declarar aceite funcionalmente algo só validado tecnicamente
+
+CAPÍTULO 39 — ENTREGÁVEIS FINAIS
+
+A entrega do CRM completo inclui código, banco de dados, documentação e evidência técnica suficiente para reproduzir e operar a instalação.
+
+Materiais
+
+Frontend, backend, migrações, autenticação, permissões, todos os módulos, motor no-code, integrações aprovadas, testes e documentação.
+
+-   Instalação e operação
+
+-   Backups e restauro
+
+-   Matriz AT-01 a AT-16
+
+-   Relatório de segurança/desempenho
+
+-   Migração e reversão
+
+-   Aceitação e aprovação formal
+
+CAPÍTULO 40 — INSTRUÇÃO EXECUTIVA FINAL
+
+Desenvolver o CRM Valor Máximo como produto profissional português, com fonte de verdade única por registo, permissões reais, histórico íntegro e navegação intuitiva.
+
+Princípio de atuação
+
+Na continuação, inspecionar antes de alterar; nunca reconstruir trabalho existente. Em desenvolvimento de raiz, isolar a nova implementação e respeitar fontes normativas.
+
+-   Não transformar exemplos em regras universais
+
+-   Documentar decisões e evidências
+
+-   Trabalhar incrementalmente com testes técnicos em cada fase
+
+-   Apenas publicar ou importar dados reais após autorização formal
+
+ANEXO I — ESPECIFICAÇÃO CONSOLIDADA V1.4 (TRANSCRIÇÃO INTEGRAL)
+
+Texto normativo original incluído como referência. A formatação foi normalizada para integração neste documento; para paginação e apresentação originais, consultar o ficheiro-fonte.
+
+VALOR MÁXIMO
+
+SOLUÇÕES IMOBILIÁRIAS
+
+ESPECIFICAÇÃO-MESTRA
+
+CRM imobiliário configurável
+
+Requisitos funcionais e técnicos · Versão documental 1.4
+
+Especificação consolidada: motor de configuração, dashboard, 45 tarefas de marketing, decisões complementares e critérios de entrada em produção.
+
+Decisões D-01 a D-10, Q01 a Q16 e V01 a V04 confirmadas, com validações técnicas e legais explicitadas.
+
+Base de referência: protótipo CRM Valor Máximo V30.25
+
+Objetivo: evolução para uma aplicação profissional com autonomia de configuração.
+
+1. Finalidade e critérios do documento
+
+Este documento consolida os requisitos para a futura aplicação profissional CRM Valor Máximo e atualiza a Especificação V1.3 sem apagar requisitos anteriormente aprovados. É a base para preparação da implementação com Codex, revisão funcional e testes. Não substitui a validação dos detalhes técnicos de cada módulo nem a verificação jurídica e operacional de obrigações legais.
+
+Decisão estruturante Reconstruir a base técnica da aplicação, preservando a V30.25 como referência funcional e visual. Não eliminar o protótipo nem iniciar uma migração irreversível sem aprovação.
+
+1.1 Origem e estatuto dos requisitos
+
+CONFIRMADO: requisitos expressamente definidos pelo promotor, incluindo dashboard, plano de marketing de Imóveis, campos e permissões.
+
+PROPOSTO: sugestões técnicas e de desenho funcional recomendadas para avaliação, não são decisões fechadas.
+
+PENDENTE: opções de negócio ou detalhes que necessitam de confirmação antes da implementação.
+
+1.2 Objetivos do produto
+
+Aplicação profissional para operações imobiliárias e respetiva informação relacionada.
+
+Configuração por administração sem necessidade de alterar código na operação quotidiana.
+
+Interface rápida, consistente e responsiva, preservando a identidade visual Valor Máximo.
+
+Estrutura segura e preparada para crescimento, concorrência, auditoria e cópias de segurança.
+
+Evolução modular, testes automáticos e controlo de versões em Git/GitHub.
+
+2. Plataforma, interface e identidade
+
+2.1 Compatibilidade e instalação
+
+  --------------------------------------------------------------------------------------------------------------------------------------------------------
+  Código                  Requisito                                           Critério de aceitação
+  ----------------------- --------------------------------------------------- ----------------------------------------------------------------------------
+  PL-01                   Aplicação web responsiva: PC, tablet e telemóvel.   Ecrãs e formulários adaptam-se sem perda de operações essenciais.
+
+  PL-02                   Compatível com Windows, Android e Apple.            Acesso através de navegadores suportados; testes nos principais sistemas.
+
+  PL-03                   Instalável no telemóvel como PWA.                   Ícone no ecrã inicial e abertura como aplicação, quando suportado.
+
+  PL-04                   Fonte Inter e identidade visual consistente.        Inter em toda a interface; degradé/estilos configuráveis quando previstos.
+
+  PL-05                   Cores de fundo, paleta e logótipo configuráveis.    Administrador pode alterar marca e guardar a configuração.
+  --------------------------------------------------------------------------------------------------------------------------------------------------------
+
+2.2 Regras de interação
+
+A ficha abre em modo de consulta; editar apenas mediante botão Editar, seguindo-se Guardar ou Cancelar.
+
+Alertar antes de fechar janelas ou mudar de contexto se existirem alterações por guardar.
+
+Garantir botões de consulta/edição e navegação direta para registos relacionados, quando permitidos.
+
+Manter nomenclatura, alinhamentos, filtros, campos e ações consistentes entre módulos.
+
+Manter nomenclatura e alinhamento entre a consulta e a edição dos módulos.
+
+Respeitar acessibilidade: contraste, foco por teclado, rótulos, áreas de toque e uso móvel.\
+
+3. Motor de configuração sem programação
+
+O sistema terá um motor de configuração que permita gerir a estrutura administrativa sem alterações permanentes ao código. As configurações devem respeitar integridade dos dados, permissões, dependências e histórico.
+
+3.1 Gestão de módulos e menus
+
+Criar novos módulos de registos e desativar os existentes; remoção definitiva apenas sujeita a regras de conservação e dependências.
+
+Renomear módulo, alterar ícone e cor, escolher visibilidade e ordenar o menu lateral (setas ou arrastar).
+
+Definir pesquisas, filtros, listas, estados e vistas por módulo.
+
+Preservar identificadores internos estáveis, mesmo que os nomes apresentados sejam alterados.
+
+3.2 Campos configuráveis
+
+  -------------------------------------------------------------------------------------------------
+  Família                             Tipos de campo previstos
+  ----------------------------------- -------------------------------------------------------------
+  Texto                               Texto, Texto Longo, Texto Livre
+
+  Telefone                            Formato aplicado ao indicativo de cada país
+
+  Url                                 Email, links de sites
+
+  Numérico                            Inteiro, decimal
+
+  Moeda                               Símbolo €
+
+  Data                                Data
+
+  Escolha                             Select, Lista Suspensa, Multi Select, Select ou Texto Livre
+
+  Lógico                              Boolean (Sim/Não)
+
+  Relações                            Relação entre módulos
+
+  Cálculo                             Calculado
+  -------------------------------------------------------------------------------------------------
+
+Adicionar, renomear, reordenar e desativar campos; definir se são obrigatórios.
+
+Configurar colunas da listagem, ordem, visibilidade, filtros e pesquisas.
+
+Configurar secções e organização de formulários, com validações por tipo de campo.
+
+Alterações estruturais com pré-visualização de impacto, histórico e salvaguarda dos dados existentes.
+
+3.3 Regras transversais
+
+Criar relações entre módulos, incluindo ligações simples e múltiplas.
+
+Campos calculados e automações devem usar referências estáveis e regras com validação.
+
+Definir permissões para configuração e publicação de alterações estruturais.
+
+Eliminação definitiva de módulos/campos (D-05): permitir apenas a administradores expressamente autorizados, após análise de dependências, prazos legais de conservação, pré-visualização do impacto e confirmação inequívoca. Proibir eliminações silenciosas em cascata e registar a operação em auditoria.
+
+4. Segurança, RGPD e modelo de dados
+
+4.1 Utilizadores e controlo de acesso
+
+Autenticação real: contas individuais, recuperação segura, proteção de sessões e, quando adequado, MFA.
+
+Perfis iniciais aprovados (D-06/Q06): Administrador, Responsável de Equipa, Consultor e Assistente. Permissões configuráveis por perfil/utilizador, módulo, operação e âmbito do registo: consultar, criar, editar, eliminar, exportar, partilhar, transferir e administrar. Por defeito, o Assistente apenas acede aos registos atribuídos ou partilhados. Só o Administrador e o Responsável de Equipa podem autorizar partilhas e transferências de titularidade entre consultores, dentro do respetivo âmbito e permissões, sempre com histórico e validação no servidor.
+
+Verificação no servidor de todas as operações e anexos; não confiar só em ocultação na interface.
+
+Registos de auditoria: utilizador, data, operação e alterações relevantes.
+
+4.2 Escalabilidade e robustez
+
+Base de dados relacional robusta, preparada para centenas de milhares de registos e utilização concorrente.
+
+Integridade referencial, identificadores únicos, transações, índices, pesquisas paginadas e testes de carga.
+
+Prevenção de conflitos de edição; backups automáticos, externos à VPS, e testes periódicos de recuperação.
+
+Armazenamento protegido de documentos e ficheiros; separação entre desenvolvimento, testes e produção.
+
+4.3 RGPD
+
+Registo de finalidades e fundamentos de tratamento, minimização, prazos de conservação e controlo de exportações.
+
+Gestão de preferências de contacto e oposição a marketing; consentimentos quando aplicáveis.
+
+Mecanismos para pesquisa, exportação, retificação, anonimização e eliminação controlada de dados de titulares.
+
+Contratos, acessos e localização de tratamento de fornecedores externos (alojamento, email, SMS, notificações).
+
+Limite a respeitar Uma aplicação segura não garante, por si só, conformidade RGPD: são também necessários procedimentos organizacionais e validação jurídica.
+
+5. Dashboard inteiramente configurável
+
+O dashboard deve permitir que cada utilizador autorizado componha o seu espaço de trabalho, dentro das regras definidas pelo administrador.
+
+5.1 Contadores e grelha
+
+Lista de módulos elegíveis com seleção individual para incluir ou remover o contador da grelha.
+
+Contadores clicáveis com navegação direta para o módulo e, quando aplicável, filtro correspondente.
+
+Visibilidade dos valores limitada aos registos que o utilizador pode consultar.
+
+Permitir reorganização e reposição de layout; configurações individuais ou partilhadas conforme permissões.
+
+5.2 Widgets
+
+Cada widget tem controlo ON/OFF individual, disponível apenas a quem o pode configurar.
+
+Arrastar para reordenar e guardar a posição; acesso alternativo por teclado ou botões de ordenação.
+
+Widgets sugeridos: O meu dia, Tarefas, Agenda, Angariações a expirar, Próximas visitas, Leads por contactar, Resumo Financeiro, Plano de Marketing e Alertas.
+
+5.3 Resumo Financeiro: escolha exata de métricas
+
+  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Métrica                             Significado / critério a definir
+  ----------------------------------- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Volume Total                        Soma dos valores das transações com escritura concluída no período selecionado.
+
+  Comissões                           Soma das comissões efetivamente recebidas no período (cada recebimento na respetiva data; pagamentos parciais incluídos). Separar de comissões previstas e faturadas.
+
+  N.º Transações                      Quantidade de transações com escritura concluída no período selecionado.
+
+  Ticket Médio                        Volume Total ÷ N.º de Transações concluídas no mesmo período (sem dividir por zero).
+
+  Comissão Média                      Média aritmética das comissões sem IVA já apuradas em transações com escritura concluída no período. Denominador: número de transações com comissão apurada, incluindo as de comissão confirmada igual a zero; excluir transações com comissão por apurar.
+
+  Volume Este Mês                     Volume de vendas com escritura realizada no mês corrente.
+  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+D-03 / Q03 / Q04 / Q05 APROVADAS — Indicadores comerciais pela data da escritura; comissões recebidas por data de cada pagamento efetivo, incluindo parciais. A Comissão Média é calculada sobre transações concluídas com comissão apurada, incluindo zeros confirmados e excluindo valores desconhecidos. Estornos e devoluções são movimentos novos, ligados aos originais e sem apagar histórico. No Dashboard, os indicadores de comissões são sempre sem IVA; o módulo financeiro mantém bases, IVA e totais detalhados.
+
+6. Plano de Marketing de Imóveis — requisito confirmado
+
+6.1 Estrutura e catálogo
+
+Catálogo configurável de 45 tarefas de marketing imobiliário, distribuídas da 1.ª à 8.ª semana. As designações originais, incluindo tarefas repetidas intencionalmente em semanas distintas, estão integralmente transcritas no ANEXO A e não devem ser corrigidas ou fundidas automaticamente.
+
+Cada tarefa inclui: designação, semana, ordem, responsável, checkbox Incluir (Sim/Não), Data a Fazer, Data Concluído, estado e observações.
+
+Permitir utilização de um plano-modelo, com personalização para cada imóvel/angariação, sem alterar a estrutura padrão.
+
+O plano associa-se ao imóvel e à angariação. O ciclo inicial utiliza a data de início do CMI assinado; em caso de renovação validamente formalizada ou registada, um novo ciclo pode utilizar a data de início da renovação, sem alterar a data nem o histórico do contrato original.
+
+6.2 Datas automáticas
+
+A Data a Fazer será proposta automaticamente com base na Data CMI e no offset da respetiva semana:
+
+  -------------------------------------------------------------------------
+  Semana                  Offset base             Cálculo da Data a Fazer
+  ----------------------- ----------------------- -------------------------
+  1.ª                     +0 dias                 Data CMI + 0 dias
+
+  2.ª                     +7 dias                 Data CMI + 7 dias
+
+  3.ª                     +14 dias                Data CMI + 14 dias
+
+  4.ª                     +21 dias                Data CMI + 21 dias
+
+  5.ª                     +28 dias                Data CMI + 28 dias
+
+  6.ª                     +35 dias                Data CMI + 35 dias
+
+  7.ª                     +42 dias                Data CMI + 42 dias
+
+  8.ª                     +49 dias                Data CMI + 49 dias
+  -------------------------------------------------------------------------
+
+D-02 APROVADA As tarefas de uma mesma semana podem ter offsets individuais configuráveis; por defeito, seguem o offset base semanal. A data inicial do CMI assinado é um dado contratual, não deve ser alterado como operação normal. Eventuais correções excecionais do registo só por utilizador autorizado, com justificação, evidência e histórico; nesses casos, pedir confirmação para recalcular datas de tarefas pendentes, preservando tarefas concluídas.
+
+6.3 Contadores de progresso por semana
+
+Contador visível por semana, por exemplo «3/8», com leitura imediata do estado das tarefas selecionadas para execução.
+
+  -------------------------------------------------------------------------------------------------------
+  Estado                  Regra proposta para a apresentação                      Cor
+  ----------------------- ------------------------------------------------------- -----------------------
+  Nenhuma concluída       Concluídas = 0                                          Vermelho
+
+  Parcial                 0 < concluídas < tarefas incluídas                      Amarelo
+
+  Completo                Concluídas = tarefas incluídas e há tarefas incluídas   Verde
+  -------------------------------------------------------------------------------------------------------
+
+Os exemplos 0/8, 5/8 e 8/8 traduzem respetivamente os estados vermelho, amarelo e verde.
+
+Tarefas marcadas como Não incluir não entram no denominador; semana sem tarefas incluídas deve ter estado neutro, não completo.
+
+Mostrar histórico de alterações e data de conclusão; impedir data de conclusão sem indicação clara de tarefa concluída.
+
+6.4 Critérios de aceitação
+
+Com CMI definida, as oito semanas recebem automaticamente os offsets indicados.
+
+Desmarcar uma tarefa não apaga histórico, mas exclui-a do plano executável e do progresso.
+
+Concluir uma tarefa atualiza o contador e a cor da semana e cria data de conclusão editável com rastreabilidade.
+
+As tarefas do plano podem originar tarefas operacionais e alertas, sem duplicações.
+
+6.5 Contrato inicial, correção excecional e renovação
+
+Ativação do plano inicial: só depois de existir CMI assinado pelas partes e de estar validado o início de vigência. O contrato, o número de contrato e a data original permanecem preservados.
+
+Correção de erro material: não é uma alteração contratual normal. Se for necessário corrigir um dado incorretamente registado, exigir autorização, motivo, evidência e registo de auditoria; perguntar se se recalculam tarefas pendentes e não alterar tarefas concluídas.
+
+Renovação: guardar um evento de renovação distinto com data de início própria. Se houver renovação válida (automática quando contratualmente prevista ou formalizada por documento, consoante o caso), mostrar: «O CMI foi renovado. Pretendes emitir um novo Plano de Marketing a partir da data de início da renovação?»
+
+Se a resposta for «Sim», criar um novo ciclo de tarefas ligado ao mesmo CMI/angariação, com data-base = data de início da renovação e as oito semanas +0 a +49 dias. O ciclo anterior mantém os seus dados, conclusões, responsáveis e histórico; tarefas de ciclos diferentes não se confundem.
+
+Se a resposta for «Não», manter o plano e histórico existentes, sem criação automática de tarefas. O utilizador poderá iniciar um novo ciclo mais tarde, respeitando permissões e evitando emissões duplicadas.
+
+Q01 / Q02 APROVADAS — Ao criar novo ciclo por renovação, perguntar se o utilizador deseja partir do catálogo-padrão atualizado de 45 tarefas ou copiar a seleção de tarefas do ciclo anterior. Perguntar separadamente se pretende manter ativas as tarefas pendentes do ciclo anterior ou encerrá-las como «Não executada — Plano substituído». Todas as escolhas, ciclos, datas e conclusões anteriores ficam preservados no histórico.
+
+7. Plano de Marketing de Entidades — motor configurável aprovado
+
+D-04 APROVADA — Implementar apenas o motor de configuração sem código. Os planos, tarefas e segmentos serão definidos pelo utilizador em Configurações → Marketing de Entidades. Não instalar nem ativar modelos ou tarefas pré-definidos para vendedores, compradores, investidores, pós-negócio ou contactos inativos.
+
+7.1 Configuração de planos e tarefas
+
+Criar, renomear, ativar, desativar e ordenar planos e respetivas tarefas, sem alterar código.
+
+Configurar designação, descrição, objetivo, público-alvo escolhido pelo utilizador, tarefas, ordem, responsável, prazo relativo, periodicidade, estado e condição de conclusão.
+
+Associar um ou mais planos a uma Entidade; iniciar planos manualmente ou através de gatilhos configurados e autorizados.
+
+Editar um plano-modelo sem alterar retroativamente tarefas históricas já executadas, salvo operação expressa e auditada.
+
+7.2 Execução e salvaguardas
+
+Cada plano pode ter tarefas e etapas configuráveis, prazos relativos ao gatilho e responsáveis atribuídos; a definição dos segmentos e do conteúdo é feita inteiramente nas Configurações.
+
+O administrador pode configurar gatilhos, por exemplo criação de entidade, contacto realizado, mudança de qualificação, visita ou conclusão de negócio; nenhum modelo é ativado por defeito.
+
+Execução sujeita a preferências de contacto, finalidade de tratamento, permissões e regras RGPD.
+
+Contadores e indicadores por entidade, com visão agregada no dashboard.
+
+D-04 APROVADA — Apenas o motor configurável integra o âmbito da primeira versão. A criação de planos concretos, conteúdos, canais e calendários compete ao utilizador, respeitando permissões e regras RGPD.
+
+8. Tarefas, automações, alertas e integrações
+
+8.1 Tarefas por módulo
+
+Cada módulo pode ter separador Tarefas com lista, filtros, estados, prioridade, data limite e atribuição à equipa.
+
+Catálogos e modelos configuráveis por módulo, com tarefas locais integradas numa lista central sem duplicação.
+
+Ações de criação a partir de fichas, listas e processos relacionados; ligação bidirecional às entidades de origem.
+
+8.2 Motor de automações sem código
+
+Configurar em Configurações → Automações: nome, gatilho, condições, ação, responsável, prazo e estado ON/OFF.
+
+Exemplo: ao criar um Imóvel, gerar automaticamente tarefas definidas num plano aprovado.
+
+Ações iniciais: criar tarefa, gerar aviso, atualizar campo autorizado e agendar notificação; integrações externas em fases posteriores.
+
+Registar execuções, falhas, tentativas e prevenção de duplicados; a execução ocorre em serviço de servidor.
+
+8.3 Notificações e funcionamento offline
+
+Notificações no navegador e no telemóvel: novas leads, tarefas em atraso, aniversários, angariações a expirar e regras configuradas.
+
+Web Push pode entregar notificações com a aplicação fechada, se o dispositivo suportar, houver autorização e existir conectividade.
+
+D-07 APROVADA — Na primeira versão a PWA é instalável, mas requer ligação à Internet para consultar e modificar dados. Operações offline e sincronização ficam fora do âmbito inicial, podendo ser avaliadas numa fase futura.
+
+8.4 WhatsApp, SMS e email
+
+WhatsApp: começar por ligação direta wa.me, que abre a conversa; não constitui envio automático pela API oficial.
+
+D-08 APROVADA — Integrar envio de email pelo Brevo desde a primeira versão; preparar a extensibilidade para SMS e integrações mais avançadas apenas em fases posteriores. Não associar envio efetivo a uma simples abertura de WhatsApp.
+
+WhatsApp inicial via ligação wa.me e sem confirmação fictícia de envio. Email pela plataforma Brevo com remetente profissional individual autorizado por consultor e remetente central. O Administrador parametriza limites diários e mensais para equipa e consultores; o CRM emite alertas, pede confirmação antes de campanhas e autoriza exceder limites internos apenas a perfis habilitados, respeitando sempre os limites efetivos do fornecedor e as regras de privacidade.
+
+9. Importação, exportação, relatórios e documentos
+
+  -----------------------------------------------------------------------------------------------------------------------------------------------------
+  Código                  Funcionalidade                              Salvaguardas
+  ----------------------- ------------------------------------------- ---------------------------------------------------------------------------------
+  DT-01                   Importar Excel/CSV e exportar Excel.        Mapear campos, validar dados, detetar duplicados e fornecer relatório de erros.
+
+  DT-02                   Exportar ficheiros de relatório para PDF.   Modelos configuráveis, filtros, campos e permissões.
+
+  DT-03                   Documentos associados a registos.           Controlo de acesso, histórico e armazenamento privado.
+
+  DT-04                   Cópias de segurança e recuperação.          Automatização, armazenamento externo e ensaios periódicos.
+
+  DT-05                   Relatórios configuráveis.                   Escolha de colunas, métricas, período, ordenação e destinatários.
+  -----------------------------------------------------------------------------------------------------------------------------------------------------
+
+D-09 / Q08 APROVADAS — Importação inicial prevista a partir de Excel/CSV e contactos Outlook (por exportação), com possibilidade de outras fontes futuramente. Capacidade planeada para mais de 2.000 registos, sem ser limite máximo. O utilizador autorizado escolhe categorias, campos e períodos históricos por importar. Antes de introduzir dados reais: mapeamento, ensaio, identificação de possíveis duplicados, revisão manual de conflitos, conferência de relações, verificação RGPD, relatório e aprovação explícita. Importação automática não atribui consentimento para marketing.
+
+10. Arquitetura aprovada e estratégia de alojamento
+
+D-10 APROVADA — Arquitetura final: interface React + TypeScript em PWA, backend/API em Django, base de dados PostgreSQL e serviços de servidor para automações. O desenvolvimento e os testes iniciais decorrem no computador local; a publicação online é prevista para a VPS Amen com Ubuntu, condicionada à validação de recursos, segurança, backups e custos.
+
+Separar autenticação, dados e permissões do frontend; o servidor valida cada pedido.
+
+Organizar módulos e tipos de campos através de um esquema de metadados com identificadores estáveis.
+
+Permitir versionar configurações e migrar alterações sem perda silenciosa de dados.
+
+Usar armazenamento adequado para ficheiros e backups externos; HTTPS e gestão protegida de segredos.
+
+Testar volumes de dados, concorrência, consultas e importações antes de definir requisitos finais da VPS.
+
+D-10 / V01 APROVADAS — Desenvolvimento e testes principais em computador local; servidor Amen VPS X2 reservado inicialmente a instalação e testes. Recursos comunicados: 2 vCPU, 2 GB de RAM, 75 GB de disco e Ubuntu 24.04 LTS. Antes de produção, verificar capacidade, segurança, backups e custos; avaliar aumento de RAM para 4 GB ou mais segundo medições efetivas, sem contratar antecipadamente.
+
+10.1 Verificações obrigatórias antes da publicação na VPS
+
+Confirmar recursos reais da VPS Amen (CPU, RAM, armazenamento, espaço livre), sistema Ubuntu, acessos, capacidade prevista e custos operacionais.
+
+Aplicar medidas de segurança: atualizações, acesso SSH protegido, firewall, HTTPS, gestão de segredos, permissões e separação entre ambientes de desenvolvimento/testes e produção.
+
+V02 APROVADA — Backups encriptados diários da base PostgreSQL, anexos e configurações indispensáveis; OneDrive como destino externo inicial sujeito a validação técnica e de segurança. Aplicar versionamento/retenção, alertas de falha e testes de recuperação efetiva; segredos/chaves em armazenamento separado e protegido. Confirmar procedimentos e tempo de recuperação antes da produção.
+
+V04 APROVADA — Validar desempenho, segurança, importação, documentos, automações, notificações, envios Brevo, backup e reposição. Todos os testes críticos devem passar e a entrada em produção carece de aprovação formal do promotor; problemas residuais não críticos exigem aceitação expressa e registo.
+
+11. Plano de desenvolvimento por fases
+
+  -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Fase                     Entrega                                                                            Aprovação exigida
+  ------------------------ ---------------------------------------------------------------------------------- -----------------------------------------------------------
+  0 — Referência           Congelar V30.25, inventariar 22 módulos e recuperar regras aprovadas.              Mapa funcional validado.
+
+  1 — Fundação             Autenticação, permissões, PostgreSQL, identidade visual e motor de configuração.   Dois utilizadores com permissões verificadas no servidor.
+
+  2 — Núcleo CRM           Entidades, Imóveis, Angariações, relações, formulários e importação.               Fluxos principais com testes de dados e permissões.
+
+  3 — Processo comercial   Procuras, Visitas, Propostas, Transações, Pós-Venda e Comissões.                   Processo completo e coerente.
+
+  4 — Operação             Tarefas, Agenda, Marketing, dashboard, notificações, relatórios.                   Planos, alertas e métricas demonstrados.
+
+  5 — Produção             Migração, segurança, recuperação, testes de carga e piloto.                        Aprovação final antes de usar dados reais.
+  -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+11.1 Método de execução com Codex
+
+Pedidos agrupados por funcionalidades e dependências, com critérios claros de aceitação.
+
+Desenvolvimento em ramos controlados e testes automatizados; revisão antes de commits e publicação.
+
+Preservação integral do repositório V30.25 e histórico existente como referência.
+
+Registos de decisões, alterações e testes, evitando instruções contraditórias e retrabalho.
+
+12. Decisões estruturantes aprovadas — D-01 a D-10
+
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Ref.                    Decisão aprovada (critério principal)                                                                                                               Condições / detalhes de execução
+  ----------------------- --------------------------------------------------------------------------------------------------------------------------------------------------- ------------------------------------------------------------------------------------------------------------------------------------------------
+  D-01                    RESOLVIDA — Fonte aprovada: Plano Marketing 45.xlsx; 45 tarefas distribuídas em oito semanas, incluindo repetições.                                 Anexo A integrado; catálogo configurável.
+
+  D-02                    RESOLVIDA — Data inicial de CMI assinado preservada; correção excecional com confirmação; renovação origina pergunta sobre novo ciclo de tarefas.   Escolha de novo ciclo (catálogo-padrão ou seleção anterior) e destino das tarefas pendentes decididos em cada renovação (Q01/Q02).
+
+  D-03                    RESOLVIDA (critério-base) — Vendas e transações pela escritura; comissões recebidas pelas respetivas datas de recebimento.                          Comissão Média sobre valores apurados, incluindo zero confirmado; estornos por movimentos; dashboard sem IVA (Q03/Q04/Q05).
+
+  D-04                    APROVADA — Motor de Marketing de Entidades 100% configurável, sem planos ou tarefas predefinidos.                                                   Planos e tarefas criados pelo utilizador em Configurações; RGPD e permissões.
+
+  D-05                    APROVADA — Permitir desativação e eliminação definitiva de módulos e campos por administrador autorizado.                                           Rever dependências, retenção legal, impacto, confirmação explícita e auditoria.
+
+  D-06                    APROVADA — Quatro perfis iniciais: Administrador, Responsável de Equipa, Consultor e Assistente.                                                    Assistente só registos atribuídos/partilhados por defeito; partilhas e transferências mediante autorização qualificada, rastreabilidade (Q06).
+
+  D-07                    APROVADA — Primeira versão PWA com funcionamento online; Internet necessária para consulta e edição.                                                Offline e sincronização fora do âmbito da primeira versão.
+
+  D-08                    APROVADA — WhatsApp via ligação direta e email pelo Brevo desde o início.                                                                           Remetentes individuais e central autorizados; limites, alertas e validação de campanhas Brevo (V03).
+
+  D-09                    APROVADA — Preparar importação Excel/CSV e migração de dados do CRM existente.                                                                      Excel/CSV e contactos Outlook exportados; seleção de histórico, >2.000 registos estimados e pré-validação (Q08).
+
+  D-10                    APROVADA — React/TypeScript (PWA) + Django + PostgreSQL; desenvolvimento inicial local; alojamento previsto na VPS Amen.                            VPS X2 (2 vCPU, 2 GB RAM, 75 GB, Ubuntu 24.04); testes locais e validação de desempenho antes da produção (V01).
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+12.1 Registo de decisões do promotor
+
+As decisões D-01 a D-10 mantêm-se aprovadas. As respetivas concretizações posteriores, registadas como Q01 a Q16 e V01 a V04 na secção 14, integram esta versão e prevalecem sobre menções anteriores a assuntos pendentes. Os critérios de realização continuam sujeitos a implementação e teste.
+
+D-01 — CATÁLOGO RECEBIDO E VALIDADO. Ficheiro «Plano Marketing 45.xlsx» com 45 tarefas, distribuídas pelas oito semanas em 8, 5, 4, 3, 9, 5, 5 e 6 tarefas. A lista nominal está transcrita no Anexo A, respeitando as tarefas repetidas entre semanas.
+
+D-02 — REGRAS APROVADAS. Data inicial = início de vigência do CMI assinado; não há emissão de tarefas antes da formalização do contrato. A data original não muda por renovação. Correções de registo excecionais requerem autorização e justificação; se afetarem datas, perguntar antes de recalcular as tarefas pendentes e preservar o histórico das concluídas. Em cada renovação válida, perguntar se devem ser emitidas novas tarefas com data-base igual ao início da renovação, criando um novo ciclo separado e preservando o plano anterior.
+
+D-03 — Indicadores comerciais por data de escritura, comissões recebidas por data do pagamento efetivo. Q03: Comissão Média considera só transações concluídas com comissão apurada, incluindo zeros confirmados; Q04: devoluções/estornos como novos movimentos; Q05: métricas do Dashboard sem IVA e detalhe financeiro com IVA.
+
+D-04 APROVADA Aprovado motor de configuração sem planos nem tarefas previamente definidos. O utilizador cria os modelos, ações, responsáveis e calendários em Configurações; integra-se com tarefas centrais, respeitando permissões e RGPD.
+
+D-05 APROVADA Permitir desativação e eliminação definitiva por administrador com privilégio adequado. Antes de eliminar: detetar dependências, respeitar prazos legais, apresentar o impacto, pedir confirmação inequívoca, impedir cascatas silenciosas e registar auditoria.
+
+D-06 — Quatro perfis iniciais configuráveis e permissões por módulo, ação e âmbito, validadas no servidor. Assistente limitado por defeito aos registos atribuídos/partilhados; partilha e transferência entre consultores apenas com autorização de Administrador ou Responsável de Equipa competente e trilho de auditoria.
+
+D-07 APROVADA Primeira versão online, com PWA instalável em dispositivos compatíveis. É necessária Internet para consulta e alterações. Modo offline e sincronização poderão ser avaliados numa fase posterior.
+
+D-08 — WhatsApp via ligação direta wa.me e emails pela Brevo. Remetentes individuais autorizados e remetente central, quotas internas configuráveis, alertas e controlo de campanhas (V03). SMS e WhatsApp Business API fora do primeiro âmbito.
+
+D-09 — Migração inicialmente a partir de Excel/CSV e contactos Outlook exportados; seleção de atuais/históricos, com volume superior a 2.000 registos estimado, sem teto artificial. Ensaios, mapeamento, deduplicação assistida, relações e validação de permissões e base legal. Recuperação de outros sistemas somente se a origem existir e for confirmada.
+
+D-10 — React + TypeScript (PWA), Django e PostgreSQL; desenvolvimento local e VPS Amen X2 (2 vCPU/2 GB RAM/75 GB/Ubuntu 24.04) para testes, com avaliação de upgrade antes de produção. Backups externos diários via OneDrive sujeitos a validação técnica e testes formais antes do arranque.
+
+Estado da especificação — Decisões D-01 a D-10, Q01 a Q16 e V01 a V04 confirmadas. Permanecem tarefas de execução: validação de requisitos legais e segurança; levantamento exato de ficheiros e mapeamentos; detalhamento de interfaces e fluxos; verificação de fornecedores/servidor; testes e aprovação formal para entrada em produção. As decisões fechadas não significam funcionalidades implementadas.
+
+13. Lista de verificação para aprovação da especificação
+
+Plataformas PC, tablet, telemóvel; PWA; marca, cores e tipografia Inter.
+
+Motor no-code: módulos, campos, menus, relações, formulários e permissões.
+
+Dashboard inteiramente configurável: contadores, widgets e resumo financeiro.
+
+Plano de Marketing de Imóveis: catálogo de 45 tarefas, oito semanas, datas e progresso.
+
+Plano de Marketing de Entidades: apenas motor configurável, sem modelos pré-instalados.
+
+Tarefas por módulo, automações, alertas, notificações e integrações.
+
+Importação/exportação Excel, relatórios PDF e gestão de documentos.
+
+Segurança, RGPD, robustez, backups, auditoria e uso multiutilizador.
+
+Fases de implementação, critérios de aceitação e pontos ainda pendentes.
+
+13.1 Preparação das primeiras tarefas para Codex
+
+Conservar a V30.25 e o histórico do repositório como referência funcional, sem migrar dados nem substituir a versão existente.
+
+Inventariar os módulos e relações do protótipo antes de escrever as novas regras de dados e permissões.
+
+Preparar um ambiente local de desenvolvimento e testes automatizados para React/TypeScript, Django e PostgreSQL, mantendo segredos fora do código.
+
+Implementar primeiro autenticação, quatro perfis configuráveis, permissões no servidor e estrutura de configuração de módulos e campos.
+
+Submeter cada fase a testes e aprovação antes de publicar na VPS ou migrar informação real.
+
+14. Decisões complementares de negócio — Q01 a Q16
+
+As seguintes decisões foram confirmadas pelo promotor após o levantamento funcional da V30.25. São requisitos da aplicação profissional, não descrição de funcionalidades atualmente implementadas no protótipo. O detalhe de validação encontra-se também na matriz de testes da secção 16.
+
+14.1 Renovações do CMI e ciclos de marketing (Q01 / Q02)
+
+Em cada renovação válida, perguntar se deve ser criado um novo ciclo de Plano de Marketing, com data-base própria, mantendo inalterada a data original e o histórico do CMI.
+
+Se criar novo ciclo, apresentar duas origens à escolha: catálogo-padrão atualizado de 45 tarefas com seleção manual, ou cópia das tarefas escolhidas no ciclo anterior. A cópia gera novas instâncias por concluir e novas datas, nunca reabre as tarefas concluídas anteriores.
+
+Perguntar separadamente se as tarefas pendentes do ciclo anterior devem manter-se ativas ou ser encerradas com o estado «Não executada — Plano substituído». Não eliminar registos; reter motivo, utilizador e data.
+
+Impedir emissão duplicada não autorizada de ciclos para a mesma renovação; cada ciclo conserva identificador próprio, relação com CMI e esquema de tarefas. A escolha é por renovação, não uma política fixa.
+
+14.2 Métricas, pagamentos, estornos e IVA (Q03 / Q04 / Q05)
+
+As regras de período e de IVA aplicam-se aos indicadores e filtros do Dashboard configurável, sem afetar a possibilidade de consultar componentes financeiras separadas no módulo Faturação e Comissões.
+
+  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Regra                               Critério aprovado
+  ----------------------------------- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Comissão Média                      Soma das comissões apuradas de transações com escritura concluída no período ÷ número dessas transações com comissão apurada. Incluir comissão confirmada de 0 €; excluir comissão desconhecida. Mostrar denominador e tratamento de valor inexistente.
+
+  Comissões recebidas                 Basear no pagamento efetivo datado. Cada recebimento parcial entra no respetivo período; distinguir devido, faturado e efetivamente recebido.
+
+  Devoluções/estornos                 Criar movimento separado (valor negativo/correção) associado ao original, com motivo, data, autorizações e auditabilidade; nunca apagar recebimento histórico.
+
+  Dashboard                           Mostrar indicadores de comissões somente sem IVA, com widgets, filtros, ordem e visibilidade inteiramente configuráveis pelo utilizador autorizado.
+
+  Financeiro                          Guardar e mostrar comissão sem IVA, IVA e total, também por recebimentos parciais. Respeitar taxas aplicáveis e documentos reais; sem dupla contabilização.
+  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+14.3 Partilha, delegação e transferência de registos (Q06)
+
+Assistente: apenas registos próprios/atribuídos ou expressamente partilhados, por defeito; cada ação continua a depender das permissões efetivas do perfil e do módulo.
+
+Só Administrador e Responsável de Equipa com direito sobre o âmbito podem aprovar partilha ou transferência de titularidade entre consultores; a transferência de um registo não implica transferência automática de outros relacionados.
+
+Registar quem pediu, quem autorizou, origem/destino, momento e motivo. Toda a filtragem é aplicada no backend e testada também por acesso direto à API, pesquisa, exportação e documentos.
+
+14.4 Conservação RGPD e eliminação controlada (Q07)
+
+Configurar regras de conservação por categoria: contactos/marketing, contratos, transações, documentos, financeiro e auditoria, entre outras. Cada regra inclui finalidade, base aplicável, prazo validado e operação permitida no fim do prazo.
+
+Prazos e restrições legais carecem de confirmação jurídica antes de ativação; não atribuir automaticamente prazos uniformes. Proteger dados sujeitos a obrigação legal e evitar eliminação em cascata não autorizada.
+
+Antes de eliminar/anonimizar: identificar dependências e retenções obrigatórias, informar o administrador do impacto, exigir confirmação inequívoca e gerar registo de auditoria apropriado. Os registos de auditoria também respeitam prazos de conservação.
+
+14.5 Migração seletiva e consolidação de origens (Q08)
+
+Fontes iniciais confirmadas: ficheiros Excel/CSV e contactos Outlook através de exportação. Sincronização automática com Outlook não foi aprovada para a primeira versão.
+
+Volume de arranque ainda não quantificado, mas seguramente superior a 2.000 registos. O desenho global não terá esse valor como limite e deverá escalar para centenas de milhares de registos, sujeito a testes.
+
+Permitir selecionar categorias, campos, intervalos, registos atuais e históricos a importar por lote. Não importar dados sem fundamento de conservação; a importação nunca cria automaticamente consentimento para marketing.
+
+Mapear colunas para campos do CRM, incluindo campos configuráveis; identificar conflitos e possíveis duplicados (sem fusão automática), preservar associações entre módulos sempre que documentadas, apresentar pré-visualização, erros, balanço e origem.
+
+Realizar migração de ensaio e obter aprovação antes da definitiva. Relatórios de importação e histórico de lotes devem permitir rastrear criados, atualizados, rejeitados e erros. O protótipo V30.25 mantém-se como referência funcional; transferência real a partir dele só se forem identificados dados relevantes.
+
+14.6 Inventário histórico, Glossário e vistas dos módulos (Q09 / Q10 / Q11)
+
+Q09 — Campos históricos: os campos relevantes das folhas do ficheiro «Tabelas Completo» deverão estar disponíveis para ativação e configuração. Evitar campos duplicados e não tornar automaticamente visíveis todos os campos históricos; validar mapeamento por módulo antes da implementação.
+
+Q10 — Manter o módulo Glossário, baseado no inventário histórico. Campos de partida: Termo e Descrição; pesquisa e estrutura de campos adicionais configuráveis. Incluir na navegação de forma coerente com as permissões.
+
+Q11 — Na primeira versão profissional, disponibilizar vistas Lista, Cartões e Kanban nos módulos em que façam sentido, com colunas/etapas configuráveis e respeito integral pelas regras de acesso. Não dispensar filtros, pesquisa e edição por registo.
+
+O pipeline ponderado é uma evolução posterior, não um requisito obrigatório para o lançamento inicial. A Agenda também permanece no âmbito, com vistas Dia, Semana, Mês e Lista, mostrando compromissos e eventos derivados sem duplicações.
+
+14.7 Propostas, transações, comissões e correspondência de imóveis (Q12–Q16)
+
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Ref.                    Decisão funcional aprovada                                                                                                                                                Validações essenciais
+  ----------------------- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Q12                     Ações «Gerar Proposta» a partir de Visita e «Gerar Transação» a partir de Proposta aceite, com formulário pré-preenchido e confirmação antes de guardar.                  Validar permissões e pré-condições; verificar registo de origem e impedir duplicados. Automatização de criação apenas numa fase posterior e configurável.
+
+  Q13                     Comissão calculada automaticamente segundo CMI e negócio; alteração manual excecional com motivo e aprovação de Administrador ou Responsável de Equipa autorizado.        Guardar base contratual, cálculo inicial, valor final, motivo, aprovador, data e histórico. Após faturação/recebimento, correção por procedimento próprio sem substituições silenciosas.
+
+  Q14                     Quando uma Transação é concluída, cancelada ou reaberta, propor alterações a Imóvel, Angariação e outros registos relacionados. Só aplicar após confirmação.              Pré-visualizar efeitos, respeitar permissões, não fechar indiscriminadamente procuras/visitas/propostas/tarefas, preservar audit trail e permitir rejeitar atualizações propostas.
+
+  Q15                     Buyer/Seller Match com critérios obrigatórios e preferenciais e tolerância de orçamento configurável por Procura até 20%.                                                 Critérios obrigatórios eliminam não conformidades; preferenciais ajudam ordenação/explicação. Com orçamento 250.000 € e tolerância 20%, teto máximo 300.000 €; não incluir preço superior.
+
+  Q16                     Ao gerar Proposta/Transação, pré-preencher proprietários/coproprietários, compradores, quotas e destinatários de faturação, com confirmação dos participantes efetivos.   Guardar fotografia histórica dos participantes, papéis e percentagens, sem alterar retroativamente a transação quando a titularidade atual do imóvel mudar. Faturação não é inferida automaticamente a partir de quotas.
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Nota: as vistas e formulários continuam configuráveis no motor no-code aprovado. As regras de negócio críticas e transições de estado devem ser validadas no servidor, independentemente do desenho de interface.
+
+15. Infraestrutura, integrações e decisão de publicação — V01 a V04
+
+15.1 VPS Amen e estratégia de recursos (V01)
+
+  -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Recurso                 VPS X2 comunicado       Decisão
+  ----------------------- ----------------------- -----------------------------------------------------------------------------------------------------------------------------
+  Processamento           2 vCPU                  Adequado como ponto de partida de testes; validar carga/concorrência antes de produção.
+
+  Memória                 2 GB RAM                Margem limitada para Django + PostgreSQL + serviços. Medir consumo; avaliar 4 GB ou mais se necessário antes da publicação.
+
+  Disco                   75 GB                   Validar espaço útil, crescimento de anexos, ficheiros temporários e política de retenção.
+
+  Sistema                 Ubuntu 24.04 LTS        Aplicar hardening, HTTPS, SSH protegido, atualizações e isolamentos antes de expor o serviço.
+  -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Desenvolver essencialmente no computador local; usar a VPS X2 para testes e configuração. Sem necessidade de contratar upgrade nesta fase. A decisão de alojamento de produção depende de auditoria técnica e testes de desempenho.
+
+15.2 Backups automáticos e OneDrive externo (V02)
+
+Fazer cópias diárias encriptadas de PostgreSQL, documentos anexados e configurações necessárias para reposição. OneDrive é destino externo inicial, condicionado à validação da integração, capacidade, proteção e segregação de acessos.
+
+Manter várias versões, proteção contra eliminação/alteração indevida, alertas ao Administrador e testes periódicos de restauro documentados. Definir política de retenção, verificação de integridade e proteção das chaves antes da produção.
+
+Um ficheiro sincronizado não substitui um backup restaurável. Confirmar como repor base de dados, anexos e configurações numa instância de recuperação.
+
+15.3 Brevo: remetentes, limites e campanhas (V03)
+
+Existe email profissional com domínio próprio, a identificar na implementação. Validar remetentes e DNS de autenticação SPF, DKIM e DMARC conforme exigências do serviço; não presumir que a conta Brevo ou o domínio já estão configurados.
+
+Disponibilizar remetentes autorizados individuais por consultor e um remetente central; Administrador define direitos e desativa endereços. Registar mensagens preparadas, tentativas de envio e estados confirmados pelo fornecedor sem os confundir.
+
+Permitir limites diários/mensais internos por consultor e organização, alertas por consumo, confirmação prévia do número de destinatários das campanhas e autorização qualificada para exceder limites internos. Limites reais do fornecedor nunca são ultrapassados por autorização interna.
+
+Aplicar preferências/oposição a marketing e fundamentos válidos de envio; proteger listas, histórico e credenciais de acesso à API do Brevo.
+
+15.4 Critérios formais para a entrada em produção (V04)
+
+O CRM só pode operar com dados reais após execução dos testes obrigatórios, resolução de todas as falhas críticas e aprovação formal do promotor. Um problema não crítico só pode permanecer se ficar documentado, com impacto conhecido, medida alternativa e aceitação expressa.
+
+Estados de teste: Aprovado, Reprovado ou Pendente. Identificar cenário, utilizador/perfil, dados de ensaio, evidências, severidade, responsável e data de validação.
+
+A passagem a produção requer validação da infraestrutura, backups efetivamente restaurados, autenticação/permissões e operações essenciais, não apenas uma demonstração visual da aplicação.
+
+16. Matriz mínima de aceitação para Codex e testes
+
+Os identificadores AT-01 a AT-16 são novos nesta versão e constituem os cenários mínimos a detalhar em testes automatizados e manuais. Não dispensam testes próprios dos restantes requisitos da V1.3.
+
+  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  ID                      Cenário a validar             Resultado exigido
+  ----------------------- ----------------------------- ---------------------------------------------------------------------------------------------------------------------------------------
+  AT-01                   Sessões, perfis e APIs        Sem login ou permissão adequada, nem URL direta, pesquisa, exportação ou anexo permitem aceder a registos proibidos.
+
+  AT-02                   Partilha e transferência      Assistente só vê atribuídos/partilhados; só administrador/responsável habilitado autoriza transferência; operação auditada.
+
+  AT-03                   Registos e vistas             Consulta→Editar sem regressar à lista; alterações não guardadas alertadas; Lista/Cartões/Kanban aplicam filtros e permissões.
+
+  AT-04                   CMI original e renovação      Data inicial preservada; novo ciclo seleciona catálogo ou seleção anterior; tarefas pendentes antigas mantidas/encerradas à escolha.
+
+  AT-05                   Plano de marketing 45         45 tarefas originais, oito semanas, repetições independentes, offsets, checkboxes e contadores coerentes.
+
+  AT-06                   Dashboard e finanças          Widgets configuráveis; vendas por escritura; Comissão Média exclui desconhecidas e inclui zeros confirmados; KPI de comissão sem IVA.
+
+  AT-07                   Pagamentos e estornos         Parciais por datas próprias; devolução como movimento separado; totais sem/com IVA conciliáveis; histórico preservado.
+
+  AT-08                   Proposta a partir de Visita   Pré-preenchimento, verificação de origem, confirmação e proteção contra duplicados.
+
+  AT-09                   Transação e estados           Ação expressa de geração; ao concluir/cancelar/reabrir, propostas de atualização confirmáveis, sem cascatas indevidas.
+
+  AT-10                   Match Imóvel/Procura          Obrigatórios excluem; preferenciais indicam diferenças; tolerância superior a 20% não aceite.
+
+  AT-11                   Participantes históricos      Quotas e papéis confirmados; alterações posteriores na titularidade não alteram participantes guardados no negócio.
+
+  AT-12                   Importação Excel/Outlook      Ensaio com >2.000 registos; seleção de histórico; deduplicação assistida; relações e erros revistos antes da importação final.
+
+  AT-13                   Configuração no-code          Campos históricos podem ser ativados sem duplicar; Glossário pesquisável; módulo/campo só eliminado após impacto e retenção.
+
+  AT-14                   Brevo e WhatsApp              Remetentes válidos e autorizados; limite e aviso funcionam; campanha confirmada; abrir WhatsApp não marca envio como feito.
+
+  AT-15                   VPS e segurança               HTTPS, acesso protegido, auditoria, segregação de ambientes, desempenho com volume representativo.
+
+  AT-16                   Backup e aprovação            Backup externo cifrado e restaurado em ensaio; erros geram alerta; falhas críticas resolvidas; aceitação formal antes do lançamento.
+  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+17. Orientações para o desenvolvimento seguro e incremental
+
+Preservar o protótipo V30.25, histórico Git e ramo principal como referência funcional e de desenho; o nome do HTML legado não define a versão funcional. Não modificar o ficheiro de referência para implementar a arquitetura nova.
+
+Partir do levantamento read-only existente e associar cada tarefa Codex a um requisito verificável, com teste e evidência. Não instalar uma base de produção nem importar dados de clientes no arranque do desenvolvimento.
+
+Sequência recomendada: projeto/base técnica; autenticação e autorização; modelo de dados e metadados no-code; Entidades/Imóveis/Angariações; processo comercial e financeiro; Tarefas/Agenda/Marketing; Dashboard e comunicações; importação; ensaios; produção.
+
+Usar ambientes separados de desenvolvimento, ensaio e produção, controlo de versões, migrações reversíveis quando possível, backups e revisão antes de publicação.
+
+Nenhuma regra parametrizável no painel administrativo deve criar possibilidade de contornar segurança, validação de estados ou obrigações de conservação.
+
+18. Registo de alterações e pontos ainda sujeitos a validação
+
+  --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Tema                              Estado na V1.4                  Observação para a implementação
+  --------------------------------- ------------------------------- --------------------------------------------------------------------------------------------------------------------
+  D-01 a D-10                       Aprovadas e preservadas         Base funcional e técnica da V1.3, atualizada pelas decisões posteriores.
+
+  Q01–Q16                           Aprovadas                       Novas regras detalhadas nas secções 14 e 16; inclui Q08.1, Q08.2 e Q08.3.
+
+  V01–V04                           Aprovadas                       Decisões de infraestrutura, backup, Brevo e aceitação formal.
+
+  Inventário de campos históricos   Mapeamento ainda por executar   Validar folha a folha do Excel «Tabelas Completo», sem supor identidade com o protótipo.
+
+  Ficheiros e volume de migração    A recolher na execução          Fontes confirmadas Excel/CSV + contactos Outlook; mais de 2.000 registos previstos, mas número exato desconhecido.
+
+  RGPD, retenção, fornecedor        Validação obrigatória           Confirmar prazos e base legal, termos de tratamento e segurança antes de ativar retenção/importação.
+
+  Recursos, Brevo e OneDrive        Testes obrigatórios             Não presumir configuração, limites ou disponibilidade demonstrados sem evidência.
+
+  Entrada em produção               Não autorizada nesta etapa      Exige execução dos testes críticos, análise de falhas e aprovação formal.
+  --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+A versão 1.4 consolida decisões e critérios de aceitação, não é prova de que a aplicação profissional já tenha sido desenvolvida, instalada, migrada ou validada.
+
+ANEXO A — Catálogo das 45 tarefas de Marketing de Imóveis
+
+Fonte: «Plano Marketing 45.xlsx» fornecido para D-01. Designações transcritas sem alterar o sentido nem substituir tarefas repetidas. A coluna Semana determina o offset-base CMI + 7 × (semana − 1) dias; em renovação, usa-se a data-base do novo ciclo.
+
+  -------------------------------------------------------------------------------------------------------------------
+  N.º                     Semana                  Tarefa (designação original)
+  ----------------------- ----------------------- -------------------------------------------------------------------
+  1                       1ª                      Análise Concorencia
+
+  2                       1ª                      Video de pré angariação
+
+  3                       1ª                      Análise swot
+
+  4                       1ª                      Reportagem fotográfica
+
+  5                       1ª                      Reportagem videográfiva
+
+  6                       1ª                      Elaborar da descrição imóvel
+
+  7                       1ª                      Home staging
+
+  8                       1ª                      Plano de marketing
+
+  9                       2ª                      Publicar no site da marca
+
+  10                      2ª                      Buyer/Seller match
+
+  11                      2ª                      Partilha na rede
+
+  12                      2ª                      Publicar nas redes sociais ( Facebook, Insta, Whatsapp, Youtube)
+
+  13                      2ª                      Distribuição de cartas na envolvente
+
+  14                      3ª                      Colocação de placa no imóvel
+
+  15                      3ª                      Partilha com outras agências
+
+  16                      3ª                      Colocação anuncio na montra da loja
+
+  17                      3ª                      Publicar nas redes sociais - anuncio patrocinados
+
+  18                      4ª                      Republicar no site da marca com troca de fotos
+
+  19                      4ª                      Republicar nas redes sociais (Facebook, Insta, Whatsapp, Youtube)
+
+  20                      4ª                      Distribuição de Flyers
+
+  21                      5ª                      Elaboração da ACM
+
+  22                      5ª                      Agendar reunião presencial com o proprietário
+
+  23                      5ª                      Apresentar relatório de atividade ao proprietário
+
+  24                      5ª                      Apresentaçao ACM e discução do asking price
+
+  25                      5ª                      Republicar no site da marca com troca de fotos
+
+  26                      5ª                      Republicar nas redes sociais (Facebook, Insta, Whatsapp, Youtube)
+
+  27                      5ª                      Partilha rede
+
+  28                      5ª                      Partilha com outras agências
+
+  29                      5ª                      Buyer/Seller match
+
+  30                      6ª                      Republicar no site da marca com troca de fotos
+
+  31                      6ª                      Publicar nas redes sociais - anuncio patrocinados
+
+  32                      6ª                      Partilha rede
+
+  33                      6ª                      Partilha com outras agências
+
+  34                      6ª                      Buyer/Seller match
+
+  35                      7ª                      Republicar no site da marca com troca de fotos
+
+  36                      7ª                      Republicar nas redes sociais (Facebook, Insta, Whatsapp, Youtube)
+
+  37                      7ª                      Partilha rede
+
+  38                      7ª                      Partilha com outras agências
+
+  39                      7ª                      Buyer/Seller match
+
+  40                      8ª                      Agendar reunião presencial com o proprietário
+
+  41                      8ª                      Apresentar relatório de atividade ao proprietário
+
+  42                      8ª                      Apresentaçao ACM e discução do asking price
+
+  43                      8ª                      Republicar no site da marca com troca de fotos
+
+  44                      8ª                      Publicar nas redes sociais - anuncio patrocinados
+
+  45                      8ª                      Buyer/Seller match
+  -------------------------------------------------------------------------------------------------------------------
+
+Nota de implementação: o plano inclui tarefas repetidas intencionalmente em semanas diferentes. Cada tarefa deve conservar um identificador próprio no catálogo e cada emissão deverá ter identificador único de ciclo, para impedir duplicações não autorizadas.
+
+FIM DA ESPECIFICAÇÃO — VERSÃO DOCUMENTAL 1.4 Requisitos consolidados para implementação progressiva; a aprovação das decisões não equivale a aceitação técnica da aplicação nem autoriza importação de dados reais ou entrada em produção.
+
+ANEXO II — PLANO DE IMPLEMENTAÇÃO V1.0 (TRANSCRIÇÃO INTEGRAL)
+
+Texto normativo original incluído como referência. A formatação foi normalizada para integração neste documento; para paginação e apresentação originais, consultar o ficheiro-fonte.
+
+VALOR MÁXIMO
+
+SOLUÇÕES IMOBILIÁRIAS
+
+PLANO DE IMPLEMENTAÇÃO PARA CODEX
+
+Da especificação aprovada à nova aplicação profissional
+
+Versão do plano 1.0 · Referência normativa: Especificação Consolidada V1.4
+
+Arquitetura: React + TypeScript (PWA) · Django · PostgreSQL
+
+Execução local, incremental e verificável · Sem alterações ao protótipo V30.25
+
+20 de outubro de 2026
+
+1. Objetivo e regras inegociáveis
+
+Este plano transforma a Especificação Consolidada V1.4 num roteiro de tarefas pequenas, sequenciais e testáveis para execução assistida pelo Codex no projeto CRM Valor Máximo. Não significa que as tarefas já estejam implementadas nem autoriza publicação, uso de dados reais ou alterações ao protótipo.
+
+Preservar o protótipo funcional V30.25, o histórico Git, as tags e o ficheiro HTML legado. Não reconstruir a aplicação dentro do HTML existente.
+
+Respeitar AGENTS.md e verificar ramo ativo e alterações locais antes de escrever ficheiros. Não eliminar, reformatar ou substituir alterações preexistentes.
+
+Considerar a Especificação V1.4 a referência para os requisitos aprovados. Em ambiguidades, mostrar opções e pedir confirmação, em vez de inventar regras de negócio.
+
+Uma tarefa Codex de cada vez; antes de avançar, obter relatório de ficheiros alterados, testes executados, limitações e verificação humana.
+
+Usar apenas dados sintéticos durante desenvolvimento e ensaios. Nunca colocar palavras-passe, chaves, ficheiros de clientes ou tokens no Git.
+
+Garantir que permissões, visibilidade, transições de estado, pagamentos e eliminação são verificadas no backend, não apenas no React.
+
+A entrada em produção exige todos os testes críticos aprovados e aprovação formal do promotor (V04).
+
+Legenda: F0–F5 = fases da V1.4; F?-?? = tarefas executáveis; AT-01–AT-16 = cenários mínimos de aceitação da V1.4.
+
+1.1 Fontes de referência e ordem de precedência
+
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  Fonte                                             Como utilizar
+  ------------------------------------------------- --------------------------------------------------------------------------------------------------------------------------
+  Especificação Consolidada V1.4                    Fonte normativa das decisões D01–D10, Q01–Q16, V01–V04 e critérios AT-01–AT-16.
+
+  CRM V30.25 (HTML existente)                       Referência visual e funcional; não é arquitetura, fonte de autenticação nem base de dados profissional.
+
+  documentacao/levantamento_v30_25/ (7 ficheiros)   Inventário de 22 módulos, campos, ligações, lacunas e riscos; levantamento estático a confirmar com o repositório local.
+
+  Plano Marketing 45.xlsx                           Fonte do catálogo nominal das 45 tarefas, reproduzido integralmente no Anexo A da V1.4.
+
+  Tabelas Completo.xlsx                             Inventário histórico para mapeamento de campos; não ativar todos nem criar duplicados sem revisão.
+
+  AGENTS.md e Git                                   Instruções locais do projeto e histórico a respeitar antes de qualquer alteração.
+  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+2. Estratégia de execução no repositório
+
+2.1 Condições antes da primeira alteração
+
+Abrir a pasta local do projeto no VS Code e confirmar com o Codex: git status, ramo ativo, último commit, tags, existência de AGENTS.md e localização efetiva da V1.4.
+
+Preparar uma ramificação de trabalho isolada, com nome a aprovar na inspeção inicial (por exemplo, reconstrucao-profissional). Não alterar main nem apagar desenvolvimento.
+
+Conservar a V30.25 no local e com o conteúdo original. Criar a nova aplicação em diretórios distintos, sem sobrepor ficheiros existentes.
+
+Não executar instalações, migrações de base de dados, comandos destrutivos, push, deploy ou ações externas sem consentimento e revisão do pedido concreto.
+
+Em cada tarefa: pedido único → implementação delimitada → testes → relatório de diferenças → revisão/aceitação → passo seguinte.
+
+2.2 Estrutura de pastas proposta — sujeita à inspeção do repositório
+
+O Codex deve propor e justificar os diretórios antes de os criar. Exemplo ilustrativo, não uma instrução para substituir a árvore existente:
+
+frontend/ — React, TypeScript e PWA
+
+backend/ — Django, APIs, regras de negócio e testes
+
+infra/ — configurações locais e exemplos seguros de publicação
+
+documentacao/ — especificações, decisões, evidências e registos de testes
+
+scripts/ — tarefas de desenvolvimento e importação de ensaio
+
+2.3 Definição de concluído para cada tarefa
+
+Código limitado ao objetivo da tarefa, com ficheiros identificados e sem refatorações indiscriminadas.
+
+Testes automatizados novos ou adaptados, incluindo casos de erro/permissão relevantes, executados quando o ambiente o permite.
+
+Compatibilidade visual e comportamento coerentes com a V1.4; datas, moeda e terminologia pt-PT.
+
+Sem erros críticos conhecidos; documentação de decisões técnicas e limitações remanescentes.
+
+Relatório Codex: resumo, ficheiros alterados, comandos executados, resultado dos testes, riscos e instruções curtas de verificação.
+
+Revisão humana e autorização antes de abrir a tarefa seguinte ou executar uma alteração irreversível.
+
+3. Fase 0 — Referência e preparação segura
+
+Estado: o levantamento documental da V30.25 foi preparado anteriormente; a verificação do estado Git local, a disponibilidade da V1.4 no repositório e as condições de trabalho devem ser confirmadas pelo Codex antes da implementação.
+
+F0-01 Inspeção não destrutiva do repositório
+
+Execução: Ler AGENTS.md; verificar ramo, alterações locais, commit da V30.25, tags, estrutura atual e documentos existentes. Não modificar ficheiros nem instalar software.
+
+Aceitação: Relatório com evidência do estado e lista de bloqueios, sem quaisquer alterações no Git.
+
+Referências: V1.4 §§1, 13.1, 17; levantamento 01–07.
+
+F0-02 Plano de isolamento da nova aplicação
+
+Execução: Propor ramo e árvore de diretórios separados; inventariar possíveis conflitos de nomes; definir modo de preservar o HTML e documentos originais.
+
+Aceitação: Plano de criação de ficheiros validado, com estratégia explícita de reversão.
+
+Referências: V1.4 §§11, 17.
+
+F0-03 Mapa de requisitos e rastreabilidade
+
+Execução: Associar 22 módulos originais + Glossário, Agenda, catálogo de 45 tarefas e 16 testes AT aos pacotes de trabalho.
+
+Aceitação: Nenhum módulo fica sem responsável/fase; lacunas ou ambiguidades são assinaladas, não preenchidas por suposição.
+
+Referências: V1.4 §§11, 14, 16; levantamento 01–07.
+
+4. Fase 1 — Fundação técnica, segurança e configuração
+
+F1-01 Estrutura inicial e comandos de desenvolvimento
+
+Execução: Depois de aprovar F0, criar base React/TypeScript e Django em pastas novas; instruções Windows para iniciar os serviços. Sem dados reais.
+
+Aceitação: Interface de arranque e endpoint de saúde acessíveis localmente; V30.25 intocada.
+
+Referências: D10; V1.4 §§2, 10, 11.
+
+F1-02 PostgreSQL, migrações e ambiente local
+
+Execução: Configurar ligações por variáveis de ambiente, migrations, separação dev/test e dados fictícios; definir boas práticas de índices e transações.
+
+Aceitação: Migração inicial reprodutível numa base vazia; credenciais não estão no Git.
+
+Referências: D10, V1.4 §4.2.
+
+F1-03 Identidade visual e padrões de interação
+
+Execução: Criar layout responsivo com Inter, identidade Valor Máximo, navegação, modos consulta/edição, formulários, confirmação de saída sem gravar, acessibilidade.
+
+Aceitação: Visual coerente em PC/telemóvel; consulta → Editar direto; sem perda silenciosa de formulário.
+
+Referências: PL-01–PL-05; AT-03.
+
+F1-04 Autenticação individual e sessões
+
+Execução: Contas, início/fim de sessão, recuperação segura, proteção de rotas e tratamento de sessão expirada; preparar MFA conforme análise de risco.
+
+Aceitação: Endpoints protegidos respondem com erro a anónimos; fluxos básicos testados.
+
+Referências: D06; AT-01.
+
+F1-05 Permissões verificadas no servidor
+
+Execução: Implementar perfis Administrador, Responsável de Equipa, Consultor, Assistente; matriz por módulo/ação/âmbito de registo.
+
+Aceitação: Filtros, exportações, URLs diretas e anexos bloqueiam acessos indevidos; testes de negação por perfil.
+
+Referências: Q06; AT-01/AT-02.
+
+F1-06 Partilha, transferência e auditoria
+
+Execução: Permitir partilha/transferência somente com aprovação e âmbito válido do Administrador/Responsável; guardar quem, quando, origem/destino, motivo.
+
+Aceitação: Assistente acede por defeito apenas a atribuídos/partilhados; transferência não propaga automaticamente; historial auditável.
+
+Referências: Q06; AT-02.
+
+F1-07 Base do motor no-code e regras imutáveis
+
+Execução: Criar metadados de módulos, campos, listas, secções, validações e vistas; diferenciar configuração editável de regras de segurança/negócio protegidas.
+
+Aceitação: Administrador configura um campo de ensaio e publica alteração controlada; não é possível contornar permissões via metadados.
+
+Referências: D05; V1.4 §3; AT-13.
+
+F1-08 Qualidade contínua e isolamento
+
+Execução: Testes do backend/frontend, verificações estáticas, registos de erros, fixtures; preparar pipeline de teste sem publicar no servidor.
+
+Aceitação: Comandos de teste documentados e executáveis; relatórios legíveis e regressões sinalizadas.
+
+Referências: V04; V1.4 §§4, 16.
+
+5. Fase 2 — Núcleo CRM, relações e vistas
+
+F2-01 Entidades e ligações
+
+Execução: CRUD, consulta/edição, tipos de contacto, múltiplos contactos e relações com imóveis, histórico e campos configuráveis.
+
+Aceitação: Duplicados suspeitos identificáveis; dados sujeitos a acesso por registo; navegação direta.
+
+Referências: M02; AT-03.
+
+F2-02 Imóveis e coproprietários
+
+Execução: Modelar identificador/referência estável, características, múltiplos proprietários, quotas e zonas exteriores multisseleção; anexos associados.
+
+Aceitação: Titularidade múltipla consistente; alterações não destroem histórico de negócios.
+
+Referências: M03; Q16; AT-11.
+
+F2-03 Angariações e contratos CMI
+
+Execução: CMI vinculado ao imóvel, referências distintas, datas, duração, renovação, estado, avisos e confirmação das correções excepcionais.
+
+Aceitação: Data original preservada e renovação com registo próprio; avisos recalculáveis sem falsificar histórico.
+
+Referências: M04; D02; AT-04.
+
+F2-04 Vistas Lista, Cartões e Kanban
+
+Execução: Adicionar vistas por módulo pertinente, ordenações, pesquisa, filtros, colunas e etapas configuráveis com acesso validado no backend.
+
+Aceitação: Mesmos registos autorizados nas três vistas; Kanban não contorna validações de mudança de estado.
+
+Referências: Q11; AT-03.
+
+F2-05 Equipa, Agentes, Agências e Glossário
+
+Execução: Criar gestão dos intervenientes e o Glossário de Termo/Descrição pesquisável, com campos opcionais no-code e permissões.
+
+Aceitação: Glossário operacional sem duplicar campos da fonte histórica; relações consistentes.
+
+Referências: M14–M16; Q10; AT-13.
+
+F2-06 Campos históricos do Excel e eliminação controlada
+
+Execução: Mapear folhas de “Tabelas Completo” para campos de cada módulo; oferecer ativação seletiva e pré-visualização. Implementar inativação e política de eliminação com dependências.
+
+Aceitação: Não ativar nem duplicar campos por defeito; operações destrutivas bloqueadas por retenção/relacionamentos e auditadas.
+
+Referências: Q07/Q09; D05; AT-13.
+
+F2-07 Motor comum de importação em ambiente de ensaio
+
+Execução: Criar estrutura de lote, upload protegido, seleção de colunas, mapeamento, validação e prévia; não importar ainda dados reais.
+
+Aceitação: Rejeições explicadas, nenhuma fusão automática, relatório de erros e capacidade de cancelamento.
+
+Referências: D09/Q08; AT-12.
+
+6. Fase 3 — Processo comercial e financeiro
+
+F3-01 Oportunidades de Angariação e Procuras
+
+Execução: Qualificação, estados, responsáveis, critérios de procura, histórico de interações e relações com Entidades/Imóveis.
+
+Aceitação: Filtros, permissões e edição direta consistentes; dados relacionados visíveis apenas a autorizados.
+
+Referências: M05–M06; AT-03.
+
+F3-02 Buyer/Seller Match com teto de 20%
+
+Execução: Criar critérios obrigatórios e preferenciais, tolerância configurável por Procura de 0% a 20%, explicação de compatibilidade.
+
+Aceitação: 250.000 € + 20% = teto 300.000 €; imóveis acima do teto são excluídos; obrigatórios não satisfeitos excluem.
+
+Referências: Q15; AT-10.
+
+F3-03 Visitas e interesses
+
+Execução: Modelar agendamento, participantes, estado e interessados por imóvel, com origem e histórico; integração posterior com Agenda sem duplicar eventos.
+
+Aceitação: Ligação de Visita a Entidade e Imóvel íntegra, com filtros por perfil.
+
+Referências: M07; M12.
+
+F3-04 Gerar Proposta a partir de Visita
+
+Execução: Ação explícita “Gerar Proposta”, formulário pré-preenchido e confirmação; participantes e origem preservados; bloquear duplicados.
+
+Aceitação: Não cria registo sem Guardar; teste de duplicação e acesso inválido.
+
+Referências: Q12/Q16; AT-08.
+
+F3-05 Gerar Transação de Proposta aceite
+
+Execução: Ação explícita “Gerar Transação”; exigir estado elegível e confirmação; preservar comprador, titulares e referência da proposta.
+
+Aceitação: Sem criação em duplicado; participantes históricos estáveis.
+
+Referências: Q12/Q16; AT-09/AT-11.
+
+F3-06 Estados de Transação e atualizações sugeridas
+
+Execução: Ao concluir, cancelar ou reabrir, apresentar consequências propostas sobre Imóvel, CMI e outros; apenas executar escolhas confirmadas.
+
+Aceitação: Sem atualizações em cascata indiscriminadas; tudo reversível quando permitido e auditado.
+
+Referências: Q14; AT-09.
+
+F3-07 Comissões, exceções e aprovações
+
+Execução: Calcular com base em CMI e negócio; permitir valor excepcional justificado com aprovação de Administrador/Responsável autorizado.
+
+Aceitação: Valor calculado, final, aprovador, motivo e hora preservados; após faturação, corrigir por movimento próprio.
+
+Referências: Q13; AT-07.
+
+F3-08 Recebimentos parciais, IVA e estornos
+
+Execução: Registar cada pagamento com data real, base/IVA/total, ligação a fatura/negócio; devolução como movimento novo associado.
+
+Aceitação: KPI sem IVA; estorno conserva recebimento original; reconciliação de saldos e datas de caixa.
+
+Referências: D03/Q04/Q05; AT-06/AT-07.
+
+F3-09 Pós-Venda e documentos transacionais
+
+Execução: Criar tarefas e documentos ligados ao negócio e participantes históricos; permissões e exportações seguras.
+
+Aceitação: Alteração posterior de coproprietários não reescreve transações concluídas.
+
+Referências: M10/M18; Q16; AT-11.
+
+7. Fase 4 — Operação, marketing e comunicação
+
+F4-01 Tarefas centralizadas
+
+Execução: Modelar tarefas ligadas a qualquer módulo, responsáveis, prioridade, estados, prazos e sincronização com atividades do Pós-Venda.
+
+Aceitação: Listagem central e ficha apresentam os mesmos estados sem duplicação de tarefas.
+
+Referências: M11; V1.4 §8.1.
+
+F4-02 Agenda e alertas
+
+Execução: Dia/Semana/Mês/Lista, compromissos editáveis e eventos derivados (visitas, tarefas, aniversários, prazos), sem duplicar origens.
+
+Aceitação: Alterar uma Visita atualiza a respetiva visualização; alertas coerentes por perfil.
+
+Referências: M12; Q11.
+
+F4-03 Plano de Marketing de Imóveis — 45 tarefas
+
+Execução: Instanciar catálogo original por semanas 1–8, +0 a +49 dias, offsets adicionais, seleção Incluir, estados e contadores semanais.
+
+Aceitação: 45 designações/ocorrências exatas e repetições independentes; semana sem incluídas neutra; contadores corretos.
+
+Referências: D01/D02; AT-05.
+
+F4-04 Renovação e novo ciclo de Marketing
+
+Execução: Perguntar se criar novo plano e origem (catálogo ou seleção anterior), depois destino das tarefas pendentes (manter/encerrar).
+
+Aceitação: Cada renovação tem ciclo próprio; sem duplicar ciclos, sem perder tarefas/conclusões antigas.
+
+Referências: Q01/Q02; AT-04.
+
+F4-05 Marketing de Entidades sem modelos instalados
+
+Execução: Criar apenas motor de planos, públicos, tarefas, disparadores e prazos configuráveis pelo Administrador.
+
+Aceitação: Sistema nasce sem planos/campanhas/tarefas de Entidades pré-configurados.
+
+Referências: D04; V1.4 §7.
+
+F4-06 Dashboard e Estatísticas configuráveis
+
+Execução: Widgets individuais, layout, filtros, períodos e indicadores definidos pelo Administrador; comercial por escritura, recebimentos por data do dinheiro.
+
+Aceitação: Comissão Média exclui desconhecidas e inclui zeros apurados; só valores de comissão sem IVA no Dashboard.
+
+Referências: Q03/Q05; M01/M20; AT-06.
+
+F4-07 Brevo, remetentes e limites
+
+Execução: Remetente central + individuais autorizados, limite diário/mensal por utilizador/empresa, previsão de destinatários e consentimentos.
+
+Aceitação: Exceder limite interno pede autorização; não excede o fornecedor; enviados distintos de preparados; erros registados.
+
+Referências: V03; AT-14.
+
+F4-08 WhatsApp direto e relatórios/documentos
+
+Execução: Abrir link WhatsApp sem presumir envio concluído; exportar relatórios e documentos com controlo de acesso.
+
+Aceitação: Abertura wa.me não marca mensagem como enviada; PDFs/exports não divulgam dados não autorizados.
+
+Referências: D08/DT-02–05; AT-14.
+
+F4-09 Notificações e configuração operacional
+
+Execução: Alertas, avisos de contratos, permissões de configuração, preferências pessoais e registos das notificações efetivamente emitidas.
+
+Aceitação: Avisos reproduzíveis e testáveis, com limites e âmbito de visibilidade.
+
+Referências: V1.4 §§3, 8; Q06.
+
+8. Fase 5 — Migração, segurança, recuperação e lançamento
+
+F5-01 Importação seletiva Excel/CSV e Outlook exportado
+
+Execução: Ensaiar >2.000 registos fictícios/anonimizados; prévia por categoria/campo/histórico, deduplicação assistida e origem do lote.
+
+Aceitação: Nenhuma fusão ou consentimento presumidos; relatório dos criados/atualizados/rejeitados e relações conservadas.
+
+Referências: Q08; AT-12.
+
+F5-02 Testes de acesso, carga e integridade
+
+Execução: Cobrir 16 cenários AT, cenários negativos de API, conflitos de edição, exportações, PDFs e pesquisas paginadas.
+
+Aceitação: Zero falhas críticas; resultados e condições de desempenho documentados, sem garantir capacidade apenas pela VPS.
+
+Referências: V04; AT-01–AT-15.
+
+F5-03 Infraestrutura Amen VPS X2 em ensaio
+
+Execução: Validar 2 vCPU/2 GB/75 GB Ubuntu 24.04, HTTPS, firewall, sessões, observabilidade e consumo sob testes.
+
+Aceitação: Decisão fundamentada sobre necessidade de >=4 GB RAM antes da produção, sem contratação automática.
+
+Referências: V01; AT-15.
+
+F5-04 Backups diários cifrados e restauro
+
+Execução: Configurar solução técnica aprovada para OneDrive, versões e alertas; realizar restauro integral em ambiente separado.
+
+Aceitação: Backup + anexos + configurações recuperados com integridade; chaves e acesso segregados; ensaio registado.
+
+Referências: V02; AT-16.
+
+F5-05 RGPD, retenção e fornecedores
+
+Execução: Validar regras legais com responsável competente, categorias, bases e prazos; contratos com fornecedores, oposição a marketing e auditoria.
+
+Aceitação: Nenhuma regra legal arbitrária; bloqueios de eliminação funcionam; prova de validação antes de ativar.
+
+Referências: Q07; V1.4 §4.3; AT-13.
+
+F5-06 Piloto e aceite formal
+
+Execução: Preparar checklist AT, registo de incidentes e demonstrações. Separar ensaio de produção; só usar dados reais após revisão e decisão explícita.
+
+Aceitação: Todos os AT críticos aprovados; restantes pendentes justificados e expressamente aceites; autorização formal registada.
+
+Referências: V04; AT-01–AT-16.
+
+9. Cobertura dos módulos da V30.25 e do novo Glossário
+
+  --------------------------------------------------------------------------------
+  Origem                  Módulo                         Pacote(s) principal(is)
+  ----------------------- ------------------------------ -------------------------
+  M01                     Painel principal / Dashboard   F4-06
+
+  M02                     Entidades                      F2-01
+
+  M03                     Imóveis                        F2-02
+
+  M04                     Angariações / CMI              F2-03 / F4-04
+
+  M05                     Oportunidades de Angariação    F3-01
+
+  M06                     Procuras / Qualificação        F3-01 / F3-02
+
+  M07                     Visitas                        F3-03
+
+  M08                     Propostas                      F3-04
+
+  M09                     Transações                     F3-05 / F3-06
+
+  M10                     Pós-Venda                      F3-09
+
+  M11                     Tarefas                        F4-01
+
+  M12                     Agenda                         F4-02
+
+  M13                     Comunicações e Automações      F4-05 / F4-07 / F4-09
+
+  M14                     Equipa                         F1-05 / F2-05
+
+  M15                     Agentes                        F2-05
+
+  M16                     Agências                       F2-05
+
+  M17                     Faturação e Comissões          F3-07 / F3-08
+
+  M18                     Documentos                     F3-09 / F4-08
+
+  M19                     Marketing                      F4-03 / F4-05
+
+  M20                     Estatísticas                   F4-06
+
+  M21                     Configurações                  F1-07 / F2-06
+
+  M22                     Lixeira                        F2-06 / F5-05
+
+  NOVO                    Glossário (Q10)                F2-05
+  --------------------------------------------------------------------------------
+
+A correspondência indica o pacote central, não dispensa as tarefas transversais de permissões, vista, validação, documentos e auditoria.
+
+10. Matriz de aceitação e momentos de aprovação
+
+  --------------------------------------------------------------------------------------------------------------------------
+  Teste                   Implementação principal   Evidência mínima
+  ----------------------- ------------------------- ------------------------------------------------------------------------
+  AT-01                   F1-04/05; F5-02           Autenticação, API, exportação e anexos negam acesso indevido.
+
+  AT-02                   F1-05/06                  Assistente limitado; partilha e transferência autorizadas e auditadas.
+
+  AT-03                   F1-03; F2-04              Consulta/edição direta e vistas Lista/Cartões/Kanban seguras.
+
+  AT-04                   F2-03; F4-04              CMI original e ciclos de renovação preservados.
+
+  AT-05                   F4-03                     45 tarefas, oito semanas, repetições e contadores corretos.
+
+  AT-06                   F3-08; F4-06              Dashboard configurável, escritura e métricas sem IVA.
+
+  AT-07                   F3-07/08                  Parciais, autorizações, IVA e estornos rastreáveis.
+
+  AT-08                   F3-04                     Gerar Proposta apenas por confirmação, sem duplicados.
+
+  AT-09                   F3-05/06                  Transação e atualizações relacionadas confirmáveis.
+
+  AT-10                   F3-02                     Correspondência com obrigatórios/preferenciais e teto 20%.
+
+  AT-11                   F2-02; F3-05/09           Participantes históricos e quotas preservados.
+
+  AT-12                   F2-07; F5-01              Importação >2.000 registos, mapa, deduplicação e revisão.
+
+  AT-13                   F1-07; F2-05/06; F5-05    Campos históricos, Glossário, dependências e conservação.
+
+  AT-14                   F4-07/08                  Brevo/remetentes/limites; WhatsApp não equivale a envio.
+
+  AT-15                   F5-02/03                  HTTPS, acesso protegido, segregação e carga.
+
+  AT-16                   F5-04/06                  Restauro externo testado e aprovação formal.
+  --------------------------------------------------------------------------------------------------------------------------
+
+10.1 Aprovação de fase
+
+  ----------------------------------------------------------------------------------------------------------------------------------------------------
+  Porta                               Condição para avançar
+  ----------------------------------- ----------------------------------------------------------------------------------------------------------------
+  Após F0                             Repositório inspecionado, V30.25 protegido e localização das fontes confirmada.
+
+  Após F1                             Autenticação/permissões negativas testadas, modelo no-code básico e ambiente local reproduzível.
+
+  Após F2                             Entidades, Imóveis e CMI com relações e vistas aprovadas; sem perda silenciosa.
+
+  Após F3                             Ciclo Visita→Proposta→Transação→Financeiro demonstrado de ponta a ponta.
+
+  Após F4                             Marketing, Tarefas, Agenda, Dashboard e comunicações com testes aprovados.
+
+  Antes de produção                   AT críticos verdes, backup restaurado, adequação da VPS aferida, requisitos RGPD validados e aprovação formal.
+  ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+11. Riscos conhecidos e prioridades de correção
+
+  ---------------------------------------------------------------------------------------------------------------------------------------------------
+  Risco                                                           Tratamento no plano
+  --------------------------------------------------------------- -----------------------------------------------------------------------------------
+  Protótipo localStorage sem autenticação real                    Não reutilizar mecanismos de segurança; F1-04/05, AT-01.
+
+  Campos/data de escritura divergentes nas estatísticas           Modelo canónico de escritura e testes de coorte em F3-05/F4-06, AT-06.
+
+  Perda de proprietários ou participantes em fluxos de proposta   Relacionamentos e fotografia histórica de participantes em F2-02/F3-04/05, AT-11.
+
+  Comissões com valores acumulados e sem movimentos datados       Livro de movimentos financeiros imutáveis em F3-08, AT-07.
+
+  Perda de dados ao fechar formulários; estados conflitantes      Guardas de saída e validação de transições em F1-03/F3-06, AT-03/09.
+
+  Apagamentos destrutivos e conservação não validada              Controlo de dependências/retenção em F2-06/F5-05, AT-13.
+
+  Importação de contactos sem consentimento de marketing          Separar origem e base legal; F5-01/F5-05, AT-12.
+
+  RAM de 2 GB e backups insuficientes                             Avaliar capacidade e testar restauro OneDrive em F5-03/04, AT-15/16.
+  ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+12. O que fica expressamente para uma evolução posterior
+
+Pipeline ponderado por probabilidade (Q11); Lista/Cartões/Kanban entram na primeira versão.
+
+Funcionamento offline e sincronização bidirecional: primeira versão PWA online (D07).
+
+Envio de SMS, integração oficial da API WhatsApp e sincronização automática de contactos com Outlook, sujeitos a decisões e custos próprios.
+
+Autocriação de propostas/transações por mudança de estado: primeira versão exige ações explícitas; um motor de automação poderá permitir evolução parametrizada.
+
+13. Primeiro pedido pronto para colocar no Codex
+
+Começar por F0-01, em modo apenas leitura. O ficheiro Markdown que acompanha este plano contém o texto integral, pronto a copiar. É especialmente importante não pedir ao Codex todas as fases de uma só vez.
+
+OBJETIVO: iniciar com segurança a implementação profissional do CRM Valor Máximo, SEM alterar qualquer ficheiro nesta primeira tarefa.
+
+1. Lê integralmente AGENTS.md e identifica as regras locais aplicáveis.
+
+2. Mostra o ramo Git atual, o último commit e o estado de alterações (incluindo ficheiros não seguidos). Não faças checkout, reset, commit, push nem outro comando de escrita.
+
+3. Confirma a existência e localização do protótipo V30.25, da Especificação Consolidada V1.4 e dos sete ficheiros documentacao/levantamento_v30_25/. Se algum faltar, assinala-o; não o recries de memória.
+
+4. Indica que pastas/ficheiros existentes seriam afetados por uma nova aplicação React/TypeScript + Django + PostgreSQL e propõe uma estrutura isolada que preserve integralmente a V30.25.
+
+5. Apresenta uma proposta para a tarefa F1-01, incluindo ficheiros a criar, comandos planeados, requisitos de ambiente e testes de aceitação. Não executes a tarefa F1-01 nesta ronda.
+
+6. Termina com a lista de pontos que requerem a minha aprovação antes de alterar o projeto.
+
+REGRAS: sem instalações, sem segredos, sem dados reais, sem migrações, sem acesso ao VPS e sem chamadas a serviços externos. Responde em português de Portugal.
+
+13.1 Após a resposta do Codex
+
+Verificar se o repositório está limpo ou se existem alterações locais por preservar.
+
+Confirmar que o Codex encontrou a V1.4 e não pretende modificar o HTML V30.25.
+
+Aprovar a árvore de ficheiros proposta e só então pedir a implementação de F1-01 (idealmente num ramo separado).
+
+Não copiar tokens, senhas do servidor ou dados de clientes para a conversa nem para o Git.
+
+14. Registo de alterações e condição do documento
+
+Plano 1.0: criado a partir da Especificação Consolidada V1.4 e das conclusões documentais do levantamento da V30.25. Identifica tarefas e dependências, não substitui a especificação normativa nem constitui evidência de implementação ou de testes concluídos. O calendário depende da execução e aprovação de cada pacote.
