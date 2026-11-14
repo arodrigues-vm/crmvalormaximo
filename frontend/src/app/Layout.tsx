@@ -27,13 +27,7 @@ export function Layout({ children }: { children: ReactNode }) {
     <div className="estrutura">
       <aside className={`lateral ${menuAberto ? 'aberta' : ''}`} aria-label="Navegação principal">
         <div className="marca">
-          <span className="marca-logo" aria-hidden="true">
-            VM
-          </span>
-          <span className="marca-texto">
-            <strong>Valor Máximo</strong>
-            <small>Soluções Imobiliárias</small>
-          </span>
+          <img src="/marca/logotipo-320.webp" alt="Valor Máximo — Soluções Imobiliárias" width={150} height={117} />
         </div>
         <nav>
           {grupos.map((grupo) => (

@@ -14,6 +14,8 @@ As decisões D-01 a D-10, Q01 a Q16 e V01 a V04 da Especificação V1.4 mantêm-
 | D-17 | 14/11/2026 | Ambiente de desenvolvimento e produção em **Docker Compose**; testes automáticos no **GitHub Actions**. |
 | D-18 | 14/11/2026 | **Consultor vê só os seus registos** (atribuídos ou partilhados), não os da equipa. Confirma a matriz por omissão. |
 | D-19 | 14/11/2026 | **MFA obrigatória para Administradores** (proposta técnica aplicada, sugestão 12); disponível para os restantes perfis. Lista de perfis configurável. |
+| D-20 | 14/11/2026 | **Logótipo aprovado** recebido (`marca/logotipo-valor-maximo-original.webp`). Na interface usa-se o mesmo logótipo com o fundo removido, para assentar no azul-marinho; ícones da aplicação a partir do monograma VM (recorte, sem redesenho). |
+| D-21 | 14/11/2026 | **Manual de utilizador escrito à medida** que cada módulo fica pronto (`documentacao/manual/`), com revisão e versão final (PDF) no fim. |
 
 ## Decisões técnicas propostas (aplicadas salvo indicação em contrário)
 
@@ -36,5 +38,4 @@ Confirmada pela decisão D-18.
 
 ## Pendentes do proprietário
 
-- Ficheiro do logótipo aprovado (VM dourado sobre azul-marinho). Até lá é usado um marcador provisório.
 - Ficheiro «Tabelas Completo.xlsx» (inventário histórico de campos, Q09) — necessário na F2-06.

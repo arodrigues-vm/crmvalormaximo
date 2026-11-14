@@ -15,11 +15,15 @@ export default defineConfig({
         short_name: 'Valor Máximo',
         description: 'Valor Máximo — Soluções Imobiliárias',
         lang: 'pt-PT',
-        theme_color: '#0b2545',
+        theme_color: '#000b23',
         background_color: '#f5f7fa',
         display: 'standalone',
         start_url: '/',
-        icons: [{ src: '/icone.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' }],
+        icons: [
+          { src: '/marca/icone-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: '/marca/icone-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: '/marca/icone-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+        ],
       },
       workbox: {
         navigateFallbackDenylist: [/^\/api\//, /^\/admin\//],

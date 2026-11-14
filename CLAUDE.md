@@ -20,6 +20,9 @@ Não inventar regras de negócio, fiscais ou prazos legais. Em ambiguidade, apre
 - Ações que criam registos a partir de outros (Gerar Proposta, Gerar Transação, Criar plano) exigem ação expressa e confirmação.
 - Cada alteração vem com testes. Antes de enviar: `ruff check`, `ruff format --check`, `pytest` (backend); `npm run lint`, `npm test`, `npm run build` (frontend).
 - No fim de cada tarefa, atualizar `documentacao/CONTINUIDADE.md` e, se aplicável, a matriz de aceitação.
+- Quando uma funcionalidade visível ao utilizador fica pronta, escrever/atualizar o capítulo respetivo do
+  manual em `documentacao/manual/` (linguagem simples, passos numerados, capturas com dados fictícios).
+- Identidade visual: usar apenas o logótipo aprovado (`documentacao/marca/`); nunca o redesenhar.
 
 ## Comandos
 - Backend: `cd backend && .venv/bin/pytest`

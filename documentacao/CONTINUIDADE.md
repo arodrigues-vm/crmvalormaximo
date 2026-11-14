@@ -26,7 +26,9 @@ Estes estados não são equivalentes.
 ## Limitações conhecidas
 - O `docker compose` ainda não foi executado de ponta a ponta (o ambiente de desenvolvimento usado não tem Docker ativo). Backend e frontend foram testados diretamente contra PostgreSQL 16.
 - Endereço IP na auditoria vem de REMOTE_ADDR; em produção, atrás do proxy, configurar o cabeçalho de IP real (F5-03).
-- Logótipo provisório («VM» em texto) até receber o ficheiro aprovado.
+
+## Manual de utilizador
+Capítulo 1 (Entrar, sair e segurança) escrito. Ver `documentacao/manual/README.md`.
 
 ## Utilizadores de demonstração (fictícios)
 `python manage.py criar_utilizadores_demo --password <palavra-passe>` cria admin@, responsavel@, consultor@ e assistente@demo.local. Recusa-se a correr em produção.

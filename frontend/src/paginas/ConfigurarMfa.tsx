@@ -1,6 +1,6 @@
-import { useMutation } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import QRCode from 'qrcode'
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 
 import { auth, ErroApi } from '../api/cliente'
 import { useSessao } from '../app/sessao'
@@ -14,16 +14,17 @@ export function ConfigurarMfa() {
   const [erro, setErro] = useState<string | null>(null)
   const [codigos, setCodigos] = useState<string[] | null>(null)
 
-  const configurar = useMutation({ mutationFn: auth.configurarMfa })
-  const { mutate: iniciar } = configurar
-  // Pedir o segredo uma única vez (o StrictMode executa os efeitos duas vezes em desenvolvimento,
-  // o que geraria dois segredos e um QR desatualizado).
-  const iniciado = useRef(false)
-  useEffect(() => {
-    if (iniciado.current) return
-    iniciado.current = true
-    iniciar()
-  }, [iniciar])
+  // Uma consulta (e não uma mutação) garante um único pedido mesmo quando o componente
+  // é montado duas vezes (StrictMode): dois pedidos gerariam dois segredos e um QR inválido.
+  const configurar = useQuery({
+    queryKey: ['mfa', 'configurar'],
+    queryFn: auth.configurarMfa,
+    staleTime: Infinity,
+    gcTime: 0,
+    retry: false,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  })
 
   useEffect(() => {
     if (configurar.data) void QRCode.toDataURL(configurar.data.uri, { margin: 1, width: 220 }).then(setQr)
