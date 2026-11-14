@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 
+import { ConfigurarMfa } from '../paginas/ConfigurarMfa'
 import { Dashboard } from '../paginas/Dashboard'
 import { Entrar } from '../paginas/Entrar'
 import { DefinirPassword, PedirRecuperacao } from '../paginas/Recuperar'
@@ -12,6 +13,7 @@ function RotaProtegida({ children }: { children: ReactNode }) {
   const local = useLocation()
   if (aCarregar) return <p className="a-carregar">A carregar…</p>
   if (!utilizador) return <Navigate to="/entrar" replace state={{ de: local.pathname }} />
+  if (utilizador.mfa_configuracao_pendente) return <ConfigurarMfa />
   return <Layout>{children}</Layout>
 }
 

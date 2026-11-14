@@ -16,7 +16,8 @@ Estes estados não são equivalentes.
 | F1-01 Estrutura inicial | Implementado, testado | Django 5.2 + DRF + drf-spectacular; React 19 + TS + Vite + PWA; navegação lateral com os 23 módulos; endpoint `/api/saude/`. |
 | F1-02 PostgreSQL e ambientes | Implementado, testado | `DATABASE_URL` por variável de ambiente; `.env` fora do Git; Docker Compose (db/backend/frontend); CI com PostgreSQL 16. |
 | F1-03 Identidade e padrões de interação | Por fazer | Layout base feito; falta Consulta/Edição, guardas de saída, componentes de formulário. |
-| F1-04 Autenticação | Implementado, testado | Login por email (sessão Django, CSRF obrigatório incluindo no login), limite de 10 tentativas/min, mensagem genérica, recuperação por email com token (2 h), auditoria de entradas/saídas/falhas. **MFA ainda por fazer** (tarefa F1-04b). |
+| F1-04 Autenticação | Implementado, testado | Login por email (sessão Django, CSRF obrigatório incluindo no login), limite de 10 tentativas/min, mensagem genérica, recuperação por email com token (2 h), auditoria de entradas/saídas/falhas. MFA concluída (F1-04b). |
+| F1-04b MFA | Implementado, testado | TOTP (Google/Microsoft Authenticator) obrigatório para Administrador (configurável: `CRM_MFA_PERFIS_OBRIGATORIOS`); segredo cifrado; anti-reutilização de códigos; 10 códigos de recuperação de uso único; até configurar, a API e o admin ficam bloqueados; o Administrador pode repor o MFA de um utilizador no admin. Mudar a `DJANGO_SECRET_KEY` invalida as configurações MFA. |
 | F1-05 Permissões no servidor | Implementado, testado | 4 perfis; matriz perfil × módulo × operação → âmbito (nenhum/atribuídos/equipa/todos), configurável no admin; exceções por utilizador; serviço `filtrar()` e permissão DRF `PermissaoModulo` (nega por omissão). Matriz por omissão é proposta — ver DECISOES. |
 | F1-06 Partilha, transferência, auditoria | Parcial | Registo de auditoria imutável criado. Partilha/transferência por fazer (precisam dos primeiros registos de negócio). |
 | F1-07 Motor no-code (âmbito D-13) | Por fazer | |
@@ -31,4 +32,4 @@ Estes estados não são equivalentes.
 `python manage.py criar_utilizadores_demo --password <palavra-passe>` cria admin@, responsavel@, consultor@ e assistente@demo.local. Recusa-se a correr em produção.
 
 ## Próxima tarefa
-F1-03 (Consulta/Edição, guardas de saída, componentes de formulário), F1-04b (MFA para Administradores) e F1-07 (motor no-code, âmbito D-13).
+F1-03 (Consulta/Edição, guardas de saída, componentes de formulário) e F1-07 (motor no-code, âmbito D-13).

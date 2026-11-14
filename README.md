@@ -49,6 +49,7 @@ cd backend && python manage.py criar_utilizadores_demo --password "Escolha-uma-p
 ```
 
 Entrar com `admin@demo.local`, `responsavel@demo.local`, `consultor@demo.local` ou `assistente@demo.local`.
+O Administrador tem verificação em dois passos obrigatória: no primeiro acesso é pedido para ler um código QR com uma aplicação de autenticação.
 
 ## Testes
 

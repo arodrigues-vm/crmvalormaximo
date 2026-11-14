@@ -49,6 +49,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "apps.contas.middleware.ExigirConfiguracaoMFA",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -115,8 +116,14 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "entrar": env("CRM_LIMITE_ENTRAR", default="10/min"),
         "recuperar": env("CRM_LIMITE_RECUPERAR", default="5/hour"),
+        "mfa": env("CRM_LIMITE_MFA", default="10/min"),
     },
 }
+
+# Perfis com autenticação em dois passos obrigatória.
+CRM_MFA_PERFIS_OBRIGATORIOS = env.list("CRM_MFA_PERFIS_OBRIGATORIOS", default=["administrador"])
+# Tempo máximo entre a palavra-passe e o código MFA (segundos).
+CRM_MFA_PENDENTE_SEGUNDOS = 300
 
 # Endereço público da interface (usado nas ligações enviadas por email).
 CRM_URL_FRONTEND = env("CRM_URL_FRONTEND", default="http://localhost:5173")

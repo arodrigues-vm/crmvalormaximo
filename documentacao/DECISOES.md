@@ -13,6 +13,7 @@ As decisões D-01 a D-10, Q01 a Q16 e V01 a V04 da Especificação V1.4 mantêm-
 | D-16 | 14/11/2026 | VPS Amen X2 (2 GB) mantém-se; upgrade só se as medições o justificarem. Por isso: fila de tarefas sobre PostgreSQL (sem Redis). |
 | D-17 | 14/11/2026 | Ambiente de desenvolvimento e produção em **Docker Compose**; testes automáticos no **GitHub Actions**. |
 | D-18 | 14/11/2026 | **Consultor vê só os seus registos** (atribuídos ou partilhados), não os da equipa. Confirma a matriz por omissão. |
+| D-19 | 14/11/2026 | **MFA obrigatória para Administradores** (proposta técnica aplicada, sugestão 12); disponível para os restantes perfis. Lista de perfis configurável. |
 
 ## Decisões técnicas propostas (aplicadas salvo indicação em contrário)
 

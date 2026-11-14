@@ -6,7 +6,10 @@ import { auth, type Operacao, type UtilizadorAtual } from '../api/cliente'
 interface Sessao {
   utilizador: UtilizadorAtual | null
   aCarregar: boolean
-  entrar: (email: string, password: string) => Promise<void>
+  /** Devolve 'mfa' quando é preciso o código de dois passos. */
+  entrar: (email: string, password: string) => Promise<'ok' | 'mfa'>
+  verificarMfa: (codigo: string) => Promise<void>
+  atualizar: () => Promise<void>
   sair: () => Promise<void>
   pode: (modulo: string, operacao?: Operacao) => boolean
 }
@@ -22,19 +25,31 @@ export function ProvedorSessao({ children }: { children: ReactNode }) {
 
   // Remove os dados em cache de outro utilizador, mantendo a consulta da sessão
   // (que está a ser observada; não pode ser destruída).
-  const limparDados = useCallback(
-    () => qc.removeQueries({ predicate: (q) => q.queryKey[0] !== CHAVE_SESSAO[0] }),
-    [qc],
-  )
+  const limparDados = useCallback(() => qc.removeQueries({ predicate: (q) => q.queryKey[0] !== CHAVE_SESSAO[0] }), [qc])
 
   const entrar = useCallback(
     async (email: string, password: string) => {
-      const u = await auth.entrar(email, password)
+      const r = await auth.entrar(email, password)
+      if ('mfa_necessaria' in r) return 'mfa' as const
+      limparDados()
+      qc.setQueryData(CHAVE_SESSAO, r)
+      return 'ok' as const
+    },
+    [qc, limparDados],
+  )
+
+  const verificarMfa = useCallback(
+    async (codigo: string) => {
+      const u = await auth.verificarMfa(codigo)
       limparDados()
       qc.setQueryData(CHAVE_SESSAO, u)
     },
     [qc, limparDados],
   )
+
+  const atualizar = useCallback(async () => {
+    await qc.invalidateQueries({ queryKey: CHAVE_SESSAO })
+  }, [qc])
 
   const sair = useCallback(async () => {
     try {
@@ -53,8 +68,8 @@ export function ProvedorSessao({ children }: { children: ReactNode }) {
   )
 
   const valor = useMemo(
-    () => ({ utilizador, aCarregar: isLoading, entrar, sair, pode }),
-    [utilizador, isLoading, entrar, sair, pode],
+    () => ({ utilizador, aCarregar: isLoading, entrar, verificarMfa, atualizar, sair, pode }),
+    [utilizador, isLoading, entrar, verificarMfa, atualizar, sair, pode],
   )
   return <ContextoSessao.Provider value={valor}>{children}</ContextoSessao.Provider>
 }

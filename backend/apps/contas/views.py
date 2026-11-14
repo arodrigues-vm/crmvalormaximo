@@ -1,3 +1,5 @@
+import time
+
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
@@ -14,8 +16,10 @@ from rest_framework.views import APIView
 
 from apps.core.auditoria import registar
 
+from . import mfa
 from .models import Utilizador
 from .serializers import (
+    CodigoSerializer,
     ConfirmarRecuperacaoSerializer,
     EntrarSerializer,
     RecuperarSerializer,
@@ -23,6 +27,7 @@ from .serializers import (
 )
 
 MENSAGEM_CREDENCIAIS = "Email ou palavra-passe incorretos."
+CHAVE_MFA_PENDENTE = "mfa_pendente"
 
 
 @method_decorator(ensure_csrf_cookie, name="dispatch")
@@ -54,8 +59,71 @@ class EntrarView(APIView):
         if utilizador is None:
             # Mensagem genérica: não revelar se o email existe.
             return Response({"detail": MENSAGEM_CREDENCIAIS}, status=status.HTTP_400_BAD_REQUEST)
+        if mfa.mfa_ativa(utilizador):
+            # Palavra-passe correta, mas a sessão só é aberta após o código MFA.
+            request.session.cycle_key()
+            request.session[CHAVE_MFA_PENDENTE] = {"id": utilizador.pk, "desde": time.time()}
+            return Response({"mfa_necessaria": True})
         login(request, utilizador)
         return Response(UtilizadorAtualSerializer(utilizador).data)
+
+
+@method_decorator(csrf_protect, name="dispatch")
+class MfaVerificarView(APIView):
+    permission_classes = [AllowAny]
+    throttle_scope = "mfa"
+
+    @extend_schema(summary="Concluir entrada com código MFA", request=CodigoSerializer)
+    def post(self, request):
+        dados = CodigoSerializer(data=request.data)
+        dados.is_valid(raise_exception=True)
+        pendente = request.session.get(CHAVE_MFA_PENDENTE)
+        if not pendente or time.time() - pendente["desde"] > settings.CRM_MFA_PENDENTE_SEGUNDOS:
+            request.session.pop(CHAVE_MFA_PENDENTE, None)
+            return Response(
+                {"detail": "O tempo para introduzir o código expirou. Volte a entrar."}, status=400
+            )
+        utilizador = Utilizador.objects.filter(pk=pendente["id"], is_active=True).first()
+        tipo = mfa.verificar(utilizador, dados.validated_data["codigo"]) if utilizador else None
+        if tipo is None:
+            registar("sessao.mfa_falha", utilizador=utilizador, modulo="sessao", request=request)
+            return Response({"detail": "Código inválido."}, status=400)
+        request.session.pop(CHAVE_MFA_PENDENTE, None)
+        utilizador.backend = "django.contrib.auth.backends.ModelBackend"
+        login(request, utilizador)
+        if tipo == "recuperacao":
+            registar(
+                "sessao.mfa_codigo_recuperacao_usado", utilizador=utilizador, modulo="sessao", request=request
+            )
+        return Response(UtilizadorAtualSerializer(utilizador).data)
+
+
+class MfaConfigurarView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(summary="Iniciar configuração MFA (gera segredo)", request=None)
+    def post(self, request):
+        if mfa.mfa_ativa(request.user):
+            return Response({"detail": "A autenticação em dois passos já está ativa."}, status=400)
+        segredo, uri = mfa.iniciar_configuracao(request.user)
+        return Response({"segredo": segredo, "uri": uri})
+
+
+class MfaAtivarView(APIView):
+    permission_classes = [IsAuthenticated]
+    throttle_scope = "mfa"
+
+    @extend_schema(summary="Confirmar configuração MFA com um código", request=CodigoSerializer)
+    def post(self, request):
+        dados = CodigoSerializer(data=request.data)
+        dados.is_valid(raise_exception=True)
+        codigos = mfa.ativar(request.user, dados.validated_data["codigo"])
+        if codigos is None:
+            return Response(
+                {"detail": "Código inválido. Verifique a hora do telemóvel e tente de novo."}, status=400
+            )
+        registar("sessao.mfa_ativada", modulo="sessao", request=request)
+        return Response({"codigos_recuperacao": codigos})
 
 
 class SairView(APIView):

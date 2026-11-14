@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import Equipa, PermissaoPerfil, PermissaoUtilizador, Utilizador
+from .models import ConfiguracaoMFA, Equipa, PermissaoPerfil, PermissaoUtilizador, Utilizador
 
 
 @admin.register(Utilizador)
@@ -35,3 +35,15 @@ class PermissaoPerfilAdmin(admin.ModelAdmin):
 @admin.register(PermissaoUtilizador)
 class PermissaoUtilizadorAdmin(admin.ModelAdmin):
     list_display = ["utilizador", "modulo", "operacao", "ambito"]
+
+
+@admin.register(ConfiguracaoMFA)
+class ConfiguracaoMFAAdmin(admin.ModelAdmin):
+    """Permite ao Administrador repor o MFA de um utilizador (eliminando a configuração)."""
+
+    list_display = ["utilizador", "ativa", "ativada_em"]
+    readonly_fields = ["utilizador", "ativa", "ativada_em"]
+    exclude = ["segredo_cifrado", "ultimo_passo"]
+
+    def has_add_permission(self, request):
+        return False

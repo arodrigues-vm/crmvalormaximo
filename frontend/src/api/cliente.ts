@@ -82,7 +82,11 @@ export interface UtilizadorAtual {
   equipa: number | null
   equipa_nome: string | null
   permissoes: Record<string, Record<Operacao, Ambito>>
+  mfa_ativa: boolean
+  mfa_configuracao_pendente: boolean
 }
+
+export type RespostaEntrar = UtilizadorAtual | { mfa_necessaria: true }
 
 export const auth = {
   eu: async (): Promise<UtilizadorAtual | null> => {
@@ -94,7 +98,11 @@ export const auth = {
     }
   },
   entrar: (email: string, password: string) =>
-    pedido<UtilizadorAtual>('/api/auth/entrar/', { json: { email, password } }),
+    pedido<RespostaEntrar>('/api/auth/entrar/', { json: { email, password } }),
+  verificarMfa: (codigo: string) => pedido<UtilizadorAtual>('/api/auth/mfa/verificar/', { json: { codigo } }),
+  configurarMfa: () => pedido<{ segredo: string; uri: string }>('/api/auth/mfa/configurar/', { method: 'POST' }),
+  ativarMfa: (codigo: string) =>
+    pedido<{ codigos_recuperacao: string[] }>('/api/auth/mfa/ativar/', { json: { codigo } }),
   sair: () => pedido<null>('/api/auth/sair/', { method: 'POST' }),
   recuperar: (email: string) => pedido<null>('/api/auth/recuperar/', { json: { email } }),
   confirmar: (uid: string, token: string, nova_password: string) =>

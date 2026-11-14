@@ -161,3 +161,33 @@ class PermissaoUtilizador(models.Model):
 
     def __str__(self):
         return f"{self.utilizador} · {self.modulo} · {self.operacao} → {self.ambito}"
+
+
+class ConfiguracaoMFA(models.Model):
+    utilizador = models.OneToOneField(Utilizador, on_delete=models.CASCADE, related_name="mfa")
+    segredo_cifrado = models.TextField()
+    ativa = models.BooleanField(default=False)
+    ativada_em = models.DateTimeField(null=True, blank=True)
+    ultimo_passo = models.BigIntegerField(
+        default=0, help_text="Último passo TOTP aceite (anti-reutilização)."
+    )
+
+    class Meta:
+        verbose_name = "autenticação em dois passos"
+        verbose_name_plural = "autenticações em dois passos"
+
+    def __str__(self):
+        return f"MFA de {self.utilizador} ({'ativa' if self.ativa else 'pendente'})"
+
+
+class CodigoRecuperacaoMFA(models.Model):
+    utilizador = models.ForeignKey(Utilizador, on_delete=models.CASCADE, related_name="codigos_recuperacao")
+    codigo_hash = models.CharField(max_length=128)
+    usado_em = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = "código de recuperação MFA"
+        verbose_name_plural = "códigos de recuperação MFA"
+
+    def __str__(self):
+        return f"Código de {self.utilizador} ({'usado' if self.usado_em else 'disponível'})"
