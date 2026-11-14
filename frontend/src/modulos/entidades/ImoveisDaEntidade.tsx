@@ -23,7 +23,7 @@ export function ImoveisDaEntidade({ entidadeId }: { entidadeId: number }) {
             </Link>
             <span className="relacao-tipo">{formatarPercentagem(i.quota) ?? 'Quota não indicada'}</span>
             <small className="ajuda">
-              {[i.estado_comercializacao, i.status !== 'Ativo' ? i.status : null].filter(Boolean).join(' · ')}
+              {[i.estado_comercializacao, i.status_categoria !== 'ativo' ? i.status : null].filter(Boolean).join(' · ')}
             </small>
           </li>
         ))}

@@ -1,17 +1,31 @@
 """Base reutilizável para módulos de registos de negócio (lista, ficha, edição com
 controlo de versão, lixeira, histórico, auditoria e permissões por registo)."""
 
+from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
+from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 
+from apps.configuracao.campos import CampoValorLista
 from apps.contas.models import Ambito, Operacao
 from apps.contas.permissoes import OPERACAO_POR_ACAO, PermissaoModulo, ambito_efetivo, filtrar, pode_no_registo
 from apps.core.auditoria import registar
 
 CAMPOS_IGNORADOS_HISTORICO = {"versao", "atualizado_em", "atualizado_por"}
+
+
+class LigacaoSerializer(serializers.Serializer):
+    tipo = CampoValorLista("tipos_ligacao")
+    titulo = serializers.CharField(max_length=150)
+    url = serializers.URLField(max_length=1000)
+
+    def validate_url(self, valor):
+        if not valor.lower().startswith(("https://", "http://")):
+            raise serializers.ValidationError("O endereço tem de começar por https://")
+        return valor
 
 
 class RegistoViewSet(
@@ -32,6 +46,8 @@ class RegistoViewSet(
         "lixeira": Operacao.RESTAURAR,
         "historico": Operacao.CONSULTAR,
         "opcoes": Operacao.CONSULTAR,
+        "ligacoes": Operacao.CONSULTAR,
+        "remover_ligacao": Operacao.EDITAR,
     }
 
     # Subclasses: base_queryset() e filtros(qs)
@@ -163,6 +179,59 @@ class RegistoViewSet(
                 }
             )
         return Response(resultado)
+
+    # Ligações externas (pastas do OneDrive, etc.) -------------------------------------
+
+    def _ligacoes(self, obj):
+        from apps.core.models import LigacaoExterna
+
+        ct = ContentType.objects.get_for_model(obj)
+        return [
+            {"id": x.id, "tipo": x.tipo_id, "tipo_nome": x.tipo.nome, "titulo": x.titulo, "url": x.url}
+            for x in LigacaoExterna.objects.filter(tipo_conteudo=ct, objeto_id=obj.pk).select_related("tipo")
+        ]
+
+    @extend_schema(request=LigacaoSerializer)
+    @action(detail=True, methods=["get", "post"])
+    def ligacoes(self, request, pk=None):
+        from apps.core.models import LigacaoExterna
+
+        obj = self.get_object()
+        if request.method == "GET":
+            return Response(self._ligacoes(obj))
+        if not pode_no_registo(request.user, self.modulo, Operacao.EDITAR, obj, campo_partilhas="partilhada_com"):
+            raise PermissionDenied(f"Não tem permissão para alterar este {self.nome_registo}.")
+        s = LigacaoSerializer(data=request.data)
+        s.is_valid(raise_exception=True)
+        lig = LigacaoExterna.objects.create(
+            tipo_conteudo=ContentType.objects.get_for_model(obj),
+            objeto_id=obj.pk,
+            criado_por=request.user,
+            **s.validated_data,
+        )
+        registar(
+            f"{self.nome_registo}.ligacao_criada",
+            modulo=self.modulo,
+            objeto=obj,
+            request=request,
+            dados={"ligacao": lig.pk, "titulo": lig.titulo, "url": lig.url},
+        )
+        return Response(self._ligacoes(obj), status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["delete"], url_path=r"ligacoes/(?P<ligacao_id>\d+)")
+    def remover_ligacao(self, request, pk=None, ligacao_id=None):
+        from apps.core.models import LigacaoExterna
+
+        obj = self.get_object()
+        lig = LigacaoExterna.objects.filter(
+            pk=ligacao_id, tipo_conteudo=ContentType.objects.get_for_model(obj), objeto_id=obj.pk
+        ).first()
+        if lig is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        dados = {"ligacao": lig.pk, "titulo": lig.titulo, "url": lig.url}
+        lig.delete()
+        registar(f"{self.nome_registo}.ligacao_removida", modulo=self.modulo, objeto=obj, request=request, dados=dados)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def permissoes_gerais(self, request) -> dict:
         u = request.user

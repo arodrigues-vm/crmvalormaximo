@@ -8,7 +8,10 @@ import { Dado } from '../../componentes/campos'
 import { Dialogo } from '../../componentes/Dialogo'
 import { CabecalhoRegisto, HistoricoRegisto } from '../../componentes/Ficha'
 import { formatarArea, formatarEuros, formatarPercentagem, momentoPt } from '../../componentes/formatar'
-import { imoveisApi, NOMES_CAMPOS_IMOVEL, STATUS_ETIQUETA, tituloImovel } from './api'
+import { LigacoesExternas } from '../../componentes/LigacoesExternas'
+import { pedido } from '../../api/cliente'
+import { etiquetaStatus, imoveisApi, NOMES_CAMPOS_IMOVEL, tituloImovel } from './api'
+import { FotografiaImovel } from './FotografiaImovel'
 
 export function ImovelConsulta() {
   const { id = '' } = useParams()
@@ -16,6 +19,14 @@ export function ImovelConsulta() {
   const qc = useQueryClient()
   const [confirmar, setConfirmar] = useState(false)
   const { data: i, error, isLoading } = useQuery({ queryKey: ['imoveis', id], queryFn: () => imoveisApi.obter(id) })
+  const tiposLigacao = useQuery({
+    queryKey: ['listas', 'tipos_ligacao', 'opcoes'],
+    queryFn: async () =>
+      (await pedido<{ chave: string; valores: { id: number; nome: string; ativo: boolean }[] }[]>('/api/listas/'))
+        .find((l) => l.chave === 'tipos_ligacao')
+        ?.valores.filter((v) => v.ativo) ?? [],
+    staleTime: 60_000,
+  })
   const eliminar = useMutation({
     mutationFn: () => imoveisApi.eliminar(Number(id)),
     onSuccess: () => {
@@ -45,7 +56,7 @@ export function ImovelConsulta() {
         caminho="/imoveis"
         referencia={i.referencia}
         titulo={tituloImovel({ tipo: n.tipo, tipologia: n.tipologia, localidade: i.localidade })}
-        etiqueta={{ texto: n.status, tipo: STATUS_ETIQUETA[i.status] }}
+        etiqueta={n.status ? { texto: n.status, tipo: etiquetaStatus(n.status_categoria) } : undefined}
         acoes={
           <>
             {i.acoes.eliminar && (
@@ -62,15 +73,18 @@ export function ImovelConsulta() {
         }
       />
 
-      <Bloco titulo="Comercialização">
-        <dl className="grelha-dados">
-          <Dado rotulo="Operação">{n.operacao}</Dado>
-          <Dado rotulo="Preço">{formatarEuros(i.preco)}</Dado>
-          <Dado rotulo="Estado de comercialização">{n.estado_comercializacao}</Dado>
-          <Dado rotulo="Status">{n.status}</Dado>
-          <Dado rotulo="Responsável">{i.responsavel_nome}</Dado>
-        </dl>
-      </Bloco>
+      <div className="ficha-topo">
+        <FotografiaImovel imovel={i} />
+        <Bloco titulo="Comercialização">
+          <dl className="grelha-dados">
+            <Dado rotulo="Operação">{n.operacao}</Dado>
+            <Dado rotulo="Preço">{formatarEuros(i.preco)}</Dado>
+            <Dado rotulo="Estado de comercialização">{n.estado_comercializacao}</Dado>
+            <Dado rotulo="Status">{n.status}</Dado>
+            <Dado rotulo="Responsável">{i.responsavel_nome}</Dado>
+          </dl>
+        </Bloco>
+      </div>
 
       <Bloco titulo="Proprietários">
         {i.proprietarios_detalhe.length === 0 ? (
@@ -136,6 +150,14 @@ export function ImovelConsulta() {
           <Dado rotulo="Zona comercial">{n.zona_comercial}</Dado>
           <Dado rotulo="Localização descritiva">{i.localizacao_descritiva}</Dado>
         </dl>
+      </Bloco>
+
+      <Bloco titulo="Fotografias, documentos e outras ligações">
+        <LigacoesExternas
+          base={`/api/imoveis/${i.id}/ligacoes/`}
+          podeEditar={i.acoes.editar}
+          tipos={tiposLigacao.data ?? []}
+        />
       </Bloco>
 
       <Bloco titulo="Descrição" abertoInicial={!!i.descricao}>

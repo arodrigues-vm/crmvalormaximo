@@ -4,7 +4,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 
 import { formatarArea, formatarEuros } from '../../componentes/formatar'
 import { Paginacao } from '../../componentes/Paginacao'
-import { imoveisApi, STATUS_ETIQUETA } from './api'
+import { etiquetaStatus, imoveisApi, urlFotografia } from './api'
 
 export function ImoveisLista() {
   const [params, setParams] = useSearchParams()
@@ -63,7 +63,12 @@ export function ImoveisLista() {
           value={termo}
           onChange={(e) => setTermo(e.target.value)}
         />
-        {filtro('operacao', 'Operação', o?.operacoes ?? [], 'Venda e arrendamento')}
+        {filtro(
+          'operacao',
+          'Operação',
+          (o?.operacoes ?? []).map((x) => ({ valor: x.id, nome: x.nome })),
+          'Todas as operações',
+        )}
         {filtro(
           'tipo',
           'Tipo',
@@ -82,7 +87,12 @@ export function ImoveisLista() {
           (o?.estados_comercializacao ?? []).map((x) => ({ valor: x.id, nome: x.nome })),
           'Todos os estados',
         )}
-        {filtro('status', 'Status', o?.status ?? [], 'Ativos e inativos')}
+        {filtro(
+          'status',
+          'Status',
+          (o?.status ?? []).map((x) => ({ valor: x.id, nome: x.nome })),
+          'Todos exceto arquivados',
+        )}
         <input
           type="number"
           min={0}
@@ -120,6 +130,7 @@ export function ImoveisLista() {
         <table className="tabela">
           <thead>
             <tr>
+              <th aria-label="Fotografia" />
               <th>Referência</th>
               <th>Imóvel</th>
               <th>Localização</th>
@@ -131,6 +142,13 @@ export function ImoveisLista() {
           <tbody>
             {lista.data.results.map((i) => (
               <tr key={i.id} onClick={() => navegar(`/imoveis/${i.id}`)}>
+                <td className="celula-miniatura">
+                  {i.tem_fotografia ? (
+                    <img src={urlFotografia(i.id, i.versao, true)} alt="" loading="lazy" />
+                  ) : (
+                    <span className="miniatura-vazia" aria-hidden="true" />
+                  )}
+                </td>
                 <td data-rotulo="Referência">
                   <Link to={`/imoveis/${i.id}`} onClick={(ev) => ev.stopPropagation()}>
                     {i.referencia}
@@ -140,7 +158,7 @@ export function ImoveisLista() {
                   {[i.tipo_nome, i.tipologia_nome].filter(Boolean).join(' ') || '—'}
                   <small className="ajuda">
                     {' '}
-                    {i.operacao === 'venda' ? 'Venda' : 'Arrendamento'}
+                    {i.operacao_nome}
                     {i.area_bruta_privativa && ` · ${formatarArea(i.area_bruta_privativa)}`}
                   </small>
                 </td>
@@ -148,10 +166,8 @@ export function ImoveisLista() {
                 <td data-rotulo="Preço">{formatarEuros(i.preco) ?? '—'}</td>
                 <td data-rotulo="Estado">
                   {i.estado_comercializacao_nome ?? '—'}
-                  {i.status !== 'ativo' && (
-                    <span className={`etiqueta etiqueta-${STATUS_ETIQUETA[i.status]}`}>
-                      {i.status === 'inativo' ? 'Inativo' : 'Arquivado'}
-                    </span>
+                  {i.status_categoria !== 'ativo' && i.status_nome && (
+                    <span className={`etiqueta etiqueta-${etiquetaStatus(i.status_categoria)}`}>{i.status_nome}</span>
                   )}
                 </td>
                 <td data-rotulo="Proprietários">{i.proprietarios_nomes.join(', ') || '—'}</td>

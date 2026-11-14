@@ -4,6 +4,7 @@ from django.db import transaction
 from rest_framework import serializers
 
 from apps.configuracao.campos import CampoValorLista
+from apps.configuracao.models import ValorLista
 from apps.contas.models import Utilizador
 from apps.localizacao.models import Freguesia
 
@@ -24,6 +25,10 @@ class ProprietarioEscritaSerializer(serializers.Serializer):
 
 
 class ImovelListaSerializer(serializers.ModelSerializer):
+    operacao_nome = serializers.SerializerMethodField()
+    status_nome = serializers.SerializerMethodField()
+    status_categoria = serializers.SerializerMethodField()
+    tem_fotografia = serializers.SerializerMethodField()
     tipo_nome = serializers.SerializerMethodField()
     tipologia_nome = serializers.SerializerMethodField()
     estado_comercializacao_nome = serializers.SerializerMethodField()
@@ -34,13 +39,26 @@ class ImovelListaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Imovel
         fields = [
-            "id", "referencia", "tipo_nome", "tipologia_nome", "operacao", "estado_comercializacao_nome",
-            "status", "preco", "localidade", "concelho", "area_bruta_privativa", "proprietarios_nomes",
+            "id", "referencia", "tipo_nome", "tipologia_nome", "operacao_nome", "estado_comercializacao_nome",
+            "status_nome", "status_categoria", "tem_fotografia", "versao", "preco", "localidade", "concelho",
+            "area_bruta_privativa", "proprietarios_nomes",
             "responsavel_nome",
         ]  # fmt: skip
 
     def get_tipo_nome(self, o) -> str | None:
         return _nome(o.tipo)
+
+    def get_operacao_nome(self, o) -> str | None:
+        return _nome(o.operacao)
+
+    def get_status_nome(self, o) -> str | None:
+        return _nome(o.status)
+
+    def get_status_categoria(self, o) -> str | None:
+        return o.status.categoria if o.status else None
+
+    def get_tem_fotografia(self, o) -> bool:
+        return bool(o.fotografia)
 
     def get_tipologia_nome(self, o) -> str | None:
         return _nome(o.tipologia)
@@ -60,6 +78,9 @@ class ImovelListaSerializer(serializers.ModelSerializer):
 
 
 class ImovelSerializer(serializers.ModelSerializer):
+    operacao = CampoValorLista("operacoes")
+    status = CampoValorLista("status_imovel", required=False)
+    tem_fotografia = serializers.SerializerMethodField()
     tipo = CampoValorLista("tipos_imovel", allow_null=True, required=False)
     tipologia = CampoValorLista("tipologias", allow_null=True, required=False)
     estado_comercializacao = CampoValorLista("estados_comercializacao", allow_null=True, required=False)
@@ -90,7 +111,7 @@ class ImovelSerializer(serializers.ModelSerializer):
             "quartos", "casas_banho", "ano_construcao", "piso", "elevador", "lugares_estacionamento",
             "certificado_energetico", "zonas_exteriores", "descricao",
             "proprietarios", "proprietarios_detalhe", "responsavel", "responsavel_nome", "observacoes",
-            "nomes", "criado_em", "atualizado_em", "versao", "eliminado_em", "acoes",
+            "nomes", "tem_fotografia", "criado_em", "atualizado_em", "versao", "eliminado_em", "acoes",
         ]  # fmt: skip
         read_only_fields = ["referencia", "criado_em", "atualizado_em", "eliminado_em"]
 
@@ -104,8 +125,10 @@ class ImovelSerializer(serializers.ModelSerializer):
             "zona_comercial": _nome(o.zona_comercial),
             "certificado_energetico": _nome(o.certificado_energetico),
             "zonas_exteriores": [z.nome for z in o.zonas_exteriores.all()],
-            "operacao": o.get_operacao_display(),
-            "status": o.get_status_display(),
+            "operacao": _nome(o.operacao),
+            "operacao_categoria": o.operacao.categoria if o.operacao else None,
+            "status": _nome(o.status),
+            "status_categoria": o.status.categoria if o.status else None,
         }
 
     def get_proprietarios_detalhe(self, o) -> list[dict]:
@@ -129,6 +152,9 @@ class ImovelSerializer(serializers.ModelSerializer):
         if not f:
             return None
         return {"freguesia": f.nome, "concelho": f.concelho.nome, "distrito": f.concelho.distrito.nome}
+
+    def get_tem_fotografia(self, o) -> bool:
+        return bool(o.fotografia)
 
     def get_acoes(self, o) -> dict[str, bool]:
         return self.context.get("acoes", {}).get(o.pk, {})
@@ -167,6 +193,12 @@ class ImovelSerializer(serializers.ModelSerializer):
         dados.pop("versao", None)
         proprietarios = dados.pop("proprietarios", [])
         zonas = dados.pop("zonas_exteriores", [])
+        if not dados.get("status"):
+            dados["status"] = (
+                ValorLista.objects.filter(lista__chave="status_imovel", categoria="ativo", ativo=True)
+                .order_by("ordem")
+                .first()
+            )
         imovel = Imovel.objects.create(**dados)
         imovel.zonas_exteriores.set(zonas)
         self._gravar_proprietarios(imovel, proprietarios)

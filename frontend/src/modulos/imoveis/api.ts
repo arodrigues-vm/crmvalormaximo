@@ -1,8 +1,7 @@
 import { pedido } from '../../api/cliente'
 import type { EntradaHistorico } from '../../componentes/Ficha'
 
-type Opcao = { id: number; nome: string }
-type Escolha = { valor: string; nome: string }
+type Opcao = { id: number; nome: string; categoria?: string }
 
 export interface ProprietarioDetalhe {
   entidade: number
@@ -17,9 +16,10 @@ export interface Imovel {
   referencia: string
   tipo: number | null
   tipologia: number | null
-  operacao: 'venda' | 'arrendamento'
+  operacao: number | null
   estado_comercializacao: number | null
-  status: 'ativo' | 'inativo' | 'arquivado'
+  status: number | null
+  tem_fotografia: boolean
   condicao_fisica: number | null
   preco: string | null
   rua: string
@@ -56,8 +56,10 @@ export interface Imovel {
     zona_comercial: string | null
     certificado_energetico: string | null
     zonas_exteriores: string[]
-    operacao: string
-    status: string
+    operacao: string | null
+    operacao_categoria: string | null
+    status: string | null
+    status_categoria: string | null
   }
   criado_em: string
   atualizado_em: string
@@ -70,9 +72,12 @@ export interface ImovelResumo {
   referencia: string
   tipo_nome: string | null
   tipologia_nome: string | null
-  operacao: string
+  operacao_nome: string | null
   estado_comercializacao_nome: string | null
-  status: string
+  status_nome: string | null
+  status_categoria: string | null
+  tem_fotografia: boolean
+  versao: number
   preco: string | null
   localidade: string
   concelho: string | null
@@ -89,8 +94,8 @@ export interface OpcoesImovel {
   zonas_comerciais: Opcao[]
   certificados_energeticos: Opcao[]
   zonas_exteriores: Opcao[]
-  operacoes: Escolha[]
-  status: Escolha[]
+  operacoes: Opcao[]
+  status: Opcao[]
   pode_criar: boolean
   pode_transferir: boolean
   pode_restaurar: boolean
@@ -103,7 +108,8 @@ export interface ImovelDaEntidade {
   tipologia: string | null
   localidade: string
   estado_comercializacao: string | null
-  status: string
+  status: string | null
+  status_categoria: string | null
   quota: string | null
 }
 
@@ -118,15 +124,26 @@ export const imoveisApi = {
   eliminar: (id: number) => pedido<null>(`${BASE}${id}/`, { method: 'DELETE' }),
   opcoes: () => pedido<OpcoesImovel>(`${BASE}opcoes/`),
   historico: (id: number) => pedido<EntradaHistorico[]>(`${BASE}${id}/historico/`),
+  carregarFotografia: (id: number, ficheiro: File) => {
+    const dados = new FormData()
+    dados.append('ficheiro', ficheiro)
+    return pedido<Imovel>(`${BASE}${id}/fotografia/`, { method: 'POST', body: dados })
+  },
+  removerFotografia: (id: number) => pedido<Imovel>(`${BASE}${id}/fotografia/`, { method: 'DELETE' }),
   daEntidade: (entidade: number) =>
     pedido<{ imoveis: ImovelDaEntidade[]; outros: number }>(`/api/entidades/${entidade}/imoveis/`),
 }
 
-export const STATUS_ETIQUETA: Record<string, 'sucesso' | 'neutra' | 'aviso'> = {
+const STATUS_ETIQUETA: Record<string, 'sucesso' | 'neutra' | 'aviso'> = {
   ativo: 'sucesso',
   inativo: 'aviso',
   arquivado: 'neutra',
 }
+export const etiquetaStatus = (categoria: string | null | undefined) => STATUS_ETIQUETA[categoria ?? ''] ?? 'neutra'
+
+/** Endereço da fotografia (privada; o servidor verifica a sessão). `versao` evita imagens antigas em cache. */
+export const urlFotografia = (id: number, versao: number, miniatura = false) =>
+  `/api/imoveis/${id}/fotografia/?${miniatura ? 'tamanho=miniatura&' : ''}v=${versao}`
 
 export function tituloImovel(i: { tipo?: string | null; tipologia?: string | null; localidade?: string }) {
   return [[i.tipo, i.tipologia].filter(Boolean).join(' '), i.localidade].filter(Boolean).join(' · ') || 'Imóvel'

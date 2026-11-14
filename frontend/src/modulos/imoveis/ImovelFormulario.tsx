@@ -10,7 +10,7 @@ import { SeletorLocalizacao } from '../../componentes/SeletorLocalizacao'
 import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
 import { useGuardaSaida } from '../../componentes/useGuardaSaida'
 import { entidadesApi } from '../entidades/api'
-import { imoveisApi, STATUS_ETIQUETA, tituloImovel, type Imovel } from './api'
+import { etiquetaStatus, imoveisApi, tituloImovel, type Imovel } from './api'
 
 interface ProprietarioEditavel {
   entidade: OpcaoPesquisa
@@ -57,9 +57,9 @@ const t = (v: string | number | null | undefined) => (v === null || v === undefi
 const VAZIO: Valores = {
   tipo: '',
   tipologia: '',
-  operacao: 'venda',
+  operacao: '',
   estado_comercializacao: '',
-  status: 'ativo',
+  status: '',
   condicao_fisica: '',
   preco: '',
   rua: '',
@@ -91,9 +91,9 @@ function deImovel(i: Imovel): Valores {
   return {
     tipo: t(i.tipo),
     tipologia: t(i.tipologia),
-    operacao: i.operacao,
+    operacao: t(i.operacao),
     estado_comercializacao: t(i.estado_comercializacao),
-    status: i.status,
+    status: t(i.status),
     condicao_fisica: t(i.condicao_fisica),
     preco: t(i.preco),
     rua: i.rua,
@@ -137,9 +137,9 @@ function paraApi(v: Valores) {
   return {
     tipo: id(v.tipo),
     tipologia: id(v.tipologia),
-    operacao: v.operacao,
+    operacao: id(v.operacao),
     estado_comercializacao: id(v.estado_comercializacao),
-    status: v.status,
+    status: id(v.status),
     condicao_fisica: id(v.condicao_fisica),
     preco: num(v.preco),
     rua: v.rua,
@@ -274,7 +274,7 @@ function Formulario({ imovel }: { imovel?: Imovel }) {
           caminho="/imoveis"
           referencia={imovel.referencia}
           titulo={tituloImovel({ tipo: n?.tipo, tipologia: n?.tipologia, localidade: imovel.localidade })}
-          etiqueta={{ texto: n!.status, tipo: STATUS_ETIQUETA[imovel.status] }}
+          etiqueta={n?.status ? { texto: n.status, tipo: etiquetaStatus(n.status_categoria) } : undefined}
         />
       ) : (
         <CabecalhoRegisto modulo="Imóveis" caminho="/imoveis" referencia="Novo" titulo="Novo imóvel" />
@@ -292,7 +292,8 @@ function Formulario({ imovel }: { imovel?: Imovel }) {
             required
             value={v.operacao}
             onChange={(e) => mudar('operacao', e.target.value)}
-            opcoes={o?.operacoes ?? []}
+            vazio="—"
+            opcoes={comAtual(lista(o?.operacoes), v.operacao, n?.operacao ?? null)}
             erro={erro('operacao')}
           />
           <CampoTexto
@@ -319,7 +320,8 @@ function Formulario({ imovel }: { imovel?: Imovel }) {
             rotulo="Status"
             value={v.status}
             onChange={(e) => mudar('status', e.target.value)}
-            opcoes={o?.status ?? []}
+            vazio={imovel ? undefined : 'Por omissão: ativo'}
+            opcoes={comAtual(lista(o?.status), v.status, n?.status ?? null)}
             erro={erro('status')}
           />
         </div>

@@ -13,6 +13,9 @@ class Lista(models.Model):
     nome = models.CharField(max_length=100)
     modulo = models.CharField(max_length=40, help_text="Módulo onde a lista é usada.")
     descricao = models.CharField(max_length=255, blank=True)
+    # Quando preenchido, cada valor tem de pertencer a uma destas categorias fixas, das quais
+    # dependem regras da aplicação (ex.: operação venda/arrendamento). Formato: [{"valor", "nome"}].
+    categorias = models.JSONField(default=list, blank=True)
 
     class Meta:
         ordering = ["modulo", "nome"]
@@ -28,6 +31,7 @@ class ValorLista(models.Model):
     nome = models.CharField(max_length=100)
     ordem = models.PositiveIntegerField(default=0)
     ativo = models.BooleanField(default=True)
+    categoria = models.CharField(max_length=30, blank=True, help_text="Categoria fixa (ver Lista.categorias).")
 
     class Meta:
         ordering = ["lista", "ordem", "nome"]

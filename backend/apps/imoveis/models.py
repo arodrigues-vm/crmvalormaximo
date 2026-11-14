@@ -4,7 +4,13 @@ from django.db import models
 from simple_history.models import HistoricalRecords
 
 from apps.configuracao.models import campo_lista, campo_lista_multipla
+from apps.core.armazenamento import armazenamento_privado_fn
 from apps.core.modelos_base import RegistoBase
+
+
+def caminho_fotografia(instancia, nome):
+    return f"imoveis/{instancia.pk or 'novo'}/{nome}"
+
 
 AREA = {"max_digits": 10, "decimal_places": 2, "null": True, "blank": True, "validators": [MinValueValidator(0)]}
 
@@ -12,21 +18,13 @@ AREA = {"max_digits": 10, "decimal_places": 2, "null": True, "blank": True, "val
 class Imovel(RegistoBase):
     PREFIXO_REFERENCIA = "IMO"
 
-    class Operacao(models.TextChoices):
-        VENDA = "venda", "Venda"
-        ARRENDAMENTO = "arrendamento", "Arrendamento"
-
-    class Status(models.TextChoices):
-        ATIVO = "ativo", "Ativo"
-        INATIVO = "inativo", "Inativo"
-        ARQUIVADO = "arquivado", "Arquivado"
-
     # Classificação
     tipo = campo_lista("tipos_imovel", verbose_name="tipo de imóvel")
     tipologia = campo_lista("tipologias")
-    operacao = models.CharField("operação", max_length=12, choices=Operacao.choices, default=Operacao.VENDA)
     estado_comercializacao = campo_lista("estados_comercializacao", verbose_name="estado de comercialização")
-    status = models.CharField(max_length=10, choices=Status.choices, default=Status.ATIVO, db_index=True)
+    # Listas configuráveis com categoria fixa (venda/arrendamento; ativo/inativo/arquivado).
+    operacao = campo_lista("operacoes", verbose_name="operação")
+    status = campo_lista("status_imovel", verbose_name="status")
     condicao_fisica = campo_lista("condicoes_fisicas", verbose_name="condição física")
     # NULL = preço desconhecido (diferente de zero).
     preco = models.DecimalField(
@@ -66,11 +64,15 @@ class Imovel(RegistoBase):
     zonas_exteriores = campo_lista_multipla("zonas_exteriores")
     descricao = models.TextField("descrição", blank=True)
 
+    # Uma única fotografia de identificação; as restantes ficam em pastas externas (ligações).
+    fotografia = models.ImageField(upload_to=caminho_fotografia, blank=True, storage=armazenamento_privado_fn)
+    fotografia_miniatura = models.ImageField(upload_to=caminho_fotografia, blank=True, storage=armazenamento_privado_fn)
+
     responsavel = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+")
     partilhada_com = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="+")
     observacoes = models.TextField(blank=True)
 
-    historico = HistoricalRecords()
+    historico = HistoricalRecords(excluded_fields=["fotografia_miniatura"])
 
     class Meta:
         ordering = ["-criado_em", "-id"]

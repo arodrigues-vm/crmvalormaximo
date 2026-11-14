@@ -15,13 +15,13 @@ const OPCOES = {
   certificados_energeticos: [],
   zonas_exteriores: [{ id: 30, nome: 'Varanda' }],
   operacoes: [
-    { valor: 'venda', nome: 'Venda' },
-    { valor: 'arrendamento', nome: 'Arrendamento' },
+    { id: 40, nome: 'Venda', categoria: 'venda' },
+    { id: 41, nome: 'Arrendamento', categoria: 'arrendamento' },
   ],
   status: [
-    { valor: 'ativo', nome: 'Ativo' },
-    { valor: 'inativo', nome: 'Inativo' },
-    { valor: 'arquivado', nome: 'Arquivado' },
+    { id: 50, nome: 'Ativo', categoria: 'ativo' },
+    { id: 51, nome: 'Inativo', categoria: 'inativo' },
+    { id: 52, nome: 'Arquivado', categoria: 'arquivado' },
   ],
   pode_criar: true,
   pode_transferir: false,
@@ -33,9 +33,10 @@ const IMOVEL = {
   referencia: 'IMO-000005',
   tipo: 1,
   tipologia: 10,
-  operacao: 'venda',
+  operacao: 40,
   estado_comercializacao: 20,
-  status: 'ativo',
+  status: 50,
+  tem_fotografia: false,
   condicao_fisica: null,
   preco: '250000.00',
   rua: '',
@@ -76,7 +77,9 @@ const IMOVEL = {
     certificado_energetico: null,
     zonas_exteriores: ['Varanda'],
     operacao: 'Venda',
+    operacao_categoria: 'venda',
     status: 'Ativo',
+    status_categoria: 'ativo',
   },
   criado_em: '2026-11-14T10:00:00Z',
   atualizado_em: '2026-11-14T10:00:00Z',
@@ -90,6 +93,9 @@ const base = {
   '/api/imoveis/opcoes/': () => json(OPCOES),
   '/api/localizacao/distritos/': () => json([]),
   'GET /api/imoveis/5/': () => json(IMOVEL),
+  'GET /api/imoveis/5/ligacoes/': () =>
+    json([{ id: 1, tipo: 60, tipo_nome: 'Fotografias', titulo: 'Fotos', url: 'https://onedrive.live.com/x' }]),
+  'GET /api/listas/': () => json([{ chave: 'tipos_ligacao', valores: [{ id: 60, nome: 'Fotografias', ativo: true }] }]),
 }
 
 afterEach(() => vi.restoreAllMocks())
@@ -103,6 +109,10 @@ describe('Imóveis', () => {
     expect(screen.getByText('85,5 m²')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Ana Ensaio/ })).toHaveAttribute('href', '/entidades/7')
     expect(screen.getByText('Entidade a que não tem acesso')).toBeInTheDocument()
+    expect(screen.getByText('Sem fotografia')).toBeInTheDocument()
+    const link = await screen.findByRole('link', { name: /Fotos/ })
+    expect(link).toHaveAttribute('href', 'https://onedrive.live.com/x')
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer')
   })
 
   it('edição envia proprietários (incluindo os inacessíveis) e versão; mostra a soma das quotas', async () => {
@@ -118,6 +128,8 @@ describe('Imóveis', () => {
     await waitFor(() => expect(pedidos.some((p) => p.metodo === 'PATCH')).toBe(true))
     const corpo = pedidos.find((p) => p.metodo === 'PATCH')!.corpo as Record<string, unknown>
     expect(corpo.versao).toBe(3)
+    expect(corpo.operacao).toBe(40)
+    expect(corpo.status).toBe(50)
     expect(corpo.preco).toBeNull()
     expect(corpo.proprietarios).toEqual([
       { entidade: 7, quota: '50' },

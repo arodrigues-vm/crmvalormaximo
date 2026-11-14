@@ -19,6 +19,8 @@ As decisões D-01 a D-10, Q01 a Q16 e V01 a V04 da Especificação V1.4 mantêm-
 | D-22 | 14/11/2026 | **Relações entre entidades** (requisito novo do proprietário): tipos configuráveis, com nome direto e inverso; iniciais: Cônjuge, Familiar, Sócio de / Tem como sócio, Gerente de / Tem como gerente. A relação aparece nas duas fichas; respeita as permissões das duas pontas. |
 | D-23 | 14/11/2026 | **Todas as listas suspensas são editáveis na aplicação** (Configurações → Listas de valores), sem código; valores desativam-se, não se apagam. Inclui papéis e origens das Entidades. Exceções (regras de negócio): Operação e Status. |
 | D-24 | 14/11/2026 | Imóveis: «Fase comercial» passa a **Status** (Ativo, Inativo, Arquivado); «Estado comercial» passa a **Estado de comercialização** (lista editável). Listas iniciais aprovadas: tipos, tipologias, estados, condições físicas, zonas exteriores, áreas (m²); acrescentadas classes de certificado energético e zonas comerciais (vazia). |
+| D-25 | 14/11/2026 | **Operação e Status também são listas configuráveis.** Para preservar as regras de negócio, cada valor tem uma categoria fixa escolhida ao criar (operação: venda/arrendamento; status: ativo/inativo/arquivado) que não muda depois. |
+| D-26 | 14/11/2026 | **Ficheiros:** cada imóvel guarda **uma** fotografia principal no CRM (identificação). As restantes fotografias e **todos os documentos** ficam no OneDrive ou noutro serviço, registados no CRM como **ligações externas** (tipo, título, endereço). Substitui o armazenamento privado de documentos previsto em §21 da especificação (versões, descarregamento privado): o controlo de acesso aos ficheiros passa a ser feito no serviço externo. |
 
 ## Decisões técnicas propostas (aplicadas salvo indicação em contrário)
 

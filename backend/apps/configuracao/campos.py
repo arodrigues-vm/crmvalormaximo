@@ -30,4 +30,4 @@ class CampoValorLista(serializers.PrimaryKeyRelatedField):
 
 
 def opcoes_lista(chave: str) -> list[dict]:
-    return list(ValorLista.objects.filter(lista__chave=chave, ativo=True).values("id", "nome"))
+    return list(ValorLista.objects.filter(lista__chave=chave, ativo=True).values("id", "nome", "categoria"))

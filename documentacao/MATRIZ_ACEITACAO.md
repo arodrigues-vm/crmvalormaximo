@@ -16,7 +16,7 @@ Critérios completos: Especificação V1.4 §16 (em `fontes/`). Estados: Pendent
 | AT-10 | Match Imóvel/Procura | F3-02 | — | Pendente |
 | AT-11 | Participantes históricos | F2-02; F3-05/09 | — | Pendente |
 | AT-12 | Importação Excel/Outlook | F2-07; F5-01 | — | Pendente |
-| AT-13 | Configuração no-code | F1-07; F2-05/06; F5-05 | — | Pendente |
+| AT-13 | Configuração no-code | F1-07; F2-05/06; F5-05 | `configuracao/tests.py` (listas: adicionar, renomear, desativar, ordenar, categorias fixas) | Em curso |
 | AT-14 | Brevo e WhatsApp | F4-07/08 | — | Pendente |
 | AT-15 | VPS e segurança | F5-02/03 | — | Pendente |
 | AT-16 | Backup e aprovação | F5-04/06 | — | Pendente |

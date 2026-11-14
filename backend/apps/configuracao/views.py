@@ -27,7 +27,10 @@ def _lista_json(lista, incluir_inativos):
         "nome": lista.nome,
         "modulo": lista.modulo,
         "descricao": lista.descricao,
-        "valores": [{"id": v.id, "nome": v.nome, "ordem": v.ordem, "ativo": v.ativo} for v in valores],
+        "categorias": lista.categorias,
+        "valores": [
+            {"id": v.id, "nome": v.nome, "ordem": v.ordem, "ativo": v.ativo, "categoria": v.categoria} for v in valores
+        ],
     }
 
 
@@ -41,6 +44,7 @@ def listas(request):
 
 class ValorSerializer(serializers.Serializer):
     nome = serializers.CharField(max_length=100, trim_whitespace=True)
+    categoria = serializers.CharField(max_length=30, required=False, allow_blank=True)
 
 
 @extend_schema(request=ValorSerializer)
@@ -56,8 +60,14 @@ def adicionar_valor(request, chave):
     nome = s.validated_data["nome"]
     if lista.valores.filter(nome__iexact=nome).exists():
         raise serializers.ValidationError({"nome": "Já existe um valor com este nome (pode estar desativado)."})
+    categoria = s.validated_data.get("categoria", "")
+    validas = [c["valor"] for c in lista.categorias]
+    if validas and categoria not in validas:
+        raise serializers.ValidationError({"categoria": "Escolha a categoria deste valor."})
+    if not validas:
+        categoria = ""
     ultimo = lista.valores.order_by("-ordem").values_list("ordem", flat=True).first() or 0
-    v = ValorLista.objects.create(lista=lista, nome=nome, ordem=ultimo + 1)
+    v = ValorLista.objects.create(lista=lista, nome=nome, ordem=ultimo + 1, categoria=categoria)
     registar("lista.valor_criado", modulo=MODULO, objeto=v, request=request, dados={"lista": chave, "nome": nome})
     return Response(_lista_json(lista, True), status=status.HTTP_201_CREATED)
 

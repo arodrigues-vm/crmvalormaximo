@@ -1,13 +1,21 @@
+import uuid
 from decimal import Decimal, InvalidOperation
 
 from django.db.models import Prefetch, Q
+from django.http import FileResponse, Http404
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 
 from apps.configuracao.campos import opcoes_lista
 from apps.contas.models import Operacao
-from apps.contas.permissoes import filtrar
+from apps.contas.permissoes import filtrar, pode_no_registo
+from apps.core.armazenamento import armazenamento_privado
+from apps.core.auditoria import registar
+from apps.core.imagens import ImagemInvalida, processar_fotografia
 from apps.core.vistas import RegistoViewSet
 from apps.entidades.models import Entidade
 
@@ -20,7 +28,7 @@ ORDENACOES = {
     "preco": "preco",
     "-preco": "-preco",
 }
-LISTAS = {
+LISTAS = {  # nome na resposta -> chave da lista
     "tipos": "tipos_imovel",
     "tipologias": "tipologias",
     "estados_comercializacao": "estados_comercializacao",
@@ -39,15 +47,16 @@ def entidades_visiveis(utilizador) -> set[int]:
 
 
 class ImovelViewSet(RegistoViewSet):
+    operacoes_extra = {**RegistoViewSet.operacoes_extra, "fotografia": Operacao.CONSULTAR}
     modulo = "imoveis"
     modelo = Imovel
     nome_registo = "imovel"
     campos_auditados = [
-        "tipo_id", "tipologia_id", "operacao", "estado_comercializacao_id", "status", "condicao_fisica_id", "preco",
+        "tipo_id", "tipologia_id", "estado_comercializacao_id", "condicao_fisica_id", "preco",
         "rua", "numero_policia", "complemento", "codigo_postal", "localidade", "freguesia_id", "zona_comercial_id",
         "localizacao_descritiva", "area_bruta_privativa", "area_bruta_dependente", "area_util", "area_terreno",
         "quartos", "casas_banho", "ano_construcao", "piso", "elevador", "lugares_estacionamento",
-        "certificado_energetico_id", "descricao", "responsavel_id", "observacoes",
+        "certificado_energetico_id", "descricao", "responsavel_id", "observacoes", "operacao_id", "status_id",
     ]  # fmt: skip
 
     def get_serializer_class(self):
@@ -60,7 +69,7 @@ class ImovelViewSet(RegistoViewSet):
 
     def base_queryset(self):
         return Imovel.objects.select_related(
-            "tipo", "tipologia", "estado_comercializacao", "condicao_fisica", "zona_comercial",
+            "tipo", "tipologia", "estado_comercializacao", "operacao", "status", "condicao_fisica", "zona_comercial",
             "certificado_energetico", "responsavel", "freguesia__concelho__distrito",
         ).prefetch_related(
             "zonas_exteriores",
@@ -84,14 +93,14 @@ class ImovelViewSet(RegistoViewSet):
             ("tipo", "tipo_id"),
             ("tipologia", "tipologia_id"),
             ("estado_comercializacao", "estado_comercializacao_id"),
-            ("operacao", "operacao"),
+            ("operacao", "operacao_id"),
             ("responsavel", "responsavel_id"),
         ):
             if p.get(parametro):
                 qs = qs.filter(**{campo: p[parametro]})
         # Por omissão não se mostram os arquivados.
         status_ = p.get("status")
-        qs = qs.filter(status=status_) if status_ else qs.exclude(status=Imovel.Status.ARQUIVADO)
+        qs = qs.filter(status_id=status_) if status_ else qs.exclude(status__categoria="arquivado")
         for parametro, lookup in (("preco_min", "preco__gte"), ("preco_max", "preco__lte")):
             try:
                 if p.get(parametro):
@@ -125,8 +134,57 @@ class ImovelViewSet(RegistoViewSet):
         return Response(
             {
                 **{nome: opcoes_lista(chave) for nome, chave in LISTAS.items()},
-                "operacoes": [{"valor": v, "nome": n} for v, n in Imovel.Operacao.choices],
-                "status": [{"valor": v, "nome": n} for v, n in Imovel.Status.choices],
+                "operacoes": opcoes_lista("operacoes"),
+                "status": opcoes_lista("status_imovel"),
                 **self.permissoes_gerais(request),
             }
         )
+
+    # Fotografia principal (uma por imóvel) ---------------------------------------------
+
+    @extend_schema(
+        methods=["GET"],
+        parameters=[OpenApiParameter("tamanho", str, enum=["normal", "miniatura"])],
+        responses={(200, "image/webp"): OpenApiTypes.BINARY},
+    )
+    @extend_schema(methods=["POST"], request={"multipart/form-data": {"type": "object", "properties": {
+        "ficheiro": {"type": "string", "format": "binary"}}}})  # fmt: skip
+    @action(detail=True, methods=["get", "post", "delete"], parser_classes=[MultiPartParser])
+    def fotografia(self, request, pk=None):
+        imovel = self.get_object()
+        if request.method == "GET":
+            campo = (
+                imovel.fotografia_miniatura if request.query_params.get("tamanho") == "miniatura" else imovel.fotografia
+            )
+            if not campo:
+                raise Http404
+            resposta = FileResponse(campo.open("rb"), content_type="image/webp")
+            # Ficheiro privado: o browser pode guardá-lo, mas nunca caches partilhadas.
+            resposta["Cache-Control"] = "private, max-age=86400"
+            return resposta
+        if not pode_no_registo(request.user, self.modulo, Operacao.EDITAR, imovel, campo_partilhas="partilhada_com"):
+            raise PermissionDenied("Não tem permissão para alterar este imóvel.")
+        antigos = [imovel.fotografia.name, imovel.fotografia_miniatura.name]
+        if request.method == "DELETE":
+            imovel.fotografia = imovel.fotografia_miniatura = ""
+            acao = "imovel.fotografia_removida"
+        else:
+            ficheiro = request.FILES.get("ficheiro")
+            if ficheiro is None:
+                raise ValidationError({"ficheiro": "Escolha uma imagem."})
+            try:
+                principal, miniatura = processar_fotografia(ficheiro)
+            except ImagemInvalida as e:
+                raise ValidationError({"ficheiro": str(e)}) from e
+            sufixo = uuid.uuid4().hex[:12]
+            imovel.fotografia.save(f"foto-{sufixo}.webp", principal, save=False)
+            imovel.fotografia_miniatura.save(f"mini-{sufixo}.webp", miniatura, save=False)
+            acao = "imovel.fotografia_alterada"
+        imovel.atualizado_por = request.user
+        imovel.save()
+        # Apaga os ficheiros substituídos (o registo do histórico mantém o nome).
+        for nome in antigos:
+            if nome:
+                armazenamento_privado.delete(nome)
+        registar(acao, modulo=self.modulo, objeto=imovel, request=request)
+        return Response(self.get_serializer(self.recarregar(imovel)).data)

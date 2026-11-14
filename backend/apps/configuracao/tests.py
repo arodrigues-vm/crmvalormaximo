@@ -71,3 +71,22 @@ def test_valor_desativado_mantem_se_no_registo_mas_nao_pode_ser_escolhido(api, c
     novo = api.patch(reverse("entidade-detail", args=[e["id"]]), {"versao": 2, "papeis": [vendedor.pk]}, format="json")
     assert novo.status_code == 400
     assert list(Entidade.objects.get(pk=e["id"]).papeis.values_list("nome", flat=True)) == ["Comprador"]
+
+
+def test_lista_com_categorias_exige_categoria_fixa(api, criar_utilizador):
+    api.force_authenticate(criar_utilizador(Perfil.ADMINISTRADOR))
+    url = reverse("listas-adicionar", args=["operacoes"])
+    assert api.post(url, {"nome": "Venda em leilão"}, format="json").status_code == 400
+    assert api.post(url, {"nome": "Venda em leilão", "categoria": "troca"}, format="json").status_code == 400
+    r = api.post(url, {"nome": "Venda em leilão", "categoria": "venda"}, format="json")
+    assert r.status_code == 201
+    assert {"nome": "Venda em leilão", "categoria": "venda"}.items() <= r.json()["valores"][-1].items()
+    assert [c["valor"] for c in r.json()["categorias"]] == ["venda", "arrendamento"]
+
+
+def test_categoria_nao_muda_ao_renomear(api, criar_utilizador):
+    api.force_authenticate(criar_utilizador(Perfil.ADMINISTRADOR))
+    v = ValorLista.objects.get(lista__chave="status_imovel", nome="Arquivado")
+    api.patch(reverse("listas-valor", args=[v.pk]), {"nome": "Histórico", "categoria": "ativo"}, format="json")
+    v.refresh_from_db()
+    assert (v.nome, v.categoria) == ("Histórico", "arquivado")

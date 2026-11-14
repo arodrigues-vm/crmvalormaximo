@@ -3,7 +3,35 @@
 Os valores são apenas o ponto de partida: o Administrador altera-os na aplicação.
 """
 
+CAT_OPERACAO = [{"valor": "venda", "nome": "Venda"}, {"valor": "arrendamento", "nome": "Arrendamento"}]
+CAT_STATUS = [
+    {"valor": "ativo", "nome": "Ativo"},
+    {"valor": "inativo", "nome": "Inativo"},
+    {"valor": "arquivado", "nome": "Arquivado (escondido por omissão)"},
+]
+
+# Listas com categorias: chave -> categorias. Os valores iniciais são pares (nome, categoria).
+CATEGORIAS = {"operacoes": CAT_OPERACAO, "status_imovel": CAT_STATUS}
+
 LISTAS = {
+    "operacoes": (
+        "Operações",
+        "imoveis",
+        "Venda, arrendamento…",
+        [("Venda", "venda"), ("Arrendamento", "arrendamento")],
+    ),
+    "status_imovel": (
+        "Status do imóvel",
+        "imoveis",
+        "",
+        [("Ativo", "ativo"), ("Inativo", "inativo"), ("Arquivado", "arquivado")],
+    ),
+    "tipos_ligacao": (
+        "Tipos de ligação externa",
+        "geral",
+        "Ligações para pastas do OneDrive ou outros serviços.",
+        ["Fotografias", "Documentos", "Outro"],
+    ),
     # chave: (nome, módulo, descrição, valores iniciais)
     "papeis_entidade": ("Papéis de entidade", "entidades", "Papéis comerciais de pessoas e empresas.", []),
     "origens_contacto": ("Origens de contacto", "entidades", "Como o contacto chegou à agência.", []),

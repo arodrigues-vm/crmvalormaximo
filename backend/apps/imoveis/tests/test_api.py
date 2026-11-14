@@ -45,7 +45,7 @@ def dados(**extra):
     base = {
         "tipo": valor("tipos_imovel", "Apartamento"),
         "tipologia": valor("tipologias", "T2"),
-        "operacao": "venda",
+        "operacao": valor("operacoes", "Venda"),
         "estado_comercializacao": valor("estados_comercializacao", "Em preparação"),
         "preco": "250000.00",
         "localidade": "Localidade Ensaio",
@@ -66,7 +66,8 @@ class TestImovel:
     def test_criar(self, api, pessoas):
         i = criar(api, pessoas.cons)
         assert i["referencia"] == f"IMO-{i['id']:06d}"
-        assert i["status"] == "ativo"
+        assert i["nomes"]["status"] == "Ativo" and i["nomes"]["status_categoria"] == "ativo"
+        assert i["nomes"]["operacao_categoria"] == "venda"
         assert i["preco"] == "250000.00"
         assert i["nomes"]["tipo"] == "Apartamento" and i["nomes"]["zonas_exteriores"] == ["Varanda"]
         assert i["responsavel"] == pessoas.cons.id
@@ -80,8 +81,8 @@ class TestImovel:
         "extra, campo",
         [
             ({"preco": "-1"}, "preco"),
-            ({"operacao": "troca"}, "operacao"),
-            ({"status": "vendido"}, "status"),
+            ({"operacao": None}, "operacao"),
+            ({"status": 999999}, "status"),
             ({"codigo_postal": "12"}, "codigo_postal"),
             ({"ano_construcao": 99}, "ano_construcao"),
             ({"area_util": "-5"}, "area_util"),
@@ -97,10 +98,10 @@ class TestImovel:
 
     def test_arquivados_escondidos_por_omissao(self, api, pessoas):
         a = criar(api, pessoas.cons)
-        b = criar(api, pessoas.cons, status="arquivado")
+        b = criar(api, pessoas.cons, status=valor("status_imovel", "Arquivado"))
         ids = [x["id"] for x in como(api, pessoas.cons).get(LISTA).json()["results"]]
         assert a["id"] in ids and b["id"] not in ids
-        arq = como(api, pessoas.cons).get(LISTA, {"status": "arquivado"}).json()["results"]
+        arq = como(api, pessoas.cons).get(LISTA, {"status": valor("status_imovel", "Arquivado")}).json()["results"]
         assert [x["id"] for x in arq] == [b["id"]]
 
     def test_filtros_e_pesquisa(self, api, pessoas):
@@ -221,7 +222,11 @@ class TestProprietarios:
     def test_opcoes(self, api, pessoas):
         o = como(api, pessoas.cons).get(reverse("imovel-opcoes")).json()
         assert "Moradia" in [x["nome"] for x in o["tipos"]]
-        assert [x["valor"] for x in o["status"]] == ["ativo", "inativo", "arquivado"]
+        assert [(x["nome"], x["categoria"]) for x in o["status"]] == [
+            ("Ativo", "ativo"),
+            ("Inativo", "inativo"),
+            ("Arquivado", "arquivado"),
+        ]
         assert o["pode_criar"] is True
 
 
@@ -229,8 +234,124 @@ def test_historico_mostra_nomes_e_nao_identificadores(api, pessoas):
     i = criar(api, pessoas.cons)
     c = como(api, pessoas.cons)
     c.patch(
-        detalhe(i["id"]), {"versao": 1, "tipo": valor("tipos_imovel", "Moradia"), "status": "inativo"}, format="json"
+        detalhe(i["id"]),
+        {"versao": 1, "tipo": valor("tipos_imovel", "Moradia"), "status": valor("status_imovel", "Inativo")},
+        format="json",
     )
     alt = c.get(reverse("imovel-historico", args=[i["id"]])).json()[0]["alteracoes"]
     assert {"campo": "tipo", "antes": "Apartamento", "depois": "Moradia"} in alt
     assert {"campo": "status", "antes": "Ativo", "depois": "Inativo"} in alt
+
+
+def test_novo_status_com_categoria_arquivado_tambem_fica_escondido(api, pessoas):
+    from apps.configuracao.models import Lista, ValorLista
+
+    vendido = ValorLista.objects.create(
+        lista=Lista.objects.get(chave="status_imovel"), nome="Vendido e fechado", categoria="arquivado"
+    )
+    criar(api, pessoas.cons, status=vendido.pk)
+    assert como(api, pessoas.cons).get(LISTA).json()["count"] == 0
+
+
+class TestFotografia:
+    @staticmethod
+    def imagem(formato="JPEG", tamanho=(2400, 1200)):
+        from io import BytesIO
+
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from PIL import Image
+
+        b = BytesIO()
+        Image.new("RGB", tamanho, (11, 37, 69)).save(b, formato)
+        return SimpleUploadedFile(f"foto.{formato.lower()}", b.getvalue(), content_type=f"image/{formato.lower()}")
+
+    @pytest.fixture(autouse=True)
+    def _media(self, settings, tmp_path):
+        settings.MEDIA_ROOT = tmp_path
+
+    def test_carregar_ver_substituir_e_remover(self, api, pessoas, tmp_path):
+        from PIL import Image
+
+        i = criar(api, pessoas.cons)
+        url = reverse("imovel-fotografia", args=[i["id"]])
+        c = como(api, pessoas.cons)
+        assert c.get(url).status_code == 404
+        r = c.post(url, {"ficheiro": self.imagem()}, format="multipart")
+        assert r.status_code == 200, r.content
+        assert r.json()["tem_fotografia"] is True
+        foto = c.get(url)
+        assert foto.status_code == 200 and foto["Content-Type"] == "image/webp"
+        assert "private" in foto["Cache-Control"]
+        img = Image.open(__import__("io").BytesIO(b"".join(foto.streaming_content)))
+        assert max(img.size) == 1600  # redimensionada
+        mini = Image.open(__import__("io").BytesIO(b"".join(c.get(url, {"tamanho": "miniatura"}).streaming_content)))
+        assert max(mini.size) == 480
+        # Substituir apaga os ficheiros anteriores.
+        c.post(url, {"ficheiro": self.imagem("PNG", (300, 200))}, format="multipart")
+        assert len(list((tmp_path / "imoveis" / str(i["id"])).iterdir())) == 2
+        assert c.delete(url).json()["tem_fotografia"] is False
+        assert list((tmp_path / "imoveis" / str(i["id"])).iterdir()) == []
+        assert RegistoAuditoria.objects.filter(acao="imovel.fotografia_alterada").count() == 2
+
+    def test_rejeita_ficheiro_que_nao_e_imagem(self, api, pessoas):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        i = criar(api, pessoas.cons)
+        falso = SimpleUploadedFile("foto.jpg", b"<script>alert(1)</script>", content_type="image/jpeg")
+        r = como(api, pessoas.cons).post(
+            reverse("imovel-fotografia", args=[i["id"]]), {"ficheiro": falso}, format="multipart"
+        )
+        assert r.status_code == 400 and "imagem válida" in str(r.json())
+
+    def test_sem_acesso_nao_ve_nem_altera(self, api, pessoas):
+        i = criar(api, pessoas.cons)
+        url = reverse("imovel-fotografia", args=[i["id"]])
+        como(api, pessoas.cons).post(url, {"ficheiro": self.imagem()}, format="multipart")
+        assert como(api, pessoas.cons2).get(url).status_code == 404
+        assert como(api, pessoas.cons2).post(url, {"ficheiro": self.imagem()}, format="multipart").status_code == 404
+        api.force_authenticate(None)
+        assert api.get(url).status_code == 401
+
+
+class TestLigacoes:
+    def test_adicionar_listar_e_remover(self, api, pessoas):
+        i = criar(api, pessoas.cons)
+        url = reverse("imovel-ligacoes", args=[i["id"]])
+        c = como(api, pessoas.cons)
+        r = c.post(
+            url,
+            {"tipo": valor("tipos_ligacao", "Fotografias"), "titulo": "Fotos", "url": "https://onedrive.live.com/x"},
+            format="json",
+        )
+        assert r.status_code == 201, r.content
+        assert r.json()[0]["tipo_nome"] == "Fotografias"
+        lid = r.json()[0]["id"]
+        assert como(api, pessoas.resp).get(url).json()[0]["url"] == "https://onedrive.live.com/x"
+        assert como(api, pessoas.cons2).get(url).status_code == 404
+        c = como(api, pessoas.cons)
+        assert c.delete(reverse("imovel-remover-ligacao", args=[i["id"], lid])).status_code == 204
+        assert c.get(url).json() == []
+        assert RegistoAuditoria.objects.filter(acao="imovel.ligacao_removida").exists()
+
+    @pytest.mark.parametrize("endereco", ["javascript:alert(1)", "ftp://x.pt/a", "não é url"])
+    def test_rejeita_enderecos_invalidos(self, api, pessoas, endereco):
+        i = criar(api, pessoas.cons)
+        r = como(api, pessoas.cons).post(
+            reverse("imovel-ligacoes", args=[i["id"]]),
+            {"tipo": valor("tipos_ligacao", "Documentos"), "titulo": "Docs", "url": endereco},
+            format="json",
+        )
+        assert r.status_code == 400
+
+    def test_assistente_sem_edicao_nao_adiciona(self, api, pessoas):
+        i = criar(api, pessoas.resp)
+        from apps.imoveis.models import Imovel
+
+        Imovel.objects.get(pk=i["id"]).partilhada_com.add(pessoas.assist)
+        # O assistente pode editar registos partilhados (matriz por omissão); um consultor de outra equipa não vê.
+        r = como(api, pessoas.cons_sul).post(
+            reverse("imovel-ligacoes", args=[i["id"]]),
+            {"tipo": valor("tipos_ligacao", "Outro"), "titulo": "X", "url": "https://exemplo.pt"},
+            format="json",
+        )
+        assert r.status_code == 404

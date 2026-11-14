@@ -24,6 +24,20 @@ qualquer programação.
 
 Todas as alterações às listas ficam registadas na auditoria.
 
-> **Status** dos imóveis (Ativo, Inativo, Arquivado) e **Operação** (Venda, Arrendamento) não são listas
-> editáveis, porque deles dependem regras da aplicação (por exemplo, o cálculo de comissões de venda e de
-> arrendamento é diferente).
+### Listas com categorias fixas
+
+Nas listas **Operações** e **Status do imóvel**, cada valor pertence a uma **categoria fixa**, da qual dependem
+regras da aplicação:
+
+| Lista | Categorias | Para que servem |
+|-------|------------|-----------------|
+| Operações | Venda, Arrendamento | O cálculo de comissões de venda e de arrendamento é diferente. |
+| Status do imóvel | Ativo, Inativo, Arquivado | Os imóveis com status da categoria *Arquivado* ficam escondidos da lista por omissão. |
+
+Pode criar os valores que quiser (por exemplo, *Venda em leilão*), mas ao criar tem de escolher a categoria.
+Depois de criada, a categoria de um valor **não muda** (pode renomeá-lo, reordená-lo ou desativá-lo).
+
+![Lista com categorias](imagens/26-listas-categorias.png)
+
+A lista **Tipos de ligação externa** (Fotografias, Documentos, Outro) define os tipos usados nas ligações
+para pastas do OneDrive ou de outros serviços.

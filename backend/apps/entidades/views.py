@@ -415,7 +415,7 @@ class EntidadeViewSet(
 
         e = self.get_object()
         props = Proprietario.objects.filter(entidade=e, imovel__eliminado_em__isnull=True).select_related(
-            "imovel__tipo", "imovel__tipologia", "imovel__estado_comercializacao"
+            "imovel__tipo", "imovel__tipologia", "imovel__estado_comercializacao", "imovel__status"
         )
         visiveis = set(
             filtrar(
@@ -436,7 +436,8 @@ class EntidadeViewSet(
                 "estado_comercializacao": p.imovel.estado_comercializacao.nome
                 if p.imovel.estado_comercializacao
                 else None,
-                "status": p.imovel.get_status_display(),
+                "status": p.imovel.status.nome if p.imovel.status else None,
+                "status_categoria": p.imovel.status.categoria if p.imovel.status else None,
                 "quota": str(p.quota) if p.quota is not None else None,
             }
             for p in props
