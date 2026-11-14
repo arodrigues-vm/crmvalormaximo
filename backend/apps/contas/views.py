@@ -80,9 +80,7 @@ class MfaVerificarView(APIView):
         pendente = request.session.get(CHAVE_MFA_PENDENTE)
         if not pendente or time.time() - pendente["desde"] > settings.CRM_MFA_PENDENTE_SEGUNDOS:
             request.session.pop(CHAVE_MFA_PENDENTE, None)
-            return Response(
-                {"detail": "O tempo para introduzir o código expirou. Volte a entrar."}, status=400
-            )
+            return Response({"detail": "O tempo para introduzir o código expirou. Volte a entrar."}, status=400)
         utilizador = Utilizador.objects.filter(pk=pendente["id"], is_active=True).first()
         tipo = mfa.verificar(utilizador, dados.validated_data["codigo"]) if utilizador else None
         if tipo is None:
@@ -92,9 +90,7 @@ class MfaVerificarView(APIView):
         utilizador.backend = "django.contrib.auth.backends.ModelBackend"
         login(request, utilizador)
         if tipo == "recuperacao":
-            registar(
-                "sessao.mfa_codigo_recuperacao_usado", utilizador=utilizador, modulo="sessao", request=request
-            )
+            registar("sessao.mfa_codigo_recuperacao_usado", utilizador=utilizador, modulo="sessao", request=request)
         return Response(UtilizadorAtualSerializer(utilizador).data)
 
 
@@ -119,9 +115,7 @@ class MfaAtivarView(APIView):
         dados.is_valid(raise_exception=True)
         codigos = mfa.ativar(request.user, dados.validated_data["codigo"])
         if codigos is None:
-            return Response(
-                {"detail": "Código inválido. Verifique a hora do telemóvel e tente de novo."}, status=400
-            )
+            return Response({"detail": "Código inválido. Verifique a hora do telemóvel e tente de novo."}, status=400)
         registar("sessao.mfa_ativada", modulo="sessao", request=request)
         return Response({"codigos_recuperacao": codigos})
 
@@ -173,9 +167,7 @@ class ConfirmarRecuperacaoView(APIView):
     permission_classes = [AllowAny]
     throttle_scope = "recuperar"
 
-    @extend_schema(
-        summary="Definir nova palavra-passe", request=ConfirmarRecuperacaoSerializer, responses={204: None}
-    )
+    @extend_schema(summary="Definir nova palavra-passe", request=ConfirmarRecuperacaoSerializer, responses={204: None})
     def post(self, request):
         dados = ConfirmarRecuperacaoSerializer(data=request.data)
         dados.is_valid(raise_exception=True)

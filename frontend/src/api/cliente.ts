@@ -2,12 +2,16 @@
 // o browser nunca é fonte de verdade dos dados do CRM.
 export class ErroApi extends Error {
   estado: number
+  /** Erros de validação por campo (pedidos 400). */
   campos: Record<string, string[]>
+  /** Corpo completo da resposta de erro (ex.: `codigo`, `candidatos`). */
+  corpo: Record<string, unknown>
 
-  constructor(estado: number, mensagem: string, campos: Record<string, string[]> = {}) {
+  constructor(estado: number, mensagem: string, corpo: Record<string, unknown> = {}) {
     super(mensagem)
     this.estado = estado
-    this.campos = campos
+    this.corpo = corpo
+    this.campos = corpo as Record<string, string[]>
   }
 }
 
@@ -46,8 +50,8 @@ export async function pedido<T>(caminho: string, opcoes: RequestInit & { json?: 
   })
   const corpo = resposta.headers.get('content-type')?.includes('json') ? await resposta.json() : null
   if (!resposta.ok) {
-    const { detail, ...campos } = (corpo ?? {}) as { detail?: string } & Record<string, string[]>
-    throw new ErroApi(resposta.status, detail ?? `Erro ${resposta.status}`, campos)
+    const { detail, ...resto } = (corpo ?? {}) as { detail?: string } & Record<string, unknown>
+    throw new ErroApi(resposta.status, detail ?? `Erro ${resposta.status}`, resto)
   }
   return corpo as T
 }

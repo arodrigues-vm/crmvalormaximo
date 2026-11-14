@@ -94,10 +94,7 @@ def ativar(utilizador, codigo: str) -> list[str] | None:
     CodigoRecuperacaoMFA.objects.filter(utilizador=utilizador).delete()
     codigos = [f"{secrets.token_hex(2)}-{secrets.token_hex(2)}".upper() for _ in range(N_CODIGOS_RECUPERACAO)]
     CodigoRecuperacaoMFA.objects.bulk_create(
-        [
-            CodigoRecuperacaoMFA(utilizador=utilizador, codigo_hash=make_password(_normalizar(c)))
-            for c in codigos
-        ]
+        [CodigoRecuperacaoMFA(utilizador=utilizador, codigo_hash=make_password(_normalizar(c))) for c in codigos]
     )
     return codigos
 

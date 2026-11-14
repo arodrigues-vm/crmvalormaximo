@@ -1,9 +1,9 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { App } from './App'
+import { rotas } from './App'
 import { ProvedorSessao } from './sessao'
 
 const json = (corpo: unknown, status = 200) =>
@@ -27,11 +27,9 @@ function desenhar(caminho = '/') {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={qc}>
-      <MemoryRouter initialEntries={[caminho]}>
-        <ProvedorSessao>
-          <App />
-        </ProvedorSessao>
-      </MemoryRouter>
+      <ProvedorSessao>
+        <RouterProvider router={createMemoryRouter(rotas, { initialEntries: [caminho] })} />
+      </ProvedorSessao>
     </QueryClientProvider>,
   )
 }

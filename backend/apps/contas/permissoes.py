@@ -44,9 +44,7 @@ def matriz_utilizador(utilizador) -> dict[str, dict[str, str]]:
         return resultado
     if utilizador.is_superuser:
         return {m: {o: Ambito.TODOS for o in Operacao.values} for m in MODULOS}
-    for m, o, a in PermissaoPerfil.objects.filter(perfil=utilizador.perfil).values_list(
-        "modulo", "operacao", "ambito"
-    ):
+    for m, o, a in PermissaoPerfil.objects.filter(perfil=utilizador.perfil).values_list("modulo", "operacao", "ambito"):
         if m in resultado:
             resultado[m][o] = a
     for m, o, a in PermissaoUtilizador.objects.filter(utilizador=utilizador).values_list(
@@ -117,3 +115,9 @@ class PermissaoModulo(BasePermission):
         if operacao is None:
             return False
         return pode(request.user, modulo, operacao)
+
+
+def pode_no_registo(utilizador, modulo: str, operacao: str, registo, **kwargs) -> bool:
+    """O utilizador pode executar a operação sobre este registo concreto?"""
+    base = type(registo)._default_manager.filter(pk=registo.pk)
+    return filtrar(utilizador, modulo, operacao, base, **kwargs).exists()

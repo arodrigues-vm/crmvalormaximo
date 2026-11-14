@@ -4,10 +4,10 @@ import './estilos.css'
 import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
 import { ErroApi } from './api/cliente'
-import { App } from './app/App'
+import { rotas } from './app/App'
 import { CHAVE_SESSAO, ProvedorSessao } from './app/sessao'
 
 // Sessão expirada (401) em qualquer pedido: voltar ao ecrã de entrada.
@@ -26,14 +26,14 @@ const queryClient = new QueryClient({
   },
 })
 
+const router = createBrowserRouter(rotas)
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <ProvedorSessao>
-          <App />
-        </ProvedorSessao>
-      </BrowserRouter>
+      <ProvedorSessao>
+        <RouterProvider router={router} />
+      </ProvedorSessao>
     </QueryClientProvider>
   </StrictMode>,
 )

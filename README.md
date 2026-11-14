@@ -48,8 +48,20 @@ Dados fictícios, um utilizador por perfil:
 cd backend && python manage.py criar_utilizadores_demo --password "Escolha-uma-palavra-passe"
 ```
 
+```bash
+cd backend && python manage.py criar_entidades_demo
+```
+
 Entrar com `admin@demo.local`, `responsavel@demo.local`, `consultor@demo.local` ou `assistente@demo.local`.
 O Administrador tem verificação em dois passos obrigatória: no primeiro acesso é pedido para ler um código QR com uma aplicação de autenticação.
+
+## Catálogo de localizações (CAOP)
+
+Carregar distritos, concelhos e freguesias a partir de um CSV oficial (colunas `dicofre;freguesia;concelho;distrito`):
+
+```bash
+cd backend && python manage.py importar_caop caminho/para/caop2025.csv
+```
 
 ## Testes
 

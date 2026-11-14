@@ -35,3 +35,11 @@ def saude(request):
         {"estado": estado, "base_dados": base_dados, "ambiente": settings.CRM_AMBIENTE},
         status=codigo,
     )
+
+
+@extend_schema(summary="Países e indicativos telefónicos")
+@api_view(["GET"])
+def paises(request):
+    from .validacao import paises_telefone
+
+    return Response(paises_telefone())

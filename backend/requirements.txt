@@ -7,3 +7,5 @@ gunicorn==23.0.0
 whitenoise==6.11.0
 pyotp==2.9.0
 cryptography==46.0.3
+phonenumbers==9.0.43
+django-simple-history==3.13.0

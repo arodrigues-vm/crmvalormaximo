@@ -11,7 +11,7 @@ As imagens usam apenas dados fictícios de demonstração.
 |------|------|--------|
 | 1 | [Entrar, sair e segurança da conta](01-entrar-e-seguranca.md) | Disponível |
 | 2 | Navegar na aplicação (menu, fichas, Consulta/Edição) | Em preparação |
-| 3 | Entidades | Por escrever |
+| 3 | [Entidades](03-entidades.md) | Disponível |
 | 4 | Imóveis | Por escrever |
 | 5 | Angariações (CMI) | Por escrever |
 | 6 | Oportunidades de Angariação | Por escrever |

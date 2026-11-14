@@ -90,9 +90,7 @@ class Utilizador(AbstractUser):
     email = models.EmailField("email", unique=True)
     nome = models.CharField(max_length=150)
     perfil = models.CharField(max_length=20, choices=Perfil.choices, default=Perfil.CONSULTOR)
-    equipa = models.ForeignKey(
-        Equipa, null=True, blank=True, on_delete=models.PROTECT, related_name="membros"
-    )
+    equipa = models.ForeignKey(Equipa, null=True, blank=True, on_delete=models.PROTECT, related_name="membros")
     funcao_comercial = models.CharField(
         "função comercial", max_length=80, blank=True, help_text="Informativa; não concede acessos."
     )
@@ -134,9 +132,7 @@ class PermissaoPerfil(models.Model):
     class Meta:
         verbose_name = "permissão de perfil"
         verbose_name_plural = "permissões de perfil"
-        constraints = [
-            models.UniqueConstraint(fields=["perfil", "modulo", "operacao"], name="permissao_perfil_unica")
-        ]
+        constraints = [models.UniqueConstraint(fields=["perfil", "modulo", "operacao"], name="permissao_perfil_unica")]
 
     def __str__(self):
         return f"{self.get_perfil_display()} · {self.modulo} · {self.operacao} → {self.ambito}"
@@ -154,9 +150,7 @@ class PermissaoUtilizador(models.Model):
         verbose_name = "permissão individual"
         verbose_name_plural = "permissões individuais"
         constraints = [
-            models.UniqueConstraint(
-                fields=["utilizador", "modulo", "operacao"], name="permissao_utilizador_unica"
-            )
+            models.UniqueConstraint(fields=["utilizador", "modulo", "operacao"], name="permissao_utilizador_unica")
         ]
 
     def __str__(self):
@@ -168,9 +162,7 @@ class ConfiguracaoMFA(models.Model):
     segredo_cifrado = models.TextField()
     ativa = models.BooleanField(default=False)
     ativada_em = models.DateTimeField(null=True, blank=True)
-    ultimo_passo = models.BigIntegerField(
-        default=0, help_text="Último passo TOTP aceite (anti-reutilização)."
-    )
+    ultimo_passo = models.BigIntegerField(default=0, help_text="Último passo TOTP aceite (anti-reutilização).")
 
     class Meta:
         verbose_name = "autenticação em dois passos"

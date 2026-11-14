@@ -6,7 +6,7 @@ Critérios completos: Especificação V1.4 §16 (em `fontes/`). Estados: Pendent
 |----|---------|---------|--------------------|--------|
 | AT-01 | Sessões, perfis e APIs | F1-04/05; F5-02 | `contas/tests/test_autenticacao.py`, `test_permissoes.py` (parcial: falta anexos/exportações) | Em curso |
 | AT-02 | Partilha e transferência | F1-05/06 | `test_permissoes.py::TestFiltrar` (âmbitos; falta partilha/transferência) | Em curso |
-| AT-03 | Registos e vistas | F1-03; F2-04 | — | Pendente |
+| AT-03 | Registos e vistas | F1-03; F2-04 | `entidades.test.tsx` (Consulta→Editar, guarda de saída, erros por bloco); falta Cartões/Kanban (F2-04) | Em curso |
 | AT-04 | CMI original e renovação | F2-03; F4-04 | — | Pendente |
 | AT-05 | Plano de marketing 45 | F4-03 | — | Pendente |
 | AT-06 | Dashboard e finanças | F3-08; F4-06 | — | Pendente |

@@ -51,9 +51,7 @@ def test_semear_nao_sobrepoe_configuracao_do_administrador():
 
 def test_permissao_individual_prevalece_sobre_perfil(criar_utilizador):
     u = criar_utilizador(Perfil.ASSISTENTE)
-    PermissaoUtilizador.objects.create(
-        utilizador=u, modulo="entidades", operacao=Op.ELIMINAR, ambito="atribuidos"
-    )
+    PermissaoUtilizador.objects.create(utilizador=u, modulo="entidades", operacao=Op.ELIMINAR, ambito="atribuidos")
     assert pode(u, "entidades", Op.ELIMINAR)
     assert matriz_utilizador(u)["entidades"][Op.ELIMINAR] == Ambito.ATRIBUIDOS
 
