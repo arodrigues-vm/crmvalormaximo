@@ -4,9 +4,8 @@ Guia passo a passo para instalar o CRM Valor Máximo na VPS (Ubuntu 24.04) com *
 verificações intermédias. Demora cerca de 15 minutos. Não é preciso colar palavras-passe em lado nenhum: o
 script gera-as na própria VPS.
 
-O resultado é um endereço do tipo `https://203-0-113-10.sslip.io` (o IP da VPS com traços), com HTTPS
-verdadeiro (certificado Let's Encrypt). Quando houver um domínio próprio (ex.: `crm.valormaximo.pt`),
-muda-se numa linha.
+O resultado é o endereço **https://crm.valormaximo.pt**, com HTTPS verdadeiro (certificado Let's Encrypt),
+a funcionar ao lado dos sites que já existem na VPS.
 
 ---
 
@@ -70,29 +69,64 @@ git clone -b desenvolvimento git@github.com:arodrigues-vm/crmvalormaximo.git /op
 
 Se perguntar *«Are you sure you want to continue connecting?»*, escreva `yes`.
 
-## Passo 5 — Instalar
+## Passo 5 — Criar o endereço crm.valormaximo.pt (registo DNS)
+
+A VPS já tem outros sites (por exemplo `alexandre.valormaximo.pt`), servidos pelo **nginx**. O CRM fica ao
+lado deles, com o endereço próprio **crm.valormaximo.pt**, sem mexer nos outros sites.
+
+Para isso, o endereço tem de "apontar" para a VPS:
+
+1. Entre na **área de cliente da Amen** e abra o domínio **valormaximo.pt** → **Gestão de DNS** (ou *Zona DNS*).
+2. Veja o registo do tipo **A** com o nome `alexandre` e anote o **IP** (é o IP da VPS).
+3. Carregue em **Adicionar registo** e preencha:
+   - **Tipo:** A
+   - **Nome:** `crm`
+   - **Valor / Destino:** o mesmo IP do ponto 2
+   - **TTL:** deixe o valor proposto
+4. Grave e espere **15 a 30 minutos**.
+
+Para confirmar, na VPS escreva:
 
 ```bash
-sudo bash /opt/crm/infra/instalar-vps.sh --demo
+getent hosts crm.valormaximo.pt
 ```
 
-O script instala o Docker, ativa a firewall (só SSH, HTTP e HTTPS), gera as palavras-passe internas, compila e
-arranca a aplicação e cria os utilizadores de demonstração. A primeira vez demora 5–10 minutos.
+Deve aparecer o IP da VPS. Se não aparecer nada, espere mais um pouco e repita.
 
-No fim mostra algo como:
+## Passo 6 — Instalar
+
+```bash
+cd /opt/crm && git pull
+```
+
+```bash
+sudo bash /opt/crm/infra/instalar-vps.sh --demo --nginx --dominio crm.valormaximo.pt
+```
+
+O que acontece:
+- prepara o Docker, a firewall e as palavras-passe internas;
+- compila e arranca o CRM (a primeira vez demora 5–10 minutos);
+- cria **um ficheiro novo** no nginx só para `crm.valormaximo.pt` e pede o certificado HTTPS gratuito.
+  Antes de aplicar, verifica sempre a configuração; se algo estiver errado, desfaz a alteração e os outros
+  sites continuam como estavam;
+- cria os utilizadores de demonstração.
+
+No fim mostra:
 
 ```
 Utilizadores: admin@demo.local, responsavel@demo.local, consultor@demo.local, assistente@demo.local
 Palavra-passe (guardada em /opt/crm/.senha-demo): ...
-Concluído. Abra: https://203-0-113-10.sslip.io
+Concluído. Abra: https://crm.valormaximo.pt
 ```
 
-Guarde a palavra-passe de demonstração (fica também no ficheiro indicado, só legível pelo administrador da VPS).
+Guarde a palavra-passe de demonstração.
 
-## Passo 6 — Abrir
+> Se aparecer *«O endereço crm.valormaximo.pt ainda não aponta para esta VPS»*, o passo 5 ainda não está
+> ativo: espere e volte a correr o mesmo comando.
 
-Abra o endereço indicado no browser do PC ou do telemóvel. O certificado HTTPS pode demorar 1–2 minutos na
-primeira vez.
+## Passo 7 — Abrir
+
+Abra **https://crm.valormaximo.pt** no computador ou no telemóvel.
 
 - Entre com `consultor@demo.local` (ou outro perfil) e a palavra-passe de demonstração.
 - O `admin@demo.local` pede para ativar a verificação em dois passos (manual, cap. 1.5).
@@ -107,6 +141,8 @@ Sempre que eu publicar alterações:
 cd /opt/crm && git pull && sudo bash infra/instalar-vps.sh
 ```
 
+(As opções `--nginx --dominio crm.valormaximo.pt` ficam guardadas; não é preciso repeti-las.)
+
 Os dados mantêm-se (ficam em volumes Docker).
 
 ## Problemas frequentes
@@ -115,6 +151,7 @@ Os dados mantêm-se (ficam em volumes Docker).
 |---------|----------------|-------------|
 | `could not create work tree dir '/opt/crm': Permission denied` | Pasta criada sem `sudo` | Fazer os dois comandos `sudo mkdir` e `sudo chown` do passo 4 |
 | `Permission denied (publickey)` no passo 4 | Chave não autorizada no GitHub | Repetir o passo 3 com a linha completa `ssh-ed25519 …` |
+| *«ainda não aponta para esta VPS»* | Registo DNS ainda não ativo | Esperar 15–30 min (passo 5) e repetir |
 | O endereço não abre | Firewall do painel da Amen | No painel da Amen, permitir as portas 80 e 443 |
 | Aviso de certificado | Certificado ainda a ser emitido | Esperar 2 minutos e recarregar |
 

@@ -21,4 +21,9 @@ def test_ip_atras_do_proxy(rf, settings):
     settings.CRM_CONFIAR_PROXY = False
     assert _ip(pedido) == "172.18.0.3"
     settings.CRM_CONFIAR_PROXY = True
+    settings.CRM_NUMERO_PROXIES = 1
     assert _ip(pedido) == "203.0.113.7"
+    # nginx + Caddy: "forjado, cliente, nginx"
+    duplo = rf.get("/", HTTP_X_FORWARDED_FOR="9.9.9.9, 198.51.100.4, 172.18.0.1", REMOTE_ADDR="172.18.0.3")
+    settings.CRM_NUMERO_PROXIES = 2
+    assert _ip(duplo) == "198.51.100.4"

@@ -40,10 +40,13 @@ services:
     build: ./frontend
     restart: unless-stopped
     environment:
-      CRM_DOMINIO: ${CRM_DOMINIO}
+      CRM_ENDERECO_SITE: ${CRM_ENDERECO_SITE}
+      CRM_CADDY_PROXIES_CONFIAVEIS: ${CRM_CADDY_PROXIES_CONFIAVEIS:-127.0.0.1/32}
+      CRM_PROTOCOLO_ORIGEM: ${CRM_PROTOCOLO_ORIGEM:-}
     ports:
-      - "80:80"
-      - "443:443"
+      # Modo direto: 80/443 públicas. Modo «atrás do nginx»: só 127.0.0.1:8090 (o nginx encaminha).
+      - "${CRM_PUBLICAR_HTTP:-80}:80"
+      - "${CRM_PUBLICAR_HTTPS:-443}:443"
     volumes:
       - caddy_dados:/data
       - caddy_config:/config

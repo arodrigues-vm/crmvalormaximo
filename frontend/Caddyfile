@@ -1,7 +1,16 @@
 # CRM Valor Máximo — servidor web.
-# CRM_DOMINIO: nome do site (ex.: crm.exemplo.pt ou 203-0-113-10.sslip.io). O Caddy obtém e renova
-# automaticamente o certificado HTTPS (Let's Encrypt).
-{$CRM_DOMINIO} {
+#
+# Dois modos (definidos em .env.producao pelo instalador):
+#  - direto: CRM_ENDERECO_SITE=crm.exemplo.pt → o Caddy obtém o certificado HTTPS (Let's Encrypt).
+#  - atrás do nginx: CRM_ENDERECO_SITE=:80 → o nginx da VPS trata do HTTPS e encaminha para aqui.
+{
+	servers {
+		# Proxies de confiança (o nginx da VPS no modo «atrás do nginx»): mantêm o IP real do visitante.
+		trusted_proxies static {$CRM_CADDY_PROXIES_CONFIAVEIS:127.0.0.1/32}
+	}
+}
+
+{$CRM_ENDERECO_SITE} {
 	encode zstd gzip
 
 	header {
@@ -20,12 +29,14 @@
 
 	@servidor path /api/* /admin/* /static/*
 	handle @servidor {
-		reverse_proxy backend:8000
+		reverse_proxy backend:8000 {
+			# Indica ao Django que o visitante chegou por HTTPS (no modo nginx, o HTTPS é do nginx).
+			header_up X-Forwarded-Proto {$CRM_PROTOCOLO_ORIGEM:{scheme}}
+		}
 	}
 
 	handle {
 		root * /srv
-		# Ficheiros da aplicação com nome versionado podem ficar em cache; index.html nunca.
 		@versionados path /assets/*
 		header @versionados Cache-Control "public, max-age=31536000, immutable"
 		try_files {path} /index.html

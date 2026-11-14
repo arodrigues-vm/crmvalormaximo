@@ -29,6 +29,8 @@ CSRF_TRUSTED_ORIGINS = env("DJANGO_CSRF_TRUSTED_ORIGINS")
 CRM_AMBIENTE = env("CRM_AMBIENTE")
 # Em produção a aplicação está atrás do Caddy: o IP real vem em X-Forwarded-For.
 CRM_CONFIAR_PROXY = env.bool("CRM_CONFIAR_PROXY", default=False)
+# Quantos proxies acrescentam endereços a X-Forwarded-For (1 = Caddy; 2 = nginx + Caddy).
+CRM_NUMERO_PROXIES = env.int("CRM_NUMERO_PROXIES", default=1)
 
 INSTALLED_APPS = [
     "django.contrib.admin",

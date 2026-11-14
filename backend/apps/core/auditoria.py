@@ -4,14 +4,16 @@ from .models import RegistoAuditoria
 
 
 def _ip(request):
-    """IP do cliente. Atrás do proxy (Caddy), usar o último endereço de X-Forwarded-For,
-    que é o acrescentado pelo próprio proxy (os anteriores podem ser forjados pelo cliente)."""
+    """IP do cliente. Atrás de N proxies de confiança (Caddy; ou nginx + Caddy), o IP real é o
+    N-ésimo endereço a contar do fim de X-Forwarded-For: cada proxy acrescenta um, e os anteriores
+    podem ter sido forjados pelo cliente."""
     if request is None:
         return None
-    if settings.CRM_CONFIAR_PROXY:
-        encaminhado = request.META.get("HTTP_X_FORWARDED_FOR", "")
-        if encaminhado:
-            return encaminhado.split(",")[-1].strip() or None
+    n = settings.CRM_NUMERO_PROXIES if settings.CRM_CONFIAR_PROXY else 0
+    if n:
+        enderecos = [e.strip() for e in request.META.get("HTTP_X_FORWARDED_FOR", "").split(",") if e.strip()]
+        if len(enderecos) >= n:
+            return enderecos[-n]
     return request.META.get("REMOTE_ADDR") or None
 
 

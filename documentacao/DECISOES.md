@@ -25,6 +25,7 @@ As decisões D-01 a D-10, Q01 a Q16 e V01 a V04 da Especificação V1.4 mantêm-
 | D-28 | 14/11/2026 | **CMI: correção excecional e reabertura** podem ser feitas por **quem pode editar o CMI** (incluindo o Consultor responsável), sempre com motivo (e evidência na correção) e registo na auditoria. |
 | D-29 | 14/11/2026 | **Instância de teste na VPS Amen** (dados fictícios) para as verificações intermédias; acesso por SSH a partir do PC do proprietário. |
 | D-30 | 14/11/2026 | **Comunicação com o proprietário:** não é técnico; linguagem simples e instruções passo a passo (registado em CLAUDE.md). |
+| D-31 | 14/11/2026 | A VPS já serve outros sites (alexandre/certificados/ferramentas.valormaximo.pt, incluindo a versão antiga do Codex) com **nginx**: o CRM fica **ao lado**, em **crm.valormaximo.pt**, com o nginx a tratar do HTTPS (ficheiro próprio, validado antes de aplicar) e o CRM só acessível internamente (127.0.0.1:8090). Os outros sites não são alterados. |
 
 ## Decisões técnicas propostas (aplicadas salvo indicação em contrário)
 

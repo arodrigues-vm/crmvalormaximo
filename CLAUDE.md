@@ -10,8 +10,10 @@ Responder sempre em **português de Portugal**.
 
 ## Servidor (VPS Amen)
 - Ubuntu 24.04, utilizador `arodrigues` (não root; usa `sudo`). Repositório em `/opt/crm`.
-- A VPS **já tem o nginx** a ocupar as portas 80 e 443 (pode estar a servir outro site); não o desligar
-  sem confirmação.
+- A VPS **já tem o nginx** (portas 80/443) a servir alexandre.valormaximo.pt, certificados.valormaximo.pt e
+  ferramentas.valormaximo.pt (inclui a versão antiga do CRM feita com o Codex). **Não alterar esses sites.**
+- O CRM fica em **crm.valormaximo.pt** atrás desse nginx (D-31): `infra/instalar-vps.sh --nginx --dominio …`.
+- Domínio da empresa: **valormaximo.pt** (DNS na Amen).
 
 ## Fontes normativas (por ordem)
 1. Decisões do proprietário registadas em `documentacao/DECISOES.md` (prevalecem).
