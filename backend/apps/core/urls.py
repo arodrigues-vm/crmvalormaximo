@@ -7,5 +7,7 @@ urlpatterns = [
     path("auth/", include("apps.contas.urls")),
     path("telefone/paises/", views.paises, name="telefone-paises"),
     path("", include("apps.entidades.urls")),
+    path("", include("apps.imoveis.urls")),
     path("localizacao/", include("apps.localizacao.urls")),
+    path("listas/", include("apps.configuracao.urls")),
 ]

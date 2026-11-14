@@ -1,9 +1,10 @@
 import pytest
 from django.urls import reverse
 
+from apps.configuracao.models import ValorLista
 from apps.contas.models import Perfil
 from apps.core.models import RegistoAuditoria
-from apps.entidades.models import Entidade, PapelEntidade
+from apps.entidades.models import Entidade
 
 pytestmark = pytest.mark.django_db
 
@@ -92,7 +93,7 @@ class TestCriar:
         assert e["apelido"] == ""
 
     def test_papeis(self, api, pessoas):
-        p = PapelEntidade.objects.get(nome="Comprador")
+        p = ValorLista.objects.get(lista__chave="papeis_entidade", nome="Comprador")
         e = criar(api, pessoas.cons, papeis=[p.id])
         assert e["papeis_nomes"] == ["Comprador"]
 

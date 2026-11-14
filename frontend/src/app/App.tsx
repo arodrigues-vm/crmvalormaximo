@@ -1,9 +1,15 @@
 /* eslint-disable react-refresh/only-export-components -- ficheiro de definição de rotas */
 import { Navigate, Outlet, useLocation, type RouteObject } from 'react-router-dom'
 
+import type { Operacao } from '../api/cliente'
+
 import { EntidadeEditar, EntidadeNova } from '../modulos/entidades/EntidadeFormulario'
 import { EntidadeConsulta } from '../modulos/entidades/EntidadeConsulta'
 import { EntidadesLista } from '../modulos/entidades/EntidadesLista'
+import { ListasValores } from '../modulos/configuracoes/ListasValores'
+import { ImoveisLista } from '../modulos/imoveis/ImoveisLista'
+import { ImovelConsulta } from '../modulos/imoveis/ImovelConsulta'
+import { ImovelEditar, ImovelNovo } from '../modulos/imoveis/ImovelFormulario'
 import { ConfigurarMfa } from '../paginas/ConfigurarMfa'
 import { Dashboard } from '../paginas/Dashboard'
 import { Entrar } from '../paginas/Entrar'
@@ -25,9 +31,9 @@ function AreaProtegida() {
 }
 
 /** Exige permissão de consulta no módulo (a API volta a verificar sempre). */
-function ExigeModulo({ modulo }: { modulo: string }) {
+function ExigeModulo({ modulo, operacao = 'consultar' }: { modulo: string; operacao?: Operacao }) {
   const { pode } = useSessao()
-  if (!pode(modulo)) return <p className="aviso">Não tem acesso a este módulo.</p>
+  if (!pode(modulo, operacao)) return <p className="aviso">Não tem acesso a este módulo.</p>
   return <Outlet />
 }
 
@@ -47,6 +53,24 @@ export const rotas: RouteObject[] = [
           { path: 'nova', element: <EntidadeNova /> },
           { path: ':id', element: <EntidadeConsulta /> },
           { path: ':id/editar', element: <EntidadeEditar /> },
+        ],
+      },
+      {
+        path: 'imoveis',
+        element: <ExigeModulo modulo="imoveis" />,
+        children: [
+          { index: true, element: <ImoveisLista /> },
+          { path: 'novo', element: <ImovelNovo /> },
+          { path: ':id', element: <ImovelConsulta /> },
+          { path: ':id/editar', element: <ImovelEditar /> },
+        ],
+      },
+      {
+        path: 'configuracoes',
+        element: <ExigeModulo modulo="configuracoes" operacao="administrar" />,
+        children: [
+          { index: true, element: <Navigate to="listas" replace /> },
+          { path: 'listas', element: <ListasValores /> },
         ],
       },
       { path: '*', element: <p>Página não encontrada.</p> },

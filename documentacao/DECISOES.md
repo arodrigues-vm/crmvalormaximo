@@ -17,6 +17,8 @@ As decisões D-01 a D-10, Q01 a Q16 e V01 a V04 da Especificação V1.4 mantêm-
 | D-20 | 14/11/2026 | **Logótipo aprovado** recebido (`marca/logotipo-valor-maximo-original.webp`). Na interface usa-se o mesmo logótipo com o fundo removido, para assentar no azul-marinho; ícones da aplicação a partir do monograma VM (recorte, sem redesenho). |
 | D-21 | 14/11/2026 | **Manual de utilizador escrito à medida** que cada módulo fica pronto (`documentacao/manual/`), com revisão e versão final (PDF) no fim. |
 | D-22 | 14/11/2026 | **Relações entre entidades** (requisito novo do proprietário): tipos configuráveis, com nome direto e inverso; iniciais: Cônjuge, Familiar, Sócio de / Tem como sócio, Gerente de / Tem como gerente. A relação aparece nas duas fichas; respeita as permissões das duas pontas. |
+| D-23 | 14/11/2026 | **Todas as listas suspensas são editáveis na aplicação** (Configurações → Listas de valores), sem código; valores desativam-se, não se apagam. Inclui papéis e origens das Entidades. Exceções (regras de negócio): Operação e Status. |
+| D-24 | 14/11/2026 | Imóveis: «Fase comercial» passa a **Status** (Ativo, Inativo, Arquivado); «Estado comercial» passa a **Estado de comercialização** (lista editável). Listas iniciais aprovadas: tipos, tipologias, estados, condições físicas, zonas exteriores, áreas (m²); acrescentadas classes de certificado energético e zonas comerciais (vazia). |
 
 ## Decisões técnicas propostas (aplicadas salvo indicação em contrário)
 

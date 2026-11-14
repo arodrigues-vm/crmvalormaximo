@@ -1,7 +1,7 @@
 from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
 
-from .models import Entidade, OrigemContacto, PapelEntidade, RelacaoEntidade, TelefoneEntidade, TipoRelacao
+from .models import Entidade, RelacaoEntidade, TelefoneEntidade, TipoRelacao
 
 
 class TelefoneInline(admin.TabularInline):
@@ -20,18 +20,6 @@ class EntidadeAdmin(SimpleHistoryAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False  # usar a lixeira da aplicação
-
-
-@admin.register(PapelEntidade)
-class PapelAdmin(admin.ModelAdmin):
-    list_display = ["nome", "ordem", "ativo"]
-    list_editable = ["ordem", "ativo"]
-
-
-@admin.register(OrigemContacto)
-class OrigemAdmin(admin.ModelAdmin):
-    list_display = ["nome", "ativa"]
-    list_editable = ["ativa"]
 
 
 @admin.register(TipoRelacao)

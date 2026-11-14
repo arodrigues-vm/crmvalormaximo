@@ -8,12 +8,14 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 
+from apps.configuracao.campos import opcoes_lista
 from apps.contas.models import Ambito, Operacao
 from apps.contas.permissoes import PermissaoModulo, ambito_efetivo, filtrar, pode_no_registo
 from apps.core.auditoria import registar
 from apps.core.validacao import normalizar_telefone
+from apps.core.vistas import valor_legivel
 
-from .models import Entidade, OrigemContacto, PapelEntidade, RelacaoEntidade, TelefoneEntidade, TipoRelacao
+from .models import Entidade, RelacaoEntidade, TelefoneEntidade, TipoRelacao
 from .serializers import (
     DuplicadosPedidoSerializer,
     EntidadeListaSerializer,
@@ -62,6 +64,7 @@ class EntidadeViewSet(
         "opcoes": Operacao.CONSULTAR,
         "relacoes": Operacao.CONSULTAR,
         "remover_relacao": Operacao.EDITAR,
+        "imoveis": Operacao.CONSULTAR,
     }
 
     def get_serializer_class(self):
@@ -279,7 +282,11 @@ class EntidadeViewSet(
             if h.prev_record:
                 delta = h.diff_against(h.prev_record)
                 alteracoes = [
-                    {"campo": c.field, "antes": _texto(c.old), "depois": _texto(c.new)}
+                    {
+                        "campo": c.field,
+                        "antes": valor_legivel(Entidade, c.field, c.old),
+                        "depois": valor_legivel(Entidade, c.field, c.new),
+                    }
                     for c in delta.changes
                     if c.field not in ("versao", "atualizado_em", "atualizado_por")
                 ]
@@ -298,8 +305,8 @@ class EntidadeViewSet(
         """Listas de valores para os formulários."""
         return Response(
             {
-                "papeis": list(PapelEntidade.objects.filter(ativo=True).values("id", "nome")),
-                "origens": list(OrigemContacto.objects.filter(ativa=True).values("id", "nome")),
+                "papeis": opcoes_lista("papeis_entidade"),
+                "origens": opcoes_lista("origens_contacto"),
                 "tipos_pessoa": [{"valor": v, "nome": n} for v, n in Entidade.TipoPessoa.choices],
                 "consentimentos": [{"valor": v, "nome": n} for v, n in Entidade.Consentimento.choices],
                 "tipos_telefone": [{"valor": v, "nome": n} for v, n in TelefoneEntidade.Tipo.choices],
@@ -399,6 +406,43 @@ class EntidadeViewSet(
         r.delete()
         registar("entidade.relacao_removida", modulo=MODULO, objeto=e, request=request, dados=dados)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["get"])
+    def imoveis(self, request, pk=None):
+        """Imóveis de que a entidade é proprietária (titularidade atual), com a quota.
+        Imóveis a que o utilizador não tem acesso só são contados."""
+        from apps.imoveis.models import Imovel, Proprietario
+
+        e = self.get_object()
+        props = Proprietario.objects.filter(entidade=e, imovel__eliminado_em__isnull=True).select_related(
+            "imovel__tipo", "imovel__tipologia", "imovel__estado_comercializacao"
+        )
+        visiveis = set(
+            filtrar(
+                request.user,
+                "imoveis",
+                Operacao.CONSULTAR,
+                Imovel.objects.filter(pk__in=[p.imovel_id for p in props]),
+                campo_partilhas="partilhada_com",
+            ).values_list("pk", flat=True)
+        )
+        lista = [
+            {
+                "id": p.imovel.pk,
+                "referencia": p.imovel.referencia,
+                "tipo": p.imovel.tipo.nome if p.imovel.tipo else None,
+                "tipologia": p.imovel.tipologia.nome if p.imovel.tipologia else None,
+                "localidade": p.imovel.localidade,
+                "estado_comercializacao": p.imovel.estado_comercializacao.nome
+                if p.imovel.estado_comercializacao
+                else None,
+                "status": p.imovel.get_status_display(),
+                "quota": str(p.quota) if p.quota is not None else None,
+            }
+            for p in props
+            if p.imovel_id in visiveis
+        ]
+        return Response({"imoveis": lista, "outros": len(props) - len(lista)})
 
 
 def _texto(v):

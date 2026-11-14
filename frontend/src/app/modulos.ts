@@ -25,7 +25,7 @@ export const GRUPOS: GrupoModulos[] = [
     nome: 'Comercial',
     modulos: [
       m('entidades', 'Entidades', true),
-      m('imoveis', 'Imóveis'),
+      m('imoveis', 'Imóveis', true),
       m('angariacoes', 'Angariações'),
       m('oportunidades', 'Oportunidades de Angariação'),
       m('procuras', 'Procuras e Qualificação'),
@@ -55,5 +55,5 @@ export const GRUPOS: GrupoModulos[] = [
     nome: 'Organização',
     modulos: [m('equipa', 'Equipa'), m('agentes', 'Agentes'), m('agencias', 'Agências')],
   },
-  { nome: 'Sistema', modulos: [m('glossario', 'Glossário'), m('configuracoes', 'Configurações')] },
+  { nome: 'Sistema', modulos: [m('glossario', 'Glossário'), m('configuracoes', 'Configurações', true)] },
 ]

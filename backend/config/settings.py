@@ -41,8 +41,10 @@ INSTALLED_APPS = [
     "simple_history",
     "apps.core",
     "apps.contas",
+    "apps.configuracao",
     "apps.localizacao",
     "apps.entidades",
+    "apps.imoveis",
 ]
 
 MIDDLEWARE = [

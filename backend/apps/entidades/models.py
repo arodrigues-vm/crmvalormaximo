@@ -2,38 +2,8 @@ from django.conf import settings
 from django.db import models
 from simple_history.models import HistoricalRecords
 
+from apps.configuracao.models import campo_lista, campo_lista_multipla
 from apps.core.modelos_base import RegistoBase
-
-
-class PapelEntidade(models.Model):
-    """Papéis comerciais configuráveis (proprietário, comprador, …)."""
-
-    nome = models.CharField(max_length=60, unique=True)
-    ativo = models.BooleanField(default=True)
-    ordem = models.PositiveSmallIntegerField(default=0)
-
-    class Meta:
-        ordering = ["ordem", "nome"]
-        verbose_name = "papel de entidade"
-        verbose_name_plural = "papéis de entidade"
-
-    def __str__(self):
-        return self.nome
-
-
-class OrigemContacto(models.Model):
-    """Origem do contacto (configurável pelo Administrador; nenhuma vem instalada)."""
-
-    nome = models.CharField(max_length=80, unique=True)
-    ativa = models.BooleanField(default=True)
-
-    class Meta:
-        ordering = ["nome"]
-        verbose_name = "origem de contacto"
-        verbose_name_plural = "origens de contacto"
-
-    def __str__(self):
-        return self.nome
 
 
 class Entidade(RegistoBase):
@@ -69,8 +39,8 @@ class Entidade(RegistoBase):
         "localizacao.Freguesia", null=True, blank=True, on_delete=models.PROTECT, related_name="+"
     )
 
-    papeis = models.ManyToManyField(PapelEntidade, blank=True, related_name="entidades")
-    origem = models.ForeignKey(OrigemContacto, null=True, blank=True, on_delete=models.PROTECT)
+    papeis = campo_lista_multipla("papeis_entidade")
+    origem = campo_lista("origens_contacto")
     responsavel = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+")
     partilhada_com = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="+")
     ativa = models.BooleanField(default=True)

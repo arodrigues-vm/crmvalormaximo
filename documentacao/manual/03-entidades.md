@@ -118,11 +118,12 @@ Construções Demonstração, na ficha da empresa aparece *Tem como gerente* Ana
   acesso»*, sem nome nem dados.
 - Os tipos de relação disponíveis são **Cônjuge**, **Familiar**, **Sócio de / Tem como sócio** e
   **Gerente de / Tem como gerente**. O Administrador pode criar outros.
+- Os **papéis** e as **origens de contacto** são listas editáveis pelo Administrador (anexo A).
 
 ## 3.6 Imóveis da entidade
 
-Os imóveis de que a entidade é proprietária (com a respetiva quota) vão aparecer na ficha quando o módulo
-**Imóveis** estiver disponível.
+A secção **Imóveis (proprietária)** mostra os imóveis de que a entidade é proprietária, com a quota de cada
+um (ver capítulo 4). Os proprietários registam-se na ficha do imóvel.
 
 ## 3.7 Proteção de dados (RGPD)
 

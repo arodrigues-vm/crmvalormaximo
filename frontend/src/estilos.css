@@ -1021,3 +1021,177 @@ fieldset.campo {
   justify-content: flex-end;
   gap: 8px;
 }
+
+/* Configurações — listas de valores */
+.configuracao {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 16px;
+  align-items: start;
+  max-width: 1100px;
+}
+.configuracao-menu {
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  padding: 12px 8px;
+}
+.configuracao-menu ul {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+}
+.grupo-nome-claro {
+  margin: 4px 8px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--texto-suave);
+}
+.configuracao-menu button {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 0;
+  background: none;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: left;
+  color: var(--texto);
+}
+.configuracao-menu button small {
+  color: var(--texto-suave);
+}
+.configuracao-menu button:hover {
+  background: #f2f4f7;
+}
+.configuracao-menu button.ativa {
+  background: rgba(11, 37, 69, 0.08);
+  font-weight: 600;
+  color: var(--azul-marinho);
+}
+.configuracao-lista .bloco-conteudo {
+  padding-top: 18px;
+}
+.valores-lista {
+  list-style: none;
+  margin: 12px 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.valores-lista li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+}
+.valores-lista li.inativo .valor-nome {
+  color: var(--texto-suave);
+  text-decoration: line-through;
+}
+.valor-ordem {
+  display: inline-flex;
+  gap: 4px;
+}
+.valor-nome {
+  flex: 1;
+}
+.valores-lista .botao-secundario {
+  padding: 4px 10px;
+  font-size: 13px;
+}
+.valor-edicao,
+.valor-novo {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+.valor-edicao input,
+.valor-novo input {
+  flex: 1;
+  min-width: 160px;
+  font: inherit;
+  padding: 8px 10px;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+}
+@media (max-width: 760px) {
+  .configuracao {
+    grid-template-columns: 1fr;
+  }
+  .valores-lista li {
+    flex-wrap: wrap;
+  }
+}
+
+/* Imóveis */
+.filtro-curto {
+  width: 150px;
+}
+.lista-proprietarios {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.lista-proprietarios li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 8px 10px;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+}
+.proprietario-nome {
+  flex: 1;
+  min-width: 180px;
+}
+.quota {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+.quota input {
+  width: 90px;
+  font: inherit;
+  padding: 6px 8px;
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+}
+.novo-proprietario {
+  display: grid;
+  grid-template-columns: minmax(220px, 420px) auto;
+  gap: 12px;
+  align-items: end;
+  margin-top: 8px;
+}
+.novo-proprietario .ligacao-secundaria {
+  text-align: left;
+  padding-bottom: 10px;
+}
+.etiqueta-aviso {
+  background: #fffaeb;
+  color: #b54708;
+}
+@media (max-width: 760px) {
+  .novo-proprietario {
+    grid-template-columns: 1fr;
+  }
+  .filtro-curto {
+    width: auto;
+    flex: 1 1 45%;
+  }
+}

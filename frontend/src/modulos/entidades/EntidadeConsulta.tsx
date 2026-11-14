@@ -9,6 +9,7 @@ import { Bloco } from '../../componentes/Bloco'
 import { Dado } from '../../componentes/campos'
 import { Dialogo } from '../../componentes/Dialogo'
 import { entidadesApi, NOMES_CAMPOS, type Entidade } from './api'
+import { ImoveisDaEntidade } from './ImoveisDaEntidade'
 import { RelacoesEntidade } from './RelacoesEntidade'
 
 const dataPt = (d: string | null) => (d ? new Date(`${d}T00:00:00`).toLocaleDateString('pt-PT') : null)
@@ -145,6 +146,10 @@ export function EntidadeConsulta() {
           <Dado rotulo="Origem">{e.origem_nome}</Dado>
           <Dado rotulo="Responsável">{e.responsavel_nome}</Dado>
         </dl>
+      </Bloco>
+
+      <Bloco titulo="Imóveis (proprietária)">
+        <ImoveisDaEntidade entidadeId={e.id} />
       </Bloco>
 
       <Bloco titulo="Relações">

@@ -2,11 +2,12 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
 from rest_framework import serializers
 
+from apps.configuracao.campos import CampoValorLista
 from apps.contas.models import Utilizador
 from apps.core.validacao import nif_valido, normalizar_telefone
 from apps.localizacao.models import Freguesia
 
-from .models import Entidade, OrigemContacto, PapelEntidade, TelefoneEntidade
+from .models import Entidade, TelefoneEntidade
 
 
 class TelefoneSerializer(serializers.ModelSerializer):
@@ -54,12 +55,8 @@ class EntidadeListaSerializer(serializers.ModelSerializer):
 
 class EntidadeSerializer(serializers.ModelSerializer):
     telefones = TelefoneSerializer(many=True, required=False)
-    papeis = serializers.PrimaryKeyRelatedField(
-        many=True, required=False, queryset=PapelEntidade.objects.filter(ativo=True)
-    )
-    origem = serializers.PrimaryKeyRelatedField(
-        allow_null=True, required=False, queryset=OrigemContacto.objects.filter(ativa=True)
-    )
+    papeis = CampoValorLista("papeis_entidade", many=True, required=False)
+    origem = CampoValorLista("origens_contacto", allow_null=True, required=False)
     freguesia = serializers.PrimaryKeyRelatedField(allow_null=True, required=False, queryset=Freguesia.objects.all())
     responsavel = serializers.PrimaryKeyRelatedField(required=False, queryset=Utilizador.objects.filter(is_active=True))
     responsavel_nome = serializers.CharField(source="responsavel.nome", read_only=True)

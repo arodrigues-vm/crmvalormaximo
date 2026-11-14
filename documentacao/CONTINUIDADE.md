@@ -28,6 +28,8 @@ Estes estados não são equivalentes.
 |--------|--------|-------|
 | F2-01 Entidades | Implementado, testado | Pessoa singular/coletiva, NIF/NIPC validado (PT), telefones múltiplos E.164 com país, email, morada FT-01 + freguesia CAOP, papéis (6 da especificação, configuráveis), origem (configurável, nenhuma instalada), responsável, partilhas, RGPD (consentimento com data, oposição). Pesquisa sem acentos; deteção de duplicados (NIF/email/telefone bloqueiam com confirmação; nome semelhante só avisa; sem revelar dados de registos não acessíveis). Controlo de versão (409), lixeira e restauro, histórico (simple-history) e auditoria com campos alterados, transferência de responsável só com permissão e âmbito. |
 | F2-01c Relações entre entidades | Implementado, testado | D-22. Tipos configuráveis (direto/inverso, simétricos), sem auto-relação nem duplicados (também ao contrário nos simétricos), exige acesso às duas entidades, entidade sem acesso aparece anónima, auditoria e histórico. Seletor pesquisável reutilizável (teclado e toque). |
+| F1-07a Listas de valores | Implementado, testado | D-23. Listas com chave estável, valores ordenáveis, renomear, desativar/reativar (sem apagar), auditoria; ecrã Configurações → Listas de valores (só Administrador); valores desativados mantêm-se nos registos e não podem ser escolhidos de novo. |
+| F2-02 Imóveis | Implementado, testado | D-24. Referência IMO-, listas editáveis, operação, status, preço (NULL ≠ 0), localização administrativa/comercial/descritiva, áreas, características, zonas exteriores; proprietários com quotas (soma ≤ 100 %, proprietários sem acesso preservados e anónimos); secção na ficha da Entidade; filtros/pesquisa; versão, lixeira, histórico com nomes legíveis, auditoria. **Fotografias e documentos por fazer.** |
 | F2-01b Catálogo CAOP2025 | Parcial | Modelos, API e comando `importar_caop` prontos e testados. **Faltam os dados oficiais**: os sites da DGT/dados.gov.pt estão bloqueados neste ambiente. |
 
 ## Limitações conhecidas
@@ -35,10 +37,10 @@ Estes estados não são equivalentes.
 - Endereço IP na auditoria vem de REMOTE_ADDR; em produção, atrás do proxy, configurar o cabeçalho de IP real (F5-03).
 
 ## Manual de utilizador
-Capítulos 1 (Entrar, sair e segurança) e 3 (Entidades) escritos. Ver `documentacao/manual/README.md`.
+Capítulos 1, 3 (Entidades), 4 (Imóveis) e anexo A (listas de valores) escritos. Ver `documentacao/manual/README.md`.
 
 ## Utilizadores de demonstração (fictícios)
 `python manage.py criar_utilizadores_demo --password <palavra-passe>` cria admin@, responsavel@, consultor@ e assistente@demo.local. Recusa-se a correr em produção. `python manage.py criar_entidades_demo` cria 8 entidades fictícias.
 
 ## Próxima tarefa
-F2-02 Imóveis (coproprietários e quotas) e F2-03 Angariações/CMI. Em paralelo: carregar a CAOP2025; F1-06 (interface de partilha/transferência); F1-07 (motor no-code, âmbito D-13).
+F2-02b Fotografias dos imóveis; F2-03 Angariações/CMI. Em paralelo: carregar a CAOP2025; F1-06 (interface de partilha/transferência); F1-07 (motor no-code, âmbito D-13).

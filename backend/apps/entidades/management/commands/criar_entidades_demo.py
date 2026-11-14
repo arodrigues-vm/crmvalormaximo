@@ -7,8 +7,9 @@ coincidir com dados de pessoas reais.
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
+from apps.configuracao.models import Lista, ValorLista
 from apps.contas.models import Utilizador
-from apps.entidades.models import Entidade, OrigemContacto, PapelEntidade, TelefoneEntidade
+from apps.entidades.models import Entidade, TelefoneEntidade
 
 DEMO = [
     ("singular", "Ana", "Demonstração Costa", ["Proprietário", "Vendedor"], "consultor"),
@@ -28,7 +29,9 @@ class Command(BaseCommand):
     def handle(self, *args, **opts):
         if settings.CRM_AMBIENTE == "producao":
             raise CommandError("Não é permitido criar dados demo em produção.")
-        origem, _ = OrigemContacto.objects.get_or_create(nome="Recomendação (demo)")
+        origem, _ = ValorLista.objects.get_or_create(
+            lista=Lista.objects.get(chave="origens_contacto"), nome="Recomendação (demo)"
+        )
         for i, (tipo, nome, apelido, papeis, quem) in enumerate(DEMO, start=1):
             responsavel = Utilizador.objects.get(email=f"{quem}@demo.local")
             e, criada = Entidade.objects.get_or_create(
@@ -45,7 +48,7 @@ class Command(BaseCommand):
                 },
             )
             if criada:
-                e.papeis.set(PapelEntidade.objects.filter(nome__in=papeis))
+                e.papeis.set(ValorLista.objects.filter(lista__chave="papeis_entidade", nome__in=papeis))
                 TelefoneEntidade.objects.create(
                     entidade=e, regiao="PT", numero=f"91200{i:04d}", numero_e164=f"+35191200{i:04d}", principal=True
                 )

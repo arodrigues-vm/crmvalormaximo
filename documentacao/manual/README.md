@@ -12,7 +12,7 @@ As imagens usam apenas dados fictícios de demonstração.
 | 1 | [Entrar, sair e segurança da conta](01-entrar-e-seguranca.md) | Disponível |
 | 2 | Navegar na aplicação (menu, fichas, Consulta/Edição) | Em preparação |
 | 3 | [Entidades](03-entidades.md) | Disponível |
-| 4 | Imóveis | Por escrever |
+| 4 | [Imóveis](04-imoveis.md) | Disponível |
 | 5 | Angariações (CMI) | Por escrever |
 | 6 | Oportunidades de Angariação | Por escrever |
 | 7 | Procuras e correspondências | Por escrever |
@@ -27,7 +27,7 @@ As imagens usam apenas dados fictícios de demonstração.
 | 16 | Dashboard e Estatísticas | Por escrever |
 | 17 | Comunicação (email e WhatsApp) | Por escrever |
 | 18 | Equipa, Agentes e Agências | Por escrever |
-| A | Administração: utilizadores, perfis e permissões | Por escrever |
+| A | [Administração](A-administracao.md): listas de valores; utilizadores, perfis e permissões | Parcial |
 | B | Glossário | Por escrever |
 
 ## Perfis de acesso
