@@ -24,6 +24,7 @@ As decisões D-01 a D-10, Q01 a Q16 e V01 a V04 da Especificação V1.4 mantêm-
 | D-27 | 14/11/2026 | **CMI — regras confirmadas pelo proprietário (14/11/2026), exceto (e), substituída por D-28:** (a) fim = início + prazo em meses − 1 dia; (b) regime como lista com categoria Exclusivo/Não exclusivo; um CMI **exclusivo** impede outro CMI em curso **sobreposto** no mesmo imóvel e na mesma categoria de operação (não exclusivos podem coexistir); (c) modalidades de remuneração por operação — venda: percentagem ou valor fixo; arrendamento: n.º de rendas, valor fixo ou percentagem sobre base contratual identificada; (d) situação: em curso / concluída / cancelada, reabrir exige aprovação; (e) correção material e reabertura exigem a operação «aprovar» (Responsável/Administrador); (f) renovação começa depois do fim do ciclo atual. |
 | D-28 | 14/11/2026 | **CMI: correção excecional e reabertura** podem ser feitas por **quem pode editar o CMI** (incluindo o Consultor responsável), sempre com motivo (e evidência na correção) e registo na auditoria. |
 | D-29 | 14/11/2026 | **Instância de teste na VPS Amen** (dados fictícios) para as verificações intermédias; acesso por SSH a partir do PC do proprietário. |
+| D-30 | 14/11/2026 | **Comunicação com o proprietário:** não é técnico; linguagem simples e instruções passo a passo (registado em CLAUDE.md). |
 
 ## Decisões técnicas propostas (aplicadas salvo indicação em contrário)
 

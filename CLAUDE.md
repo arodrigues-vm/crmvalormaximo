@@ -2,6 +2,17 @@
 
 Responder sempre em **português de Portugal**.
 
+## Sobre o proprietário (importante)
+- **Não é técnico e não conhece programação.** Usar sempre linguagem simples e clara, sem jargão (ou
+  explicá-lo numa frase), e dar indicações **passo a passo**, numeradas, um comando de cada vez.
+- Antes de pedir para correr um comando, dizer o que ele faz e o que se espera ver.
+- Nunca pedir para alterar ou desligar algo no servidor sem primeiro confirmar o que é.
+
+## Servidor (VPS Amen)
+- Ubuntu 24.04, utilizador `arodrigues` (não root; usa `sudo`). Repositório em `/opt/crm`.
+- A VPS **já tem o nginx** a ocupar as portas 80 e 443 (pode estar a servir outro site); não o desligar
+  sem confirmação.
+
 ## Fontes normativas (por ordem)
 1. Decisões do proprietário registadas em `documentacao/DECISOES.md` (prevalecem).
 2. Especificação V1.4 e Plano V1.0, transcritos em `documentacao/fontes/CRM_Valor_Maximo_Prompt_Mestre_Integral.txt`.
