@@ -149,7 +149,8 @@ docker compose -f docker-compose.prod.yml --env-file "$ENV_FICHEIRO" up -d --bui
 echo "==> 5/7 Aguardar o servidor"
 for _ in $(seq 1 60); do
   if docker compose -f docker-compose.prod.yml --env-file "$ENV_FICHEIRO" exec -T backend \
-       python -c "import urllib.request;urllib.request.urlopen('http://localhost:8000/api/saude/')" 2>/dev/null; then
+       python -c "import urllib.request as u;u.urlopen(u.Request('http://localhost:8000/api/saude/',headers={'Host':'$DOMINIO'}))" 2>/dev/null; then
+    echo "    Servidor pronto."
     break
   fi
   sleep 3
