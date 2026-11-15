@@ -66,9 +66,9 @@ escrever_https() {
   cat >> "$SITE" <<NGINX
 
 server {
-    listen 443 ssl;
-    listen [::]:443 ssl;
-    http2 on;
+    # Forma compatível com o nginx 1.24 (Ubuntu 24.04); a diretiva «http2 on» só existe a partir do 1.25.
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
     server_name ${DOMINIO};
 
     ssl_certificate     /etc/letsencrypt/live/${DOMINIO}/fullchain.pem;
