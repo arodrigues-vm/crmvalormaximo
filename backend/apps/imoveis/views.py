@@ -51,6 +51,7 @@ class ImovelViewSet(RegistoViewSet):
         **RegistoViewSet.operacoes_extra,
         "fotografia": Operacao.CONSULTAR,
         "angariacoes": Operacao.CONSULTAR,
+        "procuras_compativeis": Operacao.CONSULTAR,
     }
     modulo = "imoveis"
     modelo = Imovel
@@ -218,3 +219,9 @@ class ImovelViewSet(RegistoViewSet):
             for a in visiveis.order_by("-data_inicio", "-id")
         ]
         return Response({"angariacoes": lista, "outros": todos.count() - len(lista)})
+
+    @action(detail=True, methods=["get"], url_path="procuras-compativeis")
+    def procuras_compativeis(self, request, pk=None):
+        from apps.procuras.correspondencias import procuras_do_imovel
+
+        return Response(procuras_do_imovel(self.get_object(), request.user))

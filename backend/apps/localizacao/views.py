@@ -10,11 +10,23 @@ def distritos(request):
     return Response(list(Distrito.objects.values("id", "codigo", "nome", "regiao_autonoma")))
 
 
-@extend_schema(parameters=[OpenApiParameter("distrito", int, required=True)])
+@extend_schema(parameters=[OpenApiParameter("distrito", int), OpenApiParameter("pesquisa", str)])
 @api_view(["GET"])
 def concelhos(request):
-    qs = Concelho.objects.filter(distrito_id=request.query_params.get("distrito") or 0)
-    return Response(list(qs.values("id", "codigo", "nome")))
+    """Por distrito, ou pesquisa por nome (insensível a acentos) em todo o país."""
+    p = request.query_params
+    if p.get("distrito"):
+        qs = Concelho.objects.filter(distrito_id=p["distrito"])
+    elif (p.get("pesquisa") or "").strip():
+        qs = Concelho.objects.filter(nome__unaccent__icontains=p["pesquisa"].strip())[:30]
+    else:
+        return Response([])
+    return Response(
+        [
+            {"id": c.id, "codigo": c.codigo, "nome": c.nome, "distrito": c.distrito.nome}
+            for c in qs.select_related("distrito")
+        ]
+    )
 
 
 @extend_schema(parameters=[OpenApiParameter("concelho", int), OpenApiParameter("pesquisa", str)])

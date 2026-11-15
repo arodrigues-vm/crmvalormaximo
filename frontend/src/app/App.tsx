@@ -15,6 +15,12 @@ import { Parametros } from '../modulos/configuracoes/Parametros'
 import { ImoveisLista } from '../modulos/imoveis/ImoveisLista'
 import { ImovelConsulta } from '../modulos/imoveis/ImovelConsulta'
 import { ImovelEditar, ImovelNovo } from '../modulos/imoveis/ImovelFormulario'
+import { OportunidadeConsulta } from '../modulos/oportunidades/OportunidadeConsulta'
+import { OportunidadeEditar, OportunidadeNova } from '../modulos/oportunidades/OportunidadeFormulario'
+import { OportunidadesLista } from '../modulos/oportunidades/OportunidadesLista'
+import { ProcuraConsulta } from '../modulos/procuras/ProcuraConsulta'
+import { ProcuraEditar, ProcuraNova } from '../modulos/procuras/ProcuraFormulario'
+import { ProcurasLista } from '../modulos/procuras/ProcurasLista'
 import { ConfigurarMfa } from '../paginas/ConfigurarMfa'
 import { Dashboard } from '../paginas/Dashboard'
 import { Entrar } from '../paginas/Entrar'
@@ -78,6 +84,26 @@ export const rotas: RouteObject[] = [
           { path: 'nova', element: <AngariacaoNova /> },
           { path: ':id', element: <AngariacaoConsulta /> },
           { path: ':id/editar', element: <AngariacaoEditar /> },
+        ],
+      },
+      {
+        path: 'oportunidades',
+        element: <ExigeModulo modulo="oportunidades" />,
+        children: [
+          { index: true, element: <OportunidadesLista /> },
+          { path: 'nova', element: <OportunidadeNova /> },
+          { path: ':id', element: <OportunidadeConsulta /> },
+          { path: ':id/editar', element: <OportunidadeEditar /> },
+        ],
+      },
+      {
+        path: 'procuras',
+        element: <ExigeModulo modulo="procuras" />,
+        children: [
+          { index: true, element: <ProcurasLista /> },
+          { path: 'nova', element: <ProcuraNova /> },
+          { path: ':id', element: <ProcuraConsulta /> },
+          { path: ':id/editar', element: <ProcuraEditar /> },
         ],
       },
       {

@@ -51,5 +51,6 @@ def test_api_hierarquia_e_pesquisa(ficheiro, api, criar_utilizador):
     assert [x["nome"] for x in c] == ["Concelho Ensaio"]
     f = api.get(reverse("freguesias"), {"concelho": c[0]["id"]}).json()
     assert len(f) == 2
+    assert api.get(reverse("concelhos"), {"pesquisa": "ensaio"}).json()[0]["distrito"] == "Distrito Ensaio"
     pesquisa = api.get(reverse("freguesias"), {"pesquisa": "ilha"}).json()
     assert pesquisa[0]["distrito"] == "Região Ensaio"

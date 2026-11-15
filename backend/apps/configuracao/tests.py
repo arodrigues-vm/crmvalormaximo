@@ -87,9 +87,22 @@ def test_lista_com_categorias_exige_categoria_fixa(api, criar_utilizador):
 def test_categoria_nao_muda_ao_renomear(api, criar_utilizador):
     api.force_authenticate(criar_utilizador(Perfil.ADMINISTRADOR))
     v = ValorLista.objects.get(lista__chave="status_imovel", nome="Arquivado")
-    api.patch(reverse("listas-valor", args=[v.pk]), {"nome": "Histórico", "categoria": "ativo"}, format="json")
+    r = api.patch(reverse("listas-valor", args=[v.pk]), {"nome": "Histórico", "categoria": "ativo"}, format="json")
+    assert r.status_code == 400
+    api.patch(reverse("listas-valor", args=[v.pk]), {"nome": "Histórico"}, format="json")
     v.refresh_from_db()
     assert (v.nome, v.categoria) == ("Histórico", "arquivado")
+
+
+def test_valor_sem_categoria_pode_receber_categoria_uma_vez(api, criar_utilizador):
+    api.force_authenticate(criar_utilizador(Perfil.ADMINISTRADOR))
+    v = ValorLista.objects.get(lista__chave="estados_comercializacao", nome="Disponível")
+    v.categoria = ""
+    v.save()
+    url = reverse("listas-valor", args=[v.pk])
+    assert api.patch(url, {"categoria": "inexistente"}, format="json").status_code == 400
+    assert api.patch(url, {"categoria": "disponivel"}, format="json").status_code == 200
+    assert api.patch(url, {"categoria": "reservado"}, format="json").status_code == 400
 
 
 def test_todas_as_listas_com_categorias_tem_valores_categorizados(db):

@@ -17,6 +17,12 @@ from apps.core.auditoria import registar
 CAMPOS_IGNORADOS_HISTORICO = {"versao", "atualizado_em", "atualizado_por"}
 
 
+class InteracaoSerializer(serializers.Serializer):
+    tipo = CampoValorLista("tipos_interacao")
+    momento = serializers.DateTimeField()
+    resumo = serializers.CharField(max_length=4000)
+
+
 class LigacaoSerializer(serializers.Serializer):
     tipo = CampoValorLista("tipos_ligacao")
     titulo = serializers.CharField(max_length=150)
@@ -48,6 +54,8 @@ class RegistoViewSet(
         "opcoes": Operacao.CONSULTAR,
         "ligacoes": Operacao.CONSULTAR,
         "remover_ligacao": Operacao.EDITAR,
+        "interacoes": Operacao.CONSULTAR,
+        "anular_interacao": Operacao.EDITAR,
     }
 
     # Subclasses: base_queryset() e filtros(qs)
@@ -232,6 +240,71 @@ class RegistoViewSet(
         lig.delete()
         registar(f"{self.nome_registo}.ligacao_removida", modulo=self.modulo, objeto=obj, request=request, dados=dados)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # Interações (diário de contactos) -------------------------------------------------
+
+    def _interacoes(self, obj):
+        from apps.core.models import Interacao
+
+        ct = ContentType.objects.get_for_model(obj)
+        return [
+            {
+                "id": x.id,
+                "tipo": x.tipo_id,
+                "tipo_nome": x.tipo.nome,
+                "momento": x.momento,
+                "resumo": x.resumo,
+                "criado_por": x.criado_por.nome,
+                "anulada": x.anulada_em is not None,
+            }
+            for x in Interacao.objects.filter(tipo_conteudo=ct, objeto_id=obj.pk).select_related("tipo", "criado_por")
+        ]
+
+    @extend_schema(request=InteracaoSerializer)
+    @action(detail=True, methods=["get", "post"])
+    def interacoes(self, request, pk=None):
+        from apps.core.models import Interacao
+
+        obj = self.get_object()
+        if request.method == "GET":
+            return Response(self._interacoes(obj))
+        if not pode_no_registo(request.user, self.modulo, Operacao.EDITAR, obj, campo_partilhas="partilhada_com"):
+            raise PermissionDenied(f"Não tem permissão para alterar este {self.nome_registo}.")
+        s = InteracaoSerializer(data=request.data)
+        s.is_valid(raise_exception=True)
+        i = Interacao.objects.create(
+            tipo_conteudo=ContentType.objects.get_for_model(obj),
+            objeto_id=obj.pk,
+            criado_por=request.user,
+            **s.validated_data,
+        )
+        registar(
+            f"{self.nome_registo}.interacao_registada",
+            modulo=self.modulo,
+            objeto=obj,
+            request=request,
+            dados={"interacao": i.pk, "tipo": i.tipo.nome},
+        )
+        return Response(self._interacoes(obj), status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["post"], url_path=r"interacoes/(?P<interacao_id>\d+)/anular")
+    def anular_interacao(self, request, pk=None, interacao_id=None):
+        from django.utils import timezone
+
+        from apps.core.models import Interacao
+
+        obj = self.get_object()
+        i = Interacao.objects.filter(
+            pk=interacao_id, tipo_conteudo=ContentType.objects.get_for_model(obj), objeto_id=obj.pk
+        ).first()
+        if i is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        if i.anulada_em is None:
+            i.anulada_em, i.anulada_por = timezone.now(), request.user
+            i.save(update_fields=["anulada_em", "anulada_por"])
+            registar(f"{self.nome_registo}.interacao_anulada", modulo=self.modulo, objeto=obj, request=request,
+                     dados={"interacao": i.pk})  # fmt: skip
+        return Response(self._interacoes(obj))
 
     def permissoes_gerais(self, request) -> dict:
         u = request.user

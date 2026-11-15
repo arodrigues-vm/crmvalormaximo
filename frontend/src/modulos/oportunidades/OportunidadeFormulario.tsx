@@ -1,0 +1,282 @@
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMemo, useState, type FormEvent } from 'react'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+
+import { ErroApi } from '../../api/cliente'
+import { Bloco } from '../../componentes/Bloco'
+import { CampoAreaTexto, CampoSelecao, CampoTexto } from '../../componentes/campos'
+import { CabecalhoRegisto } from '../../componentes/Ficha'
+import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
+import { useGuardaSaida } from '../../componentes/useGuardaSaida'
+import { entidadesApi } from '../entidades/api'
+import { procurarImoveis } from '../imoveis/api'
+import { oportunidadesApi, type Oportunidade } from './api'
+
+interface Valores {
+  entidade: OpcaoPesquisa | null
+  imovel: OpcaoPesquisa | null
+  tipo_imovel: string
+  tipologia: string
+  localidade: string
+  descricao_imovel: string
+  operacao: string
+  estado: string
+  qualificacao: string
+  origem: string
+  motivacao: string
+  preco_pretendido: string
+  prazo: string
+  observacoes: string
+}
+
+const t = (v: string | number | null | undefined) => (v === null || v === undefined ? '' : String(v))
+const idOuNull = (v: string) => (v ? Number(v) : null)
+
+export function OportunidadeNova() {
+  const [params] = useSearchParams()
+  const entidadeId = params.get('entidade')
+  const { data: e, isLoading } = useQuery({
+    queryKey: ['entidades', entidadeId],
+    queryFn: () => entidadesApi.obter(entidadeId!),
+    enabled: !!entidadeId,
+  })
+  if (entidadeId && isLoading) return <p className="a-carregar">A carregar…</p>
+  return <Formulario entidadeInicial={e ? { id: e.id, titulo: e.nome_completo, detalhe: e.referencia } : null} />
+}
+
+export function OportunidadeEditar() {
+  const { id = '' } = useParams()
+  const { data, isLoading } = useQuery({ queryKey: ['oportunidades', id], queryFn: () => oportunidadesApi.obter(id) })
+  if (isLoading) return <p className="a-carregar">A carregar…</p>
+  if (!data) return <p className="aviso">Oportunidade não encontrada ou sem acesso.</p>
+  if (!data.acoes.editar) return <p className="aviso">Não tem permissão para editar esta oportunidade.</p>
+  return <Formulario o={data} key={data.versao} />
+}
+
+function Formulario({ o, entidadeInicial = null }: { o?: Oportunidade; entidadeInicial?: OpcaoPesquisa | null }) {
+  const navegar = useNavigate()
+  const qc = useQueryClient()
+  const inicial = useMemo<Valores>(
+    () => ({
+      entidade: o ? { id: o.entidade, titulo: o.entidade_nome ?? 'Entidade a que não tem acesso' } : entidadeInicial,
+      imovel: o?.imovel ? { id: o.imovel, titulo: o.imovel_descricao } : null,
+      tipo_imovel: t(o?.tipo_imovel),
+      tipologia: t(o?.tipologia),
+      localidade: o?.localidade ?? '',
+      descricao_imovel: o?.descricao_imovel ?? '',
+      operacao: t(o?.operacao),
+      estado: t(o?.estado),
+      qualificacao: o?.qualificacao ?? 'inicial',
+      origem: t(o?.origem),
+      motivacao: o?.motivacao ?? '',
+      preco_pretendido: o?.preco_pretendido ? String(Number(o.preco_pretendido)) : '',
+      prazo: o?.prazo ?? '',
+      observacoes: o?.observacoes ?? '',
+    }),
+    [o, entidadeInicial],
+  )
+  const [v, setV] = useState(inicial)
+  const [erros, setErros] = useState<Record<string, string[]>>({})
+  const [erroGeral, setErroGeral] = useState<string | null>(null)
+  const [aGravar, setAGravar] = useState(false)
+  const opcoes = useQuery({
+    queryKey: ['oportunidades', 'opcoes'],
+    queryFn: oportunidadesApi.opcoes,
+    staleTime: 60_000,
+  })
+  const guarda = useGuardaSaida(JSON.stringify(v) !== JSON.stringify(inicial))
+  const op = opcoes.data
+  const mudar = <K extends keyof Valores>(c: K, valor: Valores[K]) => setV((a) => ({ ...a, [c]: valor }))
+  const lista = (x?: { id: number; nome: string }[]) => (x ?? []).map((i) => ({ valor: i.id, nome: i.nome }))
+  const temErro = (cs: string[]) => cs.some((c) => erros[c])
+
+  async function submeter(e: FormEvent) {
+    e.preventDefault()
+    setAGravar(true)
+    setErros({})
+    setErroGeral(null)
+    const corpo = {
+      entidade: v.entidade?.id ?? null,
+      imovel: v.imovel?.id ?? null,
+      tipo_imovel: idOuNull(v.tipo_imovel),
+      tipologia: idOuNull(v.tipologia),
+      localidade: v.localidade,
+      descricao_imovel: v.descricao_imovel,
+      operacao: idOuNull(v.operacao),
+      estado: idOuNull(v.estado),
+      qualificacao: v.qualificacao,
+      origem: idOuNull(v.origem),
+      motivacao: v.motivacao,
+      preco_pretendido: v.preco_pretendido.trim() ? v.preco_pretendido.replace(',', '.') : null,
+      prazo: v.prazo || null,
+      observacoes: v.observacoes,
+    }
+    try {
+      const r = o
+        ? await oportunidadesApi.atualizar(o.id, { ...corpo, versao: o.versao })
+        : await oportunidadesApi.criar(corpo)
+      guarda.libertar()
+      qc.invalidateQueries({ queryKey: ['oportunidades'] })
+      qc.setQueryData(['oportunidades', String(r.id)], r)
+      navegar(`/oportunidades/${r.id}`, { replace: !o })
+    } catch (err) {
+      if (err instanceof ErroApi && err.estado === 400) {
+        setErros(err.campos)
+        setErroGeral('Corrija os campos assinalados.')
+      } else setErroGeral(err instanceof ErroApi ? err.message : 'Não foi possível gravar.')
+    } finally {
+      setAGravar(false)
+    }
+  }
+
+  return (
+    <form className="ficha ficha-edicao" onSubmit={submeter} noValidate>
+      <CabecalhoRegisto
+        modulo="Oportunidades"
+        caminho="/oportunidades"
+        referencia={o?.referencia ?? 'Nova'}
+        titulo={o ? 'Editar oportunidade' : 'Nova oportunidade de angariação'}
+      />
+      {erroGeral && (
+        <p className="erro" role="alert">
+          {erroGeral}
+        </p>
+      )}
+
+      <Bloco
+        titulo="Oportunidade"
+        forcarAberto={temErro(['entidade', 'operacao', 'estado', 'preco_pretendido', 'prazo'])}
+      >
+        <div className="grelha-campos">
+          <SeletorPesquisavel
+            rotulo="Proprietário"
+            chave="entidades"
+            procurar={entidadesApi.procurar}
+            valor={v.entidade}
+            aoMudar={(x) => mudar('entidade', x)}
+            erro={erros.entidade?.join(' ')}
+          />
+          <CampoSelecao
+            rotulo="Operação pretendida"
+            vazio="—"
+            value={v.operacao}
+            onChange={(e) => mudar('operacao', e.target.value)}
+            opcoes={lista(op?.operacoes)}
+            erro={erros.operacao}
+          />
+          <CampoSelecao
+            rotulo="Estado"
+            vazio={o ? undefined : 'Por omissão: o primeiro «em curso»'}
+            value={v.estado}
+            onChange={(e) => mudar('estado', e.target.value)}
+            opcoes={lista(op?.estados)}
+            erro={erros.estado}
+          />
+          <CampoSelecao
+            rotulo="Qualificação"
+            value={v.qualificacao}
+            onChange={(e) => mudar('qualificacao', e.target.value)}
+            opcoes={op?.qualificacoes ?? []}
+          />
+          <CampoSelecao
+            rotulo="Origem do contacto"
+            vazio="—"
+            value={v.origem}
+            onChange={(e) => mudar('origem', e.target.value)}
+            opcoes={lista(op?.origens)}
+          />
+          <CampoTexto
+            rotulo="Preço pretendido (€)"
+            inputMode="decimal"
+            value={v.preco_pretendido}
+            onChange={(e) => mudar('preco_pretendido', e.target.value)}
+            erro={erros.preco_pretendido}
+          />
+          <CampoTexto
+            rotulo="Prazo pretendido"
+            type="date"
+            value={v.prazo}
+            onChange={(e) => mudar('prazo', e.target.value)}
+            erro={erros.prazo}
+          />
+          <CampoAreaTexto
+            rotulo="Motivação do proprietário"
+            value={v.motivacao}
+            onChange={(e) => mudar('motivacao', e.target.value)}
+            placeholder="Porque quer vender/arrendar, urgência…"
+          />
+        </div>
+      </Bloco>
+
+      <Bloco titulo="Imóvel" forcarAberto={temErro(['imovel', 'tipo_imovel', 'tipologia', 'localidade'])}>
+        <p className="ajuda">
+          Se o imóvel já estiver registado no CRM, escolha-o. Caso contrário, descreva-o: poderá criá-lo mais tarde com
+          «Converter em imóvel / CMI».
+        </p>
+        <div className="grelha-campos">
+          <SeletorPesquisavel
+            rotulo="Imóvel já registado"
+            chave="imoveis"
+            procurar={procurarImoveis}
+            valor={v.imovel}
+            aoMudar={(x) => mudar('imovel', x)}
+            erro={erros.imovel?.join(' ')}
+            placeholder="Referência, morada…"
+          />
+          {!v.imovel && (
+            <>
+              <CampoSelecao
+                rotulo="Tipo de imóvel"
+                vazio="—"
+                value={v.tipo_imovel}
+                onChange={(e) => mudar('tipo_imovel', e.target.value)}
+                opcoes={lista(op?.tipos_imovel)}
+              />
+              <CampoSelecao
+                rotulo="Tipologia"
+                vazio="—"
+                value={v.tipologia}
+                onChange={(e) => mudar('tipologia', e.target.value)}
+                opcoes={lista(op?.tipologias)}
+              />
+              <CampoTexto
+                rotulo="Localidade"
+                value={v.localidade}
+                onChange={(e) => mudar('localidade', e.target.value)}
+              />
+              <CampoTexto
+                rotulo="Descrição do imóvel"
+                largo
+                value={v.descricao_imovel}
+                onChange={(e) => mudar('descricao_imovel', e.target.value)}
+                placeholder="Ex.: moradia junto à escola"
+              />
+            </>
+          )}
+        </div>
+      </Bloco>
+
+      <Bloco titulo="Observações" abertoInicial={!!v.observacoes}>
+        <CampoAreaTexto
+          rotulo="Observações"
+          value={v.observacoes}
+          onChange={(e) => mudar('observacoes', e.target.value)}
+        />
+      </Bloco>
+
+      <div className="barra-gravar">
+        <button
+          type="button"
+          className="botao-secundario"
+          onClick={() => navegar(o ? `/oportunidades/${o.id}` : '/oportunidades')}
+        >
+          Cancelar
+        </button>
+        <button type="submit" className="botao-principal" disabled={aGravar}>
+          {aGravar ? 'A guardar…' : 'Guardar'}
+        </button>
+      </div>
+      {guarda.dialogo}
+    </form>
+  )
+}

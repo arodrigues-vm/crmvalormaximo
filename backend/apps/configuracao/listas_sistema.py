@@ -16,7 +16,30 @@ CAT_REGIME = [
     {"valor": "nao_exclusivo", "nome": "Não exclusivo"},
 ]
 
-CATEGORIAS = {"operacoes": CAT_OPERACAO, "status_imovel": CAT_STATUS, "regimes_cmi": CAT_REGIME}
+CAT_ESTADO_COMERCIALIZACAO = [
+    {"valor": "preparacao", "nome": "Em preparação (entra nas correspondências)"},
+    {"valor": "disponivel", "nome": "Disponível (entra nas correspondências)"},
+    {"valor": "reservado", "nome": "Reservado (fora das correspondências)"},
+    {"valor": "indisponivel", "nome": "Indisponível (fora das correspondências)"},
+]
+CAT_ESTADO_OPORTUNIDADE = [
+    {"valor": "aberta", "nome": "Em curso"},
+    {"valor": "ganha", "nome": "Angariada"},
+    {"valor": "perdida", "nome": "Perdida"},
+]
+CAT_ESTADO_PROCURA = [
+    {"valor": "ativa", "nome": "Ativa (procura correspondências)"},
+    {"valor": "inativa", "nome": "Inativa"},
+]
+
+CATEGORIAS = {
+    "operacoes": CAT_OPERACAO,
+    "status_imovel": CAT_STATUS,
+    "regimes_cmi": CAT_REGIME,
+    "estados_comercializacao": CAT_ESTADO_COMERCIALIZACAO,
+    "estados_oportunidade": CAT_ESTADO_OPORTUNIDADE,
+    "estados_procura": CAT_ESTADO_PROCURA,
+}
 
 LISTAS = {
     "operacoes": (
@@ -63,8 +86,40 @@ LISTAS = {
     "estados_comercializacao": (
         "Estados de comercialização",
         "imoveis",
+        "A categoria decide se o imóvel entra nas correspondências com procuras.",
+        [
+            ("Em preparação", "preparacao"),
+            ("Disponível", "disponivel"),
+            ("Reservado", "reservado"),
+            ("Vendido", "indisponivel"),
+            ("Arrendado", "indisponivel"),
+            ("Retirado", "indisponivel"),
+        ],
+    ),
+    "estados_oportunidade": (
+        "Estados de oportunidade",
+        "oportunidades",
         "",
-        ["Em preparação", "Disponível", "Reservado", "Vendido", "Arrendado", "Retirado"],
+        [
+            ("Novo contacto", "aberta"),
+            ("Em qualificação", "aberta"),
+            ("Avaliação marcada", "aberta"),
+            ("Angariada", "ganha"),
+            ("Perdida", "perdida"),
+        ],
+    ),
+    "estados_procura": (
+        "Estados de procura",
+        "procuras",
+        "Só as procuras de categoria «Ativa» geram correspondências.",
+        [("Ativa", "ativa"), ("Em pausa", "inativa"), ("Concluída", "inativa"), ("Desistiu", "inativa")],
+    ),
+    "urgencias": ("Urgências", "procuras", "", ["Alta", "Média", "Baixa"]),
+    "tipos_interacao": (
+        "Tipos de interação",
+        "geral",
+        "Chamadas, reuniões e outros contactos registados nas fichas.",
+        ["Chamada telefónica", "Reunião presencial", "Email", "WhatsApp", "Visita ao imóvel", "Outro"],
     ),
     "condicoes_fisicas": (
         "Condições físicas",

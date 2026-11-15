@@ -14,8 +14,8 @@ As imagens usam apenas dados fictícios de demonstração.
 | 3 | [Entidades](03-entidades.md) | Disponível |
 | 4 | [Imóveis](04-imoveis.md) | Disponível |
 | 5 | [Angariações (CMI)](05-angariacoes.md) | Disponível |
-| 6 | Oportunidades de Angariação | Por escrever |
-| 7 | Procuras e correspondências | Por escrever |
+| 6 | [Oportunidades de Angariação](06-oportunidades.md) | Disponível |
+| 7 | [Procuras e correspondências](07-procuras.md) | Disponível |
 | 8 | Visitas e interesses | Por escrever |
 | 9 | Propostas | Por escrever |
 | 10 | Transações | Por escrever |

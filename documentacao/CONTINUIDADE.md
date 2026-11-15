@@ -32,6 +32,8 @@ Estes estados não são equivalentes.
 | F2-02 Imóveis | Implementado, testado | D-24. Referência IMO-, listas editáveis, operação, status, preço (NULL ≠ 0), localização administrativa/comercial/descritiva, áreas, características, zonas exteriores; proprietários com quotas (soma ≤ 100 %, proprietários sem acesso preservados e anónimos); secção na ficha da Entidade; filtros/pesquisa; versão, lixeira, histórico com nomes legíveis, auditoria. Fotografia principal (D-26): validada e re-codificada em WebP (sem EXIF/GPS), 1600 px + miniatura 480 px, armazenamento privado servido só com permissão. Operação e Status como listas com categoria (D-25). Ligações externas genéricas (qualquer módulo) para pastas OneDrive/outros. |
 | F2-03 Angariações/CMI | Implementado, testado | D-27. Contrato (imóvel, n.º, operação, regime, assinatura, início original, prazo, fim calculado, fim em vigor), partes com fotografia própria (pré-preenchidas com os proprietários), remuneração por modalidade/operação, IVA, condições de pagamento; dados contratuais bloqueados após assinatura; correção material (aprovar, motivo, evidência, registo); renovações como ciclos autónomos; impedimento de sobreposição exclusiva; estados derivados; avisos 120/60/30 configuráveis (Parâmetros); concluir/cancelar/reabrir; ligações; histórico/auditoria; secção no imóvel. **Ligação ao Plano de Marketing (F4-03/F4-04) por fazer.** |
 | F1-07b Parâmetros | Implementado, testado | Configurações → Parâmetros (limiares de aviso do CMI), validação e auditoria. |
+| F3-01 Oportunidades e Procuras | Implementado, testado | D-32. Oportunidades (proprietário, imóvel existente ou provisório, estado, qualificação, origem, motivação, preço, prazo, conversão expressa e idempotente em imóvel/CMI). Procuras (interessado, operação, estado, urgência, qualificação, orçamento + tolerância, critérios com importância, localização por concelho/freguesia/zona). Interações genéricas (diário de contactos). Secções na ficha da entidade. |
+| F3-02 Correspondências | Implementado, testado | Motor procura→imóveis e imóvel→procuras, com explicação por critério, exclusão por obrigatórios, teto 20% (AT-10), elegibilidade por status/estado/operação/permissões. |
 | F2-01b Catálogo CAOP2025 | Parcial | Modelos, API e comando `importar_caop` prontos e testados. **Faltam os dados oficiais**: os sites da DGT/dados.gov.pt estão bloqueados neste ambiente. |
 
 ## Limitações conhecidas
@@ -41,7 +43,7 @@ Estes estados não são equivalentes.
 - Endereço IP na auditoria vem de REMOTE_ADDR; em produção, atrás do proxy, configurar o cabeçalho de IP real (F5-03).
 
 ## Manual de utilizador
-Capítulos 1, 3 (Entidades), 4 (Imóveis), 5 (Angariações) e anexo A (listas e parâmetros) escritos. Ver `documentacao/manual/README.md`.
+Capítulos 1, 3–7 (Entidades, Imóveis, Angariações, Oportunidades, Procuras) e anexo A escritos. Ver `documentacao/manual/README.md`.
 
 ## Utilizadores de demonstração (fictícios)
 `python manage.py criar_utilizadores_demo --password <palavra-passe>` cria admin@, responsavel@, consultor@ e assistente@demo.local. Recusa-se a correr em produção. `python manage.py criar_entidades_demo` cria 8 entidades fictícias.
@@ -52,4 +54,4 @@ Capítulos 1, 3 (Entidades), 4 (Imóveis), 5 (Angariações) e anexo A (listas e
 | Instância de teste (D-29) | Implementado, testado localmente com Docker | `docker-compose.prod.yml` (PostgreSQL 16, Django/gunicorn, Caddy com HTTPS automático e cabeçalhos de segurança), `infra/instalar-vps.sh` (Docker, firewall, swap, segredos gerados na VPS, dados demo opcionais), guia `documentacao/INSTALACAO_VPS.md`. IP real do cliente na auditoria atrás do proxy. **Instalada na VPS em 15/11/2026: https://crm.valormaximo.pt** (modo nginx, dados fictícios). Atualizar com `cd /opt/crm && git pull && sudo bash infra/instalar-vps.sh`. |
 
 ## Próxima tarefa
-Verificação intermédia do proprietário (D-15) sobre Entidades, Imóveis e CMI. Depois: restantes tarefas da Fase 2 (F2-04 vistas Cartões/Kanban, F2-05 Equipa/Agentes/Agências/Glossário, F2-06 campos históricos, F2-07 importação) e Fase 3. Em paralelo: carregar a CAOP2025; F1-06 (interface de partilha/transferência); F1-07 (motor no-code, âmbito D-13).
+Verificação intermédia do proprietário (D-15) sobre Entidades, Imóveis, CMI, Oportunidades e Procuras; correções e campos novos pedidos. Depois: restantes tarefas da Fase 2 (F2-04 vistas Cartões/Kanban, F2-05 Equipa/Agentes/Agências/Glossário, F2-06 campos históricos, F2-07 importação) e Fase 3. Em paralelo: carregar a CAOP2025; F1-06 (interface de partilha/transferência); F1-07 (motor no-code, âmbito D-13).

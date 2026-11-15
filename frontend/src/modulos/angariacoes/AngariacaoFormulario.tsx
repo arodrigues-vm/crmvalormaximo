@@ -9,7 +9,7 @@ import { CabecalhoRegisto } from '../../componentes/Ficha'
 import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
 import { useGuardaSaida } from '../../componentes/useGuardaSaida'
 import { entidadesApi } from '../entidades/api'
-import { imoveisApi } from '../imoveis/api'
+import { imoveisApi, procurarImoveis } from '../imoveis/api'
 import { cmiApi, ETIQUETA_ESTADO, type Angariacao } from './api'
 
 interface Parte {
@@ -115,13 +115,6 @@ const BLOCOS: Record<string, string[]> = {
   ],
   observacoes: ['observacoes'],
 }
-
-const procurarImoveis = async (termo: string) =>
-  (await imoveisApi.listar({ pesquisa: termo })).results.map((i) => ({
-    id: i.id,
-    titulo: i.referencia,
-    detalhe: [[i.tipo_nome, i.tipologia_nome].filter(Boolean).join(' '), i.localidade].filter(Boolean).join(' · '),
-  }))
 
 export function AngariacaoNova() {
   const [params] = useSearchParams()

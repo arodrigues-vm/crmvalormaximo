@@ -10,6 +10,8 @@ import { Dado } from '../../componentes/campos'
 import { Dialogo } from '../../componentes/Dialogo'
 import { entidadesApi, NOMES_CAMPOS, type Entidade } from './api'
 import { ImoveisDaEntidade } from './ImoveisDaEntidade'
+import { NegociosDaEntidade } from './NegociosDaEntidade'
+import { useSessao } from '../../app/sessao'
 import { RelacoesEntidade } from './RelacoesEntidade'
 
 const dataPt = (d: string | null) => (d ? new Date(`${d}T00:00:00`).toLocaleDateString('pt-PT') : null)
@@ -49,6 +51,7 @@ export function EntidadeConsulta() {
   const [confirmarEliminar, setConfirmarEliminar] = useState(false)
   const { data: e, error, isLoading } = useQuery({ queryKey: ['entidades', id], queryFn: () => entidadesApi.obter(id) })
   const opcoes = useQuery({ queryKey: ['entidades', 'opcoes'], queryFn: entidadesApi.opcoes, staleTime: 60_000 })
+  const { pode } = useSessao()
 
   const eliminar = useMutation({
     mutationFn: () => entidadesApi.eliminar(Number(id)),
@@ -151,6 +154,12 @@ export function EntidadeConsulta() {
       <Bloco titulo="Imóveis (proprietária)">
         <ImoveisDaEntidade entidadeId={e.id} />
       </Bloco>
+
+      {(pode('oportunidades') || pode('procuras')) && (
+        <Bloco titulo="Oportunidades e procuras">
+          <NegociosDaEntidade entidadeId={e.id} podeOport={pode('oportunidades')} podeProc={pode('procuras')} />
+        </Bloco>
+      )}
 
       <Bloco titulo="Relações">
         <RelacoesEntidade entidadeId={e.id} podeEditar={e.acoes.editar} tipos={opcoes.data?.tipos_relacao ?? []} />

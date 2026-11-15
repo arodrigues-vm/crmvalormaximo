@@ -50,6 +50,8 @@ INSTALLED_APPS = [
     "apps.entidades",
     "apps.imoveis",
     "apps.angariacoes",
+    "apps.oportunidades",
+    "apps.procuras",
 ]
 
 MIDDLEWARE = [

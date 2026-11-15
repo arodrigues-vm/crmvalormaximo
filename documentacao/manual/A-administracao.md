@@ -33,9 +33,13 @@ regras da aplicação:
 |-------|------------|-----------------|
 | Operações | Venda, Arrendamento | O cálculo de comissões de venda e de arrendamento é diferente. |
 | Status do imóvel | Ativo, Inativo, Arquivado | Os imóveis com status da categoria *Arquivado* ficam escondidos da lista por omissão. |
+| Estados de comercialização | Em preparação, Disponível, Reservado, Indisponível | Só *Disponível* e *Em preparação* entram nas correspondências com procuras. |
+| Estados de oportunidade | Em curso, Angariada, Perdida | Separadores da lista de oportunidades. |
+| Estados de procura | Ativa, Inativa | Só as procuras ativas geram correspondências. |
 
 Pode criar os valores que quiser (por exemplo, *Venda em leilão*), mas ao criar tem de escolher a categoria.
-Depois de criada, a categoria de um valor **não muda** (pode renomeá-lo, reordená-lo ou desativá-lo).
+Depois de definida, a categoria de um valor **não muda** (pode renomeá-lo, reordená-lo ou desativá-lo). Se um
+valor antigo aparecer *«Sem categoria — escolher…»*, escolha-a uma vez na lista ao lado do nome.
 
 ![Lista com categorias](imagens/26-listas-categorias.png)
 

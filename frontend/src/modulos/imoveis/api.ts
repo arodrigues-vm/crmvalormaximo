@@ -181,3 +181,11 @@ export const NOMES_CAMPOS_IMOVEL: Record<string, string> = {
   observacoes: 'Observações',
   eliminado_em: 'Eliminado em',
 }
+
+/** Para seletores pesquisáveis de imóveis. */
+export const procurarImoveis = async (termo: string) =>
+  (await imoveisApi.listar({ pesquisa: termo })).results.map((i) => ({
+    id: i.id,
+    titulo: i.referencia,
+    detalhe: [[i.tipo_nome, i.tipologia_nome].filter(Boolean).join(' '), i.localidade].filter(Boolean).join(' · '),
+  }))

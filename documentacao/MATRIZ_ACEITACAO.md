@@ -13,7 +13,7 @@ Critérios completos: Especificação V1.4 §16 (em `fontes/`). Estados: Pendent
 | AT-07 | Pagamentos e estornos | F3-07/08 | — | Pendente |
 | AT-08 | Proposta a partir de Visita | F3-04 | — | Pendente |
 | AT-09 | Transação e estados | F3-05/06 | — | Pendente |
-| AT-10 | Match Imóvel/Procura | F3-02 | — | Pendente |
+| AT-10 | Match Imóvel/Procura | F3-02 | `procuras/tests/test_correspondencias.py` (teto 250 000 € + 20% = 300 000 €, exclusão acima, obrigatórios excluem, preferenciais ordenam e explicam) | Aprovado (testes automáticos) |
 | AT-11 | Participantes históricos | F2-02; F3-05/09 | — | Pendente |
 | AT-12 | Importação Excel/Outlook | F2-07; F5-01 | — | Pendente |
 | AT-13 | Configuração no-code | F1-07; F2-05/06; F5-05 | `configuracao/tests.py` (listas: adicionar, renomear, desativar, ordenar, categorias fixas) | Em curso |

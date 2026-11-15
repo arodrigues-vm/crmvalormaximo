@@ -1352,3 +1352,153 @@ a.botao-secundario {
   text-decoration: none;
   display: inline-block;
 }
+
+/* Interações */
+.interacoes {
+  margin-top: 12px;
+}
+.interacoes li.anulada p,
+.interacoes li.anulada strong {
+  text-decoration: line-through;
+  color: var(--texto-suave);
+}
+.interacoes p {
+  margin: 4px 0 0;
+}
+.ligacao-botao {
+  background: none;
+  border: 0;
+  color: var(--azul-marinho);
+  text-decoration: underline;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  margin-left: 8px;
+}
+
+/* Correspondências */
+.correspondencias {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.correspondencias > li {
+  display: flex;
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+}
+.correspondencia-foto img,
+.correspondencia-foto .miniatura-vazia {
+  width: 96px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
+  background: #eef1f5;
+}
+.correspondencia-corpo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.correspondencia-titulo {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.correspondencia-titulo a {
+  color: var(--azul-marinho);
+  text-decoration: none;
+}
+.correspondencia-etiquetas .etiqueta {
+  margin-left: 0;
+  margin-right: 6px;
+}
+.criterios {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 13px;
+}
+.criterio {
+  display: flex;
+  gap: 4px;
+  align-items: baseline;
+}
+.criterio-detalhe {
+  color: var(--texto-suave);
+}
+.criterio-cumpre > span:first-child {
+  color: #067647;
+  font-weight: 700;
+}
+.criterio-nao_cumpre > span:first-child {
+  color: #b42318;
+  font-weight: 700;
+}
+.criterio-desconhecido > span:first-child {
+  color: #b54708;
+  font-weight: 700;
+}
+.criterio-linha {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px 16px;
+  align-items: start;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--borda);
+}
+.criterio-linha:last-child {
+  border-bottom: 0;
+}
+.importancia {
+  display: inline-flex;
+  border: 1px solid var(--borda);
+  border-radius: 999px;
+  overflow: hidden;
+  font-size: 13px;
+}
+.importancia label {
+  padding: 4px 10px;
+  cursor: pointer;
+}
+.importancia input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.importancia label:has(input:checked) {
+  background: var(--azul-marinho);
+  color: #fff;
+}
+.fichas-escolhidas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+@media (max-width: 760px) {
+  .criterio-linha {
+    grid-template-columns: 1fr;
+  }
+}
+.selecao-categoria {
+  margin-left: 8px;
+  font: inherit;
+  font-size: 12px;
+  padding: 2px 6px;
+  border: 1px solid #fedf89;
+  border-radius: 6px;
+  background: #fffaeb;
+}

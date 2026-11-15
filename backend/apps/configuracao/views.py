@@ -75,6 +75,7 @@ def adicionar_valor(request, chave):
 class AlterarValorSerializer(serializers.Serializer):
     nome = serializers.CharField(max_length=100, required=False)
     ativo = serializers.BooleanField(required=False)
+    categoria = serializers.CharField(max_length=30, required=False)
 
 
 @extend_schema(request=AlterarValorSerializer)
@@ -88,8 +89,16 @@ def alterar_valor(request, pk):
         return Response(status=status.HTTP_404_NOT_FOUND)
     s = AlterarValorSerializer(data=request.data)
     s.is_valid(raise_exception=True)
-    antes = {"nome": v.nome, "ativo": v.ativo}
-    for k, valor in s.validated_data.items():
+    antes = {"nome": v.nome, "ativo": v.ativo, "categoria": v.categoria}
+    dados = dict(s.validated_data)
+    categoria = dados.pop("categoria", None)
+    if categoria is not None:
+        validas = [c["valor"] for c in v.lista.categorias]
+        # A categoria só se escolhe uma vez: depois de definida não muda (regras dependem dela).
+        if v.categoria or categoria not in validas:
+            raise serializers.ValidationError({"categoria": "A categoria deste valor não pode ser alterada."})
+        v.categoria = categoria
+    for k, valor in dados.items():
         setattr(v, k, valor.strip() if isinstance(valor, str) else valor)
     if not v.nome:
         raise serializers.ValidationError({"nome": "O nome é obrigatório."})
@@ -103,7 +112,11 @@ def alterar_valor(request, pk):
         modulo=MODULO,
         objeto=v,
         request=request,
-        dados={"lista": v.lista.chave, "antes": antes, "depois": {"nome": v.nome, "ativo": v.ativo}},
+        dados={
+            "lista": v.lista.chave,
+            "antes": antes,
+            "depois": {"nome": v.nome, "ativo": v.ativo, "categoria": v.categoria},
+        },
     )
     return Response(_lista_json(v.lista, True))
 

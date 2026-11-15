@@ -12,6 +12,7 @@ import { LigacoesExternas } from '../../componentes/LigacoesExternas'
 import { pedido } from '../../api/cliente'
 import { etiquetaStatus, imoveisApi, NOMES_CAMPOS_IMOVEL, tituloImovel } from './api'
 import { AngariacoesDoImovel } from './AngariacoesDoImovel'
+import { ProcurasCompativeis } from './ProcurasCompativeis'
 import { FotografiaImovel } from './FotografiaImovel'
 import { useSessao } from '../../app/sessao'
 
@@ -118,6 +119,12 @@ export function ImovelConsulta() {
       <Bloco titulo="Angariações (CMI)">
         <AngariacoesDoImovel imovelId={i.id} podeCriar={pode('angariacoes', 'criar')} />
       </Bloco>
+
+      {pode('procuras') && (
+        <Bloco titulo="Procuras compatíveis" abertoInicial={false}>
+          {() => <ProcurasCompativeis imovelId={i.id} versao={i.versao} />}
+        </Bloco>
+      )}
 
       <Bloco titulo="Classificação e características">
         <dl className="grelha-dados">

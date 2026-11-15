@@ -20,7 +20,14 @@ interface Lista {
   valores: Valor[]
 }
 
-const MODULOS: Record<string, string> = { entidades: 'Entidades', imoveis: 'Imóveis', geral: 'Geral' }
+const MODULOS: Record<string, string> = {
+  entidades: 'Entidades',
+  imoveis: 'Imóveis',
+  angariacoes: 'Angariações',
+  oportunidades: 'Oportunidades',
+  procuras: 'Procuras',
+  geral: 'Geral',
+}
 
 const listasApi = {
   todas: () => pedido<Lista[]>('/api/listas/'),
@@ -200,6 +207,25 @@ export function ListasValores() {
                           <span className="etiqueta etiqueta-categoria">
                             {lista.categorias.find((c) => c.valor === v.categoria)?.nome ?? v.categoria}
                           </span>
+                        )}
+                        {!v.categoria && lista.categorias.length > 0 && (
+                          <select
+                            aria-label={`Categoria de ${v.nome}`}
+                            className="selecao-categoria"
+                            value=""
+                            onChange={(e) =>
+                              e.target.value &&
+                              window.confirm('A categoria não pode ser mudada depois. Confirmar?') &&
+                              alterar.mutate({ id: v.id, dados: { categoria: e.target.value } })
+                            }
+                          >
+                            <option value="">Sem categoria — escolher…</option>
+                            {lista.categorias.map((c) => (
+                              <option key={c.valor} value={c.valor}>
+                                {c.nome}
+                              </option>
+                            ))}
+                          </select>
                         )}
                         {!v.ativo && <span className="etiqueta etiqueta-neutra">Desativado</span>}
                       </span>
