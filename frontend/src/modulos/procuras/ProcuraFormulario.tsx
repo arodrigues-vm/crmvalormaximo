@@ -14,7 +14,7 @@ import { procurarConcelhos, procurarFreguesias, procurasApi, type Importancia, t
 type Imp = Importancia
 interface Valores {
   entidade: OpcaoPesquisa | null
-  operacao: string
+  pretende: string
   estado: string
   qualificacao: string
   urgencia: string
@@ -54,7 +54,7 @@ const hoje = () => new Date().toISOString().slice(0, 10)
 function deProcura(p?: Procura, entidade?: OpcaoPesquisa | null): Valores {
   return {
     entidade: p ? { id: p.entidade, titulo: p.entidade_nome ?? 'Entidade a que não tem acesso' } : (entidade ?? null),
-    operacao: t(p?.operacao),
+    pretende: p?.pretende ?? 'comprar',
     estado: t(p?.estado),
     qualificacao: p?.qualificacao ?? 'inicial',
     urgencia: t(p?.urgencia),
@@ -191,7 +191,7 @@ function Formulario({ p, entidadeInicial = null }: { p?: Procura; entidadeInicia
     setErroGeral(null)
     const corpo = {
       entidade: v.entidade?.id ?? null,
-      operacao: v.operacao ? Number(v.operacao) : null,
+      pretende: v.pretende,
       estado: v.estado ? Number(v.estado) : null,
       qualificacao: v.qualificacao,
       urgencia: v.urgencia ? Number(v.urgencia) : null,
@@ -255,7 +255,7 @@ function Formulario({ p, entidadeInicial = null }: { p?: Procura; entidadeInicia
         </p>
       )}
 
-      <Bloco titulo="Interessado e qualificação" forcarAberto={temErro(['entidade', 'operacao', 'estado'])}>
+      <Bloco titulo="Interessado e qualificação" forcarAberto={temErro(['entidade', 'pretende', 'estado'])}>
         <div className="grelha-campos">
           <SeletorPesquisavel
             rotulo="Interessado (comprador / arrendatário)"
@@ -266,13 +266,12 @@ function Formulario({ p, entidadeInicial = null }: { p?: Procura; entidadeInicia
             erro={erros.entidade?.join(' ')}
           />
           <CampoSelecao
-            rotulo="Operação"
+            rotulo="O cliente pretende"
             required
-            vazio="—"
-            value={v.operacao}
-            onChange={(e) => mudar('operacao', e.target.value)}
-            opcoes={lista(o?.operacoes)}
-            erro={erros.operacao}
+            value={v.pretende}
+            onChange={(e) => mudar('pretende', e.target.value)}
+            opcoes={o?.pretende ?? []}
+            erro={erros.pretende}
           />
           <CampoSelecao
             rotulo="Estado"

@@ -66,7 +66,7 @@ def procura(u, **kw):
     base = {
         "responsavel": u,
         "entidade": Entidade.objects.create(nome="Comprador Ensaio", responsavel=u),
-        "operacao": v("operacoes", "Venda"),
+        "pretende": "comprar",
         "estado": v("estados_procura", "Ativa"),
     }
     base.update(kw)
@@ -111,7 +111,7 @@ class TestOrcamento:
         e = Entidade.objects.create(nome="X", responsavel=pessoas.cons)
         r = api.post(
             reverse("procura-list"),
-            {"entidade": e.pk, "operacao": v("operacoes", "Venda").pk, "tolerancia_pct": "20.5"},
+            {"entidade": e.pk, "pretende": "comprar", "tolerancia_pct": "20.5"},
             format="json",
         )
         assert r.status_code == 400 and "tolerancia_pct" in r.json()
@@ -194,3 +194,16 @@ class TestElegibilidade:
         r = api.get(reverse("imovel-procuras-compativeis", args=[i.pk])).json()
         assert [x["procura"]["id"] for x in r] == [boa.pk]
         assert r[0]["procura"]["entidade"] == "Comprador Ensaio"
+
+
+def test_comprar_encontra_todas_as_operacoes_de_venda_e_arrendar_as_de_arrendamento(api, pessoas):
+    from apps.configuracao.models import Lista
+
+    leilao = ValorLista.objects.create(
+        lista=Lista.objects.get(chave="operacoes"), nome="Venda em leilão", categoria="venda"
+    )
+    venda = imovel(pessoas.cons)
+    em_leilao = imovel(pessoas.cons, operacao=leilao)
+    arrendar = imovel(pessoas.cons, operacao=v("operacoes", "Arrendamento"))
+    assert set(ids(resultados(api, pessoas.cons, procura(pessoas.cons)))) == {venda.pk, em_leilao.pk}
+    assert ids(resultados(api, pessoas.cons, procura(pessoas.cons, pretende="arrendar"))) == [arrendar.pk]

@@ -21,7 +21,7 @@ from apps.contas.models import Operacao
 from apps.contas.permissoes import filtrar
 from apps.imoveis.models import Imovel
 
-from .models import Importancia, Procura
+from .models import CATEGORIA_IMOVEL, PRETENDE_POR_CATEGORIA, Importancia, Procura
 
 CUMPRE, NAO_CUMPRE, DESCONHECIDO = "cumpre", "nao_cumpre", "desconhecido"
 
@@ -190,7 +190,7 @@ def _resumo(a: Avaliacao) -> dict:
 
 
 def correspondencias_da_procura(p: Procura, utilizador, limite: int = 100) -> list[dict]:
-    categoria = p.operacao.categoria if p.operacao else None
+    categoria = CATEGORIA_IMOVEL.get(p.pretende)
     cache: dict = {}
     resultados = []
     for i in imoveis_elegiveis(utilizador, categoria):
@@ -224,8 +224,8 @@ def procuras_do_imovel(i: Imovel, utilizador, limite: int = 100) -> list[dict]:
     if i.status and i.status.categoria not in ("ativo", ""):
         return []
     qs = Procura.objects.ativos().filter(Q(estado__isnull=True) | Q(estado__categoria="ativa"))
-    if i.operacao:
-        qs = qs.filter(operacao__categoria=i.operacao.categoria)
+    if i.operacao and i.operacao.categoria in PRETENDE_POR_CATEGORIA:
+        qs = qs.filter(pretende=PRETENDE_POR_CATEGORIA[i.operacao.categoria])
     qs = filtrar(utilizador, "procuras", Operacao.CONSULTAR, qs, campo_partilhas="partilhada_com").select_related(
         "entidade"
     )

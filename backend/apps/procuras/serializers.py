@@ -19,7 +19,7 @@ def _nome(v):
 
 class ProcuraListaSerializer(serializers.ModelSerializer):
     entidade_nome = serializers.SerializerMethodField()
-    operacao_nome = serializers.SerializerMethodField()
+    pretende_nome = serializers.CharField(source="get_pretende_display", read_only=True)
     estado_nome = serializers.SerializerMethodField()
     estado_categoria = serializers.SerializerMethodField()
     urgencia_nome = serializers.SerializerMethodField()
@@ -29,16 +29,13 @@ class ProcuraListaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Procura
         fields = [
-            "id", "referencia", "entidade", "entidade_nome", "operacao_nome", "estado_nome", "estado_categoria",
-            "urgencia_nome", "qualificacao", "orcamento_max", "tolerancia_pct", "resumo", "responsavel_nome",
-            "data_inicio",
+            "id", "referencia", "entidade", "entidade_nome", "pretende", "pretende_nome", "estado_nome",
+            "estado_categoria", "urgencia_nome", "qualificacao", "orcamento_max", "tolerancia_pct", "resumo",
+            "responsavel_nome", "data_inicio",
         ]  # fmt: skip
 
     def get_entidade_nome(self, o) -> str | None:
         return o.entidade.nome_completo if o.entidade_id in self.context.get("entidades_visiveis", set()) else None
-
-    def get_operacao_nome(self, o) -> str | None:
-        return _nome(o.operacao)
 
     def get_estado_nome(self, o) -> str | None:
         return _nome(o.estado)
@@ -64,7 +61,6 @@ class ProcuraListaSerializer(serializers.ModelSerializer):
 
 class ProcuraSerializer(ProcuraListaSerializer):
     entidade = serializers.PrimaryKeyRelatedField(queryset=Entidade.objects.ativos())
-    operacao = CampoValorLista("operacoes")
     estado = CampoValorLista("estados_procura", allow_null=True, required=False)
     urgencia = CampoValorLista("urgencias", allow_null=True, required=False)
     tipos = CampoValorLista("tipos_imovel", many=True, required=False)
@@ -83,7 +79,8 @@ class ProcuraSerializer(ProcuraListaSerializer):
     class Meta:
         model = Procura
         fields = [
-            "id", "referencia", "entidade", "entidade_nome", "operacao", "estado", "estado_nome", "estado_categoria",
+            "id", "referencia", "entidade", "entidade_nome", "pretende", "pretende_nome", "estado", "estado_nome",
+            "estado_categoria",
             "qualificacao", "urgencia", "urgencia_nome", "motivacao", "flexibilidade", "prazo_compra", "data_inicio",
             "orcamento_max", "tolerancia_pct", "teto",
             "tipos", "imp_tipos", "tipologias", "imp_tipologias",
@@ -98,7 +95,7 @@ class ProcuraSerializer(ProcuraListaSerializer):
 
     def get_nomes(self, o) -> dict:
         return {
-            "operacao": _nome(o.operacao),
+            "pretende": o.get_pretende_display(),
             "estado": _nome(o.estado),
             "urgencia": _nome(o.urgencia),
             "qualificacao": o.get_qualificacao_display(),

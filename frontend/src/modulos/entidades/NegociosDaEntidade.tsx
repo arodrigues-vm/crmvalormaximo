@@ -60,7 +60,7 @@ export function NegociosDaEntidade({
                   <li key={p.id}>
                     <Link to={`/procuras/${p.id}`}>{p.referencia}</Link>{' '}
                     <small className="ajuda">
-                      {p.operacao_nome} · {p.estado_nome}
+                      {p.pretende_nome} · {p.estado_nome}
                     </small>
                   </li>
                 ))}

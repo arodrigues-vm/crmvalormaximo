@@ -33,10 +33,10 @@ def test_crud_basico_estado_por_omissao_e_interacoes(api, criar_utilizador):
     assert r.status_code == 201, r.content
     p = r.json()
     assert p["referencia"].startswith("PRC-") and p["estado_nome"] == "Ativa" and p["teto"] == "300000.00"
-    assert p["nomes"]["tipologias"] == ["T2", "T3"]
+    assert p["nomes"]["tipologias"] == ["T2", "T3"] and p["pretende_nome"] == "Comprar"
     # Entidade de outro consultor não pode ser usada.
     alheia = Entidade.objects.create(nome="Alheia", responsavel=outro)
-    r2 = api.post(reverse("procura-list"), {"entidade": alheia.pk, "operacao": v("operacoes", "Venda")}, format="json")
+    r2 = api.post(reverse("procura-list"), {"entidade": alheia.pk, "pretende": "comprar"}, format="json")
     assert r2.status_code == 400
     # Interações
     url = reverse("procura-interacoes", args=[p["id"]])

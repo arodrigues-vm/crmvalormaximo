@@ -49,13 +49,13 @@ export function ProcurasLista() {
           onChange={(e) => setTermo(e.target.value)}
         />
         <select
-          aria-label="Operação"
-          value={params.get('operacao') ?? ''}
-          onChange={(e) => mudar({ operacao: e.target.value, page: '' })}
+          aria-label="O cliente pretende"
+          value={params.get('pretende') ?? ''}
+          onChange={(e) => mudar({ pretende: e.target.value, page: '' })}
         >
-          <option value="">Todas as operações</option>
-          {o?.operacoes.map((x) => (
-            <option key={x.id} value={x.id}>
+          <option value="">Comprar ou arrendar</option>
+          {o?.pretende.map((x) => (
+            <option key={x.valor} value={x.valor}>
               {x.nome}
             </option>
           ))}
@@ -103,7 +103,7 @@ export function ProcurasLista() {
                   {p.entidade_nome ?? '—'}
                 </td>
                 <td data-rotulo="Procura">
-                  {p.operacao_nome}
+                  {p.pretende_nome}
                   {p.resumo && <small className="ajuda"> · {p.resumo}</small>}
                 </td>
                 <td data-rotulo="Orçamento">

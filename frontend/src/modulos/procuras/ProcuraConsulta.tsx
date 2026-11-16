@@ -58,7 +58,7 @@ export function ProcuraConsulta() {
         modulo="Procuras"
         caminho="/procuras"
         referencia={p.referencia}
-        titulo={`${p.entidade_nome ?? 'Interessado'} · ${n.operacao ?? ''}`}
+        titulo={`${p.entidade_nome ?? 'Interessado'} · Pretende ${(n.pretende ?? '').toLowerCase()}`}
         etiqueta={
           n.estado ? { texto: n.estado, tipo: ETIQUETA_CATEGORIA[p.estado_categoria ?? ''] ?? 'neutra' } : undefined
         }
@@ -87,7 +87,7 @@ export function ProcuraConsulta() {
               'Entidade a que não tem acesso'
             )}
           </Dado>
-          <Dado rotulo="Operação">{n.operacao}</Dado>
+          <Dado rotulo="O cliente pretende">{n.pretende}</Dado>
           <Dado rotulo="Qualificação">{n.qualificacao}</Dado>
           <Dado rotulo="Urgência">{n.urgencia}</Dado>
           <Dado rotulo="Início da procura">{dataPt(p.data_inicio)}</Dado>

@@ -5,7 +5,7 @@ Uma **procura** regista o que um cliente quer comprar ou arrendar. O CRM compara
 
 ## 7.1 Lista
 
-Abra **Procuras e Qualificação** no menu. Separadores **Ativas** / **Inativas**; filtros por operação e urgência.
+Abra **Procuras e Qualificação** no menu. Separadores **Ativas** / **Inativas**; filtros por «Comprar / Arrendar» e urgência.
 
 ![Lista de procuras](imagens/45-procuras-lista.png)
 
@@ -14,7 +14,7 @@ Abra **Procuras e Qualificação** no menu. Separadores **Ativas** / **Inativas*
 A partir da ficha do cliente (secção **Oportunidades e procuras** → **+ Nova procura**) ou na lista
 (**+ Nova procura**).
 
-1. **Interessado e qualificação:** cliente, operação (obrigatória), estado, qualificação, urgência, início da
+1. **Interessado e qualificação:** cliente, **o cliente pretende** (*Comprar* ou *Arrendar*, obrigatório), estado, qualificação, urgência, início da
    procura, prazo, motivação e flexibilidade.
 2. **Orçamento:** orçamento máximo e **tolerância** (de 0 % a 20 %; por omissão 0 %). O CRM mostra o **preço
    máximo aceite**. Exemplo: 250 000 € com 20 % → até 300 000 €.
@@ -54,7 +54,8 @@ Para cada imóvel aparece a explicação de cada critério:
   obrigatório, o imóvel aparece com o aviso *«obrigatório(s) por confirmar»*: confirme e complete a ficha do
   imóvel.
 
-**Que imóveis entram?** Só imóveis com status *Ativo*, da mesma operação (venda/arrendamento) e com estado de
+**Que imóveis entram?** Só imóveis com status *Ativo*, compatíveis com o que o cliente pretende (*Comprar* → imóveis para venda; *Arrendar* → imóveis para
+arrendamento) e com estado de
 comercialização *Disponível* ou *Em preparação* (os *Reservados*, *Vendidos*, etc. ficam de fora). Só vê os
 imóveis a que o seu perfil dá acesso.
 

@@ -9,7 +9,7 @@ export interface ProcuraResumo {
   referencia: string
   entidade: number
   entidade_nome: string | null
-  operacao_nome: string | null
+  pretende_nome: string
   estado_nome: string | null
   estado_categoria: string | null
   urgencia_nome: string | null
@@ -22,7 +22,7 @@ export interface ProcuraResumo {
 }
 
 export interface Procura extends ProcuraResumo {
-  operacao: number
+  pretende: string
   estado: number | null
   urgencia: number | null
   motivacao: string
@@ -52,7 +52,7 @@ export interface Procura extends ProcuraResumo {
   responsavel: number
   observacoes: string
   nomes: {
-    operacao: string | null
+    pretende: string
     estado: string | null
     urgencia: string | null
     qualificacao: string
@@ -97,7 +97,7 @@ export interface ProcuraCompativel extends Omit<Correspondencia, 'imovel'> {
 
 export interface OpcoesProcura {
   estados: Opcao[]
-  operacoes: Opcao[]
+  pretende: { valor: string; nome: string }[]
   urgencias: Opcao[]
   tipos_imovel: Opcao[]
   tipologias: Opcao[]
@@ -140,7 +140,7 @@ export const NOMES_CRITERIOS: Record<string, string> = {
 
 export const NOMES_CAMPOS_PROCURA: Record<string, string> = {
   entidade: 'Interessado',
-  operacao: 'Operação',
+  pretende: 'O cliente pretende',
   estado: 'Estado',
   qualificacao: 'Qualificação',
   urgencia: 'Urgência',

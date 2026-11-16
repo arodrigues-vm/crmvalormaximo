@@ -31,6 +31,16 @@ def hoje():
     return timezone.localdate()
 
 
+class Pretende(models.TextChoices):
+    COMPRAR = "comprar", "Comprar"
+    ARRENDAR = "arrendar", "Arrendar"
+
+
+# Categoria da operação dos imóveis correspondente ao que o cliente pretende.
+CATEGORIA_IMOVEL = {Pretende.COMPRAR: "venda", Pretende.ARRENDAR: "arrendamento"}
+PRETENDE_POR_CATEGORIA = {v: k for k, v in CATEGORIA_IMOVEL.items()}
+
+
 class Procura(RegistoBase):
     PREFIXO_REFERENCIA = "PRC"
 
@@ -41,7 +51,9 @@ class Procura(RegistoBase):
     entidade = models.ForeignKey(
         "entidades.Entidade", on_delete=models.PROTECT, related_name="procuras", verbose_name="comprador / interessado"
     )
-    operacao = campo_lista("operacoes", verbose_name="operação")
+    # O que o CLIENTE pretende. Liga-se aos imóveis pela categoria da operação destes:
+    # comprar → imóveis de categoria «venda»; arrendar → «arrendamento».
+    pretende = models.CharField("o cliente pretende", max_length=12, choices=Pretende.choices, default=Pretende.COMPRAR)
     estado = campo_lista("estados_procura")
     qualificacao = models.CharField(max_length=10, choices=Qualificacao.choices, default=Qualificacao.INICIAL)
     urgencia = campo_lista("urgencias", verbose_name="urgência")

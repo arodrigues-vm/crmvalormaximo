@@ -18,7 +18,10 @@ const UTIL = {
 
 const OPCOES_PROC = {
   estados: [{ id: 1, nome: 'Ativa', categoria: 'ativa' }],
-  operacoes: [{ id: 40, nome: 'Venda', categoria: 'venda' }],
+  pretende: [
+    { valor: 'comprar', nome: 'Comprar' },
+    { valor: 'arrendar', nome: 'Arrendar' },
+  ],
   urgencias: [],
   tipos_imovel: [{ id: 2, nome: 'Apartamento' }],
   tipologias: [
@@ -73,7 +76,7 @@ describe('Procuras', () => {
           referencia: 'PRC-000003',
           entidade: 7,
           entidade_nome: 'Bruno Ensaio',
-          operacao: 40,
+          pretende: 'comprar',
           estado: 1,
           estado_nome: 'Ativa',
           estado_categoria: 'ativa',
@@ -111,7 +114,7 @@ describe('Procuras', () => {
           observacoes: '',
           resumo: 'T3',
           nomes: {
-            operacao: 'Venda',
+            pretende: 'Comprar',
             estado: 'Ativa',
             urgencia: null,
             qualificacao: 'Inicial',
