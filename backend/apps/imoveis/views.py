@@ -21,7 +21,7 @@ from apps.core.vistas import RegistoViewSet
 from apps.entidades.models import Entidade
 
 from .models import Imovel, Proprietario
-from .serializers import ImovelListaSerializer, ImovelSerializer
+from .serializers import CAMPOS_D34, LISTAS_D34, ImovelListaSerializer, ImovelSerializer
 
 ORDENACOES = {
     "recentes": "-criado_em",
@@ -37,6 +37,7 @@ LISTAS = {  # nome na resposta -> chave da lista
     "zonas_comerciais": "zonas_comerciais",
     "certificados_energeticos": "certificados_energeticos",
     "zonas_exteriores": "zonas_exteriores",
+    **{chave: chave for chave in LISTAS_D34.values()},
 }
 
 
@@ -79,6 +80,7 @@ class ImovelViewSet(RegistoViewSet):
         "localizacao_descritiva", "area_bruta_privativa", "area_bruta_dependente", "area_util", "area_terreno",
         "quartos", "casas_banho", "ano_construcao", "piso", "elevador", "lugares_estacionamento",
         "certificado_energetico_id", "descricao", "responsavel_id", "observacoes", "operacao_id", "status_id",
+        *[f"{c}_id" for c in LISTAS_D34], *CAMPOS_D34,
     ]  # fmt: skip
 
     def get_serializer_class(self):
@@ -92,7 +94,7 @@ class ImovelViewSet(RegistoViewSet):
     def base_queryset(self):
         return Imovel.objects.select_related(
             "tipo", "tipologia", "estado_comercializacao", "operacao", "status", "condicao_fisica", "zona_comercial",
-            "certificado_energetico", "responsavel", "freguesia__concelho__distrito",
+            "certificado_energetico", "responsavel", "freguesia__concelho__distrito", *LISTAS_D34,
         ).prefetch_related(
             "zonas_exteriores",
             Prefetch("proprietarios", queryset=Proprietario.objects.select_related("entidade")),

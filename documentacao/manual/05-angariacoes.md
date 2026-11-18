@@ -48,7 +48,27 @@ este imóvel**. Também pode usar **+ Nova angariação** na lista e escolher o 
    na escritura*. Em **Sinal mínimo do comprador** indique o sinal de que depende esse pagamento, em **% do
    preço** ou em **euros** (ex.: comissão paga no CPCV desde que o sinal seja de 15%). Use **Outras condições
    de pagamento** para o que não couber nestes campos.
-5. Carregue em **Guardar**.
+5. **Acompanhamento:** prioridade, comercialização prevista (Imediato, Normal, Difícil, Muito difícil),
+   **valor ACM** (análise comparativa de mercado), **valor vendido** e observações da angariação.
+6. Carregue em **Guardar**.
+
+### Tempo restante e comissão prevista
+
+Na lista e na ficha, cada contrato ativo mostra quantos dias faltam para a **data fim de contrato**, com uma
+cor:
+
+| Cor | Dias que faltam |
+|-----|-----------------|
+| Vermelho | 30 ou menos |
+| Laranja | 31 a 60 |
+| Amarelo | 61 a 120 |
+| Verde | mais de 120 |
+
+Os limites (30, 60 e 120) são um parâmetro que o Administrador pode alterar.
+
+Na secção *Remuneração e pagamento* aparece a **comissão prevista**: preço do imóvel × percentagem (ou o valor
+vendido, quando estiver preenchido), ou o valor fixo, nunca abaixo da remuneração mínima. É uma estimativa
+sem IVA; o valor oficial será o da faturação.
 
 > As partes do contrato ficam guardadas no próprio CMI: se mais tarde os proprietários do imóvel mudarem, o
 > contrato mantém as partes que o assinaram.

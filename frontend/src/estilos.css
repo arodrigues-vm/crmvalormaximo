@@ -617,6 +617,11 @@ body {
   gap: 14px 20px;
   margin: 0;
 }
+.grelha-campos + .grelha-campos,
+.grelha-campos + .campo,
+.grelha-dados + .grelha-dados {
+  margin-top: 14px;
+}
 .dado dt {
   font-size: 12px;
   color: var(--texto-suave);
@@ -1574,4 +1579,22 @@ a.botao-secundario {
   border: 1px solid #fedf89;
   border-radius: 6px;
   background: #fffaeb;
+}
+
+/* Tempo restante do CMI (D-34): vermelho ≤30 dias, laranja ≤60, amarelo ≤120, verde acima. */
+.etiqueta-tempo-vermelho {
+  background: #fef3f2;
+  color: #b42318;
+}
+.etiqueta-tempo-laranja {
+  background: #fff4ed;
+  color: #c4320a;
+}
+.etiqueta-tempo-amarelo {
+  background: #fefbe8;
+  color: #a15c07;
+}
+.etiqueta-tempo-verde {
+  background: #ecfdf3;
+  color: #067647;
 }

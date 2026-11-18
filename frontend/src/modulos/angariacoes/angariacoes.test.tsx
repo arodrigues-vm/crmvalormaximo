@@ -143,6 +143,7 @@ describe('Angariações', () => {
               estado: 'por_assinar',
               estado_nome: 'Por assinar',
               alerta: null,
+              tempo_restante: { dias: 45, cor: 'laranja' },
               partes: [],
               responsavel_nome: 'Consultor Demo',
             },
@@ -151,6 +152,7 @@ describe('Angariações', () => {
     })
     const { container } = desenhar('/angariacoes')
     await screen.findByText('IMO-000005')
+    expect(screen.getByText('Faltam 45 dias')).toHaveClass('etiqueta-tempo-laranja')
     expect(container.querySelector('.celula-miniatura img')).toHaveAttribute(
       'src',
       '/api/imoveis/5/fotografia/?tamanho=miniatura&v=9',

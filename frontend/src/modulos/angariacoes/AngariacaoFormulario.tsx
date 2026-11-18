@@ -5,12 +5,19 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ErroApi } from '../../api/cliente'
 import { Bloco } from '../../componentes/Bloco'
 import { CampoAreaTexto, CampoSelecao, CampoTexto } from '../../componentes/campos'
+import {
+  qualificacaoParaApi,
+  valoresQualificacao,
+  type Opcoes,
+  type Registo,
+} from '../../componentes/camposQualificacao'
+import { EditarQualificacao } from '../../componentes/Qualificacao'
 import { CabecalhoRegisto } from '../../componentes/Ficha'
 import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
 import { useGuardaSaida } from '../../componentes/useGuardaSaida'
 import { entidadesApi } from '../entidades/api'
 import { imoveisApi, procurarImoveis } from '../imoveis/api'
-import { cmiApi, ETIQUETA_ESTADO, type Angariacao } from './api'
+import { CMI_ACOMPANHAMENTO, cmiApi, ETIQUETA_ESTADO, type Angariacao } from './api'
 
 interface Parte {
   entidade: OpcaoPesquisa
@@ -37,6 +44,7 @@ interface Valores {
   sinal_unidade: string
   condicoes_pagamento: string
   observacoes: string
+  extra: Record<string, string>
   partes: Parte[] | null // null = pré-preencher com os proprietários do imóvel
 }
 
@@ -63,6 +71,7 @@ function deCmi(a: Angariacao): Valores {
     sinal_unidade: a.sinal_unidade || 'percentagem',
     condicoes_pagamento: a.condicoes_pagamento,
     observacoes: a.observacoes,
+    extra: valoresQualificacao(CMI_ACOMPANHAMENTO, a as unknown as Registo),
     partes: a.intervenientes_detalhe.map((i) => ({
       entidade: {
         id: i.entidade,
@@ -104,6 +113,7 @@ function paraApi(v: Valores, assinado: boolean) {
     sinal_unidade: num(v.sinal_valor) === null ? '' : v.sinal_unidade,
     condicoes_pagamento: v.condicoes_pagamento,
     observacoes: v.observacoes,
+    ...qualificacaoParaApi(CMI_ACOMPANHAMENTO, v.extra),
   }
   if (!assinado) {
     corpo.data_inicio = v.data_inicio || null
@@ -134,6 +144,7 @@ const BLOCOS: Record<string, string[]> = {
     'condicoes_pagamento',
   ],
   observacoes: ['observacoes'],
+  acompanhamento: CMI_ACOMPANHAMENTO.map((c) => c.campo),
 }
 
 export function AngariacaoNova() {
@@ -191,6 +202,7 @@ function Formulario({ cmi, imovelInicial = null }: { cmi?: Angariacao; imovelIni
             sinal_unidade: 'percentagem',
             condicoes_pagamento: '',
             observacoes: '',
+            extra: valoresQualificacao(CMI_ACOMPANHAMENTO),
             partes: null,
           },
     [cmi, imovelInicial],
@@ -518,6 +530,17 @@ function Formulario({ cmi, imovelInicial = null }: { cmi?: Angariacao; imovelIni
             erro={erro('condicoes_pagamento')}
           />
         </div>
+      </Bloco>
+
+      <Bloco titulo="Acompanhamento" forcarAberto={temErros('acompanhamento')} abertoInicial={!!cmi}>
+        <EditarQualificacao
+          campos={CMI_ACOMPANHAMENTO}
+          valores={v.extra}
+          aoMudar={(c, x) => setV((a) => ({ ...a, extra: { ...a.extra, [c]: x } }))}
+          opcoes={o as unknown as Opcoes | undefined}
+          erros={erros as Record<string, string[] | undefined>}
+          nomesAtuais={cmi?.nomes}
+        />
       </Bloco>
 
       <Bloco titulo="Observações" abertoInicial={!!v.observacoes} forcarAberto={temErros('observacoes')}>

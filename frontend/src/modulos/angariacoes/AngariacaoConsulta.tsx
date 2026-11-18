@@ -6,11 +6,21 @@ import { ErroApi, pedido } from '../../api/cliente'
 import { Bloco } from '../../componentes/Bloco'
 import { CampoAreaTexto, CampoSelecao, CampoTexto, Dado } from '../../componentes/campos'
 import { Dialogo } from '../../componentes/Dialogo'
+import type { Registo } from '../../componentes/camposQualificacao'
+import { VerQualificacao } from '../../componentes/Qualificacao'
 import { CabecalhoRegisto, HistoricoRegisto } from '../../componentes/Ficha'
 import { dataPt, formatarEuros, formatarPercentagem, momentoPt } from '../../componentes/formatar'
 import { LigacoesExternas } from '../../componentes/LigacoesExternas'
 import { urlFotografia } from '../imoveis/api'
-import { cmiApi, ETIQUETA_ESTADO, NOMES_CAMPOS_CMI, textoAlerta, type Angariacao } from './api'
+import {
+  CMI_ACOMPANHAMENTO,
+  cmiApi,
+  ETIQUETA_ESTADO,
+  NOMES_CAMPOS_CMI,
+  textoAlerta,
+  textoTempo,
+  type Angariacao,
+} from './api'
 
 function remuneracao(a: Angariacao): string | null {
   const v = a.valor_remuneracao
@@ -143,6 +153,13 @@ export function AngariacaoConsulta() {
             <Dado rotulo="Data de início">{dataPt(a.data_inicio)}</Dado>
             <Dado rotulo="Prazo">{a.prazo_meses && `${a.prazo_meses} meses`}</Dado>
             <Dado rotulo="Data fim de contrato">{dataPt(a.data_fim_vigente)}</Dado>
+            <Dado rotulo="Tempo restante">
+              {a.tempo_restante && (
+                <span className={`etiqueta etiqueta-tempo-${a.tempo_restante.cor}`}>
+                  {textoTempo(a.tempo_restante)}
+                </span>
+              )}
+            </Dado>
             <Dado rotulo="Situação">
               {a.nomes.situacao}
               {a.situacao_motivo && <small className="ajuda"> — {a.situacao_motivo}</small>}
@@ -234,6 +251,17 @@ export function AngariacaoConsulta() {
           <Dado rotulo="Valores">
             {a.remuneracao_inclui_iva === null ? null : a.remuneracao_inclui_iva ? 'Com IVA incluído' : 'Acresce IVA'}
           </Dado>
+          <Dado rotulo="Comissão prevista">
+            {a.valor_comissao_estimado && (
+              <>
+                {formatarEuros(a.valor_comissao_estimado)}{' '}
+                <small className="ajuda">
+                  ({a.valor_vendido ? 'sobre o valor vendido' : 'sobre o preço do imóvel'}
+                  {a.taxa_iva ? ', sem contar o IVA' : ''})
+                </small>
+              </>
+            )}
+          </Dado>
           <Dado rotulo="Momento do pagamento">{a.momento_pagamento_nome}</Dado>
           <Dado rotulo="Sinal mínimo do comprador">
             {a.sinal_valor === null
@@ -246,6 +274,10 @@ export function AngariacaoConsulta() {
             {a.condicoes_pagamento && <span className="texto-livre">{a.condicoes_pagamento}</span>}
           </Dado>
         </dl>
+      </Bloco>
+
+      <Bloco titulo="Acompanhamento">
+        <VerQualificacao campos={CMI_ACOMPANHAMENTO} registo={a as unknown as Registo} />
       </Bloco>
 
       <Bloco titulo="Documentos e ligações">

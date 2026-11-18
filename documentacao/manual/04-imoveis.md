@@ -8,8 +8,11 @@ Abra **Imóveis** no menu lateral.
 
 ![Lista de imóveis](imagens/24-imoveis-lista.png)
 
-- **Pesquisa:** referência, rua, localidade, freguesia, concelho, localização descritiva ou nome de um
-  proprietário. Ignora acentos e maiúsculas.
+- **Pesquisa:** escreva uma ou várias palavras, por exemplo **10 T3 Maia**. Aparecem os imóveis que tenham
+  **todas** essas palavras, por qualquer ordem, na referência, tipo, tipologia, rua, localidade, zona,
+  freguesia, concelho, localização descritiva, descrição ou nome de um proprietário. Ignora acentos e
+  maiúsculas. A mesma pesquisa funciona sempre que tem de escolher um imóvel (angariações, oportunidades,
+  imóvel de contacto de uma entidade).
 - **Filtros:** operação (venda/arrendamento), tipo, tipologia, estado de comercialização, status e preço
   máximo.
 - **Ordenar:** mais recentes, preço (crescente/decrescente) ou referência.
@@ -31,8 +34,10 @@ No telemóvel a lista aparece em cartões:
 
 - **Operação:** por exemplo Venda ou Arrendamento (lista editável pelo Administrador).
 - **Preço (€):** deixe **vazio** se ainda não for conhecido. Vazio é diferente de 0 €.
-- **Estado de comercialização:** em que ponto está a comercialização (Em preparação, Disponível, Reservado,
-  Vendido, Arrendado, Retirado…).
+- **Estado de comercialização:** em que ponto está a comercialização (Em preparação, Disponível, Proposta,
+  Reservado, Vendido, Arrendado, Retirado…). É a parte final da «fase de angariação»: as fases anteriores
+  (Contacto, Pré-angariação, ACM apresentado, Pendente) registam-se na **oportunidade de angariação** e o
+  contrato tem o seu próprio estado, calculado automaticamente (capítulo 5).
 - **Status:** por omissão *Ativo*, *Inativo* ou *Arquivado* (lista editável). Use *Arquivado* para imóveis
   que já não interessam ao dia a dia, sem os eliminar. Se não escolher nenhum, o imóvel fica *Ativo*.
 
@@ -51,13 +56,31 @@ No telemóvel a lista aparece em cartões:
 - Alterar os proprietários de um imóvel **não altera negócios já concluídos**: as propostas e transações
   guardam os participantes da altura.
 
-### Classificação, características e áreas
+### Caracterização
 
-Tipo, tipologia, condição física, quartos, casas de banho, ano de construção, piso, elevador, lugares de
-estacionamento, certificado energético e zonas exteriores (pode escolher várias). As áreas são em m²; pode
-usar vírgula nas casas decimais (112,5).
+Tipo, tipologia, **estado do imóvel** (Novo, Usado, Reabilitado, Restaurado, Ruína), quartos, WCs, ano de
+construção, piso, lugares de estacionamento e zonas exteriores (pode escolher várias), **destino do imóvel**,
+**ocupação**, **situação do imóvel**, **conservação**, **acabamentos** e **habitável**.
 
-Nos campos *Elevador* e nos números, deixar vazio significa *desconhecido*.
+### Divisões e equipamento
+
+Suites, quartos +1, salas, WCs de serviço, cozinha, arrumação, climatização, caixilharias, **elevadores**
+(Não, 1, 2…), piscina e garagem.
+
+### Áreas (m²)
+
+Área bruta privativa, bruta dependente, útil, do lote, coberta, descoberta e de construção, a **fonte das
+áreas** (CPU/R, CRP, planta…) e a **conformidade de áreas**. Pode usar vírgula nas casas decimais (112,5).
+
+### Documentação
+
+Classe energética, n.º do certificado energético, tipo de artigo (Urbano, Rústico, Misto), licença de
+construção, licença de habitabilidade e alvará de loteamento. Os documentos propriamente ditos ficam em
+pastas do OneDrive, ligadas na secção *Fotografias, documentos e outras ligações* (4.5).
+
+Deixar um campo vazio significa *desconhecido*. Todas as opções das listas são editáveis pelo Administrador
+(anexo A). As características descritivas ficam no **imóvel** e mantêm-se mesmo que o contrato (CMI) seja
+cancelado.
 
 ### Localização
 
@@ -65,6 +88,7 @@ Nos campos *Elevador* e nos números, deixar vazio significa *desconhecido*.
 - **Localização administrativa:** Distrito → Concelho → Freguesia (catálogo oficial CAOP).
 - **Zona comercial:** a zona de atuação da agência (lista própria, diferente das freguesias).
 - **Localização descritiva:** texto livre, por exemplo *«junto ao parque da cidade»*.
+- **Link da localização** (por exemplo, do Google Maps) e **Link do site** (anúncio do imóvel).
 
 ## 4.3 Consultar e editar
 

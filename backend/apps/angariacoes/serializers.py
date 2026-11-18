@@ -9,7 +9,7 @@ from apps.contas.models import Utilizador
 from apps.imoveis.models import Imovel
 
 from .models import ESTADOS, Angariacao, Interveniente, Renovacao, calcular_fim
-from .servicos import alerta, conflitos, descrever_conflitos, hoje
+from .servicos import alerta, comissao_estimada, conflitos, descrever_conflitos, hoje, tempo_restante
 
 CEM = Decimal("100")
 CAMPOS_CONTRATUAIS = ("data_inicio", "prazo_meses")
@@ -51,6 +51,7 @@ class AngariacaoListaSerializer(serializers.ModelSerializer):
     estado = serializers.SerializerMethodField()
     estado_nome = serializers.SerializerMethodField()
     alerta = serializers.SerializerMethodField()
+    tempo_restante = serializers.SerializerMethodField()
     responsavel_nome = serializers.CharField(source="responsavel.nome", read_only=True)
     partes = serializers.SerializerMethodField()
 
@@ -59,7 +60,7 @@ class AngariacaoListaSerializer(serializers.ModelSerializer):
         fields = [
             "id", "referencia", "numero_contrato", "imovel", "imovel_referencia", "imovel_descricao",
             "operacao_nome", "regime_nome", "data_inicio", "data_fim_vigente", "estado", "estado_nome", "alerta",
-            "partes", "responsavel_nome", "imovel_fotografia",
+            "tempo_restante", "partes", "responsavel_nome", "imovel_fotografia",
         ]  # fmt: skip
 
     def get_imovel_fotografia(self, o) -> dict | None:
@@ -85,6 +86,9 @@ class AngariacaoListaSerializer(serializers.ModelSerializer):
     def get_alerta(self, o) -> dict | None:
         return alerta(o)
 
+    def get_tempo_restante(self, o) -> dict | None:
+        return tempo_restante(o)
+
     def get_partes(self, o) -> list[str]:
         visiveis = self.context.get("entidades_visiveis", set())
         return [i.entidade.nome_completo if i.entidade_id in visiveis else "—" for i in o.intervenientes.all()]
@@ -96,6 +100,10 @@ class AngariacaoSerializer(AngariacaoListaSerializer):
     regime = CampoValorLista("regimes_cmi", allow_null=True, required=False)
     momento_pagamento = CampoValorLista("momentos_pagamento_comissao", allow_null=True, required=False)
     momento_pagamento_nome = serializers.CharField(source="momento_pagamento.nome", read_only=True, default=None)
+    prioridade = CampoValorLista("prioridades", allow_null=True, required=False)
+    comercializacao_prevista = CampoValorLista("comercializacao_prevista", allow_null=True, required=False)
+    valor_comissao_estimado = serializers.SerializerMethodField()
+    imovel_preco = serializers.DecimalField(source="imovel.preco", max_digits=12, decimal_places=2, read_only=True)
     responsavel = serializers.PrimaryKeyRelatedField(required=False, queryset=Utilizador.objects.filter(is_active=True))
     intervenientes = IntervenienteEscritaSerializer(many=True, required=False, write_only=True)
     intervenientes_detalhe = serializers.SerializerMethodField()
@@ -111,7 +119,9 @@ class AngariacaoSerializer(AngariacaoListaSerializer):
         fields = [
             "id", "referencia", "numero_contrato", "imovel", "imovel_referencia", "imovel_descricao",
             "operacao", "regime", "data_inicio", "prazo_meses", "data_fim", "data_fim_vigente",
-            "situacao", "situacao_motivo", "estado", "estado_nome", "alerta", "assinado",
+            "situacao", "situacao_motivo", "estado", "estado_nome", "alerta", "tempo_restante", "assinado",
+            "prioridade", "comercializacao_prevista", "valor_acm", "valor_vendido", "observacoes_angariacao",
+            "imovel_preco", "valor_comissao_estimado",
             "modalidade_remuneracao", "valor_remuneracao", "base_contratual", "valor_minimo_remuneracao",
             "taxa_iva", "remuneracao_inclui_iva", "momento_pagamento", "momento_pagamento_nome", "sinal_valor",
             "sinal_unidade", "condicoes_pagamento",
@@ -132,7 +142,13 @@ class AngariacaoSerializer(AngariacaoListaSerializer):
             "regime_categoria": o.regime.categoria if o.regime else None,
             "modalidade": o.get_modalidade_remuneracao_display() if o.modalidade_remuneracao else None,
             "situacao": o.get_situacao_display(),
+            "prioridade": _nome(o.prioridade),
+            "comercializacao_prevista": _nome(o.comercializacao_prevista),
         }
+
+    def get_valor_comissao_estimado(self, o) -> str | None:
+        v = comissao_estimada(o)
+        return None if v is None else str(v)
 
     def get_intervenientes_detalhe(self, o) -> list[dict]:
         visiveis = self.context.get("entidades_visiveis", set())

@@ -374,3 +374,17 @@ def test_status_vazio_fica_ativo_e_mantem_se_na_edicao(api, pessoas):
     assert i["nomes"]["status"] == "Ativo"
     r = como(api, pessoas.cons).patch(detalhe(i["id"]), {"versao": i["versao"], "status": None}, format="json")
     assert r.status_code == 200 and r.json()["nomes"]["status"] == "Ativo"
+
+
+def test_caracteristicas_d34_e_elevador_derivado(api, pessoas):
+    i = criar(
+        api, pessoas.cons, elevadores=valor("quantidades", "2"), cozinha=valor("cozinhas", "Equipada"),
+        tipo_artigo=valor("artigos_matriciais", "Urbano"), area_construcao="120.5", suites=1,
+        link_site="https://anuncios.exemplo.pt/1", habitavel=valor("sim_nao", "Sim"),
+    )  # fmt: skip
+    assert i["elevador"] is True and i["nomes"]["elevadores"] == "2" and i["nomes"]["cozinha"] == "Equipada"
+    assert i["area_construcao"] == "120.50" and i["suites"] == 1
+    r = como(api, pessoas.cons).patch(
+        detalhe(i["id"]), {"elevadores": valor("quantidades", "Não"), "versao": i["versao"]}, format="json"
+    )
+    assert r.json()["elevador"] is False

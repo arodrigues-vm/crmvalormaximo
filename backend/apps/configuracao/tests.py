@@ -16,7 +16,7 @@ def test_listas_iniciais(api, criar_utilizador):
     api.force_authenticate(criar_utilizador(Perfil.CONSULTOR))
     r = api.get(reverse("listas"))
     nomes = [v["nome"] for v in lista(r, "estados_comercializacao")["valores"]]
-    assert nomes == ["Em preparação", "Disponível", "Reservado", "Vendido", "Arrendado", "Retirado"]
+    assert nomes == ["Em preparação", "Disponível", "Proposta", "Reservado", "Vendido", "Arrendado", "Retirado"]
     assert [v["nome"] for v in lista(r, "tipologias")["valores"]][0] == "T0"
     assert lista(r, "zonas_comerciais")["valores"] == []
 

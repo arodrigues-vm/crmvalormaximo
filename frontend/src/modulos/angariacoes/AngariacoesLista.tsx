@@ -5,7 +5,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { dataPt } from '../../componentes/formatar'
 import { Paginacao } from '../../componentes/Paginacao'
 import { urlFotografia } from '../imoveis/api'
-import { cmiApi, ETIQUETA_ESTADO, textoAlerta } from './api'
+import { cmiApi, ETIQUETA_ESTADO, textoTempo } from './api'
 
 const FILTROS: [string, string][] = [
   ['', 'Todos'],
@@ -136,7 +136,11 @@ export function AngariacoesLista() {
                 </td>
                 <td data-rotulo="Estado">
                   <span className={`etiqueta etiqueta-${ETIQUETA_ESTADO[a.estado]}`}>{a.estado_nome}</span>
-                  {a.alerta && <span className="etiqueta etiqueta-perigo">{textoAlerta(a.alerta)}</span>}
+                  {a.tempo_restante && (
+                    <span className={`etiqueta etiqueta-tempo-${a.tempo_restante.cor}`}>
+                      {textoTempo(a.tempo_restante)}
+                    </span>
+                  )}
                 </td>
               </tr>
             ))}

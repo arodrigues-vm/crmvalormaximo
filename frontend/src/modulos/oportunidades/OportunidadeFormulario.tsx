@@ -194,6 +194,7 @@ function Formulario({ o, entidadeInicial = null }: { o?: Oportunidade; entidadeI
         forcarAberto={temErro(QUALIFICACAO_PROPRIETARIO.map((c) => c.campo))}
       >
         <EditarQualificacao
+          nomesAtuais={o?.nomes}
           campos={QUALIFICACAO_PROPRIETARIO}
           valores={v.qualificacao}
           aoMudar={mudarQ}
@@ -204,6 +205,7 @@ function Formulario({ o, entidadeInicial = null }: { o?: Oportunidade; entidadeI
 
       <Bloco titulo="Negócio" forcarAberto={temErro(QUALIFICACAO_NEGOCIO.map((c) => c.campo))} abertoInicial={!!o}>
         <EditarQualificacao
+          nomesAtuais={o?.nomes}
           campos={QUALIFICACAO_NEGOCIO}
           valores={v.qualificacao}
           aoMudar={mudarQ}

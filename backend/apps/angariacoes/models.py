@@ -61,6 +61,18 @@ class Angariacao(RegistoBase):
     # Fim em vigor = fim do último ciclo (inicial ou renovação). Guardado para pesquisas e avisos.
     data_fim_vigente = models.DateField(null=True, blank=True, editable=False, db_index=True)
 
+    # Acompanhamento comercial (D-34, Excel «Imoveis»)
+    prioridade = campo_lista("prioridades")
+    comercializacao_prevista = campo_lista("comercializacao_prevista", verbose_name="comercialização")
+    valor_acm = models.DecimalField(
+        "valor ACM", max_digits=12, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0)],
+        help_text="Valor da análise comparativa de mercado.",
+    )  # fmt: skip
+    valor_vendido = models.DecimalField(
+        "valor vendido", max_digits=12, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0)]
+    )
+    observacoes_angariacao = models.TextField("observações da angariação", blank=True)
+
     situacao = models.CharField(max_length=12, choices=Situacao.choices, default=Situacao.EM_CURSO, db_index=True)
     situacao_motivo = models.CharField(max_length=255, blank=True)
 

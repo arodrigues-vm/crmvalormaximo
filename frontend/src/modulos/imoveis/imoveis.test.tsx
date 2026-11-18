@@ -14,6 +14,10 @@ const OPCOES = {
   zonas_comerciais: [],
   certificados_energeticos: [],
   zonas_exteriores: [{ id: 30, nome: 'Varanda' }],
+  quantidades: [
+    { id: 60, nome: 'Não' },
+    { id: 61, nome: '1' },
+  ],
   operacoes: [
     { id: 40, nome: 'Venda', categoria: 'venda' },
     { id: 41, nome: 'Arrendamento', categoria: 'arrendamento' },
@@ -124,6 +128,9 @@ describe('Imóveis', () => {
     expect(screen.getByText(/Soma das quotas indicadas: 110 %/)).toBeInTheDocument()
     fireEvent.change(quotas[0], { target: { value: '50' } })
     fireEvent.change(screen.getByLabelText('Preço (€)'), { target: { value: '' } })
+    fireEvent.change(screen.getByLabelText('Elevadores'), { target: { value: '61' } })
+    fireEvent.change(screen.getByLabelText('Área de construção (m²)'), { target: { value: '120,5' } })
+    fireEvent.change(screen.getByLabelText('Suites'), { target: { value: '1' } })
     fireEvent.click(screen.getByRole('button', { name: 'Guardar' }))
     await waitFor(() => expect(pedidos.some((p) => p.metodo === 'PATCH')).toBe(true))
     const corpo = pedidos.find((p) => p.metodo === 'PATCH')!.corpo as Record<string, unknown>
@@ -131,6 +138,8 @@ describe('Imóveis', () => {
     expect(corpo.operacao).toBe(40)
     expect(corpo.status).toBe(50)
     expect(corpo.preco).toBeNull()
+    expect(corpo).toMatchObject({ elevadores: 61, area_construcao: '120.5', suites: 1, garagem: null })
+    expect(corpo).not.toHaveProperty('elevador')
     expect(corpo.proprietarios).toEqual([
       { entidade: 7, quota: '50' },
       { entidade: 9, quota: '50' },

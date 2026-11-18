@@ -5,7 +5,7 @@
 export interface CampoQualificacao {
   campo: string
   rotulo: string
-  tipo: 'lista' | 'texto' | 'longo' | 'euros'
+  tipo: 'lista' | 'texto' | 'longo' | 'euros' | 'numero' | 'm2' | 'url'
   /** Chave da lista configurável (tipo «lista»). */
   lista?: string
   /** Só mostra o campo quando outro campo de lista tem este valor (pelo nome). */
@@ -21,7 +21,7 @@ export function valoresQualificacao(campos: CampoQualificacao[], r?: Registo): R
     campos.map((c) => {
       const v = r?.[c.campo]
       if (v === null || v === undefined) return [c.campo, '']
-      if (c.tipo === 'euros') return [c.campo, String(Number(v))]
+      if (c.tipo === 'euros' || c.tipo === 'm2') return [c.campo, String(Number(v))]
       return [c.campo, String(v)]
     }),
   )
@@ -32,7 +32,8 @@ export function qualificacaoParaApi(campos: CampoQualificacao[], v: Record<strin
     campos.map((c) => {
       const x = (v[c.campo] ?? '').trim()
       if (c.tipo === 'lista') return [c.campo, x ? Number(x) : null]
-      if (c.tipo === 'euros') return [c.campo, x ? x.replace(/\s/g, '').replace(',', '.') : null]
+      if (c.tipo === 'euros' || c.tipo === 'm2') return [c.campo, x ? x.replace(/\s/g, '').replace(',', '.') : null]
+      if (c.tipo === 'numero') return [c.campo, x ? Number(x) : null]
       return [c.campo, v[c.campo] ?? '']
     }),
   )

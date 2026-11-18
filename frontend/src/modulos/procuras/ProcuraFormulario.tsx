@@ -292,6 +292,7 @@ function Formulario({ p, entidadeInicial = null }: { p?: Procura; entidadeInicia
 
       <Bloco titulo="Qualificação do comprador" forcarAberto={temErro(QUALIFICACAO_COMPRADOR.map((c) => c.campo))}>
         <EditarQualificacao
+          nomesAtuais={p?.nomes}
           campos={QUALIFICACAO_COMPRADOR}
           valores={v.qualificacao}
           aoMudar={mudarQ}
@@ -305,6 +306,7 @@ function Formulario({ p, entidadeInicial = null }: { p?: Procura; entidadeInicia
         forcarAberto={temErro(PRE_QUALIFICACAO_FINANCEIRA.map((c) => c.campo))}
       >
         <EditarQualificacao
+          nomesAtuais={p?.nomes}
           campos={PRE_QUALIFICACAO_FINANCEIRA}
           valores={v.qualificacao}
           aoMudar={mudarQ}

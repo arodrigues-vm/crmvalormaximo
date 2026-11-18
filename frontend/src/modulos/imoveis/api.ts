@@ -1,4 +1,5 @@
 import { pedido } from '../../api/cliente'
+import type { CampoQualificacao } from '../../componentes/camposQualificacao'
 import type { EntradaHistorico } from '../../componentes/Ficha'
 
 type Opcao = { id: number; nome: string; categoria?: string }
@@ -60,6 +61,7 @@ export interface Imovel {
     operacao_categoria: string | null
     status: string | null
     status_categoria: string | null
+    [campo: string]: unknown
   }
   criado_em: string
   atualizado_em: string
@@ -189,3 +191,58 @@ export const procurarImoveis = async (termo: string) =>
     titulo: i.referencia,
     detalhe: [[i.tipo_nome, i.tipologia_nome].filter(Boolean).join(' '), i.localidade].filter(Boolean).join(' · '),
   }))
+
+/* Campos acrescentados em D-34 (Excel «Dados Imoveis» e «Imoveis»), agrupados por bloco. */
+export const IMOVEL_CARACTERIZACAO: CampoQualificacao[] = [
+  { campo: 'destino_imovel', rotulo: 'Destino do imóvel', tipo: 'lista', lista: 'destinos_imovel' },
+  { campo: 'ocupacao', rotulo: 'Ocupação', tipo: 'lista', lista: 'ocupacoes_imovel' },
+  { campo: 'situacao', rotulo: 'Situação do imóvel', tipo: 'lista', lista: 'situacoes_imovel' },
+  { campo: 'conservacao', rotulo: 'Conservação', tipo: 'lista', lista: 'conservacoes' },
+  { campo: 'acabamentos', rotulo: 'Acabamentos', tipo: 'lista', lista: 'acabamentos' },
+  { campo: 'habitavel', rotulo: 'Habitável', tipo: 'lista', lista: 'sim_nao' },
+]
+
+export const IMOVEL_DIVISOES: CampoQualificacao[] = [
+  { campo: 'suites', rotulo: 'Suites', tipo: 'numero' },
+  { campo: 'quartos_extra', rotulo: 'Quartos +1', tipo: 'numero' },
+  { campo: 'salas', rotulo: 'Salas', tipo: 'numero' },
+  { campo: 'wcs_servico', rotulo: 'WCs de serviço', tipo: 'numero' },
+  { campo: 'cozinha', rotulo: 'Cozinha', tipo: 'lista', lista: 'cozinhas' },
+  { campo: 'arrumacao', rotulo: 'Arrumação', tipo: 'lista', lista: 'classificacoes' },
+  { campo: 'climatizacao', rotulo: 'Climatização', tipo: 'lista', lista: 'climatizacoes' },
+  { campo: 'caixilharia', rotulo: 'Caixilharias', tipo: 'lista', lista: 'caixilharias' },
+  { campo: 'elevadores', rotulo: 'Elevadores', tipo: 'lista', lista: 'quantidades' },
+  { campo: 'piscina', rotulo: 'Piscina', tipo: 'lista', lista: 'piscinas' },
+  { campo: 'garagem', rotulo: 'Garagem', tipo: 'lista', lista: 'garagens' },
+]
+
+export const IMOVEL_AREAS_EXTRA: CampoQualificacao[] = [
+  { campo: 'area_coberta', rotulo: 'Área coberta', tipo: 'm2' },
+  { campo: 'area_descoberta', rotulo: 'Área descoberta', tipo: 'm2' },
+  { campo: 'area_construcao', rotulo: 'Área de construção', tipo: 'm2' },
+  { campo: 'fonte_areas', rotulo: 'Fonte das áreas', tipo: 'lista', lista: 'fontes_areas' },
+  { campo: 'conformidade_areas', rotulo: 'Conformidade de áreas', tipo: 'texto' },
+]
+
+export const IMOVEL_DOCUMENTACAO: CampoQualificacao[] = [
+  { campo: 'tipo_artigo', rotulo: 'Tipo de artigo', tipo: 'lista', lista: 'artigos_matriciais' },
+  { campo: 'certificado_numero', rotulo: 'N.º do certificado energético', tipo: 'texto' },
+  { campo: 'licenca_construcao', rotulo: 'Licença de construção', tipo: 'texto' },
+  { campo: 'licenca_habitabilidade', rotulo: 'Licença de habitabilidade', tipo: 'texto' },
+  { campo: 'alvara_loteamento', rotulo: 'Alvará de loteamento', tipo: 'texto' },
+]
+
+export const IMOVEL_LIGACOES: CampoQualificacao[] = [
+  { campo: 'link_localizacao', rotulo: 'Link da localização', tipo: 'url', ajuda: 'Ex.: endereço do Google Maps.' },
+  { campo: 'link_site', rotulo: 'Link do site', tipo: 'url', ajuda: 'Anúncio do imóvel no site.' },
+]
+
+export const CAMPOS_D34_IMOVEL = [
+  ...IMOVEL_CARACTERIZACAO,
+  ...IMOVEL_DIVISOES,
+  ...IMOVEL_AREAS_EXTRA,
+  ...IMOVEL_DOCUMENTACAO,
+  ...IMOVEL_LIGACOES,
+]
+
+for (const c of CAMPOS_D34_IMOVEL) NOMES_CAMPOS_IMOVEL[c.campo] = c.rotulo

@@ -77,6 +77,42 @@ class ImovelListaSerializer(serializers.ModelSerializer):
         ]
 
 
+# Campos de lista acrescentados em D-34 (campo -> chave da lista configurável).
+LISTAS_D34 = {
+    "destino_imovel": "destinos_imovel",
+    "ocupacao": "ocupacoes_imovel",
+    "situacao": "situacoes_imovel",
+    "conservacao": "conservacoes",
+    "acabamentos": "acabamentos",
+    "habitavel": "sim_nao",
+    "tipo_artigo": "artigos_matriciais",
+    "fonte_areas": "fontes_areas",
+    "cozinha": "cozinhas",
+    "arrumacao": "classificacoes",
+    "climatizacao": "climatizacoes",
+    "caixilharia": "caixilharias",
+    "piscina": "piscinas",
+    "garagem": "garagens",
+    "elevadores": "quantidades",
+}
+CAMPOS_D34 = [
+    "link_localizacao",
+    "link_site",
+    "certificado_numero",
+    "licenca_construcao",
+    "licenca_habitabilidade",
+    "alvara_loteamento",
+    "area_coberta",
+    "area_descoberta",
+    "area_construcao",
+    "conformidade_areas",
+    "suites",
+    "quartos_extra",
+    "salas",
+    "wcs_servico",
+]
+
+
 class ImovelSerializer(serializers.ModelSerializer):
     operacao = CampoValorLista("operacoes")
     status = CampoValorLista("status_imovel", required=False, allow_null=True)  # vazio = ativo por omissão
@@ -88,6 +124,21 @@ class ImovelSerializer(serializers.ModelSerializer):
     zona_comercial = CampoValorLista("zonas_comerciais", allow_null=True, required=False)
     certificado_energetico = CampoValorLista("certificados_energeticos", allow_null=True, required=False)
     zonas_exteriores = CampoValorLista("zonas_exteriores", many=True, required=False)
+    destino_imovel = CampoValorLista("destinos_imovel", allow_null=True, required=False)
+    ocupacao = CampoValorLista("ocupacoes_imovel", allow_null=True, required=False)
+    situacao = CampoValorLista("situacoes_imovel", allow_null=True, required=False)
+    conservacao = CampoValorLista("conservacoes", allow_null=True, required=False)
+    acabamentos = CampoValorLista("acabamentos", allow_null=True, required=False)
+    habitavel = CampoValorLista("sim_nao", allow_null=True, required=False)
+    tipo_artigo = CampoValorLista("artigos_matriciais", allow_null=True, required=False)
+    fonte_areas = CampoValorLista("fontes_areas", allow_null=True, required=False)
+    cozinha = CampoValorLista("cozinhas", allow_null=True, required=False)
+    arrumacao = CampoValorLista("classificacoes", allow_null=True, required=False)
+    climatizacao = CampoValorLista("climatizacoes", allow_null=True, required=False)
+    caixilharia = CampoValorLista("caixilharias", allow_null=True, required=False)
+    piscina = CampoValorLista("piscinas", allow_null=True, required=False)
+    garagem = CampoValorLista("garagens", allow_null=True, required=False)
+    elevadores = CampoValorLista("quantidades", allow_null=True, required=False)
     freguesia = serializers.PrimaryKeyRelatedField(allow_null=True, required=False, queryset=Freguesia.objects.all())
     responsavel = serializers.PrimaryKeyRelatedField(required=False, queryset=Utilizador.objects.filter(is_active=True))
     proprietarios = ProprietarioEscritaSerializer(many=True, required=False, write_only=True)
@@ -109,7 +160,7 @@ class ImovelSerializer(serializers.ModelSerializer):
             "zona_comercial", "localizacao_descritiva",
             "area_bruta_privativa", "area_bruta_dependente", "area_util", "area_terreno",
             "quartos", "casas_banho", "ano_construcao", "piso", "elevador", "lugares_estacionamento",
-            "certificado_energetico", "zonas_exteriores", "descricao",
+            "certificado_energetico", "zonas_exteriores", "descricao", *LISTAS_D34, *CAMPOS_D34,
             "proprietarios", "proprietarios_detalhe", "responsavel", "responsavel_nome", "observacoes",
             "nomes", "tem_fotografia", "criado_em", "atualizado_em", "versao", "eliminado_em", "acoes",
         ]  # fmt: skip
@@ -129,6 +180,7 @@ class ImovelSerializer(serializers.ModelSerializer):
             "operacao_categoria": o.operacao.categoria if o.operacao else None,
             "status": _nome(o.status),
             "status_categoria": o.status.categoria if o.status else None,
+            **{c: _nome(getattr(o, c)) for c in LISTAS_D34},
         }
 
     def get_proprietarios_detalhe(self, o) -> list[dict]:

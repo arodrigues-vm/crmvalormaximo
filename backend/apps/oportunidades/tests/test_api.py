@@ -43,7 +43,7 @@ def criar(api, u, ana, **extra):
 
 def test_criar_com_estado_por_omissao(api, u, ana):
     o = criar(api, u, ana)
-    assert o["referencia"].startswith("OPA-") and o["estado_nome"] == "Novo contacto"
+    assert o["referencia"].startswith("OPA-") and o["estado_nome"] == "Contacto"
     assert o["imovel_descricao"] == "Moradia T3 · Ensaio"
     assert o["angariacao_gerada"] is None
 
@@ -65,7 +65,7 @@ def test_converter_cria_imovel_e_cmi_por_assinar(api, u, ana):
     assert api.post(url, {"confirmar": True}, format="json").status_code == 409
     assert RegistoAuditoria.objects.filter(acao="oportunidade.convertida").count() == 1
     # A oportunidade não muda de estado sozinha.
-    assert api.get(reverse("oportunidade-detail", args=[o["id"]])).json()["estado_nome"] == "Novo contacto"
+    assert api.get(reverse("oportunidade-detail", args=[o["id"]])).json()["estado_nome"] == "Contacto"
 
 
 def test_converter_com_imovel_existente_so_cria_cmi(api, u, ana):

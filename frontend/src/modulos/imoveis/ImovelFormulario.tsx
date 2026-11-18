@@ -5,12 +5,31 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ErroApi } from '../../api/cliente'
 import { Bloco } from '../../componentes/Bloco'
 import { CampoAreaTexto, CampoMultiplo, CampoSelecao, CampoTexto } from '../../componentes/campos'
+import {
+  qualificacaoParaApi,
+  valoresQualificacao,
+  type CampoQualificacao,
+  type Opcoes,
+  type Registo,
+} from '../../componentes/camposQualificacao'
 import { CabecalhoRegisto } from '../../componentes/Ficha'
+import { EditarQualificacao } from '../../componentes/Qualificacao'
 import { SeletorLocalizacao } from '../../componentes/SeletorLocalizacao'
 import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
 import { useGuardaSaida } from '../../componentes/useGuardaSaida'
 import { entidadesApi } from '../entidades/api'
-import { etiquetaStatus, imoveisApi, tituloImovel, type Imovel } from './api'
+import {
+  CAMPOS_D34_IMOVEL,
+  etiquetaStatus,
+  IMOVEL_AREAS_EXTRA,
+  IMOVEL_CARACTERIZACAO,
+  IMOVEL_DIVISOES,
+  IMOVEL_DOCUMENTACAO,
+  IMOVEL_LIGACOES,
+  imoveisApi,
+  tituloImovel,
+  type Imovel,
+} from './api'
 
 interface ProprietarioEditavel {
   entidade: OpcaoPesquisa
@@ -43,13 +62,13 @@ interface Valores {
   casas_banho: string
   ano_construcao: string
   piso: string
-  elevador: string
   lugares_estacionamento: string
   certificado_energetico: string
   zonas_exteriores: number[]
   descricao: string
   observacoes: string
   proprietarios: ProprietarioEditavel[]
+  extra: Record<string, string>
 }
 
 const t = (v: string | number | null | undefined) => (v === null || v === undefined ? '' : String(v))
@@ -78,13 +97,13 @@ const VAZIO: Valores = {
   casas_banho: '',
   ano_construcao: '',
   piso: '',
-  elevador: '',
   lugares_estacionamento: '',
   certificado_energetico: '',
   zonas_exteriores: [],
   descricao: '',
   observacoes: '',
   proprietarios: [],
+  extra: valoresQualificacao(CAMPOS_D34_IMOVEL),
 }
 
 function deImovel(i: Imovel): Valores {
@@ -112,7 +131,6 @@ function deImovel(i: Imovel): Valores {
     casas_banho: t(i.casas_banho),
     ano_construcao: t(i.ano_construcao),
     piso: i.piso,
-    elevador: i.elevador === null ? '' : i.elevador ? 'sim' : 'nao',
     lugares_estacionamento: t(i.lugares_estacionamento),
     certificado_energetico: t(i.certificado_energetico),
     zonas_exteriores: i.zonas_exteriores,
@@ -127,6 +145,7 @@ function deImovel(i: Imovel): Valores {
       acessivel: p.acessivel,
       quota: t(p.quota === null ? null : Number(p.quota)),
     })),
+    extra: valoresQualificacao(CAMPOS_D34_IMOVEL, i as unknown as Registo),
   }
 }
 
@@ -158,13 +177,13 @@ function paraApi(v: Valores) {
     casas_banho: num(v.casas_banho),
     ano_construcao: num(v.ano_construcao),
     piso: v.piso,
-    elevador: v.elevador === '' ? null : v.elevador === 'sim',
     lugares_estacionamento: num(v.lugares_estacionamento),
     certificado_energetico: id(v.certificado_energetico),
     zonas_exteriores: v.zonas_exteriores,
     descricao: v.descricao,
     observacoes: v.observacoes,
     proprietarios: v.proprietarios.map((p) => ({ entidade: p.entidade.id, quota: num(p.quota) })),
+    ...qualificacaoParaApi(CAMPOS_D34_IMOVEL, v.extra),
   }
 }
 
@@ -179,12 +198,19 @@ const BLOCOS: Record<string, string[]> = {
     'casas_banho',
     'ano_construcao',
     'piso',
-    'elevador',
     'lugares_estacionamento',
-    'certificado_energetico',
     'zonas_exteriores',
+    ...IMOVEL_CARACTERIZACAO.map((c) => c.campo),
   ],
-  areas: ['area_bruta_privativa', 'area_bruta_dependente', 'area_util', 'area_terreno'],
+  divisoes: IMOVEL_DIVISOES.map((c) => c.campo),
+  areas: [
+    'area_bruta_privativa',
+    'area_bruta_dependente',
+    'area_util',
+    'area_terreno',
+    ...IMOVEL_AREAS_EXTRA.map((c) => c.campo),
+  ],
+  documentacao: ['certificado_energetico', ...IMOVEL_DOCUMENTACAO.map((c) => c.campo)],
   localizacao: [
     'rua',
     'numero_policia',
@@ -194,6 +220,7 @@ const BLOCOS: Record<string, string[]> = {
     'freguesia',
     'zona_comercial',
     'localizacao_descritiva',
+    ...IMOVEL_LIGACOES.map((c) => c.campo),
   ],
   textos: ['descricao', 'observacoes'],
 }
@@ -228,6 +255,17 @@ function Formulario({ imovel }: { imovel?: Imovel }) {
 
   const mudar = <K extends keyof Valores>(campo: K, valor: Valores[K]) => setV((a) => ({ ...a, [campo]: valor }))
   const erro = (c: string) => erros[c] as string[] | undefined
+  const mudarExtra = (c: string, x: string) => setV((a) => ({ ...a, extra: { ...a.extra, [c]: x } }))
+  const extras = (campos: CampoQualificacao[]) => (
+    <EditarQualificacao
+      nomesAtuais={imovel?.nomes}
+      campos={campos}
+      valores={v.extra}
+      aoMudar={mudarExtra}
+      opcoes={o as unknown as Opcoes | undefined}
+      erros={erros as Record<string, string[] | undefined>}
+    />
+  )
   const temErros = (b: string) => BLOCOS[b].some((c) => erros[c])
   const lista = (itens?: { id: number; nome: string }[]) => (itens ?? []).map((x) => ({ valor: x.id, nome: x.nome }))
   // Valores desativados que o imóvel já tem continuam a aparecer na lista.
@@ -403,7 +441,7 @@ function Formulario({ imovel }: { imovel?: Imovel }) {
         </div>
       </Bloco>
 
-      <Bloco titulo="Classificação e características" forcarAberto={temErros('classificacao')}>
+      <Bloco titulo="Caracterização" forcarAberto={temErros('classificacao')}>
         <div className="grelha-campos">
           <CampoSelecao
             rotulo="Tipo de imóvel"
@@ -422,7 +460,7 @@ function Formulario({ imovel }: { imovel?: Imovel }) {
             erro={erro('tipologia')}
           />
           <CampoSelecao
-            rotulo="Condição física"
+            rotulo="Estado do imóvel"
             vazio="—"
             value={v.condicao_fisica}
             onChange={(e) => mudar('condicao_fisica', e.target.value)}
@@ -437,7 +475,7 @@ function Formulario({ imovel }: { imovel?: Imovel }) {
             erro={erro('quartos')}
           />
           <CampoTexto
-            rotulo="Casas de banho"
+            rotulo="WCs"
             inputMode="numeric"
             value={v.casas_banho}
             onChange={(e) => mudar('casas_banho', e.target.value)}
@@ -456,34 +494,12 @@ function Formulario({ imovel }: { imovel?: Imovel }) {
             onChange={(e) => mudar('piso', e.target.value)}
             erro={erro('piso')}
           />
-          <CampoSelecao
-            rotulo="Elevador"
-            vazio="Desconhecido"
-            value={v.elevador}
-            onChange={(e) => mudar('elevador', e.target.value)}
-            opcoes={[
-              { valor: 'sim', nome: 'Sim' },
-              { valor: 'nao', nome: 'Não' },
-            ]}
-          />
           <CampoTexto
             rotulo="Lugares de estacionamento"
             inputMode="numeric"
             value={v.lugares_estacionamento}
             onChange={(e) => mudar('lugares_estacionamento', e.target.value)}
             erro={erro('lugares_estacionamento')}
-          />
-          <CampoSelecao
-            rotulo="Certificado energético"
-            vazio="—"
-            value={v.certificado_energetico}
-            onChange={(e) => mudar('certificado_energetico', e.target.value)}
-            opcoes={comAtual(
-              lista(o?.certificados_energeticos),
-              v.certificado_energetico,
-              n?.certificado_energetico ?? null,
-            )}
-            erro={erro('certificado_energetico')}
           />
           <CampoMultiplo
             rotulo="Zonas exteriores"
@@ -493,6 +509,11 @@ function Formulario({ imovel }: { imovel?: Imovel }) {
             erro={erro('zonas_exteriores')}
           />
         </div>
+        {extras(IMOVEL_CARACTERIZACAO)}
+      </Bloco>
+
+      <Bloco titulo="Divisões e equipamento" forcarAberto={temErros('divisoes')} abertoInicial={!!imovel}>
+        {extras(IMOVEL_DIVISOES)}
       </Bloco>
 
       <Bloco titulo="Áreas (m²)" forcarAberto={temErros('areas')}>
@@ -502,7 +523,7 @@ function Formulario({ imovel }: { imovel?: Imovel }) {
               ['area_bruta_privativa', 'Área bruta privativa'],
               ['area_bruta_dependente', 'Área bruta dependente'],
               ['area_util', 'Área útil'],
-              ['area_terreno', 'Área do terreno'],
+              ['area_terreno', 'Área do lote'],
             ] as const
           ).map(([c, r]) => (
             <CampoTexto
@@ -515,6 +536,25 @@ function Formulario({ imovel }: { imovel?: Imovel }) {
             />
           ))}
         </div>
+        {extras(IMOVEL_AREAS_EXTRA)}
+      </Bloco>
+
+      <Bloco titulo="Documentação" forcarAberto={temErros('documentacao')} abertoInicial={!!imovel}>
+        <div className="grelha-campos">
+          <CampoSelecao
+            rotulo="Classe energética"
+            vazio="—"
+            value={v.certificado_energetico}
+            onChange={(e) => mudar('certificado_energetico', e.target.value)}
+            opcoes={comAtual(
+              lista(o?.certificados_energeticos),
+              v.certificado_energetico,
+              n?.certificado_energetico ?? null,
+            )}
+            erro={erro('certificado_energetico')}
+          />
+        </div>
+        {extras(IMOVEL_DOCUMENTACAO)}
       </Bloco>
 
       <Bloco titulo="Localização" forcarAberto={temErros('localizacao')}>
@@ -574,6 +614,7 @@ function Formulario({ imovel }: { imovel?: Imovel }) {
             ajuda="Ex.: junto ao parque da cidade."
           />
         </div>
+        {extras(IMOVEL_LIGACOES)}
       </Bloco>
 
       <Bloco

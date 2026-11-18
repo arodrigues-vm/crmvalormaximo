@@ -1,4 +1,5 @@
 import { pedido } from '../../api/cliente'
+import type { CampoQualificacao } from '../../componentes/camposQualificacao'
 import type { EntradaHistorico } from '../../componentes/Ficha'
 
 type Opcao = { id: number; nome: string; categoria?: string }
@@ -59,7 +60,15 @@ export interface Angariacao {
   estado: Estado
   estado_nome: string
   alerta: Alerta | null
+  tempo_restante: TempoRestante | null
   assinado: boolean
+  prioridade: number | null
+  comercializacao_prevista: number | null
+  valor_acm: string | null
+  valor_vendido: string | null
+  observacoes_angariacao: string
+  imovel_preco: string | null
+  valor_comissao_estimado: string | null
   modalidade_remuneracao: string
   valor_remuneracao: string | null
   base_contratual: string
@@ -92,11 +101,18 @@ export interface Angariacao {
     regime_categoria: string | null
     modalidade: string | null
     situacao: string
+    prioridade: string | null
+    comercializacao_prevista: string | null
   }
   criado_em: string
   atualizado_em: string
   versao: number
   acoes: { editar: boolean; eliminar: boolean; transferir: boolean }
+}
+
+export interface TempoRestante {
+  dias: number
+  cor: 'vermelho' | 'laranja' | 'amarelo' | 'verde'
 }
 
 export interface AngariacaoResumo {
@@ -114,6 +130,7 @@ export interface AngariacaoResumo {
   estado: Estado
   estado_nome: string
   alerta: Alerta | null
+  tempo_restante: TempoRestante | null
   partes: string[]
   responsavel_nome: string
 }
@@ -199,4 +216,21 @@ export const NOMES_CAMPOS_CMI: Record<string, string> = {
   condicoes_pagamento: 'Outras condições de pagamento',
   responsavel: 'Responsável',
   observacoes: 'Observações',
+}
+
+/** Acompanhamento comercial da angariação (D-34, Excel «Imoveis»). */
+export const CMI_ACOMPANHAMENTO: CampoQualificacao[] = [
+  { campo: 'prioridade', rotulo: 'Prioridade', tipo: 'lista', lista: 'prioridades' },
+  { campo: 'comercializacao_prevista', rotulo: 'Comercialização', tipo: 'lista', lista: 'comercializacao_prevista' },
+  { campo: 'valor_acm', rotulo: 'Valor ACM', tipo: 'euros', ajuda: 'Valor da análise comparativa de mercado.' },
+  { campo: 'valor_vendido', rotulo: 'Valor vendido', tipo: 'euros' },
+  { campo: 'observacoes_angariacao', rotulo: 'Observações da angariação', tipo: 'longo' },
+]
+
+for (const c of CMI_ACOMPANHAMENTO) NOMES_CAMPOS_CMI[c.campo] = c.rotulo
+
+/** «Faltam 45 dias» / «Termina hoje». */
+export function textoTempo(t: TempoRestante) {
+  if (t.dias === 0) return 'Termina hoje'
+  return `Faltam ${t.dias} dia${t.dias === 1 ? '' : 's'}`
 }

@@ -36,7 +36,9 @@ A forma mais rápida é a partir da ficha da entidade (o proprietário): secçã
 As respostas *Sim / Não / Não sabe* e as restantes opções vêm de listas configuráveis (anexo A). Os campos de
 qualificação podem ficar vazios e ser preenchidos mais tarde, à medida que conhece melhor o proprietário.
 
-Se não escolher o estado, fica no primeiro estado «em curso» (por omissão, *Novo contacto*).
+Se não escolher o estado, fica no primeiro estado «em curso» (por omissão, *Contacto*). Os estados iniciais
+são as primeiras fases da angariação: *Contacto*, *Pré-angariação*, *ACM apresentado*, *Pendente*,
+*Angariado* e *Cancelado* (lista editável).
 
 ## 6.3 Registar contactos
 

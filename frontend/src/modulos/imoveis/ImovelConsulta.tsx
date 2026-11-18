@@ -8,9 +8,21 @@ import { Dado } from '../../componentes/campos'
 import { Dialogo } from '../../componentes/Dialogo'
 import { CabecalhoRegisto, HistoricoRegisto } from '../../componentes/Ficha'
 import { formatarArea, formatarEuros, formatarPercentagem, momentoPt } from '../../componentes/formatar'
+import type { Registo } from '../../componentes/camposQualificacao'
+import { VerQualificacao } from '../../componentes/Qualificacao'
 import { LigacoesExternas } from '../../componentes/LigacoesExternas'
 import { pedido } from '../../api/cliente'
-import { etiquetaStatus, imoveisApi, NOMES_CAMPOS_IMOVEL, tituloImovel } from './api'
+import {
+  etiquetaStatus,
+  IMOVEL_AREAS_EXTRA,
+  IMOVEL_CARACTERIZACAO,
+  IMOVEL_DIVISOES,
+  IMOVEL_DOCUMENTACAO,
+  IMOVEL_LIGACOES,
+  imoveisApi,
+  NOMES_CAMPOS_IMOVEL,
+  tituloImovel,
+} from './api'
 import { AngariacoesDoImovel } from './AngariacoesDoImovel'
 import { ProcurasCompativeis } from './ProcurasCompativeis'
 import { FotografiaImovel } from './FotografiaImovel'
@@ -45,6 +57,7 @@ export function ImovelConsulta() {
   if (!i) return <p className="erro">Não foi possível carregar o imóvel.</p>
 
   const n = i.nomes
+  const registo = i as unknown as Registo
   const morada = [
     [i.rua, i.numero_policia].filter(Boolean).join(', '),
     i.complemento,
@@ -126,22 +139,25 @@ export function ImovelConsulta() {
         </Bloco>
       )}
 
-      <Bloco titulo="Classificação e características">
+      <Bloco titulo="Caracterização">
         <dl className="grelha-dados">
           <Dado rotulo="Tipo">{n.tipo}</Dado>
           <Dado rotulo="Tipologia">{n.tipologia}</Dado>
-          <Dado rotulo="Condição física">{n.condicao_fisica}</Dado>
+          <Dado rotulo="Estado do imóvel">{n.condicao_fisica}</Dado>
           <Dado rotulo="Quartos">{i.quartos}</Dado>
-          <Dado rotulo="Casas de banho">{i.casas_banho}</Dado>
+          <Dado rotulo="WCs">{i.casas_banho}</Dado>
           <Dado rotulo="Ano de construção">{i.ano_construcao}</Dado>
           <Dado rotulo="Piso">{i.piso}</Dado>
-          <Dado rotulo="Elevador">{i.elevador === null ? null : i.elevador ? 'Sim' : 'Não'}</Dado>
           <Dado rotulo="Lugares de estacionamento">{i.lugares_estacionamento}</Dado>
-          <Dado rotulo="Certificado energético">{n.certificado_energetico}</Dado>
           <Dado rotulo="Zonas exteriores" largo>
             {n.zonas_exteriores.join(', ')}
           </Dado>
         </dl>
+        <VerQualificacao campos={IMOVEL_CARACTERIZACAO} registo={registo} />
+      </Bloco>
+
+      <Bloco titulo="Divisões e equipamento">
+        <VerQualificacao campos={IMOVEL_DIVISOES} registo={registo} />
       </Bloco>
 
       <Bloco titulo="Áreas">
@@ -149,8 +165,16 @@ export function ImovelConsulta() {
           <Dado rotulo="Área bruta privativa">{formatarArea(i.area_bruta_privativa)}</Dado>
           <Dado rotulo="Área bruta dependente">{formatarArea(i.area_bruta_dependente)}</Dado>
           <Dado rotulo="Área útil">{formatarArea(i.area_util)}</Dado>
-          <Dado rotulo="Área do terreno">{formatarArea(i.area_terreno)}</Dado>
+          <Dado rotulo="Área do lote">{formatarArea(i.area_terreno)}</Dado>
         </dl>
+        <VerQualificacao campos={IMOVEL_AREAS_EXTRA} registo={registo} />
+      </Bloco>
+
+      <Bloco titulo="Documentação">
+        <dl className="grelha-dados">
+          <Dado rotulo="Classe energética">{n.certificado_energetico}</Dado>
+        </dl>
+        <VerQualificacao campos={IMOVEL_DOCUMENTACAO} registo={registo} />
       </Bloco>
 
       <Bloco titulo="Localização">
@@ -164,6 +188,7 @@ export function ImovelConsulta() {
           <Dado rotulo="Zona comercial">{n.zona_comercial}</Dado>
           <Dado rotulo="Localização descritiva">{i.localizacao_descritiva}</Dado>
         </dl>
+        <VerQualificacao campos={IMOVEL_LIGACOES} registo={registo} />
       </Bloco>
 
       <Bloco titulo="Fotografias, documentos e outras ligações">

@@ -43,6 +43,7 @@ class AngariacaoViewSet(RegistoViewSet):
         "imovel_id", "numero_contrato", "operacao_id", "regime_id", "data_inicio", "prazo_meses",
         "data_fim", "data_fim_vigente", "situacao", "modalidade_remuneracao", "valor_remuneracao", "base_contratual",
         "valor_minimo_remuneracao", "taxa_iva", "remuneracao_inclui_iva", "momento_pagamento_id", "sinal_valor",
+        "prioridade_id", "comercializacao_prevista_id", "valor_acm", "valor_vendido", "observacoes_angariacao",
         "sinal_unidade", "condicoes_pagamento", "responsavel_id",
         "observacoes",
     ]  # fmt: skip
@@ -57,7 +58,14 @@ class AngariacaoViewSet(RegistoViewSet):
 
     def base_queryset(self):
         return Angariacao.objects.select_related(
-            "imovel__tipo", "imovel__tipologia", "operacao", "regime", "responsavel", "momento_pagamento"
+            "imovel__tipo",
+            "imovel__tipologia",
+            "operacao",
+            "regime",
+            "responsavel",
+            "momento_pagamento",
+            "prioridade",
+            "comercializacao_prevista",
         ).prefetch_related(
             "renovacoes__criado_por",
             Prefetch("intervenientes", queryset=Interveniente.objects.select_related("entidade", "papel")),
@@ -118,6 +126,8 @@ class AngariacaoViewSet(RegistoViewSet):
                 "operacoes": opcoes_lista("operacoes"),
                 "regimes": opcoes_lista("regimes_cmi"),
                 "momentos_pagamento": opcoes_lista("momentos_pagamento_comissao"),
+                "prioridades": opcoes_lista("prioridades"),
+                "comercializacao_prevista": opcoes_lista("comercializacao_prevista"),
                 "papeis": opcoes_lista("papeis_interveniente_cmi"),
                 "modalidades": [{"valor": v, "nome": n} for v, n in Angariacao.Modalidade.choices],
                 "modalidades_por_operacao": {k: sorted(v) for k, v in Angariacao.MODALIDADES_POR_OPERACAO.items()},

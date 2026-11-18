@@ -25,7 +25,13 @@ class Imovel(RegistoBase):
     # Listas configuráveis com categoria fixa (venda/arrendamento; ativo/inativo/arquivado).
     operacao = campo_lista("operacoes", verbose_name="operação")
     status = campo_lista("status_imovel", verbose_name="status")
-    condicao_fisica = campo_lista("condicoes_fisicas", verbose_name="condição física")
+    condicao_fisica = campo_lista("condicoes_fisicas", verbose_name="estado do imóvel")
+    destino_imovel = campo_lista("destinos_imovel", verbose_name="destino do imóvel")
+    ocupacao = campo_lista("ocupacoes_imovel", verbose_name="ocupação")
+    situacao = campo_lista("situacoes_imovel", verbose_name="situação do imóvel")
+    conservacao = campo_lista("conservacoes", verbose_name="conservação")
+    acabamentos = campo_lista("acabamentos")
+    habitavel = campo_lista("sim_nao", verbose_name="habitável")
     # NULL = preço desconhecido (diferente de zero).
     preco = models.DecimalField(
         "preço", max_digits=12, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0)]
@@ -44,23 +50,49 @@ class Imovel(RegistoBase):
     localizacao_descritiva = models.CharField(
         "localização descritiva", max_length=200, blank=True, help_text="Ex.: junto ao parque da cidade."
     )
+    link_localizacao = models.URLField("link da localização", max_length=500, blank=True)
+    link_site = models.URLField("link do site", max_length=500, blank=True)
+
+    # Documentação (D-34)
+    tipo_artigo = campo_lista("artigos_matriciais", verbose_name="tipo de artigo")
+    certificado_numero = models.CharField("n.º do certificado energético", max_length=60, blank=True)
+    licenca_construcao = models.CharField("licença de construção", max_length=120, blank=True)
+    licenca_habitabilidade = models.CharField("licença de habitabilidade", max_length=120, blank=True)
+    alvara_loteamento = models.CharField("alvará de loteamento", max_length=120, blank=True)
 
     # Áreas (m²)
     area_bruta_privativa = models.DecimalField("área bruta privativa", **AREA)
     area_bruta_dependente = models.DecimalField("área bruta dependente", **AREA)
     area_util = models.DecimalField("área útil", **AREA)
-    area_terreno = models.DecimalField("área do terreno", **AREA)
+    area_terreno = models.DecimalField("área do lote", **AREA)
+    area_coberta = models.DecimalField("área coberta", **AREA)
+    area_descoberta = models.DecimalField("área descoberta", **AREA)
+    area_construcao = models.DecimalField("área de construção", **AREA)
+    fonte_areas = campo_lista("fontes_areas", verbose_name="fonte das áreas")
+    conformidade_areas = models.CharField("conformidade de áreas", max_length=255, blank=True)
 
     # Características
     quartos = models.PositiveSmallIntegerField(null=True, blank=True)
-    casas_banho = models.PositiveSmallIntegerField("casas de banho", null=True, blank=True)
+    suites = models.PositiveSmallIntegerField("suites", null=True, blank=True)
+    quartos_extra = models.PositiveSmallIntegerField("quartos +1", null=True, blank=True)
+    salas = models.PositiveSmallIntegerField(null=True, blank=True)
+    casas_banho = models.PositiveSmallIntegerField("WCs", null=True, blank=True)
+    wcs_servico = models.PositiveSmallIntegerField("WCs de serviço", null=True, blank=True)
+    cozinha = campo_lista("cozinhas")
+    arrumacao = campo_lista("classificacoes", verbose_name="arrumação")
+    climatizacao = campo_lista("climatizacoes", verbose_name="climatização")
+    caixilharia = campo_lista("caixilharias")
+    piscina = campo_lista("piscinas")
+    garagem = campo_lista("garagens")
     ano_construcao = models.PositiveSmallIntegerField(
         "ano de construção", null=True, blank=True, validators=[MinValueValidator(1000), MaxValueValidator(2200)]
     )
     piso = models.CharField(max_length=20, blank=True)
+    # Elevadores: lista «Não, 1…10». O campo sim/não `elevador` é derivado (usado nas correspondências).
+    elevadores = campo_lista("quantidades")
     elevador = models.BooleanField(null=True, blank=True, help_text="Vazio = desconhecido.")
     lugares_estacionamento = models.PositiveSmallIntegerField(null=True, blank=True)
-    certificado_energetico = campo_lista("certificados_energeticos", verbose_name="certificado energético")
+    certificado_energetico = campo_lista("certificados_energeticos", verbose_name="classe energética")
     zonas_exteriores = campo_lista_multipla("zonas_exteriores")
     descricao = models.TextField("descrição", blank=True)
 
@@ -82,6 +114,11 @@ class Imovel(RegistoBase):
 
     def __str__(self):
         return self.referencia or f"Imóvel {self.pk}"
+
+    def save(self, *args, **kwargs):
+        if self.elevadores_id:
+            self.elevador = self.elevadores.nome.strip().lower() not in ("não", "nao", "0")
+        super().save(*args, **kwargs)
 
 
 class Proprietario(models.Model):

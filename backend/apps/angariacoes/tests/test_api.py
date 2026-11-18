@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+from decimal import Decimal
 
 import pytest
 from django.urls import reverse
@@ -329,3 +330,30 @@ def test_fotografia_do_imovel_na_lista_e_na_ficha(api, pessoas, imovel):
     lista = como(api, pessoas.cons).get(LISTA).json()["results"][0]
     assert lista["imovel_fotografia"] == {"imovel": imovel.pk, "versao": imovel.versao}
     assert como(api, pessoas.cons).get(detalhe(c["id"])).json()["imovel_fotografia"]["imovel"] == imovel.pk
+
+
+class TestAcompanhamentoD34:
+    def test_cores_do_tempo_restante(self, pessoas, imovel):
+        from apps.angariacoes.servicos import tempo_restante
+
+        a = Angariacao.objects.create(imovel=imovel, responsavel=pessoas.cons, data_inicio=HOJE, prazo_meses=12)
+        a.recalcular_datas()
+        a.save()
+        cor = lambda dias: tempo_restante(a, a.data_fim_vigente - timedelta(days=dias))["cor"]  # noqa: E731
+        assert [cor(10), cor(30), cor(31), cor(60), cor(61), cor(120), cor(121)] == [
+            "vermelho", "vermelho", "laranja", "laranja", "amarelo", "amarelo", "verde",
+        ]  # fmt: skip
+        assert tempo_restante(a, a.data_fim_vigente - timedelta(days=45))["dias"] == 45
+
+    def test_comissao_estimada_e_campos(self, api, pessoas, imovel):
+        imovel.preco = Decimal("200000")
+        imovel.save()
+        c = criar(
+            api, pessoas.cons, imovel, modalidade_remuneracao="percentagem", valor_remuneracao="5",
+            valor_acm="210000", prioridade=valor("prioridades", "Alta").pk,
+            comercializacao_prevista=valor("comercializacao_prevista", "Normal — 7 a 18 meses").pk,
+        )  # fmt: skip
+        assert c["valor_comissao_estimado"] == "10000.00" and c["valor_acm"] == "210000.00"
+        assert c["nomes"]["prioridade"] == "Alta"
+        r = api.patch(detalhe(c["id"]), {"valor_vendido": "190000", "versao": c["versao"]}, format="json")
+        assert r.json()["valor_comissao_estimado"] == "9500.00"
