@@ -50,6 +50,7 @@ describe('Procuras', () => {
     fireEvent.change(await screen.findByLabelText('Orçamento máximo (€)'), { target: { value: '250000' } })
     fireEvent.change(screen.getByLabelText('Tolerância (%)'), { target: { value: '20' } })
     expect(screen.getByText(/300\s000 €/)).toBeInTheDocument()
+    fireEvent.click(await screen.findByRole('button', { name: /^Tipologias/ }))
     await waitFor(() => expect(screen.getAllByRole('checkbox', { name: 'T3' }).length).toBe(1))
     fireEvent.click(screen.getByRole('checkbox', { name: 'T3' }))
     fireEvent.click(

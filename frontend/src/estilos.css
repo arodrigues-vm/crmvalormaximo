@@ -752,6 +752,74 @@ fieldset.campo {
   padding: 0;
   margin: 0;
 }
+.campo-multiplo {
+  position: relative;
+}
+.lista-multipla-botao {
+  font: inherit;
+  font-size: 15px;
+  text-align: left;
+  padding: 9px 32px 9px 11px;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  background: #fff
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%235b6676' stroke-width='1.6'/%3E%3C/svg%3E")
+    no-repeat right 11px center;
+  width: 100%;
+  min-height: 40px;
+  color: var(--texto);
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lista-multipla-botao:focus-visible,
+.lista-multipla-botao[aria-expanded='true'] {
+  border-color: var(--azul-marinho);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(11, 37, 69, 0.12);
+}
+.campo.com-erro .lista-multipla-botao {
+  border-color: #d92d20;
+}
+.lista-multipla-botao .vazio {
+  color: var(--texto-suave);
+}
+.lista-multipla-opcoes {
+  position: absolute;
+  z-index: 30;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  max-height: 280px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(11, 37, 69, 0.14);
+  padding: 4px;
+}
+.lista-multipla-opcoes label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+}
+.lista-multipla-opcoes label:hover {
+  background: var(--fundo);
+}
+.lista-multipla-opcoes input {
+  width: auto;
+}
+.lista-multipla-opcoes .vazio {
+  padding: 8px 10px;
+  margin: 0;
+  color: var(--texto-suave);
+}
 .opcoes-multiplas {
   display: flex;
   flex-wrap: wrap;

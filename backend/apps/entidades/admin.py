@@ -12,8 +12,8 @@ class TelefoneInline(admin.TabularInline):
 
 @admin.register(Entidade)
 class EntidadeAdmin(SimpleHistoryAdmin):
-    list_display = ["referencia", "nome_completo", "nif", "email", "responsavel", "ativa", "eliminado_em"]
-    list_filter = ["tipo_pessoa", "ativa", "papeis"]
+    list_display = ["referencia", "nome_completo", "nif", "email", "responsavel", "status", "eliminado_em"]
+    list_filter = ["tipo_pessoa", "status", "papeis"]
     search_fields = ["nome_completo", "nif", "email", "referencia"]
     readonly_fields = ["referencia", "nome_completo", "versao", "criado_em", "atualizado_em", "eliminado_em"]
     inlines = [TelefoneInline]

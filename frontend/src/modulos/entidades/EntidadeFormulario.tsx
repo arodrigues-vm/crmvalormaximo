@@ -8,8 +8,10 @@ import { CampoTelefones, type TelefoneEditavel } from '../../componentes/CampoTe
 import { CampoAreaTexto, CampoCaixa, CampoMultiplo, CampoSelecao, CampoTexto } from '../../componentes/campos'
 import { Dialogo } from '../../componentes/Dialogo'
 import { SeletorLocalizacao } from '../../componentes/SeletorLocalizacao'
+import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
 import { useGuardaSaida } from '../../componentes/useGuardaSaida'
-import { entidadesApi, MOTIVOS, type Candidato, type Entidade } from './api'
+import { procurarImoveis } from '../imoveis/api'
+import { entidadesApi, MOTIVOS, type Candidato, type Entidade, type RegistoLigado } from './api'
 import { CabecalhoFicha } from './EntidadeConsulta'
 
 interface Valores {
@@ -29,7 +31,21 @@ interface Valores {
   freguesia: number | null
   papeis: number[]
   origem: string
-  ativa: boolean
+  status: string
+  quem_recomendou: OpcaoPesquisa | null
+  imovel_contacto: OpcaoPesquisa | null
+  visitou_imovel_contacto: '' | 'sim' | 'nao'
+  motivo_nao_visitou: string
+  estado_civil: string
+  regime_casamento: string
+  nacionalidade: string
+  documento_identificacao: string
+  naturalidade_freguesia: string
+  naturalidade_concelho: string
+  empresa: string
+  cargo: string
+  observacoes_pessoais: string
+  zona_comercial: string
   observacoes: string
   consentimento_marketing: string
   consentimento_marketing_em: string
@@ -53,12 +69,31 @@ const VAZIO: Valores = {
   freguesia: null,
   papeis: [],
   origem: '',
-  ativa: true,
+  status: '',
+  quem_recomendou: null,
+  imovel_contacto: null,
+  visitou_imovel_contacto: '',
+  motivo_nao_visitou: '',
+  estado_civil: '',
+  regime_casamento: '',
+  nacionalidade: '',
+  documento_identificacao: '',
+  naturalidade_freguesia: '',
+  naturalidade_concelho: '',
+  empresa: '',
+  cargo: '',
+  observacoes_pessoais: '',
+  zona_comercial: '',
   observacoes: '',
   consentimento_marketing: 'desconhecido',
   consentimento_marketing_em: '',
   oposicao_marketing: false,
 }
+
+const t = (x: number | null) => (x ? String(x) : '')
+const n = (x: string) => (x ? Number(x) : null)
+const ligado = (d: RegistoLigado | null): OpcaoPesquisa | null =>
+  d ? { id: d.id, titulo: d.referencia ? `${d.referencia} · ${d.nome}` : d.nome } : null
 
 function deEntidade(e: Entidade): Valores {
   return {
@@ -84,7 +119,21 @@ function deEntidade(e: Entidade): Valores {
     freguesia: e.freguesia,
     papeis: e.papeis,
     origem: e.origem ? String(e.origem) : '',
-    ativa: e.ativa,
+    status: e.status ? String(e.status) : '',
+    quem_recomendou: ligado(e.quem_recomendou_dados),
+    imovel_contacto: ligado(e.imovel_contacto_dados),
+    visitou_imovel_contacto: e.visitou_imovel_contacto === null ? '' : e.visitou_imovel_contacto ? 'sim' : 'nao',
+    motivo_nao_visitou: e.motivo_nao_visitou,
+    estado_civil: t(e.estado_civil),
+    regime_casamento: t(e.regime_casamento),
+    nacionalidade: e.nacionalidade,
+    documento_identificacao: e.documento_identificacao,
+    naturalidade_freguesia: e.naturalidade_freguesia,
+    naturalidade_concelho: e.naturalidade_concelho,
+    empresa: e.empresa,
+    cargo: e.cargo,
+    observacoes_pessoais: e.observacoes_pessoais,
+    zona_comercial: t(e.zona_comercial),
     observacoes: e.observacoes,
     consentimento_marketing: e.consentimento_marketing,
     consentimento_marketing_em: e.consentimento_marketing_em ?? '',
@@ -98,17 +147,46 @@ function paraApi(v: Valores) {
     apelido: v.tipo_pessoa === 'coletiva' ? '' : v.apelido,
     data_nascimento: v.tipo_pessoa === 'coletiva' || !v.data_nascimento ? null : v.data_nascimento,
     consentimento_marketing_em: v.consentimento_marketing_em || null,
-    origem: v.origem ? Number(v.origem) : null,
+    origem: n(v.origem),
+    status: n(v.status),
+    estado_civil: n(v.estado_civil),
+    regime_casamento: n(v.regime_casamento),
+    zona_comercial: n(v.zona_comercial),
+    quem_recomendou: v.quem_recomendou?.id ?? null,
+    imovel_contacto: v.imovel_contacto?.id ?? null,
+    visitou_imovel_contacto: v.visitou_imovel_contacto === '' ? null : v.visitou_imovel_contacto === 'sim',
+    motivo_nao_visitou: v.visitou_imovel_contacto === 'sim' ? '' : v.motivo_nao_visitou,
     // Linhas de telefone deixadas em branco são ignoradas.
     telefones: v.telefones.filter((t) => t.numero.trim()),
   }
 }
 
 const BLOCOS: Record<string, string[]> = {
-  identificacao: ['tipo_pessoa', 'nome', 'apelido', 'pais_fiscal', 'nif', 'data_nascimento'],
+  identificacao: ['tipo_pessoa', 'nome', 'apelido', 'pais_fiscal', 'nif'],
   contactos: ['email', 'telefones'],
-  morada: ['rua', 'numero_policia', 'complemento', 'codigo_postal', 'localidade', 'freguesia'],
-  classificacao: ['papeis', 'origem', 'ativa', 'responsavel'],
+  morada: ['rua', 'numero_policia', 'complemento', 'codigo_postal', 'localidade', 'freguesia', 'zona_comercial'],
+  pessoais: [
+    'data_nascimento',
+    'estado_civil',
+    'regime_casamento',
+    'nacionalidade',
+    'documento_identificacao',
+    'naturalidade_freguesia',
+    'naturalidade_concelho',
+    'empresa',
+    'cargo',
+    'observacoes_pessoais',
+  ],
+  classificacao: [
+    'papeis',
+    'status',
+    'origem',
+    'quem_recomendou',
+    'imovel_contacto',
+    'visitou_imovel_contacto',
+    'motivo_nao_visitou',
+    'responsavel',
+  ],
   dados: ['consentimento_marketing', 'consentimento_marketing_em', 'oposicao_marketing'],
   observacoes: ['observacoes'],
 }
@@ -206,6 +284,16 @@ function Formulario({ entidade }: { entidade?: Entidade }) {
 
   const o = opcoes.data
   const singular = v.tipo_pessoa === 'singular'
+  const lista = (x?: { id: number; nome: string }[]) => (x ?? []).map((i) => ({ valor: i.id, nome: i.nome }))
+  const texto = (campo: keyof Valores, rotulo: string, extra: { largo?: boolean } = {}) => (
+    <CampoTexto
+      rotulo={rotulo}
+      largo={extra.largo}
+      value={v[campo] as string}
+      onChange={(e) => mudar(campo, e.target.value as never)}
+      erro={erro(campo)}
+    />
+  )
 
   return (
     <form className="ficha ficha-edicao" onSubmit={submeter} noValidate>
@@ -268,15 +356,6 @@ function Formulario({ entidade }: { entidade?: Entidade }) {
             erro={erro('pais_fiscal')}
             ajuda="Código ISO (PT, ES, FR…). O NIF só é validado para PT."
           />
-          {singular && (
-            <CampoTexto
-              rotulo="Data de nascimento"
-              type="date"
-              value={v.data_nascimento}
-              onChange={(e) => mudar('data_nascimento', e.target.value)}
-              erro={erro('data_nascimento')}
-            />
-          )}
         </div>
       </Bloco>
 
@@ -355,13 +434,63 @@ function Formulario({ entidade }: { entidade?: Entidade }) {
             atual={entidade?.freguesia === v.freguesia ? entidade?.localizacao : null}
             aoMudar={(f) => mudar('freguesia', f)}
           />
+          <CampoSelecao
+            rotulo="Zona"
+            value={v.zona_comercial}
+            vazio="—"
+            onChange={(e) => mudar('zona_comercial', e.target.value)}
+            opcoes={lista(o?.zonas_comerciais)}
+            erro={erro('zona_comercial')}
+          />
         </div>
       </Bloco>
+
+      {singular && (
+        <Bloco titulo="Dados pessoais" forcarAberto={temErros('pessoais')} abertoInicial={!entidade}>
+          <div className="grelha-campos">
+            <CampoTexto
+              rotulo="Data de nascimento"
+              type="date"
+              value={v.data_nascimento}
+              onChange={(e) => mudar('data_nascimento', e.target.value)}
+              erro={erro('data_nascimento')}
+            />
+            <CampoSelecao
+              rotulo="Estado civil"
+              value={v.estado_civil}
+              vazio="—"
+              onChange={(e) => mudar('estado_civil', e.target.value)}
+              opcoes={lista(o?.estados_civis)}
+              erro={erro('estado_civil')}
+            />
+            <CampoSelecao
+              rotulo="Regime de casamento"
+              value={v.regime_casamento}
+              vazio="—"
+              onChange={(e) => mudar('regime_casamento', e.target.value)}
+              opcoes={lista(o?.regimes_casamento)}
+              erro={erro('regime_casamento')}
+            />
+            {texto('nacionalidade', 'Nacionalidade')}
+            {texto('documento_identificacao', 'CC/Passaporte')}
+            {texto('naturalidade_freguesia', 'Freguesia de naturalidade')}
+            {texto('naturalidade_concelho', 'Concelho de naturalidade')}
+            {texto('empresa', 'Empresa')}
+            {texto('cargo', 'Cargo')}
+          </div>
+          <CampoAreaTexto
+            rotulo="Observações (dados pessoais)"
+            value={v.observacoes_pessoais}
+            onChange={(e) => mudar('observacoes_pessoais', e.target.value)}
+            erro={erro('observacoes_pessoais')}
+          />
+        </Bloco>
+      )}
 
       <Bloco titulo="Classificação" forcarAberto={temErros('classificacao')}>
         <div className="grelha-campos">
           <CampoMultiplo
-            rotulo="Papéis"
+            rotulo="Tipo de cliente"
             opcoes={o?.papeis ?? []}
             valores={v.papeis}
             aoMudar={(p) => mudar('papeis', p)}
@@ -376,7 +505,52 @@ function Formulario({ entidade }: { entidade?: Entidade }) {
             erro={erro('origem')}
             ajuda={o && o.origens.length === 0 ? 'Sem origens configuradas (Configurações).' : undefined}
           />
-          <CampoCaixa rotulo="Entidade ativa" checked={v.ativa} onChange={(e) => mudar('ativa', e.target.checked)} />
+          <CampoSelecao
+            rotulo="Status"
+            value={v.status}
+            vazio={entidade ? undefined : 'Por omissão: Ativo'}
+            onChange={(e) => mudar('status', e.target.value)}
+            opcoes={lista(o?.status)}
+            erro={erro('status')}
+          />
+          <SeletorPesquisavel
+            rotulo="Quem recomendou"
+            chave="entidades"
+            procurar={entidadesApi.procurar}
+            valor={v.quem_recomendou}
+            aoMudar={(x) => mudar('quem_recomendou', x)}
+            excluir={entidade ? [entidade.id] : []}
+            erro={erro('quem_recomendou')?.join(' ')}
+            placeholder="Escreva o nome, NIF ou referência"
+          />
+          <SeletorPesquisavel
+            rotulo="Imóvel de contacto"
+            chave="imoveis"
+            procurar={procurarImoveis}
+            valor={v.imovel_contacto}
+            aoMudar={(x) => mudar('imovel_contacto', x)}
+            erro={erro('imovel_contacto')?.join(' ')}
+            placeholder="Ex.: 10 T3 Maia"
+          />
+          <CampoSelecao
+            rotulo="Visitou o imóvel de contacto"
+            value={v.visitou_imovel_contacto}
+            vazio="—"
+            onChange={(e) => mudar('visitou_imovel_contacto', e.target.value as Valores['visitou_imovel_contacto'])}
+            opcoes={[
+              { valor: 'sim', nome: 'Sim' },
+              { valor: 'nao', nome: 'Não' },
+            ]}
+            erro={erro('visitou_imovel_contacto')}
+          />
+          {v.visitou_imovel_contacto === 'nao' && (
+            <CampoAreaTexto
+              rotulo="Porque não visitou"
+              value={v.motivo_nao_visitou}
+              onChange={(e) => mudar('motivo_nao_visitou', e.target.value)}
+              erro={erro('motivo_nao_visitou')}
+            />
+          )}
           {erro('responsavel') && <p className="campo-erro largo">{erro('responsavel')}</p>}
         </div>
       </Bloco>

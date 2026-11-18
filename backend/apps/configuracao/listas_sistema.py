@@ -35,6 +35,7 @@ CAT_ESTADO_PROCURA = [
 CATEGORIAS = {
     "operacoes": CAT_OPERACAO,
     "status_imovel": CAT_STATUS,
+    "status_entidade": CAT_STATUS,
     "regimes_cmi": CAT_REGIME,
     "estados_comercializacao": CAT_ESTADO_COMERCIALIZACAO,
     "estados_oportunidade": CAT_ESTADO_OPORTUNIDADE,
@@ -73,7 +74,25 @@ LISTAS = {
         ["Fotografias", "Documentos", "Outro"],
     ),
     # chave: (nome, módulo, descrição, valores iniciais)
-    "papeis_entidade": ("Papéis de entidade", "entidades", "Papéis comerciais de pessoas e empresas.", []),
+    "papeis_entidade": ("Tipos de cliente", "entidades", "Proprietário, comprador, arrendatário…", []),
+    "estados_civis": (
+        "Estados civis",
+        "entidades",
+        "",
+        ["Casado(a)", "Solteiro(a)", "Viúvo(a)", "Divorciado(a)", "União de facto"],
+    ),
+    "regimes_casamento": (
+        "Regimes de casamento",
+        "entidades",
+        "",
+        ["Comunhão de bens adquiridos", "Comunhão geral de bens", "Separação de bens"],
+    ),
+    "status_entidade": (
+        "Status da entidade",
+        "entidades",
+        "",
+        [("Ativo", "ativo"), ("Inativo", "inativo")],
+    ),
     "origens_contacto": ("Origens de contacto", "entidades", "Como o contacto chegou à agência.", []),
     "tipos_imovel": (
         "Tipos de imóvel",

@@ -33,8 +33,11 @@ ORDENACOES = {
 }
 CAMPOS_AUDITADOS = [
     "tipo_pessoa", "nome", "apelido", "pais_fiscal", "nif", "data_nascimento", "email", "rua", "numero_policia",
-    "complemento", "codigo_postal", "localidade", "freguesia_id", "origem_id", "responsavel_id", "ativa",
-    "observacoes", "consentimento_marketing", "consentimento_marketing_em", "oposicao_marketing",
+    "complemento", "codigo_postal", "localidade", "freguesia_id", "origem_id", "responsavel_id", "status_id",
+    "quem_recomendou_id", "imovel_contacto_id", "visitou_imovel_contacto", "motivo_nao_visitou", "observacoes",
+    "consentimento_marketing", "consentimento_marketing_em", "oposicao_marketing", "estado_civil_id",
+    "regime_casamento_id", "nacionalidade", "documento_identificacao", "naturalidade_freguesia",
+    "naturalidade_concelho", "empresa", "cargo", "observacoes_pessoais", "zona_comercial_id",
 ]  # fmt: skip
 
 
@@ -76,7 +79,10 @@ class EntidadeViewSet(
         return self.operacoes_extra.get(self.action) or OPERACAO_POR_ACAO.get(self.action, Operacao.CONSULTAR)
 
     def get_queryset(self):
-        qs = Entidade.objects.select_related("responsavel", "origem", "freguesia__concelho__distrito")
+        qs = Entidade.objects.select_related(
+            "responsavel", "origem", "status", "quem_recomendou", "freguesia__concelho__distrito",
+            "imovel_contacto__tipo", "imovel_contacto__tipologia", "estado_civil", "regime_casamento", "zona_comercial",
+        )  # fmt: skip
         qs = qs.prefetch_related(
             "papeis", Prefetch("telefones", queryset=TelefoneEntidade.objects.order_by("-principal", "ordem"))
         )
@@ -100,8 +106,8 @@ class EntidadeViewSet(
             qs = qs.filter(papeis__id=p["papel"])
         if p.get("tipo_pessoa"):
             qs = qs.filter(tipo_pessoa=p["tipo_pessoa"])
-        if p.get("ativa") in ("true", "false"):
-            qs = qs.filter(ativa=p["ativa"] == "true")
+        if p.get("status"):
+            qs = qs.filter(status_id=p["status"])
         if p.get("responsavel"):
             qs = qs.filter(responsavel_id=p["responsavel"])
         return qs.order_by(ORDENACOES.get(p.get("ordenar", "nome"), "nome_completo"), "id")
@@ -117,7 +123,7 @@ class EntidadeViewSet(
             OpenApiParameter("pesquisa", str),
             OpenApiParameter("papel", int),
             OpenApiParameter("tipo_pessoa", str),
-            OpenApiParameter("ativa", bool),
+            OpenApiParameter("status", int),
             OpenApiParameter("responsavel", int),
             OpenApiParameter("ordenar", str, enum=list(ORDENACOES)),
         ]
@@ -307,6 +313,10 @@ class EntidadeViewSet(
             {
                 "papeis": opcoes_lista("papeis_entidade"),
                 "origens": opcoes_lista("origens_contacto"),
+                "status": opcoes_lista("status_entidade"),
+                "estados_civis": opcoes_lista("estados_civis"),
+                "regimes_casamento": opcoes_lista("regimes_casamento"),
+                "zonas_comerciais": opcoes_lista("zonas_comerciais"),
                 "tipos_pessoa": [{"valor": v, "nome": n} for v, n in Entidade.TipoPessoa.choices],
                 "consentimentos": [{"valor": v, "nome": n} for v, n in Entidade.Consentimento.choices],
                 "tipos_telefone": [{"valor": v, "nome": n} for v, n in TelefoneEntidade.Tipo.choices],
@@ -349,7 +359,13 @@ class EntidadeViewSet(
                     "rotulo": r.tipo.nome if direta else r.tipo.nome_inverso,
                     "acessivel": acessivel,
                     # Respeitar as permissões das duas pontas: sem acesso, não revelar dados.
-                    "entidade": {"id": outra.pk, "referencia": outra.referencia, "nome_completo": outra.nome_completo}
+                    "entidade": {
+                        "id": outra.pk,
+                        "referencia": outra.referencia,
+                        "nome_completo": outra.nome_completo,
+                        "tipo_pessoa": outra.tipo_pessoa,
+                        "data_nascimento": outra.data_nascimento,
+                    }
                     if acessivel
                     else None,
                     "observacoes": r.observacoes if acessivel else "",
@@ -384,9 +400,28 @@ class EntidadeViewSet(
             )
         if existe.exists():
             raise serializers.ValidationError({"entidade": "Esta relação já existe."})
+        nascimento = d.get("data_nascimento")
+        if nascimento and nascimento != outra.data_nascimento:
+            if outra.tipo_pessoa != Entidade.TipoPessoa.SINGULAR:
+                raise serializers.ValidationError({"data_nascimento": "Não aplicável a pessoas coletivas."})
+            if not pode_no_registo(request.user, MODULO, Operacao.EDITAR, outra, campo_partilhas="partilhada_com"):
+                raise serializers.ValidationError(
+                    {"data_nascimento": "Não tem permissão para alterar a data de nascimento desta entidade."}
+                )
         r = RelacaoEntidade.objects.create(
             origem=origem, destino=destino, tipo=tipo, observacoes=d.get("observacoes", ""), criado_por=request.user
         )
+        if nascimento and nascimento != outra.data_nascimento:
+            antes = outra.data_nascimento
+            outra.data_nascimento = nascimento
+            outra.save()
+            registar(
+                "entidade.alterada",
+                modulo=MODULO,
+                objeto=outra,
+                request=request,
+                dados={"data_nascimento": [_texto(antes), _texto(nascimento)]},
+            )
         registar(
             "entidade.relacao_criada",
             modulo=MODULO,

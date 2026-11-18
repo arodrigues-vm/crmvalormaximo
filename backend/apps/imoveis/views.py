@@ -1,3 +1,4 @@
+import re
 import uuid
 from decimal import Decimal, InvalidOperation
 
@@ -46,6 +47,22 @@ def entidades_visiveis(utilizador) -> set[int]:
     return set(qs.values_list("pk", flat=True))
 
 
+def condicao_pesquisa(palavra: str) -> Q:
+    return (
+        Q(referencia__icontains=palavra)
+        | Q(tipo__nome__unaccent__icontains=palavra)
+        | Q(tipologia__nome__unaccent__icontains=palavra)
+        | Q(rua__unaccent__icontains=palavra)
+        | Q(localidade__unaccent__icontains=palavra)
+        | Q(localizacao_descritiva__unaccent__icontains=palavra)
+        | Q(zona_comercial__nome__unaccent__icontains=palavra)
+        | Q(freguesia__nome__unaccent__icontains=palavra)
+        | Q(freguesia__concelho__nome__unaccent__icontains=palavra)
+        | Q(descricao__unaccent__icontains=palavra)
+        | Q(proprietarios__entidade__nome_completo__unaccent__icontains=palavra)
+    )
+
+
 class ImovelViewSet(RegistoViewSet):
     operacoes_extra = {
         **RegistoViewSet.operacoes_extra,
@@ -85,15 +102,12 @@ class ImovelViewSet(RegistoViewSet):
         p = self.request.query_params
         termo = (p.get("pesquisa") or "").strip()
         if termo:
-            qs = qs.filter(
-                Q(referencia__iexact=termo)
-                | Q(rua__unaccent__icontains=termo)
-                | Q(localidade__unaccent__icontains=termo)
-                | Q(localizacao_descritiva__unaccent__icontains=termo)
-                | Q(freguesia__nome__unaccent__icontains=termo)
-                | Q(freguesia__concelho__nome__unaccent__icontains=termo)
-                | Q(proprietarios__entidade__nome_completo__unaccent__icontains=termo)
-            ).distinct()
+            # Pesquisa flexível (D-34): cada palavra tem de aparecer em algum dos campos,
+            # por qualquer ordem. Ex.: «10 T3 Maia» encontra IMV-000010, T3, na Maia.
+            for palavra in re.split(r"[\s,;]+", termo):
+                if palavra:
+                    qs = qs.filter(condicao_pesquisa(palavra))
+            qs = qs.distinct()
         for parametro, campo in (
             ("tipo", "tipo_id"),
             ("tipologia", "tipologia_id"),

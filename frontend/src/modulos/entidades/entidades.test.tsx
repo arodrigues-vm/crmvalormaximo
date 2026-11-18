@@ -9,6 +9,13 @@ const OPCOES = {
     { id: 2, nome: 'Comprador' },
   ],
   origens: [],
+  status: [
+    { id: 30, nome: 'Ativo', categoria: 'ativo' },
+    { id: 31, nome: 'Inativo', categoria: 'inativo' },
+  ],
+  estados_civis: [{ id: 40, nome: 'Casado(a)' }],
+  regimes_casamento: [{ id: 41, nome: 'Separação de bens' }],
+  zonas_comerciais: [],
   tipos_pessoa: [
     { valor: 'singular', nome: 'Pessoa singular' },
     { valor: 'coletiva', nome: 'Pessoa coletiva' },
@@ -59,7 +66,26 @@ const ENTIDADE = {
   origem_nome: null,
   responsavel: 1,
   responsavel_nome: 'Consultor Demo',
-  ativa: true,
+  status: 30,
+  status_nome: 'Ativo',
+  status_categoria: 'ativo',
+  quem_recomendou: 9,
+  quem_recomendou_dados: { id: 9, referencia: 'ENT-000009', nome: 'Rui Recomendador', acessivel: true },
+  imovel_contacto: null,
+  imovel_contacto_dados: null,
+  visitou_imovel_contacto: false,
+  motivo_nao_visitou: 'Já estava reservado',
+  estado_civil: 40,
+  regime_casamento: 41,
+  nacionalidade: 'Portuguesa',
+  documento_identificacao: '',
+  naturalidade_freguesia: '',
+  naturalidade_concelho: '',
+  empresa: '',
+  cargo: '',
+  observacoes_pessoais: '',
+  zona_comercial: null,
+  nomes: { estado_civil: 'Casado(a)', regime_casamento: 'Separação de bens', zona_comercial: null },
   observacoes: '',
   consentimento_marketing: 'desconhecido',
   consentimento_marketing_em: null,
@@ -99,7 +125,8 @@ describe('Entidades', () => {
               telefone_principal: '+351912345678',
               papeis_nomes: ['Comprador'],
               responsavel_nome: 'Consultor Demo',
-              ativa: true,
+              status_nome: 'Ativo',
+              status_categoria: 'ativo',
             },
           ],
         }),
@@ -194,6 +221,19 @@ describe('Entidades', () => {
     expect((patch?.corpo as { versao: number }).versao).toBe(1)
   })
 
+  it('ficha mostra dados pessoais, status e quem recomendou', async () => {
+    simularApi({
+      ...base,
+      'GET /api/entidades/7/': () => json(ENTIDADE),
+      'GET /api/entidades/7/relacoes/': () => json([]),
+    })
+    desenhar('/entidades/7')
+    expect(await screen.findByRole('link', { name: /Rui Recomendador/ })).toHaveAttribute('href', '/entidades/9')
+    expect(screen.getByText('Separação de bens')).toBeInTheDocument()
+    expect(screen.getByText('Já estava reservado')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /Ativo/ })).toBeInTheDocument()
+  })
+
   it('relações: mostra sem revelar entidades sem acesso e adiciona no sentido inverso', async () => {
     const pedidos = simularApi({
       ...base,
@@ -212,20 +252,34 @@ describe('Entidades', () => {
             tipo: 4,
             rotulo: 'Tem como gerente',
             acessivel: true,
-            entidade: { id: 9, referencia: 'ENT-000009', nome_completo: 'Empresa Ensaio, Lda.' },
+            entidade: {
+              id: 9,
+              referencia: 'ENT-000009',
+              nome_completo: 'Empresa Ensaio, Lda.',
+              tipo_pessoa: 'singular',
+              data_nascimento: '1980-03-15',
+            },
             observacoes: '',
           },
         ]),
     })
     desenhar('/entidades/7')
     expect(await screen.findByText('Entidade a que não tem acesso')).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: '+ Adicionar relação' }))
+    fireEvent.click(screen.getByRole('button', { name: '+ Adicionar entidade relacionada' }))
     fireEvent.change(screen.getByLabelText('Esta entidade é…'), { target: { value: '4:inverso' } })
     fireEvent.change(screen.getByRole('combobox', { name: 'Entidade relacionada' }), { target: { value: 'empresa' } })
     fireEvent.mouseDown(await screen.findByRole('option', { name: /Empresa Ensaio/ }))
+    fireEvent.change(screen.getByLabelText('Data de aniversário'), { target: { value: '1980-03-15' } })
     fireEvent.click(screen.getByRole('button', { name: 'Adicionar' }))
     expect(await screen.findByRole('link', { name: /Empresa Ensaio/ })).toBeInTheDocument()
+    expect(screen.getByText('Aniversário: 15 de março')).toBeInTheDocument()
     const post = pedidos.find((p) => p.metodo === 'POST' && p.url.pathname === '/api/entidades/7/relacoes/')
-    expect(post?.corpo).toEqual({ tipo: 4, sentido: 'inverso', entidade: 9, observacoes: '' })
+    expect(post?.corpo).toEqual({
+      tipo: 4,
+      sentido: 'inverso',
+      entidade: 9,
+      observacoes: '',
+      data_nascimento: '1980-03-15',
+    })
   })
 })

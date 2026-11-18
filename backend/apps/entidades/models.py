@@ -26,6 +26,16 @@ class Entidade(RegistoBase):
     pais_fiscal = models.CharField("país fiscal", max_length=2, default="PT")
     nif = models.CharField("NIF/NIPC", max_length=20, blank=True, db_index=True)
     data_nascimento = models.DateField(null=True, blank=True)
+    # Dados pessoais (D-34)
+    estado_civil = campo_lista("estados_civis", verbose_name="estado civil")
+    regime_casamento = campo_lista("regimes_casamento", verbose_name="regime de casamento")
+    nacionalidade = models.CharField(max_length=60, blank=True)
+    documento_identificacao = models.CharField("CC/Passaporte", max_length=30, blank=True)
+    naturalidade_freguesia = models.CharField("freguesia de naturalidade", max_length=100, blank=True)
+    naturalidade_concelho = models.CharField("concelho de naturalidade", max_length=100, blank=True)
+    empresa = models.CharField(max_length=150, blank=True)
+    cargo = models.CharField(max_length=100, blank=True)
+    observacoes_pessoais = models.TextField("observações (dados pessoais)", blank=True)
 
     email = models.EmailField(blank=True, db_index=True)
 
@@ -35,15 +45,27 @@ class Entidade(RegistoBase):
     complemento = models.CharField(max_length=100, blank=True, help_text="Andar, fração, lote…")
     codigo_postal = models.CharField(max_length=8, blank=True)
     localidade = models.CharField(max_length=100, blank=True)
+    zona_comercial = campo_lista("zonas_comerciais", verbose_name="zona")
     freguesia = models.ForeignKey(
         "localizacao.Freguesia", null=True, blank=True, on_delete=models.PROTECT, related_name="+"
     )
 
-    papeis = campo_lista_multipla("papeis_entidade")
-    origem = campo_lista("origens_contacto")
+    # «Tipo de cliente» (antes «Papéis»): Proprietário, Comprador… (D-34).
+    papeis = campo_lista_multipla("papeis_entidade", verbose_name="tipo de cliente")
+    origem = campo_lista("origens_contacto", verbose_name="origem do contacto")
+    quem_recomendou = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.PROTECT, related_name="+", verbose_name="quem recomendou"
+    )
+    # Imóvel pelo qual o contacto chegou (angariado ou não) e se o visitou.
+    imovel_contacto = models.ForeignKey(
+        "imoveis.Imovel", null=True, blank=True, on_delete=models.PROTECT, related_name="+",
+        verbose_name="imóvel de contacto",
+    )  # fmt: skip
+    visitou_imovel_contacto = models.BooleanField("visitou o imóvel de contacto", null=True, blank=True)
+    motivo_nao_visitou = models.TextField("porque não visitou", blank=True)
     responsavel = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+")
     partilhada_com = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="+")
-    ativa = models.BooleanField(default=True)
+    status = campo_lista("status_entidade")
     observacoes = models.TextField(blank=True)
 
     # Proteção de dados (RGPD): importação ou criação não implica consentimento.

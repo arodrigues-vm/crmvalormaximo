@@ -356,3 +356,63 @@ class TestRelacoes:
         self._rel(api, pessoas.cons, a["id"], tipo=tipos["Familiar"].id, entidade=b["id"])
         with pytest.raises(ProtectedError):
             Entidade.objects.get(pk=a["id"]).delete()
+
+
+class TestAlteracoes17Nov:
+    """D-34: Status como lista, quem recomendou, imóvel de contacto, aniversário nas relações."""
+
+    def test_status_por_omissao_ativo_e_filtro(self, api, pessoas):
+        e = criar(api, pessoas.cons)
+        assert e["status_nome"] == "Ativo" and e["status_categoria"] == "ativo"
+        inativo = ValorLista.objects.get(lista__chave="status_entidade", nome="Inativo")
+        r = api.patch(detalhe(e["id"]), {"status": inativo.id, "versao": e["versao"]}, format="json")
+        assert r.status_code == 200 and r.json()["status_nome"] == "Inativo"
+        assert api.get(LISTA, {"status": inativo.id}).json()["count"] == 1
+        ativo = ValorLista.objects.get(lista__chave="status_entidade", nome="Ativo")
+        assert api.get(LISTA, {"status": ativo.id}).json()["count"] == 0
+
+    def test_lista_tipo_de_cliente(self):
+        from apps.configuracao.models import Lista
+
+        assert Lista.objects.get(chave="papeis_entidade").nome == "Tipos de cliente"
+
+    def test_quem_recomendou_e_imovel_de_contacto(self, api, pessoas):
+        from apps.imoveis.models import Imovel
+
+        amigo = criar(api, pessoas.cons, nome="Amigo", nif="", email="amigo@exemplo.pt", telefones=[])
+        i = Imovel.objects.create(responsavel=pessoas.cons, localidade="Maia")
+        e = criar(
+            api, pessoas.cons, quem_recomendou=amigo["id"], imovel_contacto=i.id,
+            visitou_imovel_contacto=False, motivo_nao_visitou="Já estava reservado",
+        )  # fmt: skip
+        assert e["quem_recomendou_dados"] == {"id": amigo["id"], "referencia": amigo["referencia"],
+                                              "nome": amigo["nome_completo"], "acessivel": True}  # fmt: skip
+        assert e["imovel_contacto_dados"]["referencia"] == i.referencia
+        assert e["motivo_nao_visitou"] == "Já estava reservado"
+        r = api.patch(detalhe(e["id"]), {"visitou_imovel_contacto": True, "versao": e["versao"]}, format="json")
+        assert r.json()["motivo_nao_visitou"] == ""  # se visitou, não há motivo
+
+    def test_nao_liga_registos_sem_acesso(self, api, pessoas):
+        from apps.imoveis.models import Imovel
+
+        alheia = criar(api, pessoas.cons_sul, nome="Alheia", nif="", email="a@exemplo.pt", telefones=[])
+        i = Imovel.objects.create(responsavel=pessoas.cons_sul)
+        r = como(api, pessoas.cons).post(LISTA, dados(quem_recomendou=alheia["id"]), format="json")
+        assert r.status_code == 400 and "quem_recomendou" in str(r.json())
+        r = como(api, pessoas.cons).post(LISTA, dados(imovel_contacto=i.id), format="json")
+        assert r.status_code == 400 and "imovel_contacto" in str(r.json())
+
+    def test_aniversario_ao_relacionar(self, api, pessoas):
+        from apps.entidades.models import TipoRelacao
+
+        a = criar(api, pessoas.cons)
+        b = criar(api, pessoas.cons, nome="Maria", nif="", email="", telefones=[])
+        conjuge = TipoRelacao.objects.get(nome="Cônjuge")
+        r = como(api, pessoas.cons).post(
+            reverse("entidade-relacoes", args=[a["id"]]),
+            {"tipo": conjuge.id, "entidade": b["id"], "data_nascimento": "1980-03-15"},
+            format="json",
+        )
+        assert r.status_code == 201, r.content
+        assert r.json()[0]["entidade"]["data_nascimento"] == "1980-03-15"
+        assert Entidade.objects.get(pk=b["id"]).data_nascimento.isoformat() == "1980-03-15"

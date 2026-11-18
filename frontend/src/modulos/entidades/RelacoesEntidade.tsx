@@ -7,6 +7,12 @@ import { CampoTexto } from '../../componentes/campos'
 import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
 import { entidadesApi, type Opcoes } from './api'
 
+/** «15 de março» — o aniversário não precisa do ano. */
+function aniversarioPt(data: string) {
+  const [, mes, dia] = data.split('-').map(Number)
+  return new Date(2000, mes - 1, dia).toLocaleDateString('pt-PT', { day: 'numeric', month: 'long' })
+}
+
 interface Props {
   entidadeId: number
   podeEditar: boolean
@@ -25,6 +31,15 @@ export function RelacoesEntidade({ entidadeId, podeEditar, tipos }: Props) {
   const [tipoSentido, setTipoSentido] = useState('')
   const [outra, setOutra] = useState<OpcaoPesquisa | null>(null)
   const [observacoes, setObservacoes] = useState('')
+  // Data de aniversário da entidade relacionada: pré-preenchida com a que já consta da ficha dela.
+  const [aniversario, setAniversario] = useState<string | null>(null)
+  const ficha = useQuery({
+    queryKey: ['entidades', String(outra?.id)],
+    queryFn: () => entidadesApi.obter(outra!.id),
+    enabled: !!outra,
+  })
+  const aniversarioMostrado = aniversario ?? ficha.data?.data_nascimento ?? ''
+  const singular = !ficha.data || ficha.data.tipo_pessoa === 'singular'
   const [erro, setErro] = useState<string | null>(null)
 
   // Cada tipo assimétrico dá duas opções: «Gerente de» (esta entidade é a origem) e «Tem como gerente».
@@ -40,7 +55,13 @@ export function RelacoesEntidade({ entidadeId, podeEditar, tipos }: Props) {
   const criar = useMutation({
     mutationFn: () => {
       const [tipo, sentido] = tipoSentido.split(':')
-      return entidadesApi.criarRelacao(entidadeId, { tipo: Number(tipo), sentido, entidade: outra!.id, observacoes })
+      return entidadesApi.criarRelacao(entidadeId, {
+        tipo: Number(tipo),
+        sentido,
+        entidade: outra!.id,
+        observacoes,
+        data_nascimento: singular && aniversarioMostrado ? aniversarioMostrado : null,
+      })
     },
     onSuccess: (lista) => {
       qc.setQueryData(chave, lista)
@@ -48,6 +69,7 @@ export function RelacoesEntidade({ entidadeId, podeEditar, tipos }: Props) {
       setTipoSentido('')
       setOutra(null)
       setObservacoes('')
+      setAniversario(null)
       setErro(null)
     },
     onError: (e) => {
@@ -74,7 +96,7 @@ export function RelacoesEntidade({ entidadeId, podeEditar, tipos }: Props) {
 
   return (
     <div className="relacoes">
-      {relacoes.length === 0 && !aAdicionar && <p className="ajuda">Sem relações registadas.</p>}
+      {relacoes.length === 0 && !aAdicionar && <p className="ajuda">Sem entidades relacionadas.</p>}
       {relacoes.length > 0 && (
         <ul className="lista-relacoes">
           {relacoes.map((r) => (
@@ -86,6 +108,9 @@ export function RelacoesEntidade({ entidadeId, podeEditar, tipos }: Props) {
                 </Link>
               ) : (
                 <span className="vazio">Entidade a que não tem acesso</span>
+              )}
+              {r.entidade?.data_nascimento && (
+                <small className="ajuda">Aniversário: {aniversarioPt(r.entidade.data_nascimento)}</small>
               )}
               {r.observacoes && <small className="ajuda">{r.observacoes}</small>}
               {podeEditar && (
@@ -108,7 +133,7 @@ export function RelacoesEntidade({ entidadeId, podeEditar, tipos }: Props) {
 
       {podeEditar && !aAdicionar && (
         <button type="button" className="botao-secundario" onClick={() => setAAdicionar(true)}>
-          + Adicionar relação
+          + Adicionar entidade relacionada
         </button>
       )}
 
@@ -130,9 +155,21 @@ export function RelacoesEntidade({ entidadeId, podeEditar, tipos }: Props) {
             chave="entidades"
             procurar={entidadesApi.procurar}
             valor={outra}
-            aoMudar={setOutra}
+            aoMudar={(x) => {
+              setOutra(x)
+              setAniversario(null)
+            }}
             excluir={[entidadeId]}
           />
+          {singular && (
+            <CampoTexto
+              rotulo="Data de aniversário"
+              type="date"
+              value={aniversarioMostrado}
+              onChange={(e) => setAniversario(e.target.value)}
+              ajuda="Fica guardada como data de nascimento na ficha da entidade relacionada."
+            />
+          )}
           <CampoTexto rotulo="Observações" value={observacoes} onChange={(e) => setObservacoes(e.target.value)} />
           {erro && (
             <p className="erro largo" role="alert">

@@ -8,7 +8,7 @@ import { formatarTelefone } from '../../componentes/formatar'
 import { Bloco } from '../../componentes/Bloco'
 import { Dado } from '../../componentes/campos'
 import { Dialogo } from '../../componentes/Dialogo'
-import { entidadesApi, NOMES_CAMPOS, type Entidade } from './api'
+import { entidadesApi, NOMES_CAMPOS, type Entidade, type RegistoLigado } from './api'
 import { ImoveisDaEntidade } from './ImoveisDaEntidade'
 import { NegociosDaEntidade } from './NegociosDaEntidade'
 import { useSessao } from '../../app/sessao'
@@ -25,6 +25,16 @@ const CONSENT: Record<string, string> = {
   recusado: 'Recusado',
 }
 
+function Ligado({ d, caminho }: { d: RegistoLigado | null; caminho: string }) {
+  if (!d) return null
+  if (!d.acessivel) return <span className="vazio">{d.nome}</span>
+  return (
+    <Link to={`${caminho}/${d.id}`}>
+      {d.referencia} · {d.nome}
+    </Link>
+  )
+}
+
 export function CabecalhoFicha({ e, acoes }: { e: Entidade; acoes?: React.ReactNode }) {
   return (
     <div className="cabecalho-ficha">
@@ -34,9 +44,11 @@ export function CabecalhoFicha({ e, acoes }: { e: Entidade; acoes?: React.ReactN
         </p>
         <h2 className="ficha-titulo">
           {e.nome_completo}
-          <span className={`etiqueta ${e.ativa ? 'etiqueta-sucesso' : 'etiqueta-neutra'}`}>
-            {e.ativa ? 'Ativa' : 'Inativa'}
-          </span>
+          {e.status_nome && (
+            <span className={`etiqueta ${e.status_categoria === 'ativo' ? 'etiqueta-sucesso' : 'etiqueta-neutra'}`}>
+              {e.status_nome}
+            </span>
+          )}
         </h2>
       </div>
       <div className="ficha-acoes">{acoes}</div>
@@ -98,7 +110,6 @@ export function EntidadeConsulta() {
           <Dado rotulo={e.tipo_pessoa === 'singular' ? 'Nome' : 'Denominação'}>{e.nome}</Dado>
           {e.tipo_pessoa === 'singular' && <Dado rotulo="Apelido">{e.apelido}</Dado>}
           <Dado rotulo="NIF/NIPC">{e.nif && `${e.nif}${e.pais_fiscal !== 'PT' ? ` (${e.pais_fiscal})` : ''}`}</Dado>
-          {e.tipo_pessoa === 'singular' && <Dado rotulo="Data de nascimento">{dataPt(e.data_nascimento)}</Dado>}
         </dl>
       </Bloco>
 
@@ -137,16 +148,51 @@ export function EntidadeConsulta() {
           <Dado rotulo="Morada" largo>
             {morada.length > 0 && morada.map((l) => <div key={l}>{l}</div>)}
           </Dado>
+          <Dado rotulo="Zona">{e.nomes.zona_comercial}</Dado>
           <Dado rotulo="Localização administrativa" largo>
             {e.localizacao && `${e.localizacao.freguesia}, ${e.localizacao.concelho}, ${e.localizacao.distrito}`}
           </Dado>
         </dl>
       </Bloco>
 
+      {e.tipo_pessoa === 'singular' && (
+        <Bloco titulo="Dados pessoais">
+          <dl className="grelha-dados">
+            <Dado rotulo="Data de nascimento">{dataPt(e.data_nascimento)}</Dado>
+            <Dado rotulo="Estado civil">{e.nomes.estado_civil}</Dado>
+            <Dado rotulo="Regime de casamento">{e.nomes.regime_casamento}</Dado>
+            <Dado rotulo="Nacionalidade">{e.nacionalidade}</Dado>
+            <Dado rotulo="CC/Passaporte">{e.documento_identificacao}</Dado>
+            <Dado rotulo="Freguesia de naturalidade">{e.naturalidade_freguesia}</Dado>
+            <Dado rotulo="Concelho de naturalidade">{e.naturalidade_concelho}</Dado>
+            <Dado rotulo="Empresa">{e.empresa}</Dado>
+            <Dado rotulo="Cargo">{e.cargo}</Dado>
+            <Dado rotulo="Observações" largo>
+              {e.observacoes_pessoais && <span className="texto-livre">{e.observacoes_pessoais}</span>}
+            </Dado>
+          </dl>
+        </Bloco>
+      )}
+
       <Bloco titulo="Classificação">
         <dl className="grelha-dados">
-          <Dado rotulo="Papéis">{e.papeis_nomes.join(', ')}</Dado>
-          <Dado rotulo="Origem">{e.origem_nome}</Dado>
+          <Dado rotulo="Tipo de cliente">{e.papeis_nomes.join(', ')}</Dado>
+          <Dado rotulo="Status">{e.status_nome}</Dado>
+          <Dado rotulo="Origem do contacto">{e.origem_nome}</Dado>
+          <Dado rotulo="Quem recomendou">
+            <Ligado d={e.quem_recomendou_dados} caminho="/entidades" />
+          </Dado>
+          <Dado rotulo="Imóvel de contacto">
+            <Ligado d={e.imovel_contacto_dados} caminho="/imoveis" />
+          </Dado>
+          <Dado rotulo="Visitou o imóvel de contacto">
+            {e.visitou_imovel_contacto === null ? null : e.visitou_imovel_contacto ? 'Sim' : 'Não'}
+          </Dado>
+          {e.visitou_imovel_contacto === false && (
+            <Dado rotulo="Porque não visitou" largo>
+              {e.motivo_nao_visitou && <span className="texto-livre">{e.motivo_nao_visitou}</span>}
+            </Dado>
+          )}
           <Dado rotulo="Responsável">{e.responsavel_nome}</Dado>
         </dl>
       </Bloco>
@@ -161,7 +207,7 @@ export function EntidadeConsulta() {
         </Bloco>
       )}
 
-      <Bloco titulo="Relações">
+      <Bloco titulo="Entidades relacionadas">
         <RelacoesEntidade entidadeId={e.id} podeEditar={e.acoes.editar} tipos={opcoes.data?.tipos_relacao ?? []} />
       </Bloco>
 

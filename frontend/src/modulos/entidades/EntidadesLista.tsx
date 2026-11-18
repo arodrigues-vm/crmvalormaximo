@@ -52,11 +52,11 @@ export function EntidadesLista() {
           onChange={(e) => setTermo(e.target.value)}
         />
         <select
-          aria-label="Papel"
+          aria-label="Tipo de cliente"
           value={params.get('papel') ?? ''}
           onChange={(e) => mudar({ papel: e.target.value, page: '' })}
         >
-          <option value="">Todos os papéis</option>
+          <option value="">Todos os tipos de cliente</option>
           {opcoes.data?.papeis.map((p) => (
             <option key={p.id} value={p.id}>
               {p.nome}
@@ -76,13 +76,16 @@ export function EntidadesLista() {
           ))}
         </select>
         <select
-          aria-label="Estado"
-          value={params.get('ativa') ?? ''}
-          onChange={(e) => mudar({ ativa: e.target.value, page: '' })}
+          aria-label="Status"
+          value={params.get('status') ?? ''}
+          onChange={(e) => mudar({ status: e.target.value, page: '' })}
         >
-          <option value="">Ativas e inativas</option>
-          <option value="true">Ativas</option>
-          <option value="false">Inativas</option>
+          <option value="">Todos os status</option>
+          {opcoes.data?.status.map((x) => (
+            <option key={x.id} value={x.id}>
+              {x.nome}
+            </option>
+          ))}
         </select>
         <select
           aria-label="Ordenar"
@@ -115,13 +118,17 @@ export function EntidadesLista() {
               <th>Nome</th>
               <th>NIF</th>
               <th>Contacto</th>
-              <th>Papéis</th>
+              <th>Tipo de cliente</th>
               <th>Responsável</th>
             </tr>
           </thead>
           <tbody>
             {lista.data.results.map((e) => (
-              <tr key={e.id} onClick={() => navegar(`/entidades/${e.id}`)} className={e.ativa ? '' : 'inativa'}>
+              <tr
+                key={e.id}
+                onClick={() => navegar(`/entidades/${e.id}`)}
+                className={e.status_categoria === 'inativo' ? 'inativa' : ''}
+              >
                 <td data-rotulo="Referência">
                   <Link to={`/entidades/${e.id}`} onClick={(ev) => ev.stopPropagation()}>
                     {e.referencia}
@@ -129,13 +136,15 @@ export function EntidadesLista() {
                 </td>
                 <td data-rotulo="Nome" className="celula-principal">
                   {e.nome_completo}
-                  {!e.ativa && <span className="etiqueta etiqueta-neutra">Inativa</span>}
+                  {e.status_nome && e.status_categoria !== 'ativo' && (
+                    <span className="etiqueta etiqueta-neutra">{e.status_nome}</span>
+                  )}
                 </td>
                 <td data-rotulo="NIF">{e.nif || '—'}</td>
                 <td data-rotulo="Contacto">
                   {e.telefone_principal ? formatarTelefone(e.telefone_principal) : e.email || '—'}
                 </td>
-                <td data-rotulo="Papéis">{e.papeis_nomes.join(', ') || '—'}</td>
+                <td data-rotulo="Tipo de cliente">{e.papeis_nomes.join(', ') || '—'}</td>
                 <td data-rotulo="Responsável">{e.responsavel_nome}</td>
               </tr>
             ))}
