@@ -35,6 +35,9 @@ Não inventar regras de negócio, fiscais ou prazos legais. Em ambiguidade, apre
 - No fim de cada tarefa, atualizar `documentacao/CONTINUIDADE.md` e, se aplicável, a matriz de aceitação.
 - Quando uma funcionalidade visível ao utilizador fica pronta, escrever/atualizar o capítulo respetivo do
   manual em `documentacao/manual/` (linguagem simples, passos numerados, capturas com dados fictícios).
+- **Campos de escolha (D-34):** sempre **listas suspensas** (também as de escolha múltipla, com o componente
+  `CampoMultiplo`), e as opções vêm **sempre de listas configuráveis** (`campo_lista`/`ValorLista`), nunca
+  fixas no código — em todos os módulos, existentes e futuros.
 - Identidade visual: usar apenas o logótipo aprovado (`documentacao/marca/`); nunca o redesenhar.
 
 ## Comandos

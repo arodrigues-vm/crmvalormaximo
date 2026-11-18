@@ -4,8 +4,8 @@ Esta parte destina-se ao **Administrador**.
 
 ## A.1 Listas de valores
 
-Todas as listas suspensas da aplicação (tipos de imóvel, tipologias, estados de comercialização, papéis de
-entidade, origens de contacto, zonas comerciais, …) editam-se em **Configurações → Listas de valores**, sem
+Todas as listas suspensas da aplicação (tipos de imóvel, tipologias, estados de comercialização, tipos de
+cliente, status, estados civis, Sim/Não/Não sabe, entidades bancárias, momentos de pagamento, origens de contacto, zonas comerciais, …) editam-se em **Configurações → Listas de valores**, sem
 qualquer programação.
 
 ![Listas de valores](imagens/20-configuracoes-listas.png)

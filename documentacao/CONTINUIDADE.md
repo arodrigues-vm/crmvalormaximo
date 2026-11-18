@@ -33,25 +33,4 @@ Estes estados não são equivalentes.
 | F2-03 Angariações/CMI | Implementado, testado | D-27. Contrato (imóvel, n.º, operação, regime, assinatura, início original, prazo, fim calculado, fim em vigor), partes com fotografia própria (pré-preenchidas com os proprietários), remuneração por modalidade/operação, IVA, condições de pagamento; dados contratuais bloqueados após assinatura; correção material (aprovar, motivo, evidência, registo); renovações como ciclos autónomos; impedimento de sobreposição exclusiva; estados derivados; avisos 120/60/30 configuráveis (Parâmetros); concluir/cancelar/reabrir; ligações; histórico/auditoria; secção no imóvel. **Ligação ao Plano de Marketing (F4-03/F4-04) por fazer.** |
 | F1-07b Parâmetros | Implementado, testado | Configurações → Parâmetros (limiares de aviso do CMI), validação e auditoria. |
 | F3-01 Oportunidades e Procuras | Implementado, testado | D-32, D-33 (procura: «O cliente pretende: Comprar/Arrendar» em vez de operação). Oportunidades (proprietário, imóvel existente ou provisório, estado, qualificação, origem, motivação, preço, prazo, conversão expressa e idempotente em imóvel/CMI). Procuras (interessado, operação, estado, urgência, qualificação, orçamento + tolerância, critérios com importância, localização por concelho/freguesia/zona). Interações genéricas (diário de contactos). Secções na ficha da entidade. |
-| F3-02 Correspondências | Implementado, testado | Motor procura→imóveis e imóvel→procuras, com explicação por critério, exclusão por obrigatórios, teto 20% (AT-10), elegibilidade por status/estado/operação/permissões. |
-| F2-01b Catálogo CAOP2025 | Parcial | Modelos, API e comando `importar_caop` prontos e testados. **Faltam os dados oficiais**: os sites da DGT/dados.gov.pt estão bloqueados neste ambiente. |
-
-## Limitações conhecidas
-- Os ficheiros `tests.py` (configuração, localização) não eram executados pelo pytest até 14/11/2026; corrigido (`python_files`).
-- Ficheiros privados (fotografias) ficam em `CRM_MEDIA_ROOT`: incluir no backup (F5-04) e num volume Docker em produção.
-- O `docker compose` ainda não foi executado de ponta a ponta (o ambiente de desenvolvimento usado não tem Docker ativo). Backend e frontend foram testados diretamente contra PostgreSQL 16.
-- Endereço IP na auditoria vem de REMOTE_ADDR; em produção, atrás do proxy, configurar o cabeçalho de IP real (F5-03).
-
-## Manual de utilizador
-Capítulos 1, 3–7 (Entidades, Imóveis, Angariações, Oportunidades, Procuras) e anexo A escritos. Ver `documentacao/manual/README.md`.
-
-## Utilizadores de demonstração (fictícios)
-`python manage.py criar_utilizadores_demo --password <palavra-passe>` cria admin@, responsavel@, consultor@ e assistente@demo.local. Recusa-se a correr em produção. `python manage.py criar_entidades_demo` cria 8 entidades fictícias.
-
-## Infraestrutura
-| Tarefa | Estado | Notas |
-|--------|--------|-------|
-| Instância de teste (D-29) | Implementado, testado localmente com Docker | `docker-compose.prod.yml` (PostgreSQL 16, Django/gunicorn, Caddy com HTTPS automático e cabeçalhos de segurança), `infra/instalar-vps.sh` (Docker, firewall, swap, segredos gerados na VPS, dados demo opcionais), guia `documentacao/INSTALACAO_VPS.md`. IP real do cliente na auditoria atrás do proxy. **Instalada na VPS em 15/11/2026: https://crm.valormaximo.pt** (modo nginx, dados fictícios). Atualizar com `cd /opt/crm && git pull && sudo bash infra/instalar-vps.sh`. |
-
-## Próxima tarefa
-Verificação intermédia do proprietário (D-15) sobre Entidades, Imóveis, CMI, Oportunidades e Procuras; correções e campos novos pedidos. Depois: restantes tarefas da Fase 2 (F2-04 vistas Cartões/Kanban, F2-05 Equipa/Agentes/Agências/Glossário, F2-06 campos históricos, F2-07 importação) e Fase 3. Em paralelo: carregar a CAOP2025; F1-06 (interface de partilha/transferência); F1-07 (motor no-code, âmbito D-13).
+| Alterações 17/11 (D-34) | Parcial | **Feito e testado:** listas suspensas de escolha múltipla; Entidades (Tipo de cliente, Status em lista, quem recomendou, imóvel de contacto, visitou/porquê, dados pessoais, entidades relacionadas com aniversário); pesquisa de imóveis por palavras; CMI sem data de assinatura, data fim de contrato única, sinal mínimo e momento do pagamento; Oportunidades e Procuras com qualificação completa (Excel), prazos em texto, URL do anúncio, sem «qualificação inicial/completa». **Falta:** campos do Excel «Dados Imoveis» e «Imoveis» no Imóvel/CMI e reorganização dos separadores (proposta enviada ao proprietário: fase de angariação, cores dos alertas, Valor ACM/vendido/comissão); atualizar capturas do manual. |

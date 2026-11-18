@@ -14,11 +14,16 @@ Abra **Procuras e Qualificação** no menu. Separadores **Ativas** / **Inativas*
 A partir da ficha do cliente (secção **Oportunidades e procuras** → **+ Nova procura**) ou na lista
 (**+ Nova procura**).
 
-1. **Interessado e qualificação:** cliente, **o cliente pretende** (*Comprar* ou *Arrendar*, obrigatório), estado, qualificação, urgência, início da
-   procura, prazo, motivação e flexibilidade.
-2. **Orçamento:** orçamento máximo e **tolerância** (de 0 % a 20 %; por omissão 0 %). O CRM mostra o **preço
+1. **Interessado:** cliente, **o cliente pretende** (*Comprar* ou *Arrendar*, obrigatório), estado e urgência.
+2. **Qualificação do comprador:** destino do imóvel, motivação de compra (de *Muito baixa* a *Muito alta*), se
+   a compra depende da venda, **quando iniciou a procura** e **prazo de aquisição** (texto livre, como o cliente
+   disse — por exemplo «há 3 meses», «até ao fim do ano»), piso, exposição solar, se aceita obras, **motivo
+   para comprar**, o que quer, o que não quer e flexibilidade.
+3. **Pré-qualificação financeira:** plafond, modo de pagamento, capitais próprios, financiamento, qualificação
+   bancária, entidade bancária e observações.
+4. **Orçamento:** orçamento máximo e **tolerância** (de 0 % a 20 %; por omissão 0 %). O CRM mostra o **preço
    máximo aceite**. Exemplo: 250 000 € com 20 % → até 300 000 €.
-3. **Critérios do imóvel:** para cada um, preencha o que o cliente quer e escolha:
+5. **Critérios do imóvel:** para cada um, preencha o que o cliente quer e escolha:
    - **Obrigatório** — imóveis que não cumprem **não aparecem**;
    - **Preferencial** — imóveis que não cumprem aparecem, mas mais abaixo.
 

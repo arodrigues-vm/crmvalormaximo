@@ -8,8 +8,7 @@ que imóvel tem, o que pretende e em que ponto está a conversa. Referência: OP
 ## 6.1 Lista
 
 Abra **Oportunidades de Angariação** no menu. Os separadores mostram as oportunidades **em curso**,
-**angariadas** e **perdidas**. Pode pesquisar pelo proprietário, localidade ou referência e filtrar por estado e
-qualificação.
+**angariadas** e **perdidas**. Pode pesquisar pelo proprietário, localidade ou referência e filtrar por estado.
 
 ![Lista de oportunidades](imagens/46-oportunidades-lista.png)
 
@@ -20,11 +19,22 @@ A forma mais rápida é a partir da ficha da entidade (o proprietário): secçã
 
 ![Nova oportunidade](imagens/40-oportunidade-nova.png)
 
-1. **Oportunidade:** proprietário, operação pretendida (venda/arrendamento), estado, qualificação (inicial ou
-   completa), origem do contacto, preço pretendido, prazo e motivação.
-2. **Imóvel:** se o imóvel já existir no CRM, escolha-o. Se não, descreva-o (tipo, tipologia, localidade e uma
-   descrição curta).
-3. Carregue em **Guardar**.
+1. **Oportunidade:** proprietário, operação pretendida (venda/arrendamento), estado, origem do contacto e
+   **valor pretendido pelo imóvel**.
+2. **Qualificação do proprietário:** destino do imóvel, ocupação, motivação de venda (de *Muito baixa* a
+   *Muito alta*), se a venda depende da compra, **prazo para vender** (texto livre, como o cliente disse — por
+   exemplo «até ao verão»), se é o único proprietário (se não for, aparece *Todos de acordo com a venda*),
+   motivo da venda e o que fará se não vender.
+3. **Negócio:** quando e por quanto comprou, hipoteca associada e entidade bancária, se está à venda (e há
+   quanto tempo), se teve visitas e propostas (se teve, aparecem o valor da proposta e porque não aceitou),
+   como chegou ao valor pretendido, pontos positivos e objeções.
+4. **Imóvel:** se o imóvel já existir no CRM, escolha-o (pode escrever várias palavras, por exemplo «T3
+   Maia»). Se não, descreva-o (tipo, tipologia, localidade e uma descrição curta). Em **Anúncio (site)** cole
+   o endereço do anúncio, se o imóvel já estiver anunciado noutro site.
+5. Carregue em **Guardar**.
+
+As respostas *Sim / Não / Não sabe* e as restantes opções vêm de listas configuráveis (anexo A). Os campos de
+qualificação podem ficar vazios e ser preenchidos mais tarde, à medida que conhece melhor o proprietário.
 
 Se não escolher o estado, fica no primeiro estado «em curso» (por omissão, *Novo contacto*).
 

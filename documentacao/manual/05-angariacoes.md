@@ -9,7 +9,7 @@ Abra **Angariações** no menu. Use os separadores para filtrar:
 
 | Separador | Mostra |
 |-----------|--------|
-| Por assinar | Contratos registados mas ainda sem data de assinatura |
+| Por assinar | Contratos registados mas ainda sem data de início e prazo |
 | Em vigor | Contratos assinados dentro do período de vigência |
 | A expirar | Contratos que terminam dentro do maior limiar de aviso (por omissão, 120 dias) |
 | Expirados | Contratos cujo período terminou sem renovação |
@@ -27,11 +27,14 @@ este imóvel**. Também pode usar **+ Nova angariação** na lista e escolher o 
 
 ![Nova angariação](imagens/30-cmi-novo.png)
 
-1. **Contrato:** n.º do contrato, tipo (operação — se não escolher, usa a do imóvel) e regime (Exclusivo,
-   Não exclusivo…).
-2. **Datas:** preencha a **data de assinatura**, a **data de início** e o **prazo em meses** quando o contrato
-   estiver assinado. A data de fim é calculada: **início + prazo − 1 dia** (ex.: 01/01 + 6 meses → 30/06).
-   Enquanto não estiver assinado, deixe a data de assinatura vazia.
+1. **Contrato:** escolha o **imóvel** escrevendo algumas palavras (por exemplo **10 T3 Maia**: aparecem todos
+   os imóveis que tenham essas palavras na referência, tipo, tipologia, morada, localidade, zona ou
+   proprietário), o n.º do contrato, o tipo (operação — se não escolher, usa a do imóvel) e o regime
+   (Exclusivo, Não exclusivo…).
+2. **Datas:** quando o contrato estiver assinado, preencha a **data de início** e o **prazo em meses**. A
+   **Data fim de contrato** aparece logo calculada: **início + prazo − 1 dia** (ex.: 01/01 + 6 meses → 30/06).
+   Com as renovações, a data fim de contrato passa a ser a do último ciclo. Enquanto o contrato não estiver
+   assinado, deixe a data de início e o prazo vazios: o CMI fica *Por assinar*.
 3. **Partes:** são preenchidas automaticamente com os proprietários atuais do imóvel (e as quotas). Pode
    indicá-las manualmente e escolher o papel (Proprietário, Representante legal, Procurador…).
 4. **Remuneração e pagamento:** escolha a modalidade e o valor. As modalidades disponíveis dependem da operação:
@@ -40,6 +43,11 @@ este imóvel**. Também pode usar **+ Nova angariação** na lista e escolher o 
      identificar).
 
    Indique a taxa de IVA e se os valores incluem IVA. Valor vazio = ainda não indicado; 0 = sem remuneração.
+
+   **Momento do pagamento** (lista configurável): *100% no CPCV*, *50% no CPCV e 50% na escritura* ou *100%
+   na escritura*. Em **Sinal mínimo do comprador** indique o sinal de que depende esse pagamento, em **% do
+   preço** ou em **euros** (ex.: comissão paga no CPCV desde que o sinal seja de 15%). Use **Outras condições
+   de pagamento** para o que não couber nestes campos.
 5. Carregue em **Guardar**.
 
 > As partes do contrato ficam guardadas no próprio CMI: se mais tarde os proprietários do imóvel mudarem, o
@@ -75,7 +83,7 @@ A renovação **não altera** a data de início original do contrato nem os cicl
 
 ## 5.5 Datas depois de assinado e correção excecional
 
-Depois de assinado, a data de assinatura, a data de início e o prazo **não se alteram na edição normal**. Se
+Depois de assinado, a data de início e o prazo **não se alteram na edição normal**. Se
 foram registados com um erro, quem pode editar o CMI pode fazer uma **Correção excecional**:
 
 1. Na ficha, carregue em **Correção excecional**.

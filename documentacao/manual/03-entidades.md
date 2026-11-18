@@ -2,9 +2,9 @@
 
 As **Entidades** são as pessoas e empresas com quem trabalha: proprietários, compradores, vendedores,
 arrendatários, senhorios, contactos profissionais, etc. Cada pessoa existe **uma só vez** no CRM, mesmo que
-tenha vários papéis (por exemplo, é proprietária de um imóvel e compradora de outro).
+tenha vários **tipos de cliente** (por exemplo, é proprietária de um imóvel e compradora de outro).
 
-> O papel comercial de uma entidade não lhe dá qualquer acesso à aplicação.
+> O tipo de cliente de uma entidade não lhe dá qualquer acesso à aplicação.
 
 ## 3.1 Lista de entidades
 
@@ -14,7 +14,7 @@ Abra **Entidades** no menu lateral.
 
 - **Pesquisa:** escreva parte do nome, NIF, email, telefone ou a referência (ENT-…). A pesquisa ignora
   acentos e maiúsculas: «jose» encontra «José».
-- **Filtros:** papel, tipo de pessoa (singular/coletiva) e estado (ativa/inativa).
+- **Filtros:** tipo de cliente, tipo de pessoa (singular/coletiva) e **Status** (Ativo, Inativo…).
 - **Ordenar:** por nome, mais recentes ou referência.
 - Clique numa linha para abrir a ficha.
 
@@ -30,8 +30,31 @@ No telemóvel, a lista aparece em cartões:
 1. Na lista, carregue em **+ Nova entidade**.
 2. Escolha o **tipo de pessoa**. Para empresas, escolha *Pessoa coletiva*: o campo passa a chamar-se
    *Denominação social* e não há apelido nem data de nascimento.
-3. Preencha os dados. Só o **nome** é obrigatório.
+3. Preencha os dados. Só o **nome** é obrigatório. Os blocos são:
+   - **Identificação:** tipo de pessoa, nome, apelido, NIF e país fiscal;
+   - **Contactos:** telefones e email;
+   - **Morada:** rua, código postal, localidade, freguesia/concelho/distrito e **Zona**;
+   - **Dados pessoais** (só pessoas singulares): data de nascimento, estado civil, regime de casamento,
+     nacionalidade, CC/Passaporte, freguesia e concelho de naturalidade, empresa, cargo e observações;
+   - **Classificação:** **Tipo de cliente** (Proprietário, Comprador…), **Status**, **Origem do contacto**,
+     **Quem recomendou** (outra entidade), **Imóvel de contacto** (o imóvel pelo qual o contacto chegou),
+     **Visitou o imóvel de contacto** (Sim/Não) e, se não visitou, **Porque não visitou**.
 4. Carregue em **Guardar**.
+
+### Listas suspensas
+
+Todos os campos de escolha são **listas suspensas**. Quando se pode escolher mais do que uma opção (por
+exemplo, *Tipo de cliente*), carregue na lista, marque as opções pretendidas e carregue fora da lista para a
+fechar. As opções de todas as listas são alteradas pelo Administrador, sem programação (anexo A).
+
+### Quem recomendou e imóvel de contacto
+
+1. Em **Quem recomendou**, escreva parte do nome, NIF ou referência de outra entidade e escolha-a na lista.
+2. Em **Imóvel de contacto**, escreva algumas palavras do imóvel — por exemplo **10 T3 Maia** — e escolha-o.
+   Aparecem todos os imóveis que tenham **todas** essas palavras (na referência, tipo, tipologia, morada,
+   localidade, zona, freguesia, concelho, descrição ou proprietário), por qualquer ordem.
+
+Só pode escolher entidades e imóveis a que tem acesso.
 
 A referência (ENT-000001, ENT-000002, …) é atribuída automaticamente e nunca muda. Fica como responsável
 quem cria a entidade.
@@ -94,17 +117,22 @@ A ficha abre sempre em **modo de consulta**:
   entidade foi alterada por outra pessoa entretanto»*. Recarregue a ficha e volte a fazer as suas alterações;
   assim nenhuma alteração é perdida sem aviso.
 
-## 3.5 Relações entre entidades
+## 3.5 Entidades relacionadas
 
-Na secção **Relações** da ficha regista as ligações entre pessoas e empresas: cônjuge, familiar, sócio,
-gerente, etc.
+Na secção **Entidades relacionadas** da ficha regista as ligações entre pessoas e empresas: cônjuge,
+familiar, sócio, gerente, etc.
 
-1. Abra a ficha da entidade e, em **Relações**, carregue em **+ Adicionar relação**.
+1. Abra a ficha da entidade e, em **Entidades relacionadas**, carregue em **+ Adicionar entidade relacionada**.
 2. Em **Esta entidade é…**, escolha a relação **do ponto de vista desta entidade**. Por exemplo, na ficha da
    Ana: *Gerente de* (a Ana é gerente de uma empresa) ou *Tem como gerente* (se a ficha fosse a da empresa).
 3. Em **Entidade relacionada**, escreva parte do nome, NIF ou referência e escolha na lista (também funciona
    com as setas e Enter).
-4. Carregue em **Adicionar**. A relação fica gravada de imediato.
+4. Em **Data de aniversário**, confirme ou indique a data de nascimento da pessoa relacionada. Se já estiver
+   na ficha dela, aparece preenchida. A data fica guardada **na ficha da pessoa relacionada** (servirá, no
+   futuro, para enviar mensagens de parabéns). Só pode alterar esta data se puder editar essa entidade.
+5. Carregue em **Adicionar**. A relação fica gravada de imediato.
+
+Na lista, cada pessoa relacionada mostra o dia de aniversário (por exemplo, *Aniversário: 15 de março*).
 
 ![Adicionar uma relação](imagens/18-relacao-adicionar.png)
 
@@ -118,7 +146,8 @@ Construções Demonstração, na ficha da empresa aparece *Tem como gerente* Ana
   acesso»*, sem nome nem dados.
 - Os tipos de relação disponíveis são **Cônjuge**, **Familiar**, **Sócio de / Tem como sócio** e
   **Gerente de / Tem como gerente**. O Administrador pode criar outros.
-- Os **papéis** e as **origens de contacto** são listas editáveis pelo Administrador (anexo A).
+- Os **tipos de cliente**, o **Status**, as **origens de contacto**, os **estados civis**, os **regimes de
+  casamento** e as **zonas** são listas editáveis pelo Administrador (anexo A).
 
 ## 3.6 Imóveis da entidade
 
@@ -139,8 +168,8 @@ Criar ou importar um contacto **não** significa que a pessoa deu consentimento.
 
 - Na ficha, **Eliminar** envia a entidade para a **lixeira**. Nada é apagado definitivamente.
 - Um utilizador autorizado (por omissão, o Responsável de Equipa ou o Administrador) pode **restaurá-la**.
-- Se a entidade deixou apenas de estar ativa (por exemplo, já não é cliente), prefira desmarcar
-  **Entidade ativa** em vez de a eliminar.
+- Se a entidade deixou apenas de estar ativa (por exemplo, já não é cliente), prefira mudar o **Status**
+  para *Inativo* em vez de a eliminar.
 
 ## 3.9 Quem pode fazer o quê
 
