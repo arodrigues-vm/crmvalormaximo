@@ -13,6 +13,25 @@ IMPORTANCIAS = [
 ]  # fmt: skip
 
 
+LISTAS_QUALIFICACAO = {
+    "destino_imovel": "destinos_imovel",
+    "nivel_motivacao": "niveis_motivacao",
+    "compra_depende_venda": "sim_nao",
+    "aceita_obras": "aceita_obras",
+    "modo_pagamento": "modos_pagamento",
+    "capitais_proprios": "sim_nao",
+    "financiamento": "sim_nao",
+    "qualificacao_bancaria": "sim_nao",
+    "entidade_bancaria": "entidades_bancarias",
+}
+CAMPOS_QUALIFICACAO = [
+    "destino_imovel", "nivel_motivacao", "motivacao", "compra_depende_venda", "prazo_aquisicao", "quando_iniciou",
+    "o_que_quer", "o_que_nao_quer", "flexibilidade", "piso", "exposicao_solar", "aceita_obras",
+    "plafond", "modo_pagamento", "capitais_proprios", "financiamento", "qualificacao_bancaria",
+    "entidade_bancaria", "observacoes_qualificacao",
+]  # fmt: skip
+
+
 def _nome(v):
     return v.nome if v else None
 
@@ -30,8 +49,8 @@ class ProcuraListaSerializer(serializers.ModelSerializer):
         model = Procura
         fields = [
             "id", "referencia", "entidade", "entidade_nome", "pretende", "pretende_nome", "estado_nome",
-            "estado_categoria", "urgencia_nome", "qualificacao", "orcamento_max", "tolerancia_pct", "resumo",
-            "responsavel_nome", "data_inicio",
+            "estado_categoria", "urgencia_nome", "orcamento_max", "tolerancia_pct", "resumo",
+            "responsavel_nome", "quando_iniciou", "criado_em",
         ]  # fmt: skip
 
     def get_entidade_nome(self, o) -> str | None:
@@ -63,6 +82,15 @@ class ProcuraSerializer(ProcuraListaSerializer):
     entidade = serializers.PrimaryKeyRelatedField(queryset=Entidade.objects.ativos())
     estado = CampoValorLista("estados_procura", allow_null=True, required=False)
     urgencia = CampoValorLista("urgencias", allow_null=True, required=False)
+    destino_imovel = CampoValorLista("destinos_imovel", allow_null=True, required=False)
+    nivel_motivacao = CampoValorLista("niveis_motivacao", allow_null=True, required=False)
+    compra_depende_venda = CampoValorLista("sim_nao", allow_null=True, required=False)
+    aceita_obras = CampoValorLista("aceita_obras", allow_null=True, required=False)
+    modo_pagamento = CampoValorLista("modos_pagamento", allow_null=True, required=False)
+    capitais_proprios = CampoValorLista("sim_nao", allow_null=True, required=False)
+    financiamento = CampoValorLista("sim_nao", allow_null=True, required=False)
+    qualificacao_bancaria = CampoValorLista("sim_nao", allow_null=True, required=False)
+    entidade_bancaria = CampoValorLista("entidades_bancarias", allow_null=True, required=False)
     tipos = CampoValorLista("tipos_imovel", many=True, required=False)
     tipologias = CampoValorLista("tipologias", many=True, required=False)
     zonas_comerciais = CampoValorLista("zonas_comerciais", many=True, required=False)
@@ -81,7 +109,7 @@ class ProcuraSerializer(ProcuraListaSerializer):
         fields = [
             "id", "referencia", "entidade", "entidade_nome", "pretende", "pretende_nome", "estado", "estado_nome",
             "estado_categoria",
-            "qualificacao", "urgencia", "urgencia_nome", "motivacao", "flexibilidade", "prazo_compra", "data_inicio",
+            "urgencia", "urgencia_nome", *CAMPOS_QUALIFICACAO,
             "orcamento_max", "tolerancia_pct", "teto",
             "tipos", "imp_tipos", "tipologias", "imp_tipologias",
             "concelhos", "freguesias", "zonas_comerciais", "imp_localizacao",
@@ -98,7 +126,7 @@ class ProcuraSerializer(ProcuraListaSerializer):
             "pretende": o.get_pretende_display(),
             "estado": _nome(o.estado),
             "urgencia": _nome(o.urgencia),
-            "qualificacao": o.get_qualificacao_display(),
+            **{c: _nome(getattr(o, c)) for c in LISTAS_QUALIFICACAO},
             "tipos": [t.nome for t in o.tipos.all()],
             "tipologias": [t.nome for t in o.tipologias.all()],
             "concelhos": [{"id": c.id, "nome": c.nome} for c in o.concelhos.all()],

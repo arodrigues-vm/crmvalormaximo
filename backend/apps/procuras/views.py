@@ -10,7 +10,7 @@ from apps.imoveis.views import entidades_visiveis
 
 from .correspondencias import correspondencias_da_procura
 from .models import Importancia, Pretende, Procura
-from .serializers import ProcuraListaSerializer, ProcuraSerializer
+from .serializers import CAMPOS_QUALIFICACAO, LISTAS_QUALIFICACAO, ProcuraListaSerializer, ProcuraSerializer
 
 
 class ProcuraViewSet(RegistoViewSet):
@@ -19,8 +19,9 @@ class ProcuraViewSet(RegistoViewSet):
     nome_registo = "procura"
     operacoes_extra = {**RegistoViewSet.operacoes_extra, "correspondencias": Operacao.CONSULTAR}
     campos_auditados = [
-        "entidade_id", "pretende", "estado_id", "qualificacao", "urgencia_id", "motivacao", "flexibilidade",
-        "prazo_compra", "data_inicio", "orcamento_max", "tolerancia_pct", "imp_tipos", "imp_tipologias",
+        "entidade_id", "pretende", "estado_id", "urgencia_id",
+        *[f"{c}_id" if c in LISTAS_QUALIFICACAO else c for c in CAMPOS_QUALIFICACAO],
+        "orcamento_max", "tolerancia_pct", "imp_tipos", "imp_tipologias",
         "imp_localizacao", "quartos_min", "imp_quartos", "area_min", "imp_area", "imp_zonas_exteriores",
         "exige_elevador", "imp_elevador", "estacionamento_min", "imp_estacionamento", "imp_condicoes",
         "responsavel_id", "observacoes",
@@ -35,7 +36,7 @@ class ProcuraViewSet(RegistoViewSet):
         return ctx
 
     def base_queryset(self):
-        qs = Procura.objects.select_related("entidade", "estado", "urgencia", "responsavel")
+        qs = Procura.objects.select_related("entidade", "estado", "urgencia", "responsavel", *LISTAS_QUALIFICACAO)
         return qs.prefetch_related(
             "tipos", "tipologias", "concelhos", "freguesias__concelho", "zonas_comerciais", "zonas_exteriores",
             "condicoes_fisicas",
@@ -51,7 +52,7 @@ class ProcuraViewSet(RegistoViewSet):
                 | Q(observacoes__unaccent__icontains=termo)
             )
         for parametro, campo in (("estado", "estado_id"), ("pretende", "pretende"), ("urgencia", "urgencia_id"),
-                                 ("entidade", "entidade_id"), ("qualificacao", "qualificacao")):  # fmt: skip
+                                 ("entidade", "entidade_id")):  # fmt: skip
             if p.get(parametro):
                 qs = qs.filter(**{campo: p[parametro]})
         if p.get("categoria"):
@@ -60,8 +61,7 @@ class ProcuraViewSet(RegistoViewSet):
 
     @extend_schema(
         parameters=[
-            OpenApiParameter(n, str)
-            for n in ("pesquisa", "estado", "categoria", "pretende", "urgencia", "entidade", "qualificacao")
+            OpenApiParameter(n, str) for n in ("pesquisa", "estado", "categoria", "pretende", "urgencia", "entidade")
         ]
     )
     def list(self, request, *args, **kwargs):
@@ -81,7 +81,7 @@ class ProcuraViewSet(RegistoViewSet):
                 "condicoes_fisicas": opcoes_lista("condicoes_fisicas"),
                 "tipos_interacao": opcoes_lista("tipos_interacao"),
                 "importancias": [{"valor": v, "nome": n} for v, n in Importancia.choices],
-                "qualificacoes": [{"valor": v, "nome": n} for v, n in Procura.Qualificacao.choices],
+                **{chave: opcoes_lista(chave) for chave in set(LISTAS_QUALIFICACAO.values())},
                 **self.permissoes_gerais(request),
             }
         )

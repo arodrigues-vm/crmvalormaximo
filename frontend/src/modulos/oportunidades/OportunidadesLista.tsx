@@ -1,7 +1,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { Link, useNavigate } from 'react-router-dom'
 
-import { dataPt, formatarEuros } from '../../componentes/formatar'
+import { formatarEuros } from '../../componentes/formatar'
 import { Paginacao } from '../../componentes/Paginacao'
 import { useListaFiltrada } from '../../componentes/useListaFiltrada'
 import { ETIQUETA_CATEGORIA, oportunidadesApi } from './api'
@@ -64,18 +64,6 @@ export function OportunidadesLista() {
             </option>
           ))}
         </select>
-        <select
-          aria-label="Qualificação"
-          value={params.get('qualificacao') ?? ''}
-          onChange={(e) => mudar({ qualificacao: e.target.value, page: '' })}
-        >
-          <option value="">Qualificação inicial e completa</option>
-          {opcoes.data?.qualificacoes.map((x) => (
-            <option key={x.valor} value={x.valor}>
-              {x.nome}
-            </option>
-          ))}
-        </select>
         {opcoes.data?.pode_criar && (
           <Link to="/oportunidades/nova" className="botao-principal">
             + Nova oportunidade
@@ -90,8 +78,8 @@ export function OportunidadesLista() {
               <th>Referência</th>
               <th>Proprietário</th>
               <th>Imóvel</th>
-              <th>Preço pretendido</th>
-              <th>Prazo</th>
+              <th>Valor pretendido</th>
+              <th>Prazo para vender</th>
               <th>Estado</th>
             </tr>
           </thead>
@@ -110,18 +98,14 @@ export function OportunidadesLista() {
                   {o.imovel_descricao}
                   {o.operacao_nome && <small className="ajuda"> · {o.operacao_nome}</small>}
                 </td>
-                <td data-rotulo="Preço pretendido">{formatarEuros(o.preco_pretendido) ?? '—'}</td>
-                <td data-rotulo="Prazo">{dataPt(o.prazo) ?? '—'}</td>
+                <td data-rotulo="Valor pretendido">{formatarEuros(o.preco_pretendido) ?? '—'}</td>
+                <td data-rotulo="Prazo para vender">{o.prazo_vender || '—'}</td>
                 <td data-rotulo="Estado">
                   {o.estado_nome && (
                     <span className={`etiqueta etiqueta-${ETIQUETA_CATEGORIA[o.estado_categoria ?? ''] ?? 'neutra'}`}>
                       {o.estado_nome}
                     </span>
                   )}
-                  <small className="ajuda">
-                    {' '}
-                    {o.qualificacao === 'completa' ? 'Qualif. completa' : 'Qualif. inicial'}
-                  </small>
                 </td>
               </tr>
             ))}

@@ -10,7 +10,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -26,24 +25,18 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    models.BigIntegerField(
-                        auto_created=True, blank=True, db_index=True, verbose_name="ID"
-                    ),
+                    models.BigIntegerField(auto_created=True, blank=True, db_index=True, verbose_name="ID"),
                 ),
                 (
                     "referencia",
-                    models.CharField(
-                        db_index=True, editable=False, max_length=20, null=True
-                    ),
+                    models.CharField(db_index=True, editable=False, max_length=20, null=True),
                 ),
                 ("criado_em", models.DateTimeField(blank=True, editable=False)),
                 ("atualizado_em", models.DateTimeField(blank=True, editable=False)),
                 ("versao", models.PositiveIntegerField(default=1, editable=False)),
                 (
                     "eliminado_em",
-                    models.DateTimeField(
-                        blank=True, db_index=True, editable=False, null=True
-                    ),
+                    models.DateTimeField(blank=True, db_index=True, editable=False, null=True),
                 ),
                 (
                     "qualificacao",
@@ -56,9 +49,7 @@ class Migration(migrations.Migration):
                 ("motivacao", models.TextField(blank=True, verbose_name="motivação")),
                 (
                     "flexibilidade",
-                    models.TextField(
-                        blank=True, help_text="Em que aspetos o cliente é flexível."
-                    ),
+                    models.TextField(blank=True, help_text="Em que aspetos o cliente é flexível."),
                 ),
                 (
                     "prazo_compra",
@@ -137,9 +128,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "quartos_min",
-                    models.PositiveSmallIntegerField(
-                        blank=True, null=True, verbose_name="quartos (mínimo)"
-                    ),
+                    models.PositiveSmallIntegerField(blank=True, null=True, verbose_name="quartos (mínimo)"),
                 ),
                 (
                     "imp_quartos",
@@ -376,18 +365,14 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "referencia",
-                    models.CharField(
-                        editable=False, max_length=20, null=True, unique=True
-                    ),
+                    models.CharField(editable=False, max_length=20, null=True, unique=True),
                 ),
                 ("criado_em", models.DateTimeField(auto_now_add=True)),
                 ("atualizado_em", models.DateTimeField(auto_now=True)),
                 ("versao", models.PositiveIntegerField(default=1, editable=False)),
                 (
                     "eliminado_em",
-                    models.DateTimeField(
-                        blank=True, db_index=True, editable=False, null=True
-                    ),
+                    models.DateTimeField(blank=True, db_index=True, editable=False, null=True),
                 ),
                 (
                     "qualificacao",
@@ -400,9 +385,7 @@ class Migration(migrations.Migration):
                 ("motivacao", models.TextField(blank=True, verbose_name="motivação")),
                 (
                     "flexibilidade",
-                    models.TextField(
-                        blank=True, help_text="Em que aspetos o cliente é flexível."
-                    ),
+                    models.TextField(blank=True, help_text="Em que aspetos o cliente é flexível."),
                 ),
                 (
                     "prazo_compra",
@@ -481,9 +464,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "quartos_min",
-                    models.PositiveSmallIntegerField(
-                        blank=True, null=True, verbose_name="quartos (mínimo)"
-                    ),
+                    models.PositiveSmallIntegerField(blank=True, null=True, verbose_name="quartos (mínimo)"),
                 ),
                 (
                     "imp_quartos",
@@ -593,9 +574,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "concelhos",
-                    models.ManyToManyField(
-                        blank=True, related_name="+", to="localizacao.concelho"
-                    ),
+                    models.ManyToManyField(blank=True, related_name="+", to="localizacao.concelho"),
                 ),
                 (
                     "condicoes_fisicas",
@@ -650,9 +629,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "freguesias",
-                    models.ManyToManyField(
-                        blank=True, related_name="+", to="localizacao.freguesia"
-                    ),
+                    models.ManyToManyField(blank=True, related_name="+", to="localizacao.freguesia"),
                 ),
                 (
                     "operacao",
@@ -668,9 +645,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "partilhada_com",
-                    models.ManyToManyField(
-                        blank=True, related_name="+", to=settings.AUTH_USER_MODEL
-                    ),
+                    models.ManyToManyField(blank=True, related_name="+", to=settings.AUTH_USER_MODEL),
                 ),
                 (
                     "responsavel",

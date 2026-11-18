@@ -6,11 +6,13 @@ import { ErroApi } from '../../api/cliente'
 import { Bloco } from '../../componentes/Bloco'
 import { CampoAreaTexto, CampoSelecao, CampoTexto } from '../../componentes/campos'
 import { CabecalhoRegisto } from '../../componentes/Ficha'
+import { EditarQualificacao } from '../../componentes/Qualificacao'
+import { qualificacaoParaApi, valoresQualificacao } from '../../componentes/camposQualificacao'
 import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
 import { useGuardaSaida } from '../../componentes/useGuardaSaida'
 import { entidadesApi } from '../entidades/api'
 import { procurarImoveis } from '../imoveis/api'
-import { oportunidadesApi, type Oportunidade } from './api'
+import { oportunidadesApi, QUALIFICACAO_NEGOCIO, QUALIFICACAO_PROPRIETARIO, type Oportunidade } from './api'
 
 interface Valores {
   entidade: OpcaoPesquisa | null
@@ -21,13 +23,14 @@ interface Valores {
   descricao_imovel: string
   operacao: string
   estado: string
-  qualificacao: string
   origem: string
-  motivacao: string
   preco_pretendido: string
-  prazo: string
+  url_anuncio: string
+  qualificacao: Record<string, string>
   observacoes: string
 }
+
+const CAMPOS_Q = [...QUALIFICACAO_PROPRIETARIO, ...QUALIFICACAO_NEGOCIO]
 
 const t = (v: string | number | null | undefined) => (v === null || v === undefined ? '' : String(v))
 const idOuNull = (v: string) => (v ? Number(v) : null)
@@ -66,11 +69,10 @@ function Formulario({ o, entidadeInicial = null }: { o?: Oportunidade; entidadeI
       descricao_imovel: o?.descricao_imovel ?? '',
       operacao: t(o?.operacao),
       estado: t(o?.estado),
-      qualificacao: o?.qualificacao ?? 'inicial',
       origem: t(o?.origem),
-      motivacao: o?.motivacao ?? '',
       preco_pretendido: o?.preco_pretendido ? String(Number(o.preco_pretendido)) : '',
-      prazo: o?.prazo ?? '',
+      url_anuncio: o?.url_anuncio ?? '',
+      qualificacao: valoresQualificacao(CAMPOS_Q, o as unknown as Record<string, unknown>),
       observacoes: o?.observacoes ?? '',
     }),
     [o, entidadeInicial],
@@ -89,6 +91,8 @@ function Formulario({ o, entidadeInicial = null }: { o?: Oportunidade; entidadeI
   const mudar = <K extends keyof Valores>(c: K, valor: Valores[K]) => setV((a) => ({ ...a, [c]: valor }))
   const lista = (x?: { id: number; nome: string }[]) => (x ?? []).map((i) => ({ valor: i.id, nome: i.nome }))
   const temErro = (cs: string[]) => cs.some((c) => erros[c])
+  const mudarQ = (c: string, x: string) => setV((a) => ({ ...a, qualificacao: { ...a.qualificacao, [c]: x } }))
+  const opcoesQ = op as unknown as Record<string, { id: number; nome: string }[]> | undefined
 
   async function submeter(e: FormEvent) {
     e.preventDefault()
@@ -104,11 +108,10 @@ function Formulario({ o, entidadeInicial = null }: { o?: Oportunidade; entidadeI
       descricao_imovel: v.descricao_imovel,
       operacao: idOuNull(v.operacao),
       estado: idOuNull(v.estado),
-      qualificacao: v.qualificacao,
       origem: idOuNull(v.origem),
-      motivacao: v.motivacao,
-      preco_pretendido: v.preco_pretendido.trim() ? v.preco_pretendido.replace(',', '.') : null,
-      prazo: v.prazo || null,
+      preco_pretendido: v.preco_pretendido.trim() ? v.preco_pretendido.replace(/\s/g, '').replace(',', '.') : null,
+      url_anuncio: v.url_anuncio.trim(),
+      ...qualificacaoParaApi(CAMPOS_Q, v.qualificacao),
       observacoes: v.observacoes,
     }
     try {
@@ -143,10 +146,7 @@ function Formulario({ o, entidadeInicial = null }: { o?: Oportunidade; entidadeI
         </p>
       )}
 
-      <Bloco
-        titulo="Oportunidade"
-        forcarAberto={temErro(['entidade', 'operacao', 'estado', 'preco_pretendido', 'prazo'])}
-      >
+      <Bloco titulo="Oportunidade" forcarAberto={temErro(['entidade', 'operacao', 'estado', 'preco_pretendido'])}>
         <div className="grelha-campos">
           <SeletorPesquisavel
             rotulo="Proprietário"
@@ -173,12 +173,6 @@ function Formulario({ o, entidadeInicial = null }: { o?: Oportunidade; entidadeI
             erro={erros.estado}
           />
           <CampoSelecao
-            rotulo="Qualificação"
-            value={v.qualificacao}
-            onChange={(e) => mudar('qualificacao', e.target.value)}
-            opcoes={op?.qualificacoes ?? []}
-          />
-          <CampoSelecao
             rotulo="Origem do contacto"
             vazio="—"
             value={v.origem}
@@ -186,29 +180,42 @@ function Formulario({ o, entidadeInicial = null }: { o?: Oportunidade; entidadeI
             opcoes={lista(op?.origens)}
           />
           <CampoTexto
-            rotulo="Preço pretendido (€)"
+            rotulo="Valor pretendido pelo imóvel (€)"
             inputMode="decimal"
             value={v.preco_pretendido}
             onChange={(e) => mudar('preco_pretendido', e.target.value)}
             erro={erros.preco_pretendido}
           />
-          <CampoTexto
-            rotulo="Prazo pretendido"
-            type="date"
-            value={v.prazo}
-            onChange={(e) => mudar('prazo', e.target.value)}
-            erro={erros.prazo}
-          />
-          <CampoAreaTexto
-            rotulo="Motivação do proprietário"
-            value={v.motivacao}
-            onChange={(e) => mudar('motivacao', e.target.value)}
-            placeholder="Porque quer vender/arrendar, urgência…"
-          />
         </div>
       </Bloco>
 
-      <Bloco titulo="Imóvel" forcarAberto={temErro(['imovel', 'tipo_imovel', 'tipologia', 'localidade'])}>
+      <Bloco
+        titulo="Qualificação do proprietário"
+        forcarAberto={temErro(QUALIFICACAO_PROPRIETARIO.map((c) => c.campo))}
+      >
+        <EditarQualificacao
+          campos={QUALIFICACAO_PROPRIETARIO}
+          valores={v.qualificacao}
+          aoMudar={mudarQ}
+          opcoes={opcoesQ}
+          erros={erros}
+        />
+      </Bloco>
+
+      <Bloco titulo="Negócio" forcarAberto={temErro(QUALIFICACAO_NEGOCIO.map((c) => c.campo))} abertoInicial={!!o}>
+        <EditarQualificacao
+          campos={QUALIFICACAO_NEGOCIO}
+          valores={v.qualificacao}
+          aoMudar={mudarQ}
+          opcoes={opcoesQ}
+          erros={erros}
+        />
+      </Bloco>
+
+      <Bloco
+        titulo="Imóvel"
+        forcarAberto={temErro(['imovel', 'tipo_imovel', 'tipologia', 'localidade', 'url_anuncio'])}
+      >
         <p className="ajuda">
           Se o imóvel já estiver registado no CRM, escolha-o. Caso contrário, descreva-o: poderá criá-lo mais tarde com
           «Converter em imóvel / CMI».
@@ -253,6 +260,16 @@ function Formulario({ o, entidadeInicial = null }: { o?: Oportunidade; entidadeI
               />
             </>
           )}
+          <CampoTexto
+            rotulo="Anúncio (site)"
+            type="url"
+            largo
+            value={v.url_anuncio}
+            onChange={(e) => mudar('url_anuncio', e.target.value)}
+            erro={erros.url_anuncio}
+            placeholder="https://…"
+            ajuda="Endereço do anúncio, se o imóvel já estiver anunciado noutro site."
+          />
         </div>
       </Bloco>
 

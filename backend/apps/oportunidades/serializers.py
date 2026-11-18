@@ -7,6 +7,26 @@ from apps.imoveis.models import Imovel
 
 from .models import Oportunidade
 
+# Qualificação do vendedor (D-34): campos de lista e campos livres.
+LISTAS_QUALIFICACAO = {
+    "destino_imovel": "destinos_imovel",
+    "ocupacao": "ocupacoes_imovel",
+    "nivel_motivacao": "niveis_motivacao",
+    "venda_depende_compra": "sim_nao",
+    "unico_proprietario": "sim_nao",
+    "todos_de_acordo": "sim_nao",
+    "entidade_bancaria": "entidades_bancarias",
+    "esta_a_venda": "sim_nao",
+    "teve_visitas": "sim_nao",
+    "teve_propostas": "sim_nao",
+}
+CAMPOS_QUALIFICACAO = [
+    "destino_imovel", "ocupacao", "nivel_motivacao", "motivacao", "venda_depende_compra", "prazo_vender",
+    "se_nao_vender", "unico_proprietario", "todos_de_acordo", "quando_comprou", "valor_compra", "valor_hipoteca",
+    "entidade_bancaria", "como_chegou_valor", "esta_a_venda", "tempo_a_venda", "teve_visitas", "teve_propostas",
+    "valor_proposta", "porque_nao_aceitou", "pontos_positivos", "objecoes",
+]  # fmt: skip
+
 
 def _nome(v):
     return v.nome if v else None
@@ -24,8 +44,7 @@ class OportunidadeListaSerializer(serializers.ModelSerializer):
         model = Oportunidade
         fields = [
             "id", "referencia", "entidade", "entidade_nome", "imovel", "imovel_descricao", "operacao_nome",
-            "estado_nome", "estado_categoria", "qualificacao", "preco_pretendido", "prazo", "responsavel_nome",
-            "criado_em",
+            "estado_nome", "estado_categoria", "preco_pretendido", "prazo_vender", "responsavel_nome", "criado_em",
         ]  # fmt: skip
 
     def get_entidade_nome(self, o) -> str | None:
@@ -58,6 +77,16 @@ class OportunidadeSerializer(OportunidadeListaSerializer):
     operacao = CampoValorLista("operacoes", allow_null=True, required=False)
     estado = CampoValorLista("estados_oportunidade", allow_null=True, required=False)
     origem = CampoValorLista("origens_contacto", allow_null=True, required=False)
+    destino_imovel = CampoValorLista("destinos_imovel", allow_null=True, required=False)
+    ocupacao = CampoValorLista("ocupacoes_imovel", allow_null=True, required=False)
+    nivel_motivacao = CampoValorLista("niveis_motivacao", allow_null=True, required=False)
+    venda_depende_compra = CampoValorLista("sim_nao", allow_null=True, required=False)
+    unico_proprietario = CampoValorLista("sim_nao", allow_null=True, required=False)
+    todos_de_acordo = CampoValorLista("sim_nao", allow_null=True, required=False)
+    entidade_bancaria = CampoValorLista("entidades_bancarias", allow_null=True, required=False)
+    esta_a_venda = CampoValorLista("sim_nao", allow_null=True, required=False)
+    teve_visitas = CampoValorLista("sim_nao", allow_null=True, required=False)
+    teve_propostas = CampoValorLista("sim_nao", allow_null=True, required=False)
     responsavel = serializers.PrimaryKeyRelatedField(required=False, queryset=Utilizador.objects.filter(is_active=True))
     angariacao_gerada_referencia = serializers.CharField(
         source="angariacao_gerada.referencia", read_only=True, default=None
@@ -70,9 +99,9 @@ class OportunidadeSerializer(OportunidadeListaSerializer):
         model = Oportunidade
         fields = [
             "id", "referencia", "entidade", "entidade_nome", "imovel", "imovel_descricao",
-            "tipo_imovel", "tipologia", "localidade", "descricao_imovel",
-            "operacao", "estado", "estado_nome", "estado_categoria", "qualificacao", "origem", "motivacao",
-            "preco_pretendido", "prazo", "angariacao_gerada", "angariacao_gerada_referencia",
+            "tipo_imovel", "tipologia", "localidade", "descricao_imovel", "url_anuncio",
+            "operacao", "estado", "estado_nome", "estado_categoria", "origem", "preco_pretendido",
+            *CAMPOS_QUALIFICACAO, "angariacao_gerada", "angariacao_gerada_referencia",
             "responsavel", "responsavel_nome", "observacoes", "nomes",
             "criado_em", "atualizado_em", "versao", "eliminado_em", "acoes",
         ]  # fmt: skip
@@ -85,7 +114,7 @@ class OportunidadeSerializer(OportunidadeListaSerializer):
             "operacao": _nome(o.operacao),
             "estado": _nome(o.estado),
             "origem": _nome(o.origem),
-            "qualificacao": o.get_qualificacao_display(),
+            **{c: _nome(getattr(o, c)) for c in LISTAS_QUALIFICACAO},
         }
 
     def get_acoes(self, o) -> dict[str, bool]:

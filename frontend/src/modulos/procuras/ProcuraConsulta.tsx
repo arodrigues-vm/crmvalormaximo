@@ -7,10 +7,18 @@ import { Bloco } from '../../componentes/Bloco'
 import { Dado } from '../../componentes/campos'
 import { Dialogo } from '../../componentes/Dialogo'
 import { CabecalhoRegisto, HistoricoRegisto } from '../../componentes/Ficha'
-import { dataPt, formatarEuros, momentoPt } from '../../componentes/formatar'
+import { formatarEuros, momentoPt } from '../../componentes/formatar'
+import type { Registo } from '../../componentes/camposQualificacao'
 import { Interacoes } from '../../componentes/Interacoes'
+import { VerQualificacao } from '../../componentes/Qualificacao'
 import { ETIQUETA_CATEGORIA } from '../oportunidades/api'
-import { NOMES_CAMPOS_PROCURA, procurasApi, type Importancia } from './api'
+import {
+  NOMES_CAMPOS_PROCURA,
+  PRE_QUALIFICACAO_FINANCEIRA,
+  procurasApi,
+  QUALIFICACAO_COMPRADOR,
+  type Importancia,
+} from './api'
 import { CorrespondenciasProcura } from './Correspondencias'
 
 const IMP: Record<Importancia, string> = { obrigatorio: 'obrigatório', preferencial: 'preferencial' }
@@ -78,7 +86,7 @@ export function ProcuraConsulta() {
         }
       />
 
-      <Bloco titulo="Interessado e qualificação">
+      <Bloco titulo="Interessado">
         <dl className="grelha-dados">
           <Dado rotulo="Interessado">
             {p.entidade_nome ? (
@@ -88,18 +96,17 @@ export function ProcuraConsulta() {
             )}
           </Dado>
           <Dado rotulo="O cliente pretende">{n.pretende}</Dado>
-          <Dado rotulo="Qualificação">{n.qualificacao}</Dado>
           <Dado rotulo="Urgência">{n.urgencia}</Dado>
-          <Dado rotulo="Início da procura">{dataPt(p.data_inicio)}</Dado>
-          <Dado rotulo="Prazo">{dataPt(p.prazo_compra)}</Dado>
           <Dado rotulo="Responsável">{p.responsavel_nome}</Dado>
-          <Dado rotulo="Motivação" largo>
-            {p.motivacao && <span className="texto-livre">{p.motivacao}</span>}
-          </Dado>
-          <Dado rotulo="Flexibilidade" largo>
-            {p.flexibilidade && <span className="texto-livre">{p.flexibilidade}</span>}
-          </Dado>
         </dl>
+      </Bloco>
+
+      <Bloco titulo="Qualificação do comprador">
+        <VerQualificacao campos={QUALIFICACAO_COMPRADOR} registo={p as unknown as Registo} />
+      </Bloco>
+
+      <Bloco titulo="Pré-qualificação financeira">
+        <VerQualificacao campos={PRE_QUALIFICACAO_FINANCEIRA} registo={p as unknown as Registo} />
       </Bloco>
 
       <Bloco titulo="Critérios">

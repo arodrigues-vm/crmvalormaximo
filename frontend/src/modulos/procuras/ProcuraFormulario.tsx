@@ -5,23 +5,29 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ErroApi } from '../../api/cliente'
 import { Bloco } from '../../componentes/Bloco'
 import { CampoAreaTexto, CampoCaixa, CampoMultiplo, CampoSelecao, CampoTexto } from '../../componentes/campos'
+import { qualificacaoParaApi, valoresQualificacao, type Opcoes } from '../../componentes/camposQualificacao'
 import { CabecalhoRegisto } from '../../componentes/Ficha'
+import { EditarQualificacao } from '../../componentes/Qualificacao'
 import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
 import { useGuardaSaida } from '../../componentes/useGuardaSaida'
 import { entidadesApi } from '../entidades/api'
-import { procurarConcelhos, procurarFreguesias, procurasApi, type Importancia, type Procura } from './api'
+import {
+  PRE_QUALIFICACAO_FINANCEIRA,
+  procurarConcelhos,
+  procurarFreguesias,
+  procurasApi,
+  QUALIFICACAO_COMPRADOR,
+  type Importancia,
+  type Procura,
+} from './api'
 
 type Imp = Importancia
 interface Valores {
   entidade: OpcaoPesquisa | null
   pretende: string
   estado: string
-  qualificacao: string
   urgencia: string
-  motivacao: string
-  flexibilidade: string
-  prazo_compra: string
-  data_inicio: string
+  qualificacao: Record<string, string>
   orcamento_max: string
   tolerancia_pct: string
   tipos: number[]
@@ -49,19 +55,15 @@ interface Valores {
 
 const t = (v: string | number | null | undefined) => (v === null || v === undefined ? '' : String(v))
 const num = (v: string) => (v.trim() === '' ? null : v.trim().replace(',', '.'))
-const hoje = () => new Date().toISOString().slice(0, 10)
+const CAMPOS_Q = [...QUALIFICACAO_COMPRADOR, ...PRE_QUALIFICACAO_FINANCEIRA]
 
 function deProcura(p?: Procura, entidade?: OpcaoPesquisa | null): Valores {
   return {
     entidade: p ? { id: p.entidade, titulo: p.entidade_nome ?? 'Entidade a que não tem acesso' } : (entidade ?? null),
     pretende: p?.pretende ?? 'comprar',
     estado: t(p?.estado),
-    qualificacao: p?.qualificacao ?? 'inicial',
     urgencia: t(p?.urgencia),
-    motivacao: p?.motivacao ?? '',
-    flexibilidade: p?.flexibilidade ?? '',
-    prazo_compra: p?.prazo_compra ?? '',
-    data_inicio: p?.data_inicio ?? hoje(),
+    qualificacao: valoresQualificacao(CAMPOS_Q, p as unknown as Record<string, unknown> | undefined),
     orcamento_max: p?.orcamento_max ? String(Number(p.orcamento_max)) : '',
     tolerancia_pct: p ? String(Number(p.tolerancia_pct)) : '0',
     tipos: p?.tipos ?? [],
@@ -179,6 +181,8 @@ function Formulario({ p, entidadeInicial = null }: { p?: Procura; entidadeInicia
   const o = opcoes.data
   const mudar = <K extends keyof Valores>(c: K, valor: Valores[K]) => setV((a) => ({ ...a, [c]: valor }))
   const lista = (x?: { id: number; nome: string }[]) => (x ?? []).map((i) => ({ valor: i.id, nome: i.nome }))
+  const mudarQ = (c: string, x: string) => setV((a) => ({ ...a, qualificacao: { ...a.qualificacao, [c]: x } }))
+  const opcoesQ = o as unknown as Opcoes | undefined
   const teto =
     v.orcamento_max && !isNaN(Number(num(v.orcamento_max)))
       ? Number(num(v.orcamento_max)) * (1 + Number(num(v.tolerancia_pct) ?? 0) / 100)
@@ -193,12 +197,8 @@ function Formulario({ p, entidadeInicial = null }: { p?: Procura; entidadeInicia
       entidade: v.entidade?.id ?? null,
       pretende: v.pretende,
       estado: v.estado ? Number(v.estado) : null,
-      qualificacao: v.qualificacao,
       urgencia: v.urgencia ? Number(v.urgencia) : null,
-      motivacao: v.motivacao,
-      flexibilidade: v.flexibilidade,
-      prazo_compra: v.prazo_compra || null,
-      data_inicio: v.data_inicio || hoje(),
+      ...qualificacaoParaApi(CAMPOS_Q, v.qualificacao),
       orcamento_max: num(v.orcamento_max),
       tolerancia_pct: num(v.tolerancia_pct) ?? '0',
       tipos: v.tipos,
@@ -255,7 +255,7 @@ function Formulario({ p, entidadeInicial = null }: { p?: Procura; entidadeInicia
         </p>
       )}
 
-      <Bloco titulo="Interessado e qualificação" forcarAberto={temErro(['entidade', 'pretende', 'estado'])}>
+      <Bloco titulo="Interessado" forcarAberto={temErro(['entidade', 'pretende', 'estado'])}>
         <div className="grelha-campos">
           <SeletorPesquisavel
             rotulo="Interessado (comprador / arrendatário)"
@@ -281,38 +281,36 @@ function Formulario({ p, entidadeInicial = null }: { p?: Procura; entidadeInicia
             opcoes={lista(o?.estados)}
           />
           <CampoSelecao
-            rotulo="Qualificação"
-            value={v.qualificacao}
-            onChange={(e) => mudar('qualificacao', e.target.value)}
-            opcoes={o?.qualificacoes ?? []}
-          />
-          <CampoSelecao
             rotulo="Urgência"
             vazio="—"
             value={v.urgencia}
             onChange={(e) => mudar('urgencia', e.target.value)}
             opcoes={lista(o?.urgencias)}
           />
-          <CampoTexto
-            rotulo="Início da procura"
-            type="date"
-            value={v.data_inicio}
-            onChange={(e) => mudar('data_inicio', e.target.value)}
-          />
-          <CampoTexto
-            rotulo="Prazo para comprar/arrendar"
-            type="date"
-            value={v.prazo_compra}
-            onChange={(e) => mudar('prazo_compra', e.target.value)}
-          />
-          <CampoAreaTexto rotulo="Motivação" value={v.motivacao} onChange={(e) => mudar('motivacao', e.target.value)} />
-          <CampoAreaTexto
-            rotulo="Flexibilidade"
-            value={v.flexibilidade}
-            onChange={(e) => mudar('flexibilidade', e.target.value)}
-            placeholder="Em que aspetos é flexível."
-          />
         </div>
+      </Bloco>
+
+      <Bloco titulo="Qualificação do comprador" forcarAberto={temErro(QUALIFICACAO_COMPRADOR.map((c) => c.campo))}>
+        <EditarQualificacao
+          campos={QUALIFICACAO_COMPRADOR}
+          valores={v.qualificacao}
+          aoMudar={mudarQ}
+          opcoes={opcoesQ}
+          erros={erros}
+        />
+      </Bloco>
+
+      <Bloco
+        titulo="Pré-qualificação financeira"
+        forcarAberto={temErro(PRE_QUALIFICACAO_FINANCEIRA.map((c) => c.campo))}
+      >
+        <EditarQualificacao
+          campos={PRE_QUALIFICACAO_FINANCEIRA}
+          valores={v.qualificacao}
+          aoMudar={mudarQ}
+          opcoes={opcoesQ}
+          erros={erros}
+        />
       </Bloco>
 
       <Bloco titulo="Orçamento" forcarAberto={temErro(['orcamento_max', 'tolerancia_pct'])}>

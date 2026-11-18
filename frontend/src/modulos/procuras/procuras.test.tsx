@@ -67,6 +67,28 @@ describe('Procuras', () => {
     })
   })
 
+  it('qualificação: prazos em texto e listas configuráveis', async () => {
+    const pedidos = simularApi({
+      '/api/auth/eu/': () => json(UTIL),
+      '/api/procuras/opcoes/': () =>
+        json({ ...OPCOES_PROC, modos_pagamento: [{ id: 70, nome: 'Pronto pagamento' }], sim_nao: [] }),
+      'POST /api/procuras/': () => json({ id: 9 }, 400),
+    })
+    desenhar('/procuras/nova')
+    fireEvent.change(await screen.findByLabelText('Quando iniciou a procura'), { target: { value: 'Há 3 meses' } })
+    fireEvent.change(screen.getByLabelText('Modo de pagamento'), { target: { value: '70' } })
+    fireEvent.change(screen.getByLabelText('Plafond (€)'), { target: { value: '200 000' } })
+    expect(screen.queryByLabelText('Qualificação')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar' }))
+    await waitFor(() => expect(pedidos.some((p) => p.metodo === 'POST')).toBe(true))
+    expect(pedidos.find((p) => p.metodo === 'POST')!.corpo).toMatchObject({
+      quando_iniciou: 'Há 3 meses',
+      modo_pagamento: 70,
+      plafond: '200000',
+      financiamento: null,
+    })
+  })
+
   it('ficha mostra imóveis compatíveis com a explicação dos critérios', async () => {
     simularApi({
       '/api/auth/eu/': () => json(UTIL),
@@ -246,5 +268,34 @@ describe('Oportunidades', () => {
       confirmar: true,
       criar_cmi: true,
     })
+  })
+})
+
+describe('Oportunidades — qualificação', () => {
+  it('mostra o valor da proposta só quando teve propostas', async () => {
+    simularApi({
+      '/api/auth/eu/': () => json(UTIL),
+      '/api/oportunidades/opcoes/': () =>
+        json({
+          estados: [],
+          operacoes: [],
+          origens: [],
+          tipos_imovel: [],
+          tipologias: [],
+          tipos_interacao: [],
+          sim_nao: [
+            { id: 1, nome: 'Sim' },
+            { id: 2, nome: 'Não' },
+          ],
+          pode_criar: true,
+        }),
+    })
+    desenhar('/oportunidades/nova')
+    const propostas = await screen.findByLabelText('Teve propostas')
+    expect(screen.queryByLabelText('Valor da proposta (€)')).not.toBeInTheDocument()
+    fireEvent.change(propostas, { target: { value: '1' } })
+    expect(screen.getByLabelText('Valor da proposta (€)')).toBeInTheDocument()
+    expect(screen.getByLabelText('Prazo para vender')).not.toHaveAttribute('type', 'date')
+    expect(screen.getByLabelText('Anúncio (site)')).toHaveAttribute('type', 'url')
   })
 })

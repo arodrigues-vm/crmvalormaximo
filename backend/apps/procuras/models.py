@@ -44,10 +44,6 @@ PRETENDE_POR_CATEGORIA = {v: k for k, v in CATEGORIA_IMOVEL.items()}
 class Procura(RegistoBase):
     PREFIXO_REFERENCIA = "PRC"
 
-    class Qualificacao(models.TextChoices):
-        INICIAL = "inicial", "Inicial"
-        COMPLETA = "completa", "Completa"
-
     entidade = models.ForeignKey(
         "entidades.Entidade", on_delete=models.PROTECT, related_name="procuras", verbose_name="comprador / interessado"
     )
@@ -55,12 +51,32 @@ class Procura(RegistoBase):
     # comprar → imóveis de categoria «venda»; arrendar → «arrendamento».
     pretende = models.CharField("o cliente pretende", max_length=12, choices=Pretende.choices, default=Pretende.COMPRAR)
     estado = campo_lista("estados_procura")
-    qualificacao = models.CharField(max_length=10, choices=Qualificacao.choices, default=Qualificacao.INICIAL)
     urgencia = campo_lista("urgencias", verbose_name="urgência")
-    motivacao = models.TextField("motivação", blank=True)
+
+    # Qualificação do comprador (D-34). Prazos em texto: os clientes falam em prazos, não em datas.
+    destino_imovel = campo_lista("destinos_imovel", verbose_name="destino do imóvel")
+    nivel_motivacao = campo_lista("niveis_motivacao", verbose_name="motivação de compra")
+    motivacao = models.TextField("motivo para comprar", blank=True)
+    compra_depende_venda = campo_lista("sim_nao", verbose_name="a compra depende da venda")
+    prazo_aquisicao = models.CharField("prazo de aquisição", max_length=120, blank=True)
+    quando_iniciou = models.CharField("quando iniciou a procura", max_length=120, blank=True)
+    o_que_quer = models.TextField("o que quer", blank=True)
+    o_que_nao_quer = models.TextField("o que não quer", blank=True)
     flexibilidade = models.TextField(blank=True, help_text="Em que aspetos o cliente é flexível.")
-    prazo_compra = models.DateField("prazo para comprar/arrendar", null=True, blank=True)
-    data_inicio = models.DateField("início da procura", default=hoje)
+    piso = models.CharField(max_length=120, blank=True, help_text="Ex.: não quer rés-do-chão.")
+    exposicao_solar = models.CharField("exposição solar", max_length=120, blank=True)
+    aceita_obras = campo_lista("aceita_obras", verbose_name="obras")
+
+    # Pré-qualificação financeira
+    plafond = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0)]
+    )
+    modo_pagamento = campo_lista("modos_pagamento", verbose_name="modo de pagamento")
+    capitais_proprios = campo_lista("sim_nao", verbose_name="capitais próprios")
+    financiamento = campo_lista("sim_nao")
+    qualificacao_bancaria = campo_lista("sim_nao", verbose_name="qualificação bancária")
+    entidade_bancaria = campo_lista("entidades_bancarias", verbose_name="entidade bancária")
+    observacoes_qualificacao = models.TextField("observações da qualificação", blank=True)
 
     # Orçamento: sempre obrigatório quando indicado. NULL = não indicado.
     orcamento_max = models.DecimalField(

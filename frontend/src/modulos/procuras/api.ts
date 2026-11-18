@@ -1,4 +1,5 @@
 import { pedido } from '../../api/cliente'
+import type { CampoQualificacao } from '../../componentes/camposQualificacao'
 import type { EntradaHistorico } from '../../componentes/Ficha'
 
 type Opcao = { id: number; nome: string; categoria?: string }
@@ -13,21 +14,18 @@ export interface ProcuraResumo {
   estado_nome: string | null
   estado_categoria: string | null
   urgencia_nome: string | null
-  qualificacao: string
   orcamento_max: string | null
   tolerancia_pct: string
   resumo: string
   responsavel_nome: string
-  data_inicio: string
+  quando_iniciou: string
+  criado_em: string
 }
 
 export interface Procura extends ProcuraResumo {
   pretende: string
   estado: number | null
   urgencia: number | null
-  motivacao: string
-  flexibilidade: string
-  prazo_compra: string | null
   teto: string | null
   tipos: number[]
   imp_tipos: Importancia
@@ -55,7 +53,7 @@ export interface Procura extends ProcuraResumo {
     pretende: string
     estado: string | null
     urgencia: string | null
-    qualificacao: string
+    [lista: string]: unknown
     tipos: string[]
     tipologias: string[]
     concelhos: { id: number; nome: string }[]
@@ -105,7 +103,12 @@ export interface OpcoesProcura {
   zonas_exteriores: Opcao[]
   condicoes_fisicas: Opcao[]
   tipos_interacao: Opcao[]
-  qualificacoes: { valor: string; nome: string }[]
+  sim_nao: Opcao[]
+  destinos_imovel: Opcao[]
+  niveis_motivacao: Opcao[]
+  aceita_obras: Opcao[]
+  modos_pagamento: Opcao[]
+  entidades_bancarias: Opcao[]
   pode_criar: boolean
 }
 
@@ -142,12 +145,7 @@ export const NOMES_CAMPOS_PROCURA: Record<string, string> = {
   entidade: 'Interessado',
   pretende: 'O cliente pretende',
   estado: 'Estado',
-  qualificacao: 'Qualificação',
   urgencia: 'Urgência',
-  motivacao: 'Motivação',
-  flexibilidade: 'Flexibilidade',
-  prazo_compra: 'Prazo',
-  data_inicio: 'Início da procura',
   orcamento_max: 'Orçamento máximo',
   tolerancia_pct: 'Tolerância (%)',
   quartos_min: 'Quartos (mínimo)',
@@ -180,3 +178,32 @@ export const procurarFreguesias = async (termo: string) =>
       `/api/localizacao/freguesias/?${new URLSearchParams({ pesquisa: termo })}`,
     )
   ).map((f) => ({ id: f.id, titulo: f.nome, detalhe: f.concelho }))
+
+/** Qualificação do comprador (D-34, Excel «Procuras e Qualificação»). */
+export const QUALIFICACAO_COMPRADOR: CampoQualificacao[] = [
+  { campo: 'destino_imovel', rotulo: 'Destino do imóvel', tipo: 'lista', lista: 'destinos_imovel' },
+  { campo: 'nivel_motivacao', rotulo: 'Motivação de compra', tipo: 'lista', lista: 'niveis_motivacao' },
+  { campo: 'compra_depende_venda', rotulo: 'A compra depende da venda', tipo: 'lista', lista: 'sim_nao' },
+  { campo: 'quando_iniciou', rotulo: 'Quando iniciou a procura', tipo: 'texto', ajuda: 'Ex.: «há 3 meses».' },
+  { campo: 'prazo_aquisicao', rotulo: 'Prazo de aquisição', tipo: 'texto', ajuda: 'Como o cliente disse.' },
+  { campo: 'piso', rotulo: 'Piso', tipo: 'texto', ajuda: 'Ex.: «não quer rés-do-chão».' },
+  { campo: 'exposicao_solar', rotulo: 'Exposição solar', tipo: 'texto' },
+  { campo: 'aceita_obras', rotulo: 'Obras', tipo: 'lista', lista: 'aceita_obras' },
+  { campo: 'motivacao', rotulo: 'Motivo para comprar', tipo: 'longo' },
+  { campo: 'o_que_quer', rotulo: 'O que quer?', tipo: 'longo' },
+  { campo: 'o_que_nao_quer', rotulo: 'O que não quer?', tipo: 'longo' },
+  { campo: 'flexibilidade', rotulo: 'Flexibilidade', tipo: 'longo', ajuda: 'Em que aspetos é flexível.' },
+]
+
+/** Pré-qualificação financeira (D-34). */
+export const PRE_QUALIFICACAO_FINANCEIRA: CampoQualificacao[] = [
+  { campo: 'plafond', rotulo: 'Plafond', tipo: 'euros' },
+  { campo: 'modo_pagamento', rotulo: 'Modo de pagamento', tipo: 'lista', lista: 'modos_pagamento' },
+  { campo: 'capitais_proprios', rotulo: 'Capitais próprios', tipo: 'lista', lista: 'sim_nao' },
+  { campo: 'financiamento', rotulo: 'Financiamento', tipo: 'lista', lista: 'sim_nao' },
+  { campo: 'qualificacao_bancaria', rotulo: 'Qualificação bancária', tipo: 'lista', lista: 'sim_nao' },
+  { campo: 'entidade_bancaria', rotulo: 'Entidade bancária', tipo: 'lista', lista: 'entidades_bancarias' },
+  { campo: 'observacoes_qualificacao', rotulo: 'Observações da qualificação', tipo: 'longo' },
+]
+
+for (const c of [...QUALIFICACAO_COMPRADOR, ...PRE_QUALIFICACAO_FINANCEIRA]) NOMES_CAMPOS_PROCURA[c.campo] = c.rotulo

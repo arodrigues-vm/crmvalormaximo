@@ -8,9 +8,16 @@ import { Bloco } from '../../componentes/Bloco'
 import { CampoCaixa, Dado } from '../../componentes/campos'
 import { Dialogo } from '../../componentes/Dialogo'
 import { CabecalhoRegisto, HistoricoRegisto } from '../../componentes/Ficha'
-import { dataPt, formatarEuros, momentoPt } from '../../componentes/formatar'
+import { formatarEuros, momentoPt } from '../../componentes/formatar'
 import { Interacoes } from '../../componentes/Interacoes'
-import { ETIQUETA_CATEGORIA, NOMES_CAMPOS_OPORTUNIDADE, oportunidadesApi } from './api'
+import { VerQualificacao } from '../../componentes/Qualificacao'
+import {
+  ETIQUETA_CATEGORIA,
+  NOMES_CAMPOS_OPORTUNIDADE,
+  oportunidadesApi,
+  QUALIFICACAO_NEGOCIO,
+  QUALIFICACAO_PROPRIETARIO,
+} from './api'
 
 export function OportunidadeConsulta() {
   const { id = '' } = useParams()
@@ -59,6 +66,7 @@ export function OportunidadeConsulta() {
     return <p className="aviso">Oportunidade não encontrada ou sem acesso.</p>
   if (!o) return <p className="erro">Não foi possível carregar a oportunidade.</p>
   const n = o.nomes
+  const registo = o as unknown as Record<string, unknown>
   const podeConverter = o.acoes.editar && !o.angariacao_gerada && (o.imovel !== null || pode('imoveis', 'criar'))
 
   return (
@@ -105,14 +113,9 @@ export function OportunidadeConsulta() {
           </Dado>
           <Dado rotulo="Operação pretendida">{n.operacao}</Dado>
           <Dado rotulo="Estado">{n.estado}</Dado>
-          <Dado rotulo="Qualificação">{n.qualificacao}</Dado>
           <Dado rotulo="Origem">{n.origem}</Dado>
-          <Dado rotulo="Preço pretendido">{formatarEuros(o.preco_pretendido)}</Dado>
-          <Dado rotulo="Prazo pretendido">{dataPt(o.prazo)}</Dado>
+          <Dado rotulo="Valor pretendido">{formatarEuros(o.preco_pretendido)}</Dado>
           <Dado rotulo="Responsável">{o.responsavel_nome}</Dado>
-          <Dado rotulo="Motivação" largo>
-            {o.motivacao && <span className="texto-livre">{o.motivacao}</span>}
-          </Dado>
         </dl>
         {podeConverter && (
           <div className="acoes-bloco">
@@ -121,6 +124,14 @@ export function OportunidadeConsulta() {
             </button>
           </div>
         )}
+      </Bloco>
+
+      <Bloco titulo="Qualificação do proprietário">
+        <VerQualificacao campos={QUALIFICACAO_PROPRIETARIO} registo={registo} />
+      </Bloco>
+
+      <Bloco titulo="Negócio">
+        <VerQualificacao campos={QUALIFICACAO_NEGOCIO} registo={registo} />
       </Bloco>
 
       <Bloco titulo="Imóvel">
@@ -137,6 +148,14 @@ export function OportunidadeConsulta() {
               {o.descricao_imovel}
             </Dado>
           </dl>
+        )}
+        {o.url_anuncio && (
+          <p>
+            Anúncio:{' '}
+            <a href={o.url_anuncio} target="_blank" rel="noopener noreferrer">
+              {o.url_anuncio}
+            </a>
+          </p>
         )}
       </Bloco>
 

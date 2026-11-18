@@ -101,3 +101,23 @@ def test_imovel_sem_acesso_recusado(api, u, ana, criar_utilizador):
     api.force_authenticate(u)
     r = api.post(LISTA, {"entidade": ana.pk, "imovel": i.pk}, format="json")
     assert r.status_code == 400 and "imovel" in r.json()
+
+
+def test_qualificacao_do_vendedor_d34(api, u, ana):
+    o = criar(
+        api, u, ana, prazo_vender="Até ao verão", url_anuncio="https://anuncios.exemplo.pt/123",
+        ocupacao=v("ocupacoes_imovel", "Devoluto"), nivel_motivacao=v("niveis_motivacao", "Alta"),
+        venda_depende_compra=v("sim_nao", "Não sabe"), valor_hipoteca="85000", objecoes="Acha a comissão alta",
+    )  # fmt: skip
+    assert o["prazo_vender"] == "Até ao verão" and o["valor_hipoteca"] == "85000.00"
+    assert o["nomes"]["ocupacao"] == "Devoluto" and o["nomes"]["venda_depende_compra"] == "Não sabe"
+    assert "qualificacao" not in o
+    # Só aceita valores da lista certa.
+    r = api.patch(
+        reverse("oportunidade-detail", args=[o["id"]]),
+        {"ocupacao": v("niveis_motivacao", "Alta"), "versao": o["versao"]},
+        format="json",
+    )
+    assert r.status_code == 400
+    opcoes = api.get(reverse("oportunidade-opcoes")).json()
+    assert [x["nome"] for x in opcoes["sim_nao"]] == ["Sim", "Não", "Não sabe"]

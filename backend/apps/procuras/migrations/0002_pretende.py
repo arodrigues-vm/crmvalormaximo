@@ -13,7 +13,6 @@ def copiar(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("configuracao", "0004_categorias_estados_comercializacao"),
         ("procuras", "0001_initial"),

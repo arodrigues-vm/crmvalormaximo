@@ -16,7 +16,13 @@ from apps.imoveis.models import Imovel, Proprietario
 from apps.imoveis.views import entidades_visiveis
 
 from .models import Oportunidade
-from .serializers import ConverterSerializer, OportunidadeListaSerializer, OportunidadeSerializer
+from .serializers import (
+    CAMPOS_QUALIFICACAO,
+    LISTAS_QUALIFICACAO,
+    ConverterSerializer,
+    OportunidadeListaSerializer,
+    OportunidadeSerializer,
+)
 
 
 def imoveis_visiveis(utilizador) -> set[int]:
@@ -30,9 +36,9 @@ class OportunidadeViewSet(RegistoViewSet):
     nome_registo = "oportunidade"
     operacoes_extra = {**RegistoViewSet.operacoes_extra, "converter": Operacao.EDITAR}
     campos_auditados = [
-        "entidade_id", "imovel_id", "tipo_imovel_id", "tipologia_id", "localidade", "descricao_imovel",
-        "operacao_id", "estado_id", "qualificacao", "origem_id", "motivacao", "preco_pretendido", "prazo",
-        "responsavel_id", "observacoes",
+        "entidade_id", "imovel_id", "tipo_imovel_id", "tipologia_id", "localidade", "descricao_imovel", "url_anuncio",
+        "operacao_id", "estado_id", "origem_id", "preco_pretendido", "responsavel_id", "observacoes",
+        *[f"{c}_id" if c in LISTAS_QUALIFICACAO else c for c in CAMPOS_QUALIFICACAO],
     ]  # fmt: skip
 
     def get_serializer_class(self):
@@ -47,7 +53,7 @@ class OportunidadeViewSet(RegistoViewSet):
     def base_queryset(self):
         return Oportunidade.objects.select_related(
             "entidade", "imovel__tipo", "imovel__tipologia", "tipo_imovel", "tipologia", "operacao", "estado",
-            "origem", "responsavel", "angariacao_gerada",
+            "origem", "responsavel", "angariacao_gerada", *LISTAS_QUALIFICACAO,
         )  # fmt: skip
 
     def filtros(self, qs):
@@ -65,15 +71,11 @@ class OportunidadeViewSet(RegistoViewSet):
             qs = qs.filter(estado_id=p["estado"])
         if p.get("categoria"):
             qs = qs.filter(estado__categoria=p["categoria"])
-        if p.get("qualificacao"):
-            qs = qs.filter(qualificacao=p["qualificacao"])
         if p.get("entidade"):
             qs = qs.filter(entidade_id=p["entidade"])
         return qs.order_by("-criado_em", "-id")
 
-    @extend_schema(
-        parameters=[OpenApiParameter(n, str) for n in ("pesquisa", "estado", "categoria", "qualificacao", "entidade")]
-    )
+    @extend_schema(parameters=[OpenApiParameter(n, str) for n in ("pesquisa", "estado", "categoria", "entidade")])
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
@@ -87,7 +89,7 @@ class OportunidadeViewSet(RegistoViewSet):
                 "tipos_imovel": opcoes_lista("tipos_imovel"),
                 "tipologias": opcoes_lista("tipologias"),
                 "tipos_interacao": opcoes_lista("tipos_interacao"),
-                "qualificacoes": [{"valor": v, "nome": n} for v, n in Oportunidade.Qualificacao.choices],
+                **{chave: opcoes_lista(chave) for chave in set(LISTAS_QUALIFICACAO.values())},
                 **self.permissoes_gerais(request),
             }
         )

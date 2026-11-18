@@ -49,3 +49,24 @@ def test_crud_basico_estado_por_omissao_e_interacoes(api, criar_utilizador):
     # Sem acesso
     api.force_authenticate(outro)
     assert api.get(reverse("procura-detail", args=[p["id"]])).status_code == 404
+
+
+def test_qualificacao_do_comprador_d34(api, criar_utilizador):
+    u = criar_utilizador(Perfil.CONSULTOR)
+    e = Entidade.objects.create(nome="Comprador", responsavel=u)
+    api.force_authenticate(u)
+    r = api.post(
+        reverse("procura-list"),
+        {
+            "entidade": e.pk, "quando_iniciou": "Há 3 meses", "prazo_aquisicao": "Até ao fim do ano",
+            "motivacao": "Família a crescer", "modo_pagamento": v("modos_pagamento", "Financiamento"),
+            "plafond": "200000", "qualificacao_bancaria": v("sim_nao", "Sim"),
+            "entidade_bancaria": v("entidades_bancarias", "CGD"), "aceita_obras": v("aceita_obras", "Poucas obras"),
+        },
+        format="json",
+    )  # fmt: skip
+    assert r.status_code == 201, r.content
+    p = r.json()
+    assert p["quando_iniciou"] == "Há 3 meses" and p["prazo_aquisicao"] == "Até ao fim do ano"
+    assert p["nomes"]["entidade_bancaria"] == "CGD" and p["nomes"]["aceita_obras"] == "Poucas obras"
+    assert p["plafond"] == "200000.00" and "qualificacao" not in p

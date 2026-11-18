@@ -8,7 +8,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -25,24 +24,18 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    models.BigIntegerField(
-                        auto_created=True, blank=True, db_index=True, verbose_name="ID"
-                    ),
+                    models.BigIntegerField(auto_created=True, blank=True, db_index=True, verbose_name="ID"),
                 ),
                 (
                     "referencia",
-                    models.CharField(
-                        db_index=True, editable=False, max_length=20, null=True
-                    ),
+                    models.CharField(db_index=True, editable=False, max_length=20, null=True),
                 ),
                 ("criado_em", models.DateTimeField(blank=True, editable=False)),
                 ("atualizado_em", models.DateTimeField(blank=True, editable=False)),
                 ("versao", models.PositiveIntegerField(default=1, editable=False)),
                 (
                     "eliminado_em",
-                    models.DateTimeField(
-                        blank=True, db_index=True, editable=False, null=True
-                    ),
+                    models.DateTimeField(blank=True, db_index=True, editable=False, null=True),
                 ),
                 (
                     "localidade",
@@ -70,9 +63,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "motivacao",
-                    models.TextField(
-                        blank=True, verbose_name="motivação do proprietário"
-                    ),
+                    models.TextField(blank=True, verbose_name="motivação do proprietário"),
                 ),
                 (
                     "preco_pretendido",
@@ -282,18 +273,14 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "referencia",
-                    models.CharField(
-                        editable=False, max_length=20, null=True, unique=True
-                    ),
+                    models.CharField(editable=False, max_length=20, null=True, unique=True),
                 ),
                 ("criado_em", models.DateTimeField(auto_now_add=True)),
                 ("atualizado_em", models.DateTimeField(auto_now=True)),
                 ("versao", models.PositiveIntegerField(default=1, editable=False)),
                 (
                     "eliminado_em",
-                    models.DateTimeField(
-                        blank=True, db_index=True, editable=False, null=True
-                    ),
+                    models.DateTimeField(blank=True, db_index=True, editable=False, null=True),
                 ),
                 (
                     "localidade",
@@ -321,9 +308,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "motivacao",
-                    models.TextField(
-                        blank=True, verbose_name="motivação do proprietário"
-                    ),
+                    models.TextField(blank=True, verbose_name="motivação do proprietário"),
                 ),
                 (
                     "preco_pretendido",
@@ -443,9 +428,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "partilhada_com",
-                    models.ManyToManyField(
-                        blank=True, related_name="+", to=settings.AUTH_USER_MODEL
-                    ),
+                    models.ManyToManyField(blank=True, related_name="+", to=settings.AUTH_USER_MODEL),
                 ),
                 (
                     "responsavel",
