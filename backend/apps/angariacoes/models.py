@@ -51,7 +51,7 @@ class Angariacao(RegistoBase):
     operacao = campo_lista("operacoes", verbose_name="tipo (operação)")
     regime = campo_lista("regimes_cmi")
 
-    data_assinatura = models.DateField("data de assinatura", null=True, blank=True)
+    # D-34: sem «data de assinatura». O CMI conta como assinado quando tem data de início e prazo.
     # Início ORIGINAL: estável depois da assinatura (só por correção material).
     data_inicio = models.DateField("data de início", null=True, blank=True)
     prazo_meses = models.PositiveSmallIntegerField(
@@ -92,9 +92,19 @@ class Angariacao(RegistoBase):
     remuneracao_inclui_iva = models.BooleanField(
         "valores com IVA incluído", null=True, blank=True, help_text="Vazio = não indicado."
     )
-    condicoes_pagamento = models.TextField(
-        "condições e momentos de pagamento", blank=True, help_text="Ex.: 50% no CPCV e 50% na escritura."
+    # Pagamento da comissão (D-34): o momento depende do sinal pago pelo comprador.
+    # Ex.: «100% no CPCV» desde que o sinal seja de pelo menos 15%.
+    momento_pagamento = campo_lista("momentos_pagamento_comissao", verbose_name="momento do pagamento")
+    sinal_valor = models.DecimalField(
+        "sinal mínimo", max_digits=12, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0)]
     )
+    sinal_unidade = models.CharField(
+        "unidade do sinal",
+        max_length=12,
+        blank=True,
+        choices=[("percentagem", "% do preço"), ("euros", "€")],
+    )
+    condicoes_pagamento = models.TextField("outras condições de pagamento", blank=True)
 
     responsavel = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+")
     partilhada_com = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="+")
@@ -113,7 +123,7 @@ class Angariacao(RegistoBase):
 
     @property
     def assinado(self) -> bool:
-        return self.data_assinatura is not None and self.data_inicio is not None and self.prazo_meses is not None
+        return self.data_inicio is not None and self.prazo_meses is not None
 
     def recalcular_datas(self):
         self.data_fim = (

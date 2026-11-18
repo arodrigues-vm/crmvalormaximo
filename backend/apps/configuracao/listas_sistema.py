@@ -67,6 +67,12 @@ LISTAS = {
         "Qualidade em que cada parte intervém no contrato.",
         ["Proprietário", "Representante legal", "Procurador"],
     ),
+    "momentos_pagamento_comissao": (
+        "Momentos de pagamento da comissão",
+        "angariacoes",
+        "",
+        ["100% no CPCV", "50% no CPCV e 50% na escritura", "100% na escritura"],
+    ),
     "tipos_ligacao": (
         "Tipos de ligação externa",
         "geral",

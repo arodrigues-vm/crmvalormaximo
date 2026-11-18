@@ -15,6 +15,7 @@ const OPCOES = {
     { id: 41, nome: 'Arrendamento', categoria: 'arrendamento' },
   ],
   regimes: [{ id: 70, nome: 'Exclusivo', categoria: 'exclusivo' }],
+  momentos_pagamento: [{ id: 90, nome: '100% no CPCV' }],
   papeis: [{ id: 80, nome: 'Proprietário' }],
   modalidades: [
     { valor: 'percentagem', nome: 'Percentagem sobre o valor do negócio' },
@@ -198,5 +199,30 @@ describe('Angariações', () => {
     fireEvent.change(operacao, { target: { value: '41' } })
     const nomes = [...screen.getByLabelText('Modalidade').querySelectorAll('option')].map((o) => o.textContent)
     expect(nomes).toEqual(['—', 'Valor fixo', 'Número de rendas', 'Percentagem sobre base contratual'])
+  })
+
+  it('mostra a data fim calculada e envia o sinal e o momento do pagamento', async () => {
+    const pedidos = simularApi({
+      ...base,
+      'GET /api/angariacoes/': () => json({ count: 0, results: [] }),
+      'POST /api/angariacoes/': () => json({ campos: {} }, 400),
+    })
+    desenhar('/angariacoes/nova')
+    expect(screen.queryByLabelText('Data de assinatura')).not.toBeInTheDocument()
+    fireEvent.change(await screen.findByLabelText('Data de início'), { target: { value: '2026-01-31' } })
+    fireEvent.change(screen.getByLabelText('Prazo (meses)'), { target: { value: '1' } })
+    expect(screen.getByText('27/02/2026')).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('Prazo (meses)'), { target: { value: '6' } })
+    expect(screen.getByText('30/07/2026')).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByLabelText('Momento do pagamento').querySelectorAll('option').length).toBe(2))
+    fireEvent.change(screen.getByLabelText('Momento do pagamento'), { target: { value: '90' } })
+    fireEvent.change(screen.getByLabelText('Sinal mínimo do comprador'), { target: { value: '15' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar' }))
+    await waitFor(() => expect(pedidos.some((p) => p.metodo === 'POST')).toBe(true))
+    expect(pedidos.find((p) => p.metodo === 'POST')!.corpo).toMatchObject({
+      momento_pagamento: 90,
+      sinal_valor: '15',
+      sinal_unidade: 'percentagem',
+    })
   })
 })

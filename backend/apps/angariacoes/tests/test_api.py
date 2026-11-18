@@ -60,7 +60,7 @@ def criar(api, u, imovel, **extra):
 
 
 def assinado(inicio=HOJE - timedelta(days=10), prazo=6):
-    return {"data_assinatura": str(inicio), "data_inicio": str(inicio), "prazo_meses": prazo}
+    return {"data_inicio": str(inicio), "prazo_meses": prazo}
 
 
 class TestDatas:
@@ -81,9 +81,23 @@ class TestDatas:
         c = criar(api, pessoas.cons, imovel, operacao=None)
         assert c["nomes"]["operacao"] == "Venda"
 
-    def test_assinatura_exige_inicio_e_prazo(self, api, pessoas, imovel):
-        r = como(api, pessoas.cons).post(LISTA, {"imovel": imovel.pk, "data_assinatura": str(HOJE)}, format="json")
-        assert r.status_code == 400 and "data_inicio" in r.json()
+    def test_so_inicio_sem_prazo_fica_por_assinar(self, api, pessoas, imovel):
+        c = criar(api, pessoas.cons, imovel, data_inicio=str(HOJE))
+        assert c["estado"] == "por_assinar" and c["data_fim_vigente"] is None
+        assert "data_assinatura" not in c
+
+    def test_sinal_e_momento_de_pagamento(self, api, pessoas, imovel):
+        momento = ValorLista.objects.get(lista__chave="momentos_pagamento_comissao", nome="100% no CPCV")
+        c = criar(
+            api, pessoas.cons, imovel, momento_pagamento=momento.pk, sinal_valor="15", sinal_unidade="percentagem"
+        )
+        assert c["momento_pagamento_nome"] == "100% no CPCV" and c["sinal_valor"] == "15.00"
+        r = como(api, pessoas.cons).post(LISTA, {"imovel": imovel.pk, "sinal_valor": "15"}, format="json")
+        assert r.status_code == 400 and "sinal_unidade" in str(r.json())
+        r = como(api, pessoas.cons).post(
+            LISTA, {"imovel": imovel.pk, "sinal_valor": "150", "sinal_unidade": "percentagem"}, format="json"
+        )
+        assert r.status_code == 400
 
     def test_expirada(self, api, pessoas, imovel):
         c = criar(api, pessoas.cons, imovel, **assinado(HOJE - timedelta(days=400), 6))
@@ -252,14 +266,14 @@ class TestRemuneracao:
 
 class TestAlertasEFiltros:
     def test_alerta_por_limiares(self, pessoas, imovel):
-        a = Angariacao(imovel=imovel, responsavel=pessoas.cons, data_assinatura=HOJE, data_inicio=HOJE, prazo_meses=6)
+        a = Angariacao(imovel=imovel, responsavel=pessoas.cons, data_inicio=HOJE, prazo_meses=6)
         for dias, limiar in [(150, None), (100, 120), (45, 60), (10, 30)]:
             a.data_fim = a.data_fim_vigente = HOJE + timedelta(days=dias)
             assert (alerta(a) or {}).get("limiar") == limiar, dias
 
     def test_limiares_configuraveis(self, pessoas, imovel):
         Parametro.objects.filter(chave="cmi_alertas_dias").update(valor=[15])
-        a = Angariacao(imovel=imovel, responsavel=pessoas.cons, data_assinatura=HOJE, data_inicio=HOJE, prazo_meses=6)
+        a = Angariacao(imovel=imovel, responsavel=pessoas.cons, data_inicio=HOJE, prazo_meses=6)
         a.data_fim = a.data_fim_vigente = HOJE + timedelta(days=20)
         assert alerta(a) is None
 

@@ -701,6 +701,11 @@ body {
   font-size: 13px;
   font-weight: 500;
 }
+.valor-calculado {
+  margin: 0;
+  padding: 9px 0;
+  font-weight: 600;
+}
 .campo input,
 .campo select,
 .campo textarea {

@@ -58,7 +58,7 @@ def alerta(angariacao: Angariacao, dia: date | None = None) -> dict | None:
 def filtro_estado(qs, estado: str, dia: date | None = None):
     dia = dia or hoje()
     em_curso = Q(situacao=Angariacao.Situacao.EM_CURSO)
-    assinado = Q(data_assinatura__isnull=False, data_inicio__isnull=False, prazo_meses__isnull=False)
+    assinado = Q(data_inicio__isnull=False, prazo_meses__isnull=False)
     if estado == "por_assinar":
         return qs.filter(em_curso).exclude(assinado)
     if estado == "vigentes":

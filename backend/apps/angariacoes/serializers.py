@@ -12,7 +12,7 @@ from .models import ESTADOS, Angariacao, Interveniente, Renovacao, calcular_fim
 from .servicos import alerta, conflitos, descrever_conflitos, hoje
 
 CEM = Decimal("100")
-CAMPOS_CONTRATUAIS = ("data_assinatura", "data_inicio", "prazo_meses")
+CAMPOS_CONTRATUAIS = ("data_inicio", "prazo_meses")
 
 
 def _nome(v):
@@ -94,6 +94,8 @@ class AngariacaoSerializer(AngariacaoListaSerializer):
     imovel = serializers.PrimaryKeyRelatedField(queryset=Imovel.objects.ativos())
     operacao = CampoValorLista("operacoes", allow_null=True, required=False)
     regime = CampoValorLista("regimes_cmi", allow_null=True, required=False)
+    momento_pagamento = CampoValorLista("momentos_pagamento_comissao", allow_null=True, required=False)
+    momento_pagamento_nome = serializers.CharField(source="momento_pagamento.nome", read_only=True, default=None)
     responsavel = serializers.PrimaryKeyRelatedField(required=False, queryset=Utilizador.objects.filter(is_active=True))
     intervenientes = IntervenienteEscritaSerializer(many=True, required=False, write_only=True)
     intervenientes_detalhe = serializers.SerializerMethodField()
@@ -108,10 +110,11 @@ class AngariacaoSerializer(AngariacaoListaSerializer):
         model = Angariacao
         fields = [
             "id", "referencia", "numero_contrato", "imovel", "imovel_referencia", "imovel_descricao",
-            "operacao", "regime", "data_assinatura", "data_inicio", "prazo_meses", "data_fim", "data_fim_vigente",
+            "operacao", "regime", "data_inicio", "prazo_meses", "data_fim", "data_fim_vigente",
             "situacao", "situacao_motivo", "estado", "estado_nome", "alerta", "assinado",
             "modalidade_remuneracao", "valor_remuneracao", "base_contratual", "valor_minimo_remuneracao",
-            "taxa_iva", "remuneracao_inclui_iva", "condicoes_pagamento",
+            "taxa_iva", "remuneracao_inclui_iva", "momento_pagamento", "momento_pagamento_nome", "sinal_valor",
+            "sinal_unidade", "condicoes_pagamento",
             "intervenientes", "intervenientes_detalhe", "renovacoes", "correcoes", "imovel_fotografia",
             "responsavel", "responsavel_nome", "observacoes", "nomes",
             "criado_em", "atualizado_em", "versao", "eliminado_em", "acoes",
@@ -178,11 +181,11 @@ class AngariacaoSerializer(AngariacaoListaSerializer):
                 raise serializers.ValidationError({"imovel": "Não é possível mudar o imóvel de um CMI assinado."})
 
         val = lambda c: d.get(c, getattr(inst, c, None))  # noqa: E731
-        assinatura, inicio, prazo = val("data_assinatura"), val("data_inicio"), val("prazo_meses")
-        if assinatura and not (inicio and prazo):
-            raise serializers.ValidationError(
-                {"data_inicio": "Com data de assinatura, indique também a data de início e o prazo."}
-            )
+        inicio, prazo = val("data_inicio"), val("prazo_meses")
+        if val("sinal_valor") is not None and not val("sinal_unidade"):
+            raise serializers.ValidationError({"sinal_unidade": "Indique se o sinal é em % ou em euros."})
+        if val("sinal_unidade") == "percentagem" and (val("sinal_valor") or 0) > CEM:
+            raise serializers.ValidationError({"sinal_valor": "A percentagem não pode passar de 100%."})
         operacao = val("operacao") or (val("imovel").operacao if val("imovel") else None)
         modalidade = val("modalidade_remuneracao")
         if modalidade and operacao and operacao.categoria:

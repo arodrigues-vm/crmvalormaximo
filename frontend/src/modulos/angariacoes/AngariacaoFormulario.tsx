@@ -24,7 +24,6 @@ interface Valores {
   numero_contrato: string
   operacao: string
   regime: string
-  data_assinatura: string
   data_inicio: string
   prazo_meses: string
   modalidade_remuneracao: string
@@ -33,6 +32,9 @@ interface Valores {
   valor_minimo_remuneracao: string
   taxa_iva: string
   remuneracao_inclui_iva: string
+  momento_pagamento: string
+  sinal_valor: string
+  sinal_unidade: string
   condicoes_pagamento: string
   observacoes: string
   partes: Parte[] | null // null = pré-preencher com os proprietários do imóvel
@@ -48,7 +50,6 @@ function deCmi(a: Angariacao): Valores {
     numero_contrato: a.numero_contrato,
     operacao: t(a.operacao),
     regime: t(a.regime),
-    data_assinatura: t(a.data_assinatura),
     data_inicio: t(a.data_inicio),
     prazo_meses: t(a.prazo_meses),
     modalidade_remuneracao: a.modalidade_remuneracao,
@@ -57,6 +58,9 @@ function deCmi(a: Angariacao): Valores {
     valor_minimo_remuneracao: a.valor_minimo_remuneracao === null ? '' : String(Number(a.valor_minimo_remuneracao)),
     taxa_iva: a.taxa_iva === null ? '' : String(Number(a.taxa_iva)),
     remuneracao_inclui_iva: a.remuneracao_inclui_iva === null ? '' : a.remuneracao_inclui_iva ? 'sim' : 'nao',
+    momento_pagamento: t(a.momento_pagamento),
+    sinal_valor: a.sinal_valor === null ? '' : String(Number(a.sinal_valor)),
+    sinal_unidade: a.sinal_unidade || 'percentagem',
     condicoes_pagamento: a.condicoes_pagamento,
     observacoes: a.observacoes,
     partes: a.intervenientes_detalhe.map((i) => ({
@@ -72,6 +76,17 @@ function deCmi(a: Angariacao): Valores {
   }
 }
 
+/** Fim = início + prazo (meses) − 1 dia (D-28). Apenas para mostrar; o servidor calcula o valor oficial. */
+function fimCalculado(inicio: string, prazo: string) {
+  const meses = Number(prazo)
+  if (!inicio || !meses) return null
+  const [a, m, d] = inicio.split('-').map(Number)
+  const fim = new Date(Date.UTC(a, m - 1 + meses, 1))
+  const ultimoDia = new Date(Date.UTC(fim.getUTCFullYear(), fim.getUTCMonth() + 1, 0)).getUTCDate()
+  fim.setUTCDate(Math.min(d, ultimoDia) - 1)
+  return fim.toLocaleDateString('pt-PT', { timeZone: 'UTC' })
+}
+
 function paraApi(v: Valores, assinado: boolean) {
   const corpo: Record<string, unknown> = {
     imovel: v.imovel?.id ?? null,
@@ -84,11 +99,13 @@ function paraApi(v: Valores, assinado: boolean) {
     valor_minimo_remuneracao: num(v.valor_minimo_remuneracao),
     taxa_iva: num(v.taxa_iva),
     remuneracao_inclui_iva: v.remuneracao_inclui_iva === '' ? null : v.remuneracao_inclui_iva === 'sim',
+    momento_pagamento: idOuNull(v.momento_pagamento),
+    sinal_valor: num(v.sinal_valor),
+    sinal_unidade: num(v.sinal_valor) === null ? '' : v.sinal_unidade,
     condicoes_pagamento: v.condicoes_pagamento,
     observacoes: v.observacoes,
   }
   if (!assinado) {
-    corpo.data_assinatura = v.data_assinatura || null
     corpo.data_inicio = v.data_inicio || null
     corpo.prazo_meses = num(v.prazo_meses)
   }
@@ -102,7 +119,7 @@ function paraApi(v: Valores, assinado: boolean) {
 }
 
 const BLOCOS: Record<string, string[]> = {
-  contrato: ['imovel', 'numero_contrato', 'operacao', 'regime', 'data_assinatura', 'data_inicio', 'prazo_meses'],
+  contrato: ['imovel', 'numero_contrato', 'operacao', 'regime', 'data_inicio', 'prazo_meses'],
   partes: ['intervenientes'],
   remuneracao: [
     'modalidade_remuneracao',
@@ -111,6 +128,9 @@ const BLOCOS: Record<string, string[]> = {
     'valor_minimo_remuneracao',
     'taxa_iva',
     'remuneracao_inclui_iva',
+    'momento_pagamento',
+    'sinal_valor',
+    'sinal_unidade',
     'condicoes_pagamento',
   ],
   observacoes: ['observacoes'],
@@ -158,7 +178,6 @@ function Formulario({ cmi, imovelInicial = null }: { cmi?: Angariacao; imovelIni
             numero_contrato: '',
             operacao: '',
             regime: '',
-            data_assinatura: '',
             data_inicio: '',
             prazo_meses: '',
             modalidade_remuneracao: '',
@@ -167,6 +186,9 @@ function Formulario({ cmi, imovelInicial = null }: { cmi?: Angariacao; imovelIni
             valor_minimo_remuneracao: '',
             taxa_iva: '',
             remuneracao_inclui_iva: '',
+            momento_pagamento: '',
+            sinal_valor: '',
+            sinal_unidade: 'percentagem',
             condicoes_pagamento: '',
             observacoes: '',
             partes: null,
@@ -297,14 +319,6 @@ function Formulario({ cmi, imovelInicial = null }: { cmi?: Angariacao; imovelIni
           ) : (
             <>
               <CampoTexto
-                rotulo="Data de assinatura"
-                type="date"
-                value={v.data_assinatura}
-                onChange={(e) => mudar('data_assinatura', e.target.value)}
-                erro={erro('data_assinatura')}
-                ajuda="Deixe vazio enquanto o contrato não estiver assinado."
-              />
-              <CampoTexto
                 rotulo="Data de início"
                 type="date"
                 value={v.data_inicio}
@@ -317,8 +331,13 @@ function Formulario({ cmi, imovelInicial = null }: { cmi?: Angariacao; imovelIni
                 value={v.prazo_meses}
                 onChange={(e) => mudar('prazo_meses', e.target.value)}
                 erro={erro('prazo_meses')}
-                ajuda="A data de fim é calculada (início + prazo − 1 dia)."
+                ajuda="Preencha a data de início e o prazo quando o contrato for assinado."
               />
+              <div className="campo">
+                <span className="rotulo-falso">Data fim de contrato</span>
+                <p className="valor-calculado">{fimCalculado(v.data_inicio, v.prazo_meses) ?? '—'}</p>
+                <small className="campo-ajuda">Calculada: início + prazo − 1 dia. Muda com as renovações.</small>
+              </div>
             </>
           )}
         </div>
@@ -466,12 +485,37 @@ function Formulario({ cmi, imovelInicial = null }: { cmi?: Angariacao; imovelIni
               { valor: 'sim', nome: 'Com IVA incluído' },
             ]}
           />
+          <CampoSelecao
+            rotulo="Momento do pagamento"
+            vazio="—"
+            value={v.momento_pagamento}
+            onChange={(e) => mudar('momento_pagamento', e.target.value)}
+            opcoes={(o?.momentos_pagamento ?? []).map((x) => ({ valor: x.id, nome: x.nome }))}
+            erro={erro('momento_pagamento')}
+          />
+          <CampoTexto
+            rotulo="Sinal mínimo do comprador"
+            inputMode="decimal"
+            value={v.sinal_valor}
+            onChange={(e) => mudar('sinal_valor', e.target.value)}
+            erro={erro('sinal_valor')}
+            ajuda="Condição para o pagamento no CPCV (ex.: 15%)."
+          />
+          <CampoSelecao
+            rotulo="O sinal é em"
+            value={v.sinal_unidade}
+            onChange={(e) => mudar('sinal_unidade', e.target.value)}
+            opcoes={[
+              { valor: 'percentagem', nome: '% do preço' },
+              { valor: 'euros', nome: 'Euros (€)' },
+            ]}
+            erro={erro('sinal_unidade')}
+          />
           <CampoAreaTexto
-            rotulo="Condições e momentos de pagamento"
+            rotulo="Outras condições de pagamento"
             value={v.condicoes_pagamento}
             onChange={(e) => mudar('condicoes_pagamento', e.target.value)}
             erro={erro('condicoes_pagamento')}
-            placeholder="Ex.: 50% na assinatura do CPCV e 50% na escritura."
           />
         </div>
       </Bloco>

@@ -113,6 +113,18 @@ class TestImovel:
         assert c.get(LISTA, {"pesquisa": "outra terra"}).json()["count"] == 1
         assert c.get(LISTA, {"pesquisa": a["referencia"]}).json()["count"] == 1
 
+    def test_pesquisa_flexivel_por_palavras(self, api, pessoas):
+        """D-34: «10 T3 Maia» encontra imóveis com todas as palavras, em qualquer campo e ordem."""
+        a = criar(api, pessoas.cons, tipologia=valor("tipologias", "T3"), localidade="Maia")
+        criar(api, pessoas.cons, tipologia=valor("tipologias", "T3"), localidade="Porto")
+        criar(api, pessoas.cons, tipologia=valor("tipologias", "T2"), localidade="Maia")
+        c = como(api, pessoas.cons)
+        numero = str(a["id"])
+        assert [x["id"] for x in c.get(LISTA, {"pesquisa": "T3 maia"}).json()["results"]] == [a["id"]]
+        assert [x["id"] for x in c.get(LISTA, {"pesquisa": "maia, t3"}).json()["results"]] == [a["id"]]
+        assert a["id"] in [x["id"] for x in c.get(LISTA, {"pesquisa": f"{numero} T3"}).json()["results"]]
+        assert c.get(LISTA, {"pesquisa": "apartamento maia"}).json()["count"] == 2
+
     def test_permissoes(self, api, pessoas):
         i = criar(api, pessoas.cons)
         assert como(api, pessoas.cons2).get(detalhe(i["id"])).status_code == 404

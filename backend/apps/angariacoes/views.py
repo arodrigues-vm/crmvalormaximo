@@ -25,7 +25,7 @@ from .serializers import (
 from .servicos import conflitos, descrever_conflitos, filtro_estado, hoje
 
 ORDENACOES = {"recentes": "-criado_em", "fim": "data_fim_vigente", "referencia": "id"}
-NOMES_CAMPOS = {"data_assinatura": "Data de assinatura", "data_inicio": "Data de início", "prazo_meses": "Prazo"}
+NOMES_CAMPOS = {"data_inicio": "Data de início", "prazo_meses": "Prazo"}
 
 
 class AngariacaoViewSet(RegistoViewSet):
@@ -40,9 +40,10 @@ class AngariacaoViewSet(RegistoViewSet):
         "situacao": Operacao.EDITAR,
     }
     campos_auditados = [
-        "imovel_id", "numero_contrato", "operacao_id", "regime_id", "data_assinatura", "data_inicio", "prazo_meses",
+        "imovel_id", "numero_contrato", "operacao_id", "regime_id", "data_inicio", "prazo_meses",
         "data_fim", "data_fim_vigente", "situacao", "modalidade_remuneracao", "valor_remuneracao", "base_contratual",
-        "valor_minimo_remuneracao", "taxa_iva", "remuneracao_inclui_iva", "condicoes_pagamento", "responsavel_id",
+        "valor_minimo_remuneracao", "taxa_iva", "remuneracao_inclui_iva", "momento_pagamento_id", "sinal_valor",
+        "sinal_unidade", "condicoes_pagamento", "responsavel_id",
         "observacoes",
     ]  # fmt: skip
 
@@ -56,7 +57,7 @@ class AngariacaoViewSet(RegistoViewSet):
 
     def base_queryset(self):
         return Angariacao.objects.select_related(
-            "imovel__tipo", "imovel__tipologia", "operacao", "regime", "responsavel"
+            "imovel__tipo", "imovel__tipologia", "operacao", "regime", "responsavel", "momento_pagamento"
         ).prefetch_related(
             "renovacoes__criado_por",
             Prefetch("intervenientes", queryset=Interveniente.objects.select_related("entidade", "papel")),
@@ -116,6 +117,7 @@ class AngariacaoViewSet(RegistoViewSet):
             {
                 "operacoes": opcoes_lista("operacoes"),
                 "regimes": opcoes_lista("regimes_cmi"),
+                "momentos_pagamento": opcoes_lista("momentos_pagamento_comissao"),
                 "papeis": opcoes_lista("papeis_interveniente_cmi"),
                 "modalidades": [{"valor": v, "nome": n} for v, n in Angariacao.Modalidade.choices],
                 "modalidades_por_operacao": {k: sorted(v) for k, v in Angariacao.MODALIDADES_POR_OPERACAO.items()},

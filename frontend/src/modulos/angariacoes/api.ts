@@ -50,7 +50,6 @@ export interface Angariacao {
   imovel_fotografia: FotografiaImovelRef | null
   operacao: number | null
   regime: number | null
-  data_assinatura: string | null
   data_inicio: string | null
   prazo_meses: number | null
   data_fim: string | null
@@ -67,6 +66,10 @@ export interface Angariacao {
   valor_minimo_remuneracao: string | null
   taxa_iva: string | null
   remuneracao_inclui_iva: boolean | null
+  momento_pagamento: number | null
+  momento_pagamento_nome: string | null
+  sinal_valor: string | null
+  sinal_unidade: '' | 'percentagem' | 'euros'
   condicoes_pagamento: string
   intervenientes_detalhe: Interveniente[]
   renovacoes: Renovacao[]
@@ -118,6 +121,7 @@ export interface AngariacaoResumo {
 export interface OpcoesCmi {
   operacoes: Opcao[]
   regimes: Opcao[]
+  momentos_pagamento: Opcao[]
   papeis: Opcao[]
   modalidades: Escolha[]
   modalidades_por_operacao: Record<string, string[]>
@@ -177,11 +181,10 @@ export const NOMES_CAMPOS_CMI: Record<string, string> = {
   numero_contrato: 'N.º do contrato',
   operacao: 'Tipo (operação)',
   regime: 'Regime',
-  data_assinatura: 'Data de assinatura',
   data_inicio: 'Data de início',
   prazo_meses: 'Prazo (meses)',
   data_fim: 'Fim do ciclo inicial',
-  data_fim_vigente: 'Fim em vigor',
+  data_fim_vigente: 'Data fim de contrato',
   situacao: 'Situação',
   situacao_motivo: 'Motivo da situação',
   modalidade_remuneracao: 'Modalidade da remuneração',
@@ -190,7 +193,10 @@ export const NOMES_CAMPOS_CMI: Record<string, string> = {
   valor_minimo_remuneracao: 'Remuneração mínima',
   taxa_iva: 'Taxa de IVA',
   remuneracao_inclui_iva: 'IVA incluído',
-  condicoes_pagamento: 'Condições de pagamento',
+  momento_pagamento: 'Momento do pagamento',
+  sinal_valor: 'Sinal mínimo',
+  sinal_unidade: 'Unidade do sinal',
+  condicoes_pagamento: 'Outras condições de pagamento',
   responsavel: 'Responsável',
   observacoes: 'Observações',
 }

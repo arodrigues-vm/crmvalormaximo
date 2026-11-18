@@ -140,11 +140,9 @@ export function AngariacaoConsulta() {
             <Dado rotulo="N.º do contrato">{a.numero_contrato}</Dado>
             <Dado rotulo="Tipo (operação)">{a.nomes.operacao}</Dado>
             <Dado rotulo="Regime">{a.nomes.regime}</Dado>
-            <Dado rotulo="Data de assinatura">{dataPt(a.data_assinatura)}</Dado>
-            <Dado rotulo="Data de início (original)">{dataPt(a.data_inicio)}</Dado>
+            <Dado rotulo="Data de início">{dataPt(a.data_inicio)}</Dado>
             <Dado rotulo="Prazo">{a.prazo_meses && `${a.prazo_meses} meses`}</Dado>
-            <Dado rotulo="Fim do ciclo inicial">{dataPt(a.data_fim)}</Dado>
-            <Dado rotulo="Fim em vigor">{dataPt(a.data_fim_vigente)}</Dado>
+            <Dado rotulo="Data fim de contrato">{dataPt(a.data_fim_vigente)}</Dado>
             <Dado rotulo="Situação">
               {a.nomes.situacao}
               {a.situacao_motivo && <small className="ajuda"> — {a.situacao_motivo}</small>}
@@ -236,7 +234,15 @@ export function AngariacaoConsulta() {
           <Dado rotulo="Valores">
             {a.remuneracao_inclui_iva === null ? null : a.remuneracao_inclui_iva ? 'Com IVA incluído' : 'Acresce IVA'}
           </Dado>
-          <Dado rotulo="Condições e momentos de pagamento" largo>
+          <Dado rotulo="Momento do pagamento">{a.momento_pagamento_nome}</Dado>
+          <Dado rotulo="Sinal mínimo do comprador">
+            {a.sinal_valor === null
+              ? null
+              : a.sinal_unidade === 'euros'
+                ? formatarEuros(a.sinal_valor)
+                : formatarPercentagem(a.sinal_valor)}
+          </Dado>
+          <Dado rotulo="Outras condições de pagamento" largo>
             {a.condicoes_pagamento && <span className="texto-livre">{a.condicoes_pagamento}</span>}
           </Dado>
         </dl>
@@ -480,7 +486,6 @@ function DialogoCorrigir({
         }}
         opcoes={[
           { valor: 'data_inicio', nome: 'Data de início' },
-          { valor: 'data_assinatura', nome: 'Data de assinatura' },
           { valor: 'prazo_meses', nome: 'Prazo (meses)' },
         ]}
       />
