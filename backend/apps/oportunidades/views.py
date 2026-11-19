@@ -97,13 +97,17 @@ class OportunidadeViewSet(RegistoViewSet):
     @extend_schema(request=ConverterSerializer)
     @action(detail=True, methods=["post"])
     def converter(self, request, pk=None):
-        """Passagem expressa e auditada a Imóvel (se ainda não existir) e, opcionalmente, a um CMI
-        por assinar. Não altera o estado da oportunidade (decisão do utilizador)."""
+        """Passagem expressa e auditada a Imóvel. D-35: a oportunidade só cria o IMÓVEL; o CMI cria-se
+        depois, a partir do imóvel (atualizado). Não altera o estado da oportunidade."""
         from apps.angariacoes.models import Angariacao, Interveniente
 
         s = ConverterSerializer(data=request.data)
         s.is_valid(raise_exception=True)
         criar_cmi = s.validated_data["criar_cmi"]
+        if criar_cmi:
+            raise serializers.ValidationError(
+                {"criar_cmi": "As angariações (CMI) criam-se a partir da ficha do imóvel."}
+            )
         u = request.user
         with transaction.atomic():
             o = Oportunidade.objects.select_for_update().get(pk=self.get_object().pk)
@@ -115,7 +119,13 @@ class OportunidadeViewSet(RegistoViewSet):
                     },  # fmt: skip
                     status=status.HTTP_409_CONFLICT,
                 )
-            if not o.imovel_id and not pode(u, "imoveis", Operacao.CRIAR):
+            if o.imovel_id:
+                return Response(
+                    {"detail": "Esta oportunidade já tem imóvel: abra-o para o atualizar e criar o CMI.",
+                     "codigo": "ja_tem_imovel", "imovel": o.imovel_id},
+                    status=status.HTTP_409_CONFLICT,
+                )  # fmt: skip
+            if not pode(u, "imoveis", Operacao.CRIAR):
                 raise PermissionDenied("Não tem permissão para criar imóveis.")
             if criar_cmi and not pode(u, "angariacoes", Operacao.CRIAR):
                 raise PermissionDenied("Não tem permissão para criar angariações.")

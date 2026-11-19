@@ -1,3 +1,5 @@
+import re
+
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -10,6 +12,14 @@ from apps.core.modelos_base import RegistoBase
 
 def caminho_fotografia(instancia, nome):
     return f"imoveis/{instancia.pk or 'novo'}/{nome}"
+
+
+def lugares_da_garagem(nome: str) -> int:
+    """«Box 2 lugares» → 2; «Não» → 0; sem número → 1."""
+    if nome.strip().lower() in ("não", "nao"):
+        return 0
+    numero = re.search(r"\d+", nome)
+    return int(numero.group()) if numero else 1
 
 
 AREA = {"max_digits": 10, "decimal_places": 2, "null": True, "blank": True, "validators": [MinValueValidator(0)]}
@@ -59,6 +69,8 @@ class Imovel(RegistoBase):
     licenca_construcao = models.CharField("licença de construção", max_length=120, blank=True)
     licenca_habitabilidade = models.CharField("licença de habitabilidade", max_length=120, blank=True)
     alvara_loteamento = models.CharField("alvará de loteamento", max_length=120, blank=True)
+    artigo_matricial = models.CharField("artigo matricial", max_length=120, blank=True)
+    descricao_registo_predial = models.CharField("descrição do registo predial", max_length=200, blank=True)
 
     # Áreas (m²)
     area_bruta_privativa = models.DecimalField("área bruta privativa", **AREA)
@@ -69,7 +81,7 @@ class Imovel(RegistoBase):
     area_descoberta = models.DecimalField("área descoberta", **AREA)
     area_construcao = models.DecimalField("área de construção", **AREA)
     fonte_areas = campo_lista("fontes_areas", verbose_name="fonte das áreas")
-    conformidade_areas = models.CharField("conformidade de áreas", max_length=255, blank=True)
+    conformidade_areas = models.TextField("conformidade de áreas", blank=True)
 
     # Características
     quartos = models.PositiveSmallIntegerField(null=True, blank=True)
@@ -78,6 +90,9 @@ class Imovel(RegistoBase):
     salas = models.PositiveSmallIntegerField(null=True, blank=True)
     casas_banho = models.PositiveSmallIntegerField("WCs", null=True, blank=True)
     wcs_servico = models.PositiveSmallIntegerField("WCs de serviço", null=True, blank=True)
+    marquises = models.PositiveSmallIntegerField("marquise", null=True, blank=True)
+    lavandarias = models.PositiveSmallIntegerField("lavandaria", null=True, blank=True)
+    outras_divisoes = models.CharField("outras divisões", max_length=200, blank=True)
     cozinha = campo_lista("cozinhas")
     arrumacao = campo_lista("classificacoes", verbose_name="arrumação")
     climatizacao = campo_lista("climatizacoes", verbose_name="climatização")
@@ -91,6 +106,7 @@ class Imovel(RegistoBase):
     # Elevadores: lista «Não, 1…10». O campo sim/não `elevador` é derivado (usado nas correspondências).
     elevadores = campo_lista("quantidades")
     elevador = models.BooleanField(null=True, blank=True, help_text="Vazio = desconhecido.")
+    # D-35: deixa de se preencher à mão; é derivado da «Garagem» (n.º de lugares) para as correspondências.
     lugares_estacionamento = models.PositiveSmallIntegerField(null=True, blank=True)
     certificado_energetico = campo_lista("certificados_energeticos", verbose_name="classe energética")
     zonas_exteriores = campo_lista_multipla("zonas_exteriores")
@@ -103,6 +119,10 @@ class Imovel(RegistoBase):
     responsavel = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+")
     partilhada_com = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="+")
     observacoes = models.TextField(blank=True)
+    # D-35: nova comercialização do mesmo imóvel = novo registo, criado com «Duplicar imóvel».
+    duplicado_de = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.PROTECT, related_name="duplicados", editable=False
+    )
 
     historico = HistoricalRecords(excluded_fields=["fotografia_miniatura"])
 
@@ -118,6 +138,8 @@ class Imovel(RegistoBase):
     def save(self, *args, **kwargs):
         if self.elevadores_id:
             self.elevador = self.elevadores.nome.strip().lower() not in ("não", "nao", "0")
+        # Lugares de estacionamento = primeiro número do nome da garagem («Box 2 lugares» → 2; sem número → 1).
+        self.lugares_estacionamento = lugares_da_garagem(self.garagem.nome) if self.garagem_id else None
         super().save(*args, **kwargs)
 
 

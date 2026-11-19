@@ -388,3 +388,33 @@ def test_caracteristicas_d34_e_elevador_derivado(api, pessoas):
         detalhe(i["id"]), {"elevadores": valor("quantidades", "Não"), "versao": i["versao"]}, format="json"
     )
     assert r.json()["elevador"] is False
+
+
+def test_garagem_define_lugares_de_estacionamento(api, pessoas):
+    i = criar(api, pessoas.cons, garagem=valor("garagens", "Box 2 lugares"), lugares_estacionamento=9)
+    assert i["lugares_estacionamento"] == 2  # vem da garagem; o valor enviado é ignorado
+    r = como(api, pessoas.cons).patch(detalhe(i["id"]), {"garagem": None, "versao": i["versao"]}, format="json")
+    assert r.json()["lugares_estacionamento"] is None
+
+
+def test_duplicar_imovel(api, pessoas):
+    from apps.core.models import RegistoAuditoria
+
+    ana = entidade(pessoas.cons)
+    o = criar(
+        api, pessoas.cons, proprietarios=[{"entidade": ana.pk, "quota": "100"}], suites=2, marquises=1,
+        artigo_matricial="U-1234", outras_divisoes="Escritório",
+    )  # fmt: skip
+    url = reverse("imovel-duplicar", args=[o["id"]])
+    c = como(api, pessoas.cons)
+    assert c.post(url, {}, format="json").status_code == 400  # exige confirmação
+    r = c.post(url, {"confirmar": True}, format="json")
+    assert r.status_code == 201, r.content
+    novo = c.get(detalhe(r.json()["id"])).json()
+    assert novo["referencia"] != o["referencia"] and novo["duplicado_de_referencia"] == o["referencia"]
+    assert novo["suites"] == 2 and novo["marquises"] == 1 and novo["artigo_matricial"] == "U-1234"
+    assert novo["nomes"]["estado_comercializacao"] == "Em preparação" and novo["nomes"]["status"] == "Ativo"
+    assert [p["entidade"] for p in novo["proprietarios_detalhe"]] == [ana.pk]
+    assert RegistoAuditoria.objects.filter(acao="imovel.duplicado").count() == 1
+    # Assistente não cria imóveis.
+    assert como(api, pessoas.assist).post(url, {"confirmar": True}, format="json").status_code in (403, 404)

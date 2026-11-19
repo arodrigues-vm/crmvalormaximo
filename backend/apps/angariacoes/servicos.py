@@ -1,6 +1,7 @@
 from datetime import date, timedelta
 from decimal import Decimal
 
+from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 
@@ -114,3 +115,42 @@ def filtro_estado(qs, estado: str, dia: date | None = None):
     if estado == "canceladas":
         return qs.filter(situacao=Angariacao.Situacao.CANCELADA)
     return qs
+
+
+def papel_proprietario():
+    from apps.configuracao.models import ValorLista
+
+    return ValorLista.objects.filter(lista__chave="papeis_interveniente_cmi", nome="Proprietário").first()
+
+
+def sincronizar_partes(cmi: Angariacao) -> None:
+    """D-35: as partes proprietárias de um CMI em curso são SEMPRE os proprietários atuais do imóvel
+    (com as quotas). Representantes legais, procuradores e outros papéis mantêm-se. Contratos
+    concluídos ou cancelados ficam como estavam: uma nova comercialização é um imóvel novo
+    («Duplicar imóvel»)."""
+    from .models import Interveniente
+
+    if cmi.situacao != Angariacao.Situacao.EM_CURSO:
+        return
+    papel = papel_proprietario()
+    donos = list(cmi.imovel.proprietarios.order_by("ordem", "id"))
+    ids_donos = {p.entidade_id for p in donos}
+    # Saem os antigos proprietários (papel «Proprietário» ou sem papel) que já não o são.
+    cmi.intervenientes.exclude(entidade_id__in=ids_donos).filter(
+        models.Q(papel__isnull=True) | models.Q(papel=papel)
+    ).delete()
+    for ordem, p in enumerate(donos):
+        Interveniente.objects.update_or_create(
+            angariacao=cmi,
+            entidade_id=p.entidade_id,
+            defaults={"papel": papel, "quota": p.quota, "ordem": ordem},
+        )
+    for ordem, i in enumerate(cmi.intervenientes.exclude(entidade_id__in=ids_donos), start=len(donos)):
+        if i.ordem != ordem:
+            i.ordem = ordem
+            i.save(update_fields=["ordem"])
+
+
+def sincronizar_partes_do_imovel(imovel) -> None:
+    for cmi in imovel.angariacoes.filter(situacao=Angariacao.Situacao.EM_CURSO, eliminado_em__isnull=True):
+        sincronizar_partes(cmi)

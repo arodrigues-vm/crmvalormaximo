@@ -22,7 +22,8 @@ class ProcuraViewSet(RegistoViewSet):
         "entidade_id", "pretende", "estado_id", "urgencia_id",
         *[f"{c}_id" if c in LISTAS_QUALIFICACAO else c for c in CAMPOS_QUALIFICACAO],
         "orcamento_max", "tolerancia_pct", "imp_tipos", "imp_tipologias",
-        "imp_localizacao", "quartos_min", "imp_quartos", "area_min", "imp_area", "imp_zonas_exteriores",
+        "imp_localizacao", "quartos_min", "imp_quartos", "wcs_min", "imp_wcs", "area_min", "imp_area",
+        "imp_zonas_exteriores",
         "exige_elevador", "imp_elevador", "estacionamento_min", "imp_estacionamento", "imp_condicoes",
         "responsavel_id", "observacoes",
     ]  # fmt: skip

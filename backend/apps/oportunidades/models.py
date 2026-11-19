@@ -59,6 +59,7 @@ class Oportunidade(RegistoBase):
     tempo_a_venda = models.CharField("há quanto tempo", max_length=120, blank=True)
     teve_visitas = campo_lista("sim_nao", verbose_name="teve visitas")
     teve_propostas = campo_lista("sim_nao", verbose_name="teve propostas")
+    porque_nao_vendeu = models.TextField("porque não vendeu", blank=True)
     valor_proposta = models.DecimalField(
         "valor da proposta", max_digits=12, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0)]
     )

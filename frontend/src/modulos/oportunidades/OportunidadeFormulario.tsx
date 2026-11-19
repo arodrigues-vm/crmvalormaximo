@@ -203,17 +203,6 @@ function Formulario({ o, entidadeInicial = null }: { o?: Oportunidade; entidadeI
         />
       </Bloco>
 
-      <Bloco titulo="Negócio" forcarAberto={temErro(QUALIFICACAO_NEGOCIO.map((c) => c.campo))} abertoInicial={!!o}>
-        <EditarQualificacao
-          nomesAtuais={o?.nomes}
-          campos={QUALIFICACAO_NEGOCIO}
-          valores={v.qualificacao}
-          aoMudar={mudarQ}
-          opcoes={opcoesQ}
-          erros={erros}
-        />
-      </Bloco>
-
       <Bloco
         titulo="Imóvel"
         forcarAberto={temErro(['imovel', 'tipo_imovel', 'tipologia', 'localidade', 'url_anuncio'])}
@@ -273,6 +262,17 @@ function Formulario({ o, entidadeInicial = null }: { o?: Oportunidade; entidadeI
             ajuda="Endereço do anúncio, se o imóvel já estiver anunciado noutro site."
           />
         </div>
+      </Bloco>
+
+      <Bloco titulo="Negócio" forcarAberto={temErro(QUALIFICACAO_NEGOCIO.map((c) => c.campo))} abertoInicial={!!o}>
+        <EditarQualificacao
+          nomesAtuais={o?.nomes}
+          campos={QUALIFICACAO_NEGOCIO}
+          valores={v.qualificacao}
+          aoMudar={mudarQ}
+          opcoes={opcoesQ}
+          erros={erros}
+        />
       </Bloco>
 
       <Bloco titulo="Observações" abertoInicial={!!v.observacoes}>

@@ -146,6 +146,7 @@ export const QUALIFICACAO_NEGOCIO: CampoQualificacao[] = [
   },
   { campo: 'teve_visitas', rotulo: 'Teve visitas', tipo: 'lista', lista: 'sim_nao' },
   { campo: 'teve_propostas', rotulo: 'Teve propostas', tipo: 'lista', lista: 'sim_nao' },
+  { campo: 'porque_nao_vendeu', rotulo: 'Porque não vendeu', tipo: 'longo' },
   {
     campo: 'valor_proposta',
     rotulo: 'Valor da proposta',

@@ -22,8 +22,9 @@ data de fim mais próxima.
 
 ## 5.2 Criar uma angariação
 
-A forma mais simples é a partir da ficha do imóvel: secção **Angariações (CMI)** → **+ Nova angariação para
-este imóvel**. Também pode usar **+ Nova angariação** na lista e escolher o imóvel.
+As angariações criam-se **sempre a partir do imóvel**: abra a ficha do imóvel e, na secção **Angariações
+(CMI)**, carregue em **+ Nova angariação para este imóvel**. Se o imóvel ainda não existir, crie-o primeiro
+(diretamente em Imóveis ou com **Criar imóvel** numa oportunidade de angariação).
 
 ![Nova angariação](imagens/30-cmi-novo.png)
 
@@ -35,8 +36,10 @@ este imóvel**. Também pode usar **+ Nova angariação** na lista e escolher o 
    **Data fim de contrato** aparece logo calculada: **início + prazo − 1 dia** (ex.: 01/01 + 6 meses → 30/06).
    Com as renovações, a data fim de contrato passa a ser a do último ciclo. Enquanto o contrato não estiver
    assinado, deixe a data de início e o prazo vazios: o CMI fica *Por assinar*.
-3. **Partes:** são preenchidas automaticamente com os proprietários atuais do imóvel (e as quotas). Pode
-   indicá-las manualmente e escolher o papel (Proprietário, Representante legal, Procurador…).
+3. **Partes:** os **proprietários** são sempre os do imóvel (com as quotas) e não se alteram aqui: para os
+   mudar, edite os proprietários na ficha do imóvel e as partes dos contratos em curso atualizam-se sozinhas.
+   Neste separador só acrescenta **outras partes** (Representante legal, Procurador…). Quando o contrato é
+   concluído ou cancelado, as partes ficam guardadas como estavam.
 4. **Remuneração e pagamento:** escolha a modalidade e o valor. As modalidades disponíveis dependem da operação:
    - **Venda:** percentagem sobre o valor do negócio ou valor fixo;
    - **Arrendamento:** número de rendas, valor fixo ou percentagem sobre uma base contratual (que tem de

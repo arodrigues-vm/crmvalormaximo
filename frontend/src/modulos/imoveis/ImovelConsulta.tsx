@@ -7,18 +7,23 @@ import { Bloco } from '../../componentes/Bloco'
 import { Dado } from '../../componentes/campos'
 import { Dialogo } from '../../componentes/Dialogo'
 import { CabecalhoRegisto, HistoricoRegisto } from '../../componentes/Ficha'
-import { formatarArea, formatarEuros, formatarPercentagem, momentoPt } from '../../componentes/formatar'
+import { formatarPercentagem, momentoPt } from '../../componentes/formatar'
 import type { Registo } from '../../componentes/camposQualificacao'
 import { VerQualificacao } from '../../componentes/Qualificacao'
 import { LigacoesExternas } from '../../componentes/LigacoesExternas'
 import { pedido } from '../../api/cliente'
 import {
   etiquetaStatus,
-  IMOVEL_AREAS_EXTRA,
+  IMOVEL_AREAS,
   IMOVEL_CARACTERIZACAO,
+  IMOVEL_COMERCIALIZACAO,
   IMOVEL_DIVISOES,
-  IMOVEL_DOCUMENTACAO,
-  IMOVEL_LIGACOES,
+  IMOVEL_EQUIPAMENTOS,
+  IMOVEL_IDENTIFICACAO,
+  IMOVEL_MORADA,
+  IMOVEL_REGISTAL,
+  IMOVEL_TEXTOS,
+  IMOVEL_ZONA,
   imoveisApi,
   NOMES_CAMPOS_IMOVEL,
   tituloImovel,
@@ -33,6 +38,7 @@ export function ImovelConsulta() {
   const navegar = useNavigate()
   const qc = useQueryClient()
   const [confirmar, setConfirmar] = useState(false)
+  const [duplicarAberto, setDuplicarAberto] = useState(false)
   const { data: i, error, isLoading } = useQuery({ queryKey: ['imoveis', id], queryFn: () => imoveisApi.obter(id) })
   const { pode } = useSessao()
   const tiposLigacao = useQuery({
@@ -51,6 +57,15 @@ export function ImovelConsulta() {
     },
   })
 
+  const duplicar = useMutation({
+    mutationFn: () => imoveisApi.duplicar(Number(id)),
+    onSuccess: (r) => {
+      qc.invalidateQueries({ queryKey: ['imoveis'] })
+      setDuplicarAberto(false)
+      navegar(`/imoveis/${r.id}/editar`)
+    },
+  })
+
   if (isLoading) return <p className="a-carregar">A carregar…</p>
   if (error instanceof ErroApi && error.estado === 404)
     return <p className="aviso">Imóvel não encontrado ou sem acesso.</p>
@@ -58,11 +73,6 @@ export function ImovelConsulta() {
 
   const n = i.nomes
   const registo = i as unknown as Registo
-  const morada = [
-    [i.rua, i.numero_policia].filter(Boolean).join(', '),
-    i.complemento,
-    [i.codigo_postal, i.localidade].filter(Boolean).join(' '),
-  ].filter(Boolean)
   const somaQuotas = i.proprietarios_detalhe.reduce((s, p) => s + (p.quota ? Number(p.quota) : 0), 0)
   const todasQuotas = i.proprietarios_detalhe.length > 0 && i.proprietarios_detalhe.every((p) => p.quota !== null)
 
@@ -81,6 +91,11 @@ export function ImovelConsulta() {
                 Eliminar
               </button>
             )}
+            {pode('imoveis', 'criar') && (
+              <button className="botao-secundario" onClick={() => setDuplicarAberto(true)}>
+                Duplicar imóvel
+              </button>
+            )}
             {i.acoes.editar && (
               <Link to={`/imoveis/${i.id}/editar`} className="botao-principal">
                 Editar
@@ -90,18 +105,29 @@ export function ImovelConsulta() {
         }
       />
 
+      {i.duplicado_de && (
+        <p className="aviso-duplicados">
+          Este imóvel é uma nova comercialização de{' '}
+          <Link to={`/imoveis/${i.duplicado_de}`}>{i.duplicado_de_referencia}</Link>.
+        </p>
+      )}
+
       <div className="ficha-topo">
         <FotografiaImovel imovel={i} />
         <Bloco titulo="Comercialização">
           <dl className="grelha-dados">
             <Dado rotulo="Operação">{n.operacao}</Dado>
-            <Dado rotulo="Preço">{formatarEuros(i.preco)}</Dado>
             <Dado rotulo="Estado de comercialização">{n.estado_comercializacao}</Dado>
             <Dado rotulo="Status">{n.status}</Dado>
             <Dado rotulo="Responsável">{i.responsavel_nome}</Dado>
           </dl>
+          <VerQualificacao campos={IMOVEL_COMERCIALIZACAO} registo={registo} />
         </Bloco>
       </div>
+
+      <Bloco titulo="Identificação">
+        <VerQualificacao campos={IMOVEL_IDENTIFICACAO} registo={registo} />
+      </Bloco>
 
       <Bloco titulo="Proprietários">
         {i.proprietarios_detalhe.length === 0 ? (
@@ -133,62 +159,43 @@ export function ImovelConsulta() {
         <AngariacoesDoImovel imovelId={i.id} podeCriar={pode('angariacoes', 'criar')} />
       </Bloco>
 
-      {pode('procuras') && (
-        <Bloco titulo="Procuras compatíveis" abertoInicial={false}>
-          {() => <ProcurasCompativeis imovelId={i.id} versao={i.versao} />}
-        </Bloco>
-      )}
-
       <Bloco titulo="Caracterização">
+        <VerQualificacao campos={IMOVEL_CARACTERIZACAO} registo={registo} />
         <dl className="grelha-dados">
-          <Dado rotulo="Tipo">{n.tipo}</Dado>
-          <Dado rotulo="Tipologia">{n.tipologia}</Dado>
-          <Dado rotulo="Estado do imóvel">{n.condicao_fisica}</Dado>
-          <Dado rotulo="Quartos">{i.quartos}</Dado>
-          <Dado rotulo="WCs">{i.casas_banho}</Dado>
-          <Dado rotulo="Ano de construção">{i.ano_construcao}</Dado>
-          <Dado rotulo="Piso">{i.piso}</Dado>
-          <Dado rotulo="Lugares de estacionamento">{i.lugares_estacionamento}</Dado>
           <Dado rotulo="Zonas exteriores" largo>
             {n.zonas_exteriores.join(', ')}
           </Dado>
         </dl>
-        <VerQualificacao campos={IMOVEL_CARACTERIZACAO} registo={registo} />
       </Bloco>
 
-      <Bloco titulo="Divisões e equipamento">
+      <Bloco titulo="Divisões">
         <VerQualificacao campos={IMOVEL_DIVISOES} registo={registo} />
       </Bloco>
 
-      <Bloco titulo="Áreas">
-        <dl className="grelha-dados">
-          <Dado rotulo="Área bruta privativa">{formatarArea(i.area_bruta_privativa)}</Dado>
-          <Dado rotulo="Área bruta dependente">{formatarArea(i.area_bruta_dependente)}</Dado>
-          <Dado rotulo="Área útil">{formatarArea(i.area_util)}</Dado>
-          <Dado rotulo="Área do lote">{formatarArea(i.area_terreno)}</Dado>
-        </dl>
-        <VerQualificacao campos={IMOVEL_AREAS_EXTRA} registo={registo} />
+      <Bloco titulo="Equipamentos e conforto">
+        <VerQualificacao campos={IMOVEL_EQUIPAMENTOS} registo={registo} />
       </Bloco>
 
-      <Bloco titulo="Documentação">
-        <dl className="grelha-dados">
-          <Dado rotulo="Classe energética">{n.certificado_energetico}</Dado>
-        </dl>
-        <VerQualificacao campos={IMOVEL_DOCUMENTACAO} registo={registo} />
+      <Bloco titulo="Áreas (m²)">
+        <VerQualificacao campos={IMOVEL_AREAS} registo={registo} />
+      </Bloco>
+
+      <Bloco titulo="Informação registal">
+        <VerQualificacao campos={IMOVEL_REGISTAL} registo={registo} />
       </Bloco>
 
       <Bloco titulo="Localização">
+        <VerQualificacao campos={IMOVEL_MORADA} registo={registo} />
         <dl className="grelha-dados">
-          <Dado rotulo="Morada" largo>
-            {morada.length > 0 && morada.map((l) => <div key={l}>{l}</div>)}
+          <Dado rotulo="Distrito, concelho e freguesia" largo>
+            {i.localizacao && `${i.localizacao.distrito} › ${i.localizacao.concelho} › ${i.localizacao.freguesia}`}
           </Dado>
-          <Dado rotulo="Localização administrativa">
-            {i.localizacao && `${i.localizacao.freguesia}, ${i.localizacao.concelho}, ${i.localizacao.distrito}`}
-          </Dado>
-          <Dado rotulo="Zona comercial">{n.zona_comercial}</Dado>
-          <Dado rotulo="Localização descritiva">{i.localizacao_descritiva}</Dado>
         </dl>
-        <VerQualificacao campos={IMOVEL_LIGACOES} registo={registo} />
+        <VerQualificacao campos={IMOVEL_ZONA} registo={registo} />
+      </Bloco>
+
+      <Bloco titulo="Descrição e observações" abertoInicial={!!(i.descricao || i.observacoes)}>
+        <VerQualificacao campos={IMOVEL_TEXTOS} registo={registo} />
       </Bloco>
 
       <Bloco titulo="Fotografias, documentos e outras ligações">
@@ -199,13 +206,11 @@ export function ImovelConsulta() {
         />
       </Bloco>
 
-      <Bloco titulo="Descrição" abertoInicial={!!i.descricao}>
-        <p className="texto-livre">{i.descricao || <span className="vazio">—</span>}</p>
-      </Bloco>
-
-      <Bloco titulo="Observações" abertoInicial={!!i.observacoes}>
-        <p className="texto-livre">{i.observacoes || <span className="vazio">—</span>}</p>
-      </Bloco>
+      {pode('procuras') && (
+        <Bloco titulo="Procuras compatíveis" abertoInicial={false}>
+          {() => <ProcurasCompativeis imovelId={i.id} versao={i.versao} />}
+        </Bloco>
+      )}
 
       <Bloco titulo="Histórico" abertoInicial={false}>
         {() => (
@@ -221,6 +226,34 @@ export function ImovelConsulta() {
           </>
         )}
       </Bloco>
+
+      <Dialogo
+        titulo="Duplicar imóvel"
+        aberto={duplicarAberto}
+        aoFechar={() => setDuplicarAberto(false)}
+        acoes={
+          <>
+            <button className="botao-secundario" onClick={() => setDuplicarAberto(false)}>
+              Cancelar
+            </button>
+            <button className="botao-principal" disabled={duplicar.isPending} onClick={() => duplicar.mutate()}>
+              Duplicar
+            </button>
+          </>
+        }
+      >
+        <p>
+          Use quando o imóvel <strong>{i.referencia}</strong> volta ao mercado depois de vendido, cancelado ou
+          rescindido. É criado um <strong>imóvel novo</strong> com as mesmas características, proprietários e
+          fotografia, em <em>Em preparação</em>. A seguir abre-se a edição para atualizar o que mudou (por exemplo, os
+          proprietários). Este imóvel fica como está, com o seu histórico e contratos.
+        </p>
+        {duplicar.error && (
+          <p className="erro" role="alert">
+            {duplicar.error instanceof ErroApi ? duplicar.error.message : 'Não foi possível duplicar.'}
+          </p>
+        )}
+      </Dialogo>
 
       <Dialogo
         titulo="Eliminar imóvel"

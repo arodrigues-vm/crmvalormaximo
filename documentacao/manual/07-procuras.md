@@ -14,20 +14,24 @@ Abra **Procuras e Qualificação** no menu. Separadores **Ativas** / **Inativas*
 A partir da ficha do cliente (secção **Oportunidades e procuras** → **+ Nova procura**) ou na lista
 (**+ Nova procura**).
 
-1. **Interessado:** cliente, **o cliente pretende** (*Comprar* ou *Arrendar*, obrigatório), estado e urgência.
+1. **Prospect:** **comprador / arrendatário**, **o cliente pretende** (*Comprar* ou *Arrendar*, obrigatório),
+   estado e urgência.
 2. **Qualificação do comprador:** destino do imóvel, motivação de compra (de *Muito baixa* a *Muito alta*), se
    a compra depende da venda, **quando iniciou a procura** e **prazo de aquisição** (texto livre, como o cliente
-   disse — por exemplo «há 3 meses», «até ao fim do ano»), piso, exposição solar, se aceita obras, **motivo
-   para comprar**, o que quer, o que não quer e flexibilidade.
-3. **Pré-qualificação financeira:** plafond, modo de pagamento, capitais próprios, financiamento, qualificação
-   bancária, entidade bancária e observações.
-4. **Orçamento:** orçamento máximo e **tolerância** (de 0 % a 20 %; por omissão 0 %). O CRM mostra o **preço
-   máximo aceite**. Exemplo: 250 000 € com 20 % → até 300 000 €.
-5. **Critérios do imóvel:** para cada um, preencha o que o cliente quer e escolha:
+   disse — por exemplo «há 3 meses», «até ao fim do ano»), **motivo para comprar**, o que quer, o que não quer
+   e flexibilidade.
+3. **Pré-qualificação financeira:** **valor de aquisição previsto** e **tolerância** (de 0 % a 20 %; por
+   omissão 0 %) — o CRM mostra o **preço máximo aceite** (exemplo: 250 000 € com 20 % → até 300 000 €) —,
+   modo de pagamento, capitais próprios, financiamento, qualificação bancária, entidade bancária e observações
+   da qualificação financeira.
+4. **Critérios do imóvel:** para cada um, preencha o que o cliente quer e escolha:
    - **Obrigatório** — imóveis que não cumprem **não aparecem**;
    - **Preferencial** — imóveis que não cumprem aparecem, mas mais abaixo.
 
-   Critérios em branco não contam.
+   Critérios em branco não contam. A ordem é: tipo de imóvel, tipologia, localização (concelhos, freguesias,
+   zonas), área bruta privativa, quartos, casas de banho, elevador, estacionamento, zonas exteriores e
+   condição física. No fim ficam **piso**, **exposição solar** e **obras**, que se registam mas não entram nas
+   correspondências.
 
 ![Critérios da procura](imagens/43-procura-criterios.png)
 
@@ -36,7 +40,7 @@ A partir da ficha do cliente (secção **Oportunidades e procuras** → **+ Nova
 | Tipo de imóvel | O tipo do imóvel tem de ser um dos escolhidos |
 | Tipologia | Uma das escolhidas |
 | Localização | Basta cumprir uma: concelho inteiro, freguesia específica ou zona comercial |
-| Quartos / Área / Estacionamento | Igual ou superior ao mínimo (área: bruta privativa ou, se faltar, útil) |
+| Área bruta privativa / Quartos / Casas de banho / Estacionamento | Igual ou superior ao mínimo (área: bruta privativa ou, se faltar, útil; estacionamento: lugares da garagem do imóvel) |
 | Zonas exteriores | O imóvel tem de ter **todas** as escolhidas |
 | Elevador | O imóvel tem de ter elevador |
 | Condição física | Uma das escolhidas |
@@ -46,7 +50,7 @@ A partir da ficha do cliente (secção **Oportunidades e procuras** → **+ Nova
 Na ficha da procura, a secção **Imóveis compatíveis** mostra os imóveis que cumprem todos os critérios
 obrigatórios, já ordenados:
 
-1. primeiro os que estão **dentro do orçamento**, depois os que estão **dentro da tolerância**, e por fim os que
+1. primeiro os que estão **dentro do valor de aquisição previsto**, depois os que estão **dentro da tolerância**, e por fim os que
    **não têm preço indicado**;
 2. dentro de cada grupo, os que cumprem **mais preferências**;
 3. por fim, o mais barato primeiro.

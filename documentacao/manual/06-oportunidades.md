@@ -3,7 +3,8 @@
 Uma **oportunidade** regista um contacto com um proprietário **antes** de existir um contrato (CMI): quem é,
 que imóvel tem, o que pretende e em que ponto está a conversa. Referência: OPA-000001, …
 
-> Uma oportunidade **não é** uma angariação. Só passa a imóvel/CMI quando carregar em **Converter**.
+> Uma oportunidade **não é** uma angariação. O passo seguinte é **criar o imóvel**; o CMI cria-se depois, na
+> ficha do imóvel.
 
 ## 6.1 Lista
 
@@ -25,12 +26,12 @@ A forma mais rápida é a partir da ficha da entidade (o proprietário): secçã
    *Muito alta*), se a venda depende da compra, **prazo para vender** (texto livre, como o cliente disse — por
    exemplo «até ao verão»), se é o único proprietário (se não for, aparece *Todos de acordo com a venda*),
    motivo da venda e o que fará se não vender.
-3. **Negócio:** quando e por quanto comprou, hipoteca associada e entidade bancária, se está à venda (e há
-   quanto tempo), se teve visitas e propostas (se teve, aparecem o valor da proposta e porque não aceitou),
-   como chegou ao valor pretendido, pontos positivos e objeções.
-4. **Imóvel:** se o imóvel já existir no CRM, escolha-o (pode escrever várias palavras, por exemplo «T3
+3. **Imóvel:** se o imóvel já existir no CRM, escolha-o (pode escrever várias palavras, por exemplo «T3
    Maia»). Se não, descreva-o (tipo, tipologia, localidade e uma descrição curta). Em **Anúncio (site)** cole
    o endereço do anúncio, se o imóvel já estiver anunciado noutro site.
+4. **Negócio:** quando e por quanto comprou, hipoteca associada e entidade bancária, se está à venda (e há
+   quanto tempo), se teve visitas e propostas, **porque não vendeu**, (se teve propostas) o valor da proposta
+   e porque não aceitou, como chegou ao valor pretendido, pontos positivos e objeções.
 5. Carregue em **Guardar**.
 
 As respostas *Sim / Não / Não sabe* e as restantes opções vêm de listas configuráveis (anexo A). Os campos de
@@ -50,20 +51,18 @@ reunião, email…), quando foi e um resumo.
 Os contactos não se editam nem apagam: se registou algo errado, carregue em **Anular** (fica riscado, mas
 guardado).
 
-## 6.4 Converter em imóvel / CMI
+## 6.4 Criar o imóvel e, depois, o CMI
 
 Quando o proprietário aceitar avançar:
 
-1. Na ficha, carregue em **Converter em imóvel / CMI** (ou **Criar CMI**, se o imóvel já existir).
-2. Confirme o que vai ser criado. Pode desmarcar *Criar também a angariação (CMI)* se só quiser o imóvel.
-3. Carregue em **Confirmar**.
+- **Se o imóvel ainda não está registado:**
+  1. Na ficha da oportunidade, carregue em **Criar imóvel** e confirme.
+  2. O CRM cria o **imóvel** com os dados da oportunidade (tipo, tipologia, localidade, descrição, valor
+     pretendido) e o proprietário, e abre-o para o completar.
+  3. Depois de guardar o imóvel, crie a angariação na ficha do imóvel: **Angariações (CMI)** → **+ Nova
+     angariação para este imóvel**.
+- **Se o imóvel já está registado:** carregue em **Abrir imóvel (atualizar e criar o CMI)**, atualize o que for
+  preciso e crie a angariação a partir da ficha do imóvel.
 
-![Converter](imagens/42-oportunidade-converter.png)
-
-O CRM:
-- cria o **imóvel** (se ainda não existir) com os dados da oportunidade e o proprietário com a quota a indicar;
-- cria a **angariação (CMI) por assinar**, com o proprietário como parte;
-- abre o CMI para completar (regime, datas, remuneração).
-
-A oportunidade fica ligada ao CMI criado e **não pode ser convertida duas vezes**. O estado da oportunidade
-**não muda sozinho**: quando o CMI for assinado, mude-o para *Angariada*.
+A oportunidade fica ligada ao imóvel e não cria um segundo imóvel. O estado da oportunidade **não muda
+sozinho**: quando o CMI for assinado, mude-o para *Angariado*.

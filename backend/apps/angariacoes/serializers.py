@@ -9,7 +9,15 @@ from apps.contas.models import Utilizador
 from apps.imoveis.models import Imovel
 
 from .models import ESTADOS, Angariacao, Interveniente, Renovacao, calcular_fim
-from .servicos import alerta, comissao_estimada, conflitos, descrever_conflitos, hoje, tempo_restante
+from .servicos import (
+    alerta,
+    comissao_estimada,
+    conflitos,
+    descrever_conflitos,
+    hoje,
+    sincronizar_partes,
+    tempo_restante,
+)
 
 CEM = Decimal("100")
 CAMPOS_CONTRATUAIS = ("data_inicio", "prazo_meses")
@@ -152,6 +160,7 @@ class AngariacaoSerializer(AngariacaoListaSerializer):
 
     def get_intervenientes_detalhe(self, o) -> list[dict]:
         visiveis = self.context.get("entidades_visiveis", set())
+        donos = set(o.imovel.proprietarios.values_list("entidade_id", flat=True))
         return [
             {
                 "entidade": i.entidade_id,
@@ -161,6 +170,7 @@ class AngariacaoSerializer(AngariacaoListaSerializer):
                 "papel": i.papel_id,
                 "papel_nome": _nome(i.papel),
                 "quota": None if i.quota is None else str(i.quota),
+                "do_imovel": i.entidade_id in donos,
             }
             for i in o.intervenientes.select_related("entidade", "papel").all()
         ]
@@ -250,13 +260,23 @@ class AngariacaoSerializer(AngariacaoListaSerializer):
     # Gravação --------------------------------------------------------------------
 
     def _gravar_intervenientes(self, cmi, lista):
-        cmi.intervenientes.exclude(entidade_id__in=[i["entidade"] for i in lista]).delete()
+        """Num CMI em curso, os proprietários vêm do imóvel (D-35): aqui só se gravam as OUTRAS partes
+        (representantes legais, procuradores…). Contratos fechados mantêm as partes registadas."""
+        if cmi.situacao == Angariacao.Situacao.EM_CURSO:
+            donos = set(cmi.imovel.proprietarios.values_list("entidade_id", flat=True))
+            lista = [i for i in lista if i["entidade"] not in donos]
+            cmi.intervenientes.exclude(entidade_id__in=donos).exclude(
+                entidade_id__in=[i["entidade"] for i in lista]
+            ).delete()
+        else:
+            cmi.intervenientes.exclude(entidade_id__in=[i["entidade"] for i in lista]).delete()
         for ordem, i in enumerate(lista):
             Interveniente.objects.update_or_create(
                 angariacao=cmi,
                 entidade_id=i["entidade"],
-                defaults={"papel_id": i.get("papel"), "quota": i.get("quota"), "ordem": ordem},
+                defaults={"papel_id": i.get("papel"), "quota": i.get("quota"), "ordem": 100 + ordem},
             )
+        sincronizar_partes(cmi)
 
     @transaction.atomic
     def create(self, d):
@@ -268,16 +288,7 @@ class AngariacaoSerializer(AngariacaoListaSerializer):
         cmi = Angariacao(**d)
         cmi.recalcular_datas()
         cmi.save()
-        if intervenientes is None:
-            # Pré-preenche com os proprietários atuais do imóvel (fotografia própria do contrato).
-            papel = ValorLista.objects.filter(
-                lista__chave="papeis_interveniente_cmi", nome="Proprietário", ativo=True
-            ).first()
-            intervenientes = [
-                {"entidade": p.entidade_id, "papel": papel.pk if papel else None, "quota": p.quota}
-                for p in cmi.imovel.proprietarios.all()
-            ]
-        self._gravar_intervenientes(cmi, intervenientes)
+        self._gravar_intervenientes(cmi, intervenientes or [])
         return cmi
 
     @transaction.atomic

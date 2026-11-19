@@ -207,3 +207,14 @@ def test_comprar_encontra_todas_as_operacoes_de_venda_e_arrendar_as_de_arrendame
     arrendar = imovel(pessoas.cons, operacao=v("operacoes", "Arrendamento"))
     assert set(ids(resultados(api, pessoas.cons, procura(pessoas.cons)))) == {venda.pk, em_leilao.pk}
     assert ids(resultados(api, pessoas.cons, procura(pessoas.cons, pretende="arrendar"))) == [arrendar.pk]
+
+
+def test_criterio_casas_de_banho(pessoas):
+    from apps.procuras.correspondencias import avaliar
+
+    p = Procura.objects.create(entidade=Entidade.objects.create(nome="C", responsavel=pessoas.cons),
+                               responsavel=pessoas.cons, wcs_min=2, imp_wcs="obrigatorio")  # fmt: skip
+    assert avaliar(p, imovel(pessoas.cons, casas_banho=1)).excluido
+    assert not avaliar(p, imovel(pessoas.cons, casas_banho=2)).excluido
+    sem = avaliar(p, imovel(pessoas.cons))
+    assert not sem.excluido and sem.obrigatorios_por_confirmar == 1

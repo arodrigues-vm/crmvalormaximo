@@ -119,6 +119,14 @@ def avaliar(p: Procura, i: Imovel, cache: dict | None = None) -> Avaliacao:
                 "quartos", CUMPRE if i.quartos >= p.quartos_min else NAO_CUMPRE, obrig(p.imp_quartos),
                 f"{i.quartos} quarto(s); mínimo {p.quartos_min}",
             )  # fmt: skip
+    if p.wcs_min is not None:
+        if i.casas_banho is None:
+            a.juntar("casas_banho", DESCONHECIDO, obrig(p.imp_wcs), "não indicadas no imóvel")
+        else:
+            a.juntar(
+                "casas_banho", CUMPRE if i.casas_banho >= p.wcs_min else NAO_CUMPRE, obrig(p.imp_wcs),
+                f"{i.casas_banho} casa(s) de banho; mínimo {p.wcs_min}",
+            )  # fmt: skip
     if p.area_min is not None:
         area = i.area_bruta_privativa if i.area_bruta_privativa is not None else i.area_util
         if area is None:

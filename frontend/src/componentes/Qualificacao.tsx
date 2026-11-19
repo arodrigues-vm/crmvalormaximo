@@ -1,5 +1,5 @@
 import { CampoAreaTexto, CampoSelecao, CampoTexto, Dado } from './campos'
-import { formatarEuros } from './formatar'
+import { formatarArea, formatarEuros } from './formatar'
 import type { CampoQualificacao, Opcoes, Registo } from './camposQualificacao'
 
 function visivel(c: CampoQualificacao, nomeEscolhido: (campo: string) => string | null | undefined) {
@@ -96,7 +96,7 @@ export function VerQualificacao({ campos, registo }: { campos: CampoQualificacao
           let conteudo: React.ReactNode = null
           if (c.tipo === 'lista') conteudo = nomes[c.campo] as string | null
           else if (c.tipo === 'euros') conteudo = v === null || v === undefined ? null : formatarEuros(v as string)
-          else if (c.tipo === 'm2') conteudo = v === null || v === undefined ? null : `${Number(v)} m²`
+          else if (c.tipo === 'm2') conteudo = v === null || v === undefined ? null : formatarArea(v as string)
           else if (c.tipo === 'numero') conteudo = v === null || v === undefined ? null : String(v)
           else if (c.tipo === 'url' && v)
             conteudo = (

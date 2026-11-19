@@ -48,31 +48,31 @@ def test_criar_com_estado_por_omissao(api, u, ana):
     assert o["angariacao_gerada"] is None
 
 
-def test_converter_cria_imovel_e_cmi_por_assinar(api, u, ana):
+def test_converter_cria_so_o_imovel(api, u, ana):
+    """D-35: a oportunidade cria o imóvel; o CMI cria-se depois, a partir do imóvel."""
     o = criar(api, u, ana)
     url = reverse("oportunidade-converter", args=[o["id"]])
     assert api.post(url, {"confirmar": False}, format="json").status_code == 400
-    r = api.post(url, {"confirmar": True, "criar_cmi": True}, format="json")
+    assert api.post(url, {"confirmar": True, "criar_cmi": True}, format="json").status_code == 400
+    r = api.post(url, {"confirmar": True}, format="json")
     assert r.status_code == 200, r.content
     d = r.json()
     i = Imovel.objects.get(pk=d["imovel"])
-    assert d["imovel_criado"] and i.preco == Decimal("320000") and i.tipo.nome == "Moradia"
+    assert d["imovel_criado"] and d["angariacao"] is None and i.preco == Decimal("320000")
     assert list(i.proprietarios.values_list("entidade_id", flat=True)) == [ana.pk]
-    cmi = Angariacao.objects.get(pk=d["angariacao"])
-    assert not cmi.assinado and cmi.imovel_id == i.pk
-    assert list(cmi.intervenientes.values_list("entidade_id", flat=True)) == [ana.pk]
-    # Idempotente: não converte duas vezes.
-    assert api.post(url, {"confirmar": True}, format="json").status_code == 409
+    assert Angariacao.objects.count() == 0
+    # Idempotente: já tem imóvel → não cria outro.
+    r2 = api.post(url, {"confirmar": True}, format="json")
+    assert r2.status_code == 409 and r2.json()["imovel"] == i.pk
     assert RegistoAuditoria.objects.filter(acao="oportunidade.convertida").count() == 1
-    # A oportunidade não muda de estado sozinha.
     assert api.get(reverse("oportunidade-detail", args=[o["id"]])).json()["estado_nome"] == "Contacto"
 
 
-def test_converter_com_imovel_existente_so_cria_cmi(api, u, ana):
+def test_converter_com_imovel_existente_recusa(api, u, ana):
     i = Imovel.objects.create(responsavel=u, operacao=ValorLista.objects.get(pk=v("operacoes", "Venda")))
     o = criar(api, u, ana, imovel=i.pk)
-    d = api.post(reverse("oportunidade-converter", args=[o["id"]]), {"confirmar": True}, format="json").json()
-    assert d["imovel"] == i.pk and not d["imovel_criado"]
+    r = api.post(reverse("oportunidade-converter", args=[o["id"]]), {"confirmar": True}, format="json")
+    assert r.status_code == 409 and r.json()["codigo"] == "ja_tem_imovel"
     assert Imovel.objects.count() == 1
 
 

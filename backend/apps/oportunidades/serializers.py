@@ -24,7 +24,7 @@ CAMPOS_QUALIFICACAO = [
     "destino_imovel", "ocupacao", "nivel_motivacao", "motivacao", "venda_depende_compra", "prazo_vender",
     "se_nao_vender", "unico_proprietario", "todos_de_acordo", "quando_comprou", "valor_compra", "valor_hipoteca",
     "entidade_bancaria", "como_chegou_valor", "esta_a_venda", "tempo_a_venda", "teve_visitas", "teve_propostas",
-    "valor_proposta", "porque_nao_aceitou", "pontos_positivos", "objecoes",
+    "porque_nao_vendeu", "valor_proposta", "porque_nao_aceitou", "pontos_positivos", "objecoes",
 ]  # fmt: skip
 
 
@@ -150,7 +150,7 @@ class OportunidadeSerializer(OportunidadeListaSerializer):
 
 
 class ConverterSerializer(serializers.Serializer):
-    criar_cmi = serializers.BooleanField(default=True)
+    criar_cmi = serializers.BooleanField(default=False, help_text="Já não é permitido (D-35).")
     confirmar = serializers.BooleanField()
 
     def validate_confirmar(self, v):

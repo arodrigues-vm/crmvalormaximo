@@ -39,6 +39,8 @@ export interface Interveniente {
   papel: number | null
   papel_nome: string | null
   quota: string | null
+  /** É proprietário do imóvel: vem do imóvel e não se altera no CMI (D-35). */
+  do_imovel: boolean
 }
 
 export interface Angariacao {

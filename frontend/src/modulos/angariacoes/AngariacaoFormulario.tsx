@@ -24,6 +24,9 @@ interface Parte {
   acessivel: boolean
   papel: string
   quota: string
+  /** Proprietário do imóvel: só se altera na ficha do imóvel (D-35). */
+  doImovel: boolean
+  papelNome?: string | null
 }
 
 interface Valores {
@@ -45,7 +48,7 @@ interface Valores {
   condicoes_pagamento: string
   observacoes: string
   extra: Record<string, string>
-  partes: Parte[] | null // null = pré-preencher com os proprietários do imóvel
+  partes: Parte[]
 }
 
 const t = (v: string | number | null | undefined) => (v === null || v === undefined ? '' : String(v))
@@ -81,6 +84,8 @@ function deCmi(a: Angariacao): Valores {
       acessivel: i.acessivel,
       papel: t(i.papel),
       quota: i.quota === null ? '' : String(Number(i.quota)),
+      doImovel: i.do_imovel,
+      papelNome: i.papel_nome,
     })),
   }
 }
@@ -119,12 +124,11 @@ function paraApi(v: Valores, assinado: boolean) {
     corpo.data_inicio = v.data_inicio || null
     corpo.prazo_meses = num(v.prazo_meses)
   }
-  if (v.partes !== null)
-    corpo.intervenientes = v.partes.map((p) => ({
-      entidade: p.entidade.id,
-      papel: idOuNull(p.papel),
-      quota: num(p.quota),
-    }))
+  corpo.intervenientes = v.partes.map((p) => ({
+    entidade: p.entidade.id,
+    papel: idOuNull(p.papel),
+    quota: num(p.quota),
+  }))
   return corpo
 }
 
@@ -155,7 +159,18 @@ export function AngariacaoNova() {
     queryFn: () => imoveisApi.obter(imovelId!),
     enabled: !!imovelId,
   })
-  if (imovelId && isLoading) return <p className="a-carregar">A carregar…</p>
+  // D-35: as angariações criam-se sempre a partir da ficha do imóvel.
+  if (!imovelId)
+    return (
+      <div className="ficha">
+        <p className="aviso">
+          As angariações (CMI) criam-se a partir da ficha do imóvel: abra o imóvel em <Link to="/imoveis">Imóveis</Link>{' '}
+          e, na secção <strong>Angariações (CMI)</strong>, carregue em{' '}
+          <strong>+ Nova angariação para este imóvel</strong>. Se o imóvel ainda não existir, crie-o primeiro.
+        </p>
+      </div>
+    )
+  if (isLoading) return <p className="a-carregar">A carregar…</p>
   const inicial = imovel
     ? {
         id: imovel.id,
@@ -203,7 +218,7 @@ function Formulario({ cmi, imovelInicial = null }: { cmi?: Angariacao; imovelIni
             condicoes_pagamento: '',
             observacoes: '',
             extra: valoresQualificacao(CMI_ACOMPANHAMENTO),
-            partes: null,
+            partes: [],
           },
     [cmi, imovelInicial],
   )
@@ -356,93 +371,96 @@ function Formulario({ cmi, imovelInicial = null }: { cmi?: Angariacao; imovelIni
       </Bloco>
 
       <Bloco titulo="Partes" forcarAberto={temErros('partes')}>
-        {v.partes === null ? (
-          <p className="ajuda">
-            As partes serão preenchidas automaticamente com os proprietários atuais do imóvel.{' '}
-            <button type="button" className="botao-secundario" onClick={() => mudar('partes', [])}>
-              Indicar manualmente
-            </button>
-          </p>
-        ) : (
-          <>
-            <ul className="lista-proprietarios">
-              {v.partes.map((p, i) => (
-                <li key={p.entidade.id}>
-                  <span className="proprietario-nome">
-                    {p.acessivel ? (
-                      <strong>{p.entidade.titulo}</strong>
-                    ) : (
-                      <span className="vazio">{p.entidade.titulo}</span>
-                    )}
-                  </span>
-                  <select
-                    aria-label="Papel"
-                    value={p.papel}
-                    disabled={!p.acessivel}
-                    onChange={(e) =>
+        <p className="ajuda">
+          Os <strong>proprietários</strong> são sempre os do imóvel e atualizam-se sozinhos. Para os alterar, edite os
+          proprietários na ficha do imóvel
+          {v.imovel && (
+            <>
+              {' '}
+              (<Link to={`/imoveis/${v.imovel.id}`}>abrir imóvel</Link>)
+            </>
+          )}
+          . Aqui só acrescenta outras partes: representantes legais, procuradores…
+        </p>
+        <ul className="lista-proprietarios">
+          {v.partes.map((p, i) =>
+            p.doImovel ? (
+              <li key={p.entidade.id}>
+                <span className="proprietario-nome">
+                  {p.acessivel ? (
+                    <strong>{p.entidade.titulo}</strong>
+                  ) : (
+                    <span className="vazio">{p.entidade.titulo}</span>
+                  )}
+                </span>
+                <span className="relacao-tipo">
+                  {p.papelNome ?? 'Proprietário'}
+                  {p.quota && ` · ${p.quota.replace('.', ',')} %`}
+                </span>
+              </li>
+            ) : (
+              <li key={p.entidade.id}>
+                <span className="proprietario-nome">
+                  {p.acessivel ? (
+                    <strong>{p.entidade.titulo}</strong>
+                  ) : (
+                    <span className="vazio">{p.entidade.titulo}</span>
+                  )}
+                </span>
+                <select
+                  aria-label="Papel"
+                  value={p.papel}
+                  disabled={!p.acessivel}
+                  onChange={(e) =>
+                    mudar(
+                      'partes',
+                      v.partes.map((x, j) => (j === i ? { ...x, papel: e.target.value } : x)),
+                    )
+                  }
+                >
+                  <option value="">Papel…</option>
+                  {o?.papeis.map((x) => (
+                    <option key={x.id} value={x.id}>
+                      {x.nome}
+                    </option>
+                  ))}
+                </select>
+                {p.acessivel && (
+                  <button
+                    type="button"
+                    className="botao-icone"
+                    aria-label={`Remover ${p.entidade.titulo}`}
+                    onClick={() =>
                       mudar(
                         'partes',
-                        v.partes!.map((x, j) => (j === i ? { ...x, papel: e.target.value } : x)),
+                        v.partes.filter((_, j) => j !== i),
                       )
                     }
                   >
-                    <option value="">Papel…</option>
-                    {o?.papeis.map((x) => (
-                      <option key={x.id} value={x.id}>
-                        {x.nome}
-                      </option>
-                    ))}
-                  </select>
-                  <label className="quota">
-                    Quota (%)
-                    <input
-                      inputMode="decimal"
-                      value={p.quota}
-                      disabled={!p.acessivel}
-                      onChange={(e) =>
-                        mudar(
-                          'partes',
-                          v.partes!.map((x, j) => (j === i ? { ...x, quota: e.target.value } : x)),
-                        )
-                      }
-                    />
-                  </label>
-                  {p.acessivel && (
-                    <button
-                      type="button"
-                      className="botao-icone"
-                      aria-label={`Remover ${p.entidade.titulo}`}
-                      onClick={() =>
-                        mudar(
-                          'partes',
-                          v.partes!.filter((_, j) => j !== i),
-                        )
-                      }
-                    >
-                      ✕
-                    </button>
-                  )}
-                </li>
-              ))}
-            </ul>
-            {erro('intervenientes') && <p className="campo-erro">{erro('intervenientes')!.join(' ')}</p>}
-            <div className="novo-proprietario">
-              <SeletorPesquisavel
-                rotulo="Acrescentar parte"
-                chave="entidades"
-                procurar={entidadesApi.procurar}
-                valor={novaParte}
-                aoMudar={(e) => {
-                  if (e) {
-                    mudar('partes', [...v.partes!, { entidade: e, acessivel: true, papel: '', quota: '' }])
-                    setNovaParte(null)
-                  }
-                }}
-                excluir={v.partes.map((p) => p.entidade.id)}
-              />
-            </div>
-          </>
-        )}
+                    ✕
+                  </button>
+                )}
+              </li>
+            ),
+          )}
+        </ul>
+        {!cmi && <p className="ajuda">Os proprietários do imóvel entram automaticamente ao guardar.</p>}
+        {erro('intervenientes') && <p className="campo-erro">{erro('intervenientes')!.join(' ')}</p>}
+        <div className="novo-proprietario">
+          <SeletorPesquisavel
+            rotulo="Acrescentar outra parte"
+            chave="entidades"
+            procurar={entidadesApi.procurar}
+            valor={novaParte}
+            aoMudar={(e) => {
+              if (e) {
+                mudar('partes', [...v.partes, { entidade: e, acessivel: true, papel: '', quota: '', doImovel: false }])
+                setNovaParte(null)
+              }
+            }}
+            excluir={v.partes.map((p) => p.entidade.id)}
+          />
+        </div>
       </Bloco>
 
       <Bloco titulo="Remuneração e pagamento" forcarAberto={temErros('remuneracao')}>

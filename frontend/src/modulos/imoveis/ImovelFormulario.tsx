@@ -4,7 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { ErroApi } from '../../api/cliente'
 import { Bloco } from '../../componentes/Bloco'
-import { CampoAreaTexto, CampoMultiplo, CampoSelecao, CampoTexto } from '../../componentes/campos'
+import { CampoMultiplo, CampoSelecao } from '../../componentes/campos'
 import {
   qualificacaoParaApi,
   valoresQualificacao,
@@ -19,13 +19,18 @@ import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/Seleto
 import { useGuardaSaida } from '../../componentes/useGuardaSaida'
 import { entidadesApi } from '../entidades/api'
 import {
-  CAMPOS_D34_IMOVEL,
+  CAMPOS_IMOVEL,
   etiquetaStatus,
-  IMOVEL_AREAS_EXTRA,
+  IMOVEL_AREAS,
   IMOVEL_CARACTERIZACAO,
+  IMOVEL_COMERCIALIZACAO,
   IMOVEL_DIVISOES,
-  IMOVEL_DOCUMENTACAO,
-  IMOVEL_LIGACOES,
+  IMOVEL_EQUIPAMENTOS,
+  IMOVEL_IDENTIFICACAO,
+  IMOVEL_MORADA,
+  IMOVEL_REGISTAL,
+  IMOVEL_TEXTOS,
+  IMOVEL_ZONA,
   imoveisApi,
   tituloImovel,
   type Imovel,
@@ -38,35 +43,14 @@ interface ProprietarioEditavel {
   quota: string
 }
 
+/** Operação, estado de comercialização, status, localização CAOP, zonas exteriores e proprietários têm
+ * componentes próprios; todos os outros campos vêm das listas de campos por separador (`api.ts`). */
 interface Valores {
-  tipo: string
-  tipologia: string
   operacao: string
   estado_comercializacao: string
   status: string
-  condicao_fisica: string
-  preco: string
-  rua: string
-  numero_policia: string
-  complemento: string
-  codigo_postal: string
-  localidade: string
   freguesia: number | null
-  zona_comercial: string
-  localizacao_descritiva: string
-  area_bruta_privativa: string
-  area_bruta_dependente: string
-  area_util: string
-  area_terreno: string
-  quartos: string
-  casas_banho: string
-  ano_construcao: string
-  piso: string
-  lugares_estacionamento: string
-  certificado_energetico: string
   zonas_exteriores: number[]
-  descricao: string
-  observacoes: string
   proprietarios: ProprietarioEditavel[]
   extra: Record<string, string>
 }
@@ -74,68 +58,22 @@ interface Valores {
 const t = (v: string | number | null | undefined) => (v === null || v === undefined ? '' : String(v))
 
 const VAZIO: Valores = {
-  tipo: '',
-  tipologia: '',
   operacao: '',
   estado_comercializacao: '',
   status: '',
-  condicao_fisica: '',
-  preco: '',
-  rua: '',
-  numero_policia: '',
-  complemento: '',
-  codigo_postal: '',
-  localidade: '',
   freguesia: null,
-  zona_comercial: '',
-  localizacao_descritiva: '',
-  area_bruta_privativa: '',
-  area_bruta_dependente: '',
-  area_util: '',
-  area_terreno: '',
-  quartos: '',
-  casas_banho: '',
-  ano_construcao: '',
-  piso: '',
-  lugares_estacionamento: '',
-  certificado_energetico: '',
   zonas_exteriores: [],
-  descricao: '',
-  observacoes: '',
   proprietarios: [],
-  extra: valoresQualificacao(CAMPOS_D34_IMOVEL),
+  extra: valoresQualificacao(CAMPOS_IMOVEL),
 }
 
 function deImovel(i: Imovel): Valores {
   return {
-    tipo: t(i.tipo),
-    tipologia: t(i.tipologia),
     operacao: t(i.operacao),
     estado_comercializacao: t(i.estado_comercializacao),
     status: t(i.status),
-    condicao_fisica: t(i.condicao_fisica),
-    preco: t(i.preco),
-    rua: i.rua,
-    numero_policia: i.numero_policia,
-    complemento: i.complemento,
-    codigo_postal: i.codigo_postal,
-    localidade: i.localidade,
     freguesia: i.freguesia,
-    zona_comercial: t(i.zona_comercial),
-    localizacao_descritiva: i.localizacao_descritiva,
-    area_bruta_privativa: t(i.area_bruta_privativa),
-    area_bruta_dependente: t(i.area_bruta_dependente),
-    area_util: t(i.area_util),
-    area_terreno: t(i.area_terreno),
-    quartos: t(i.quartos),
-    casas_banho: t(i.casas_banho),
-    ano_construcao: t(i.ano_construcao),
-    piso: i.piso,
-    lugares_estacionamento: t(i.lugares_estacionamento),
-    certificado_energetico: t(i.certificado_energetico),
     zonas_exteriores: i.zonas_exteriores,
-    descricao: i.descricao,
-    observacoes: i.observacoes,
     proprietarios: i.proprietarios_detalhe.map((p) => ({
       entidade: {
         id: p.entidade,
@@ -145,7 +83,7 @@ function deImovel(i: Imovel): Valores {
       acessivel: p.acessivel,
       quota: t(p.quota === null ? null : Number(p.quota)),
     })),
-    extra: valoresQualificacao(CAMPOS_D34_IMOVEL, i as unknown as Registo),
+    extra: valoresQualificacao(CAMPOS_IMOVEL, i as unknown as Registo),
   }
 }
 
@@ -154,75 +92,28 @@ const num = (v: string) => (v.trim() === '' ? null : v.trim().replace(',', '.'))
 
 function paraApi(v: Valores) {
   return {
-    tipo: id(v.tipo),
-    tipologia: id(v.tipologia),
     operacao: id(v.operacao),
     estado_comercializacao: id(v.estado_comercializacao),
     status: id(v.status),
-    condicao_fisica: id(v.condicao_fisica),
-    preco: num(v.preco),
-    rua: v.rua,
-    numero_policia: v.numero_policia,
-    complemento: v.complemento,
-    codigo_postal: v.codigo_postal,
-    localidade: v.localidade,
     freguesia: v.freguesia,
-    zona_comercial: id(v.zona_comercial),
-    localizacao_descritiva: v.localizacao_descritiva,
-    area_bruta_privativa: num(v.area_bruta_privativa),
-    area_bruta_dependente: num(v.area_bruta_dependente),
-    area_util: num(v.area_util),
-    area_terreno: num(v.area_terreno),
-    quartos: num(v.quartos),
-    casas_banho: num(v.casas_banho),
-    ano_construcao: num(v.ano_construcao),
-    piso: v.piso,
-    lugares_estacionamento: num(v.lugares_estacionamento),
-    certificado_energetico: id(v.certificado_energetico),
     zonas_exteriores: v.zonas_exteriores,
-    descricao: v.descricao,
-    observacoes: v.observacoes,
     proprietarios: v.proprietarios.map((p) => ({ entidade: p.entidade.id, quota: num(p.quota) })),
-    ...qualificacaoParaApi(CAMPOS_D34_IMOVEL, v.extra),
+    ...qualificacaoParaApi(CAMPOS_IMOVEL, v.extra),
   }
 }
 
+const campos = (lista: CampoQualificacao[]) => lista.map((c) => c.campo)
 const BLOCOS: Record<string, string[]> = {
-  comercializacao: ['operacao', 'preco', 'estado_comercializacao', 'status', 'responsavel'],
+  comercializacao: ['operacao', 'estado_comercializacao', 'status', 'responsavel', ...campos(IMOVEL_COMERCIALIZACAO)],
+  identificacao: campos(IMOVEL_IDENTIFICACAO),
   proprietarios: ['proprietarios'],
-  classificacao: [
-    'tipo',
-    'tipologia',
-    'condicao_fisica',
-    'quartos',
-    'casas_banho',
-    'ano_construcao',
-    'piso',
-    'lugares_estacionamento',
-    'zonas_exteriores',
-    ...IMOVEL_CARACTERIZACAO.map((c) => c.campo),
-  ],
-  divisoes: IMOVEL_DIVISOES.map((c) => c.campo),
-  areas: [
-    'area_bruta_privativa',
-    'area_bruta_dependente',
-    'area_util',
-    'area_terreno',
-    ...IMOVEL_AREAS_EXTRA.map((c) => c.campo),
-  ],
-  documentacao: ['certificado_energetico', ...IMOVEL_DOCUMENTACAO.map((c) => c.campo)],
-  localizacao: [
-    'rua',
-    'numero_policia',
-    'complemento',
-    'codigo_postal',
-    'localidade',
-    'freguesia',
-    'zona_comercial',
-    'localizacao_descritiva',
-    ...IMOVEL_LIGACOES.map((c) => c.campo),
-  ],
-  textos: ['descricao', 'observacoes'],
+  caracterizacao: [...campos(IMOVEL_CARACTERIZACAO), 'zonas_exteriores'],
+  divisoes: campos(IMOVEL_DIVISOES),
+  equipamentos: campos(IMOVEL_EQUIPAMENTOS),
+  areas: campos(IMOVEL_AREAS),
+  registal: campos(IMOVEL_REGISTAL),
+  localizacao: [...campos(IMOVEL_MORADA), 'freguesia', ...campos(IMOVEL_ZONA)],
+  textos: campos(IMOVEL_TEXTOS),
 }
 
 export function ImovelNovo() {
@@ -304,6 +195,7 @@ function Formulario({ imovel }: { imovel?: Imovel }) {
   }
 
   const n = imovel?.nomes
+  const preenchido = (lista: CampoQualificacao[]) => lista.some((c) => v.extra[c.campo])
   return (
     <form className="ficha ficha-edicao" onSubmit={submeter} noValidate>
       {imovel ? (
@@ -334,14 +226,6 @@ function Formulario({ imovel }: { imovel?: Imovel }) {
             opcoes={comAtual(lista(o?.operacoes), v.operacao, n?.operacao ?? null)}
             erro={erro('operacao')}
           />
-          <CampoTexto
-            rotulo="Preço (€)"
-            inputMode="decimal"
-            value={v.preco}
-            onChange={(e) => mudar('preco', e.target.value)}
-            erro={erro('preco')}
-            ajuda="Deixe vazio se ainda não for conhecido."
-          />
           <CampoSelecao
             rotulo="Estado de comercialização"
             vazio="—"
@@ -363,6 +247,11 @@ function Formulario({ imovel }: { imovel?: Imovel }) {
             erro={erro('status')}
           />
         </div>
+        {extras(IMOVEL_COMERCIALIZACAO)}
+      </Bloco>
+
+      <Bloco titulo="Identificação" forcarAberto={temErros('identificacao')}>
+        {extras(IMOVEL_IDENTIFICACAO)}
       </Bloco>
 
       <Bloco titulo="Proprietários" forcarAberto={temErros('proprietarios')}>
@@ -441,66 +330,9 @@ function Formulario({ imovel }: { imovel?: Imovel }) {
         </div>
       </Bloco>
 
-      <Bloco titulo="Caracterização" forcarAberto={temErros('classificacao')}>
+      <Bloco titulo="Caracterização" forcarAberto={temErros('caracterizacao')}>
+        {extras(IMOVEL_CARACTERIZACAO)}
         <div className="grelha-campos">
-          <CampoSelecao
-            rotulo="Tipo de imóvel"
-            vazio="—"
-            value={v.tipo}
-            onChange={(e) => mudar('tipo', e.target.value)}
-            opcoes={comAtual(lista(o?.tipos), v.tipo, n?.tipo ?? null)}
-            erro={erro('tipo')}
-          />
-          <CampoSelecao
-            rotulo="Tipologia"
-            vazio="—"
-            value={v.tipologia}
-            onChange={(e) => mudar('tipologia', e.target.value)}
-            opcoes={comAtual(lista(o?.tipologias), v.tipologia, n?.tipologia ?? null)}
-            erro={erro('tipologia')}
-          />
-          <CampoSelecao
-            rotulo="Estado do imóvel"
-            vazio="—"
-            value={v.condicao_fisica}
-            onChange={(e) => mudar('condicao_fisica', e.target.value)}
-            opcoes={comAtual(lista(o?.condicoes_fisicas), v.condicao_fisica, n?.condicao_fisica ?? null)}
-            erro={erro('condicao_fisica')}
-          />
-          <CampoTexto
-            rotulo="Quartos"
-            inputMode="numeric"
-            value={v.quartos}
-            onChange={(e) => mudar('quartos', e.target.value)}
-            erro={erro('quartos')}
-          />
-          <CampoTexto
-            rotulo="WCs"
-            inputMode="numeric"
-            value={v.casas_banho}
-            onChange={(e) => mudar('casas_banho', e.target.value)}
-            erro={erro('casas_banho')}
-          />
-          <CampoTexto
-            rotulo="Ano de construção"
-            inputMode="numeric"
-            value={v.ano_construcao}
-            onChange={(e) => mudar('ano_construcao', e.target.value)}
-            erro={erro('ano_construcao')}
-          />
-          <CampoTexto
-            rotulo="Piso"
-            value={v.piso}
-            onChange={(e) => mudar('piso', e.target.value)}
-            erro={erro('piso')}
-          />
-          <CampoTexto
-            rotulo="Lugares de estacionamento"
-            inputMode="numeric"
-            value={v.lugares_estacionamento}
-            onChange={(e) => mudar('lugares_estacionamento', e.target.value)}
-            erro={erro('lugares_estacionamento')}
-          />
           <CampoMultiplo
             rotulo="Zonas exteriores"
             opcoes={o?.zonas_exteriores ?? []}
@@ -509,133 +341,50 @@ function Formulario({ imovel }: { imovel?: Imovel }) {
             erro={erro('zonas_exteriores')}
           />
         </div>
-        {extras(IMOVEL_CARACTERIZACAO)}
       </Bloco>
 
-      <Bloco titulo="Divisões e equipamento" forcarAberto={temErros('divisoes')} abertoInicial={!!imovel}>
+      <Bloco titulo="Divisões" forcarAberto={temErros('divisoes')}>
         {extras(IMOVEL_DIVISOES)}
       </Bloco>
 
-      <Bloco titulo="Áreas (m²)" forcarAberto={temErros('areas')}>
-        <div className="grelha-campos">
-          {(
-            [
-              ['area_bruta_privativa', 'Área bruta privativa'],
-              ['area_bruta_dependente', 'Área bruta dependente'],
-              ['area_util', 'Área útil'],
-              ['area_terreno', 'Área do lote'],
-            ] as const
-          ).map(([c, r]) => (
-            <CampoTexto
-              key={c}
-              rotulo={r}
-              inputMode="decimal"
-              value={v[c]}
-              onChange={(e) => mudar(c, e.target.value)}
-              erro={erro(c)}
-            />
-          ))}
-        </div>
-        {extras(IMOVEL_AREAS_EXTRA)}
+      <Bloco
+        titulo="Equipamentos e conforto"
+        forcarAberto={temErros('equipamentos')}
+        abertoInicial={!imovel || preenchido(IMOVEL_EQUIPAMENTOS)}
+      >
+        {extras(IMOVEL_EQUIPAMENTOS)}
       </Bloco>
 
-      <Bloco titulo="Documentação" forcarAberto={temErros('documentacao')} abertoInicial={!!imovel}>
-        <div className="grelha-campos">
-          <CampoSelecao
-            rotulo="Classe energética"
-            vazio="—"
-            value={v.certificado_energetico}
-            onChange={(e) => mudar('certificado_energetico', e.target.value)}
-            opcoes={comAtual(
-              lista(o?.certificados_energeticos),
-              v.certificado_energetico,
-              n?.certificado_energetico ?? null,
-            )}
-            erro={erro('certificado_energetico')}
-          />
-        </div>
-        {extras(IMOVEL_DOCUMENTACAO)}
+      <Bloco titulo="Áreas (m²)" forcarAberto={temErros('areas')}>
+        {extras(IMOVEL_AREAS)}
+      </Bloco>
+
+      <Bloco
+        titulo="Informação registal"
+        forcarAberto={temErros('registal')}
+        abertoInicial={!imovel || preenchido(IMOVEL_REGISTAL)}
+      >
+        {extras(IMOVEL_REGISTAL)}
       </Bloco>
 
       <Bloco titulo="Localização" forcarAberto={temErros('localizacao')}>
+        {extras(IMOVEL_MORADA)}
         <div className="grelha-campos">
-          <CampoTexto
-            rotulo="Rua"
-            largo
-            value={v.rua}
-            onChange={(e) => mudar('rua', e.target.value)}
-            erro={erro('rua')}
-          />
-          <CampoTexto
-            rotulo="N.º de polícia"
-            value={v.numero_policia}
-            onChange={(e) => mudar('numero_policia', e.target.value)}
-            erro={erro('numero_policia')}
-          />
-          <CampoTexto
-            rotulo="Complemento"
-            value={v.complemento}
-            onChange={(e) => mudar('complemento', e.target.value)}
-            erro={erro('complemento')}
-            ajuda="Andar, fração, lote…"
-          />
-          <CampoTexto
-            rotulo="Código postal"
-            placeholder="0000-000"
-            value={v.codigo_postal}
-            onChange={(e) => mudar('codigo_postal', e.target.value)}
-            erro={erro('codigo_postal')}
-          />
-          <CampoTexto
-            rotulo="Localidade"
-            value={v.localidade}
-            onChange={(e) => mudar('localidade', e.target.value)}
-            erro={erro('localidade')}
-          />
           <SeletorLocalizacao
             freguesia={v.freguesia}
             atual={imovel?.freguesia === v.freguesia ? imovel?.localizacao : null}
             aoMudar={(f) => mudar('freguesia', f)}
           />
-          <CampoSelecao
-            rotulo="Zona comercial"
-            vazio="—"
-            value={v.zona_comercial}
-            onChange={(e) => mudar('zona_comercial', e.target.value)}
-            opcoes={comAtual(lista(o?.zonas_comerciais), v.zona_comercial, n?.zona_comercial ?? null)}
-            erro={erro('zona_comercial')}
-            ajuda={o && o.zonas_comerciais.length === 0 ? 'Sem zonas configuradas (Configurações).' : undefined}
-          />
-          <CampoTexto
-            rotulo="Localização descritiva"
-            value={v.localizacao_descritiva}
-            onChange={(e) => mudar('localizacao_descritiva', e.target.value)}
-            erro={erro('localizacao_descritiva')}
-            ajuda="Ex.: junto ao parque da cidade."
-          />
         </div>
-        {extras(IMOVEL_LIGACOES)}
+        {extras(IMOVEL_ZONA)}
       </Bloco>
 
       <Bloco
         titulo="Descrição e observações"
-        abertoInicial={!!(v.descricao || v.observacoes)}
+        abertoInicial={!imovel || preenchido(IMOVEL_TEXTOS)}
         forcarAberto={temErros('textos')}
       >
-        <div className="grelha-campos">
-          <CampoAreaTexto
-            rotulo="Descrição"
-            value={v.descricao}
-            onChange={(e) => mudar('descricao', e.target.value)}
-            erro={erro('descricao')}
-          />
-          <CampoAreaTexto
-            rotulo="Observações (internas)"
-            value={v.observacoes}
-            onChange={(e) => mudar('observacoes', e.target.value)}
-            erro={erro('observacoes')}
-          />
-        </div>
+        {extras(IMOVEL_TEXTOS)}
       </Bloco>
 
       <div className="barra-gravar">

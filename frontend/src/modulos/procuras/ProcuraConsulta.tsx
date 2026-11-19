@@ -14,6 +14,7 @@ import { VerQualificacao } from '../../componentes/Qualificacao'
 import { ETIQUETA_CATEGORIA } from '../oportunidades/api'
 import {
   NOMES_CAMPOS_PROCURA,
+  CRITERIOS_INFORMATIVOS,
   PRE_QUALIFICACAO_FINANCEIRA,
   procurasApi,
   QUALIFICACAO_COMPRADOR,
@@ -86,9 +87,9 @@ export function ProcuraConsulta() {
         }
       />
 
-      <Bloco titulo="Interessado">
+      <Bloco titulo="Prospect">
         <dl className="grelha-dados">
-          <Dado rotulo="Interessado">
+          <Dado rotulo="Comprador / arrendatário">
             {p.entidade_nome ? (
               <Link to={`/entidades/${p.entidade}`}>{p.entidade_nome}</Link>
             ) : (
@@ -106,29 +107,32 @@ export function ProcuraConsulta() {
       </Bloco>
 
       <Bloco titulo="Pré-qualificação financeira">
+        <dl className="grelha-dados">
+          <Dado rotulo="Valor de aquisição previsto">{formatarEuros(p.orcamento_max)}</Dado>
+          <Dado rotulo="Tolerância">{Number(p.tolerancia_pct) > 0 ? `${Number(p.tolerancia_pct)} %` : '0 %'}</Dado>
+          <Dado rotulo="Preço máximo aceite">{formatarEuros(p.teto)}</Dado>
+        </dl>
         <VerQualificacao campos={PRE_QUALIFICACAO_FINANCEIRA} registo={p as unknown as Registo} />
       </Bloco>
 
-      <Bloco titulo="Critérios">
+      <Bloco titulo="Critérios do imóvel">
         <dl className="grelha-dados">
-          <Dado rotulo="Orçamento">
-            {p.orcamento_max &&
-              `${formatarEuros(p.orcamento_max)}${Number(p.tolerancia_pct) > 0 ? ` + ${Number(p.tolerancia_pct)}% → máximo ${formatarEuros(p.teto)}` : ''}`}
-          </Dado>
           {crit('Tipo', n.tipos.join(', '), p.imp_tipos)}
           {crit('Tipologia', n.tipologias.join(', '), p.imp_tipologias)}
           {crit('Localização', localizacao, p.imp_localizacao)}
+          {crit('Área bruta privativa', p.area_min !== null && `${Number(p.area_min)} m² ou mais`, p.imp_area)}
           {crit('Quartos', p.quartos_min !== null && `${p.quartos_min} ou mais`, p.imp_quartos)}
-          {crit('Área', p.area_min !== null && `${Number(p.area_min)} m² ou mais`, p.imp_area)}
-          {crit('Zonas exteriores', n.zonas_exteriores.join(', '), p.imp_zonas_exteriores)}
+          {crit('Casas de banho', p.wcs_min !== null && `${p.wcs_min} ou mais`, p.imp_wcs)}
           {crit('Elevador', p.exige_elevador && 'Sim', p.imp_elevador)}
           {crit(
             'Estacionamento',
             p.estacionamento_min !== null && `${p.estacionamento_min} lugar(es) ou mais`,
             p.imp_estacionamento,
           )}
+          {crit('Zonas exteriores', n.zonas_exteriores.join(', '), p.imp_zonas_exteriores)}
           {crit('Condição física', n.condicoes_fisicas.join(', '), p.imp_condicoes)}
         </dl>
+        <VerQualificacao campos={CRITERIOS_INFORMATIVOS} registo={p as unknown as Registo} />
       </Bloco>
 
       <Bloco titulo="Imóveis compatíveis" resumo={corresp.data ? `${corresp.data.resultados.length}` : undefined}>

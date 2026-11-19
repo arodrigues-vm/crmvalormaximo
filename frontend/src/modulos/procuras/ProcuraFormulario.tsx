@@ -12,6 +12,7 @@ import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/Seleto
 import { useGuardaSaida } from '../../componentes/useGuardaSaida'
 import { entidadesApi } from '../entidades/api'
 import {
+  CRITERIOS_INFORMATIVOS,
   PRE_QUALIFICACAO_FINANCEIRA,
   procurarConcelhos,
   procurarFreguesias,
@@ -40,6 +41,8 @@ interface Valores {
   imp_localizacao: Imp
   quartos_min: string
   imp_quartos: Imp
+  wcs_min: string
+  imp_wcs: Imp
   area_min: string
   imp_area: Imp
   zonas_exteriores: number[]
@@ -55,7 +58,7 @@ interface Valores {
 
 const t = (v: string | number | null | undefined) => (v === null || v === undefined ? '' : String(v))
 const num = (v: string) => (v.trim() === '' ? null : v.trim().replace(',', '.'))
-const CAMPOS_Q = [...QUALIFICACAO_COMPRADOR, ...PRE_QUALIFICACAO_FINANCEIRA]
+const CAMPOS_Q = [...QUALIFICACAO_COMPRADOR, ...PRE_QUALIFICACAO_FINANCEIRA, ...CRITERIOS_INFORMATIVOS]
 
 function deProcura(p?: Procura, entidade?: OpcaoPesquisa | null): Valores {
   return {
@@ -76,6 +79,8 @@ function deProcura(p?: Procura, entidade?: OpcaoPesquisa | null): Valores {
     imp_localizacao: p?.imp_localizacao ?? 'obrigatorio',
     quartos_min: t(p?.quartos_min),
     imp_quartos: p?.imp_quartos ?? 'preferencial',
+    wcs_min: t(p?.wcs_min),
+    imp_wcs: p?.imp_wcs ?? 'preferencial',
     area_min: p?.area_min ? String(Number(p.area_min)) : '',
     imp_area: p?.imp_area ?? 'preferencial',
     zonas_exteriores: p?.zonas_exteriores ?? [],
@@ -211,6 +216,8 @@ function Formulario({ p, entidadeInicial = null }: { p?: Procura; entidadeInicia
       imp_localizacao: v.imp_localizacao,
       quartos_min: num(v.quartos_min),
       imp_quartos: v.imp_quartos,
+      wcs_min: num(v.wcs_min),
+      imp_wcs: v.imp_wcs,
       area_min: num(v.area_min),
       imp_area: v.imp_area,
       zonas_exteriores: v.zonas_exteriores,
@@ -255,10 +262,10 @@ function Formulario({ p, entidadeInicial = null }: { p?: Procura; entidadeInicia
         </p>
       )}
 
-      <Bloco titulo="Interessado" forcarAberto={temErro(['entidade', 'pretende', 'estado'])}>
+      <Bloco titulo="Prospect" forcarAberto={temErro(['entidade', 'pretende', 'estado'])}>
         <div className="grelha-campos">
           <SeletorPesquisavel
-            rotulo="Interessado (comprador / arrendatário)"
+            rotulo="Comprador / arrendatário"
             chave="entidades"
             procurar={entidadesApi.procurar}
             valor={v.entidade}
@@ -303,22 +310,11 @@ function Formulario({ p, entidadeInicial = null }: { p?: Procura; entidadeInicia
 
       <Bloco
         titulo="Pré-qualificação financeira"
-        forcarAberto={temErro(PRE_QUALIFICACAO_FINANCEIRA.map((c) => c.campo))}
+        forcarAberto={temErro(['orcamento_max', 'tolerancia_pct', ...PRE_QUALIFICACAO_FINANCEIRA.map((c) => c.campo)])}
       >
-        <EditarQualificacao
-          nomesAtuais={p?.nomes}
-          campos={PRE_QUALIFICACAO_FINANCEIRA}
-          valores={v.qualificacao}
-          aoMudar={mudarQ}
-          opcoes={opcoesQ}
-          erros={erros}
-        />
-      </Bloco>
-
-      <Bloco titulo="Orçamento" forcarAberto={temErro(['orcamento_max', 'tolerancia_pct'])}>
         <div className="grelha-campos">
           <CampoTexto
-            rotulo="Orçamento máximo (€)"
+            rotulo="Valor de aquisição previsto (€)"
             inputMode="decimal"
             value={v.orcamento_max}
             onChange={(e) => mudar('orcamento_max', e.target.value)}
@@ -330,7 +326,7 @@ function Formulario({ p, entidadeInicial = null }: { p?: Procura; entidadeInicia
             value={v.tolerancia_pct}
             onChange={(e) => mudar('tolerancia_pct', e.target.value)}
             erro={erros.tolerancia_pct}
-            ajuda="De 0% a 20%. Imóveis acima do orçamento + tolerância nunca aparecem."
+            ajuda="De 0% a 20%. Imóveis acima deste valor + tolerância nunca aparecem nas correspondências."
           />
           {teto !== null && (
             <p className="ajuda largo">
@@ -338,6 +334,14 @@ function Formulario({ p, entidadeInicial = null }: { p?: Procura; entidadeInicia
             </p>
           )}
         </div>
+        <EditarQualificacao
+          nomesAtuais={p?.nomes}
+          campos={PRE_QUALIFICACAO_FINANCEIRA}
+          valores={v.qualificacao}
+          aoMudar={mudarQ}
+          opcoes={opcoesQ}
+          erros={erros}
+        />
       </Bloco>
 
       <Bloco titulo="Critérios do imóvel">
@@ -369,7 +373,7 @@ function Formulario({ p, entidadeInicial = null }: { p?: Procura; entidadeInicia
         >
           <div className="campo">
             <SeletorPesquisavel
-              rotulo="Concelhos (inteiros)"
+              rotulo="Concelhos"
               chave="concelhos"
               procurar={procurarConcelhos}
               valor={novoConcelho}
@@ -393,7 +397,7 @@ function Formulario({ p, entidadeInicial = null }: { p?: Procura; entidadeInicia
           </div>
           <div className="campo">
             <SeletorPesquisavel
-              rotulo="Freguesias (específicas)"
+              rotulo="Freguesias"
               chave="freguesias"
               procurar={procurarFreguesias}
               valor={novaFreguesia}
@@ -416,10 +420,24 @@ function Formulario({ p, entidadeInicial = null }: { p?: Procura; entidadeInicia
             />
           </div>
           <CampoMultiplo
-            rotulo="Zonas comerciais"
+            rotulo="Zonas"
             opcoes={o?.zonas_comerciais ?? []}
             valores={v.zonas_comerciais}
             aoMudar={(x) => mudar('zonas_comerciais', x)}
+          />
+        </Criterio>
+        <Criterio
+          titulo="Área bruta privativa"
+          ajuda="Compara com a área bruta privativa (ou a útil, se aquela faltar)."
+          imp={v.imp_area}
+          aoMudarImp={(i) => mudar('imp_area', i)}
+        >
+          <CampoTexto
+            rotulo="Mínimo (m²)"
+            inputMode="decimal"
+            value={v.area_min}
+            onChange={(e) => mudar('area_min', e.target.value)}
+            erro={erros.area_min}
           />
         </Criterio>
         <Criterio titulo="Quartos" imp={v.imp_quartos} aoMudarImp={(i) => mudar('imp_quartos', i)}>
@@ -431,31 +449,13 @@ function Formulario({ p, entidadeInicial = null }: { p?: Procura; entidadeInicia
             erro={erros.quartos_min}
           />
         </Criterio>
-        <Criterio
-          titulo="Área"
-          ajuda="Compara com a área bruta privativa (ou a útil, se aquela faltar)."
-          imp={v.imp_area}
-          aoMudarImp={(i) => mudar('imp_area', i)}
-        >
+        <Criterio titulo="Casas de banho" imp={v.imp_wcs} aoMudarImp={(i) => mudar('imp_wcs', i)}>
           <CampoTexto
-            rotulo="Área mínima (m²)"
-            inputMode="decimal"
-            value={v.area_min}
-            onChange={(e) => mudar('area_min', e.target.value)}
-            erro={erros.area_min}
-          />
-        </Criterio>
-        <Criterio
-          titulo="Zonas exteriores"
-          ajuda="O imóvel tem de ter todas as escolhidas."
-          imp={v.imp_zonas_exteriores}
-          aoMudarImp={(i) => mudar('imp_zonas_exteriores', i)}
-        >
-          <CampoMultiplo
-            rotulo="Zonas exteriores"
-            opcoes={o?.zonas_exteriores ?? []}
-            valores={v.zonas_exteriores}
-            aoMudar={(x) => mudar('zonas_exteriores', x)}
+            rotulo="Mínimo de casas de banho"
+            inputMode="numeric"
+            value={v.wcs_min}
+            onChange={(e) => mudar('wcs_min', e.target.value)}
+            erro={erros.wcs_min}
           />
         </Criterio>
         <Criterio titulo="Elevador" imp={v.imp_elevador} aoMudarImp={(i) => mudar('imp_elevador', i)}>
@@ -474,6 +474,19 @@ function Formulario({ p, entidadeInicial = null }: { p?: Procura; entidadeInicia
             erro={erros.estacionamento_min}
           />
         </Criterio>
+        <Criterio
+          titulo="Zonas exteriores"
+          ajuda="O imóvel tem de ter todas as escolhidas."
+          imp={v.imp_zonas_exteriores}
+          aoMudarImp={(i) => mudar('imp_zonas_exteriores', i)}
+        >
+          <CampoMultiplo
+            rotulo="Zonas exteriores"
+            opcoes={o?.zonas_exteriores ?? []}
+            valores={v.zonas_exteriores}
+            aoMudar={(x) => mudar('zonas_exteriores', x)}
+          />
+        </Criterio>
         <Criterio titulo="Condição física" imp={v.imp_condicoes} aoMudarImp={(i) => mudar('imp_condicoes', i)}>
           <CampoMultiplo
             rotulo="Condições aceites"
@@ -482,6 +495,15 @@ function Formulario({ p, entidadeInicial = null }: { p?: Procura; entidadeInicia
             aoMudar={(x) => mudar('condicoes_fisicas', x)}
           />
         </Criterio>
+        <h4 className="subtitulo-bloco">Outras preferências (não entram nas correspondências)</h4>
+        <EditarQualificacao
+          nomesAtuais={p?.nomes}
+          campos={CRITERIOS_INFORMATIVOS}
+          valores={v.qualificacao}
+          aoMudar={mudarQ}
+          opcoes={opcoesQ}
+          erros={erros}
+        />
       </Bloco>
 
       <Bloco titulo="Observações" abertoInicial={!!v.observacoes}>

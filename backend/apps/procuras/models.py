@@ -67,10 +67,7 @@ class Procura(RegistoBase):
     exposicao_solar = models.CharField("exposição solar", max_length=120, blank=True)
     aceita_obras = campo_lista("aceita_obras", verbose_name="obras")
 
-    # Pré-qualificação financeira
-    plafond = models.DecimalField(
-        max_digits=12, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0)]
-    )
+    # Pré-qualificação financeira (o valor de aquisição previsto e a tolerância estão acima)
     modo_pagamento = campo_lista("modos_pagamento", verbose_name="modo de pagamento")
     capitais_proprios = campo_lista("sim_nao", verbose_name="capitais próprios")
     financiamento = campo_lista("sim_nao")
@@ -78,9 +75,15 @@ class Procura(RegistoBase):
     entidade_bancaria = campo_lista("entidades_bancarias", verbose_name="entidade bancária")
     observacoes_qualificacao = models.TextField("observações da qualificação", blank=True)
 
-    # Orçamento: sempre obrigatório quando indicado. NULL = não indicado.
+    # «Valor de aquisição previsto» (D-35; antes «orçamento máximo» e «plafond»): é o limite de preço
+    # nas correspondências, com a tolerância. Sempre obrigatório quando indicado. NULL = não indicado.
     orcamento_max = models.DecimalField(
-        "orçamento máximo", max_digits=12, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0)]
+        "valor de aquisição previsto",
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)],
     )
     tolerancia_pct = models.DecimalField(
         "tolerância (%)",
@@ -102,6 +105,8 @@ class Procura(RegistoBase):
     imp_localizacao = importancia("localização")
     quartos_min = models.PositiveSmallIntegerField("quartos (mínimo)", null=True, blank=True)
     imp_quartos = importancia("quartos")
+    wcs_min = models.PositiveSmallIntegerField("casas de banho (mínimo)", null=True, blank=True)
+    imp_wcs = importancia("casas de banho")
     area_min = models.DecimalField(
         "área mínima (m²)", max_digits=10, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0)]
     )

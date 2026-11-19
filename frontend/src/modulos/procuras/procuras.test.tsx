@@ -47,7 +47,7 @@ describe('Procuras', () => {
       'POST /api/procuras/': () => json({ id: 9 }, 400),
     })
     desenhar('/procuras/nova')
-    fireEvent.change(await screen.findByLabelText('Orçamento máximo (€)'), { target: { value: '250000' } })
+    fireEvent.change(await screen.findByLabelText('Valor de aquisição previsto (€)'), { target: { value: '250000' } })
     fireEvent.change(screen.getByLabelText('Tolerância (%)'), { target: { value: '20' } })
     expect(screen.getByText(/300\s000 €/)).toBeInTheDocument()
     fireEvent.click(await screen.findByRole('button', { name: /^Tipologias/ }))
@@ -77,14 +77,14 @@ describe('Procuras', () => {
     desenhar('/procuras/nova')
     fireEvent.change(await screen.findByLabelText('Quando iniciou a procura'), { target: { value: 'Há 3 meses' } })
     fireEvent.change(screen.getByLabelText('Modo de pagamento'), { target: { value: '70' } })
-    fireEvent.change(screen.getByLabelText('Plafond (€)'), { target: { value: '200 000' } })
+    fireEvent.change(screen.getByLabelText('Valor de aquisição previsto (€)'), { target: { value: '200000' } })
     expect(screen.queryByLabelText('Qualificação')).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Guardar' }))
     await waitFor(() => expect(pedidos.some((p) => p.metodo === 'POST')).toBe(true))
     expect(pedidos.find((p) => p.metodo === 'POST')!.corpo).toMatchObject({
       quando_iniciou: 'Há 3 meses',
       modo_pagamento: 70,
-      plafond: '200000',
+      orcamento_max: '200000',
       financiamento: null,
     })
   })
@@ -184,7 +184,7 @@ describe('Procuras', () => {
       'GET /api/procuras/3/interacoes/': () => json([]),
     })
     desenhar('/procuras/3')
-    expect(await screen.findByText(/máximo 300\s000,00\s€/)).toBeInTheDocument()
+    expect((await screen.findAllByText(/300\s000,00\s€/)).length).toBeGreaterThan(0)
     expect(await screen.findByText('IMO-000005')).toBeInTheDocument()
     expect(screen.getByText('Dentro da tolerância')).toBeInTheDocument()
     expect(screen.getByText(/dentro da tolerância$/)).toBeInTheDocument()
@@ -192,7 +192,7 @@ describe('Procuras', () => {
 })
 
 describe('Oportunidades', () => {
-  it('converter pede confirmação e abre o CMI criado', async () => {
+  it('criar imóvel pede confirmação e abre o imóvel para completar', async () => {
     const pedidos = simularApi({
       '/api/auth/eu/': () => json(UTIL),
       '/api/oportunidades/opcoes/': () =>
@@ -260,13 +260,13 @@ describe('Oportunidades', () => {
         json({ operacoes: [], regimes: [], papeis: [], modalidades: [], modalidades_por_operacao: {} }),
     })
     const { router } = desenhar('/oportunidades/4')
-    fireEvent.click(await screen.findByRole('button', { name: 'Converter em imóvel / CMI' }))
-    const d = await screen.findByRole('dialog', { hidden: true, name: 'Converter em imóvel / CMI' })
+    fireEvent.click(await screen.findByRole('button', { name: 'Criar imóvel' }))
+    const d = await screen.findByRole('dialog', { hidden: true, name: 'Criar imóvel' })
     fireEvent.click(within(d).getByRole('button', { name: 'Confirmar', hidden: true }))
-    await waitFor(() => expect(router.state.location.pathname).toBe('/angariacoes/6/editar'))
+    await waitFor(() => expect(router.state.location.pathname).toBe('/imoveis/8/editar'))
     expect(pedidos.find((p) => p.url.pathname.endsWith('/converter/'))!.corpo).toEqual({
       confirmar: true,
-      criar_cmi: true,
+      criar_cmi: false,
     })
   })
 })

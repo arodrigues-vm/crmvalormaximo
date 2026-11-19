@@ -37,6 +37,8 @@ export interface Procura extends ProcuraResumo {
   imp_localizacao: Importancia
   quartos_min: number | null
   imp_quartos: Importancia
+  wcs_min: number | null
+  imp_wcs: Importancia
   area_min: string | null
   imp_area: Importancia
   zonas_exteriores: number[]
@@ -134,7 +136,8 @@ export const NOMES_CRITERIOS: Record<string, string> = {
   tipologia: 'Tipologia',
   localizacao: 'Localização',
   quartos: 'Quartos',
-  area: 'Área',
+  casas_banho: 'Casas de banho',
+  area: 'Área bruta privativa',
   zonas_exteriores: 'Zonas exteriores',
   elevador: 'Elevador',
   estacionamento: 'Estacionamento',
@@ -142,14 +145,15 @@ export const NOMES_CRITERIOS: Record<string, string> = {
 }
 
 export const NOMES_CAMPOS_PROCURA: Record<string, string> = {
-  entidade: 'Interessado',
+  entidade: 'Comprador / arrendatário',
   pretende: 'O cliente pretende',
   estado: 'Estado',
   urgencia: 'Urgência',
-  orcamento_max: 'Orçamento máximo',
+  orcamento_max: 'Valor de aquisição previsto',
   tolerancia_pct: 'Tolerância (%)',
   quartos_min: 'Quartos (mínimo)',
-  area_min: 'Área mínima',
+  wcs_min: 'Casas de banho (mínimo)',
+  area_min: 'Área bruta privativa mínima',
   exige_elevador: 'Elevador',
   estacionamento_min: 'Estacionamento (mínimo)',
   responsavel: 'Responsável',
@@ -158,6 +162,7 @@ export const NOMES_CAMPOS_PROCURA: Record<string, string> = {
   imp_tipologias: 'Importância da tipologia',
   imp_localizacao: 'Importância da localização',
   imp_quartos: 'Importância dos quartos',
+  imp_wcs: 'Importância das casas de banho',
   imp_area: 'Importância da área',
   imp_zonas_exteriores: 'Importância das zonas exteriores',
   imp_elevador: 'Importância do elevador',
@@ -186,9 +191,6 @@ export const QUALIFICACAO_COMPRADOR: CampoQualificacao[] = [
   { campo: 'compra_depende_venda', rotulo: 'A compra depende da venda', tipo: 'lista', lista: 'sim_nao' },
   { campo: 'quando_iniciou', rotulo: 'Quando iniciou a procura', tipo: 'texto', ajuda: 'Ex.: «há 3 meses».' },
   { campo: 'prazo_aquisicao', rotulo: 'Prazo de aquisição', tipo: 'texto', ajuda: 'Como o cliente disse.' },
-  { campo: 'piso', rotulo: 'Piso', tipo: 'texto', ajuda: 'Ex.: «não quer rés-do-chão».' },
-  { campo: 'exposicao_solar', rotulo: 'Exposição solar', tipo: 'texto' },
-  { campo: 'aceita_obras', rotulo: 'Obras', tipo: 'lista', lista: 'aceita_obras' },
   { campo: 'motivacao', rotulo: 'Motivo para comprar', tipo: 'longo' },
   { campo: 'o_que_quer', rotulo: 'O que quer?', tipo: 'longo' },
   { campo: 'o_que_nao_quer', rotulo: 'O que não quer?', tipo: 'longo' },
@@ -197,13 +199,20 @@ export const QUALIFICACAO_COMPRADOR: CampoQualificacao[] = [
 
 /** Pré-qualificação financeira (D-34). */
 export const PRE_QUALIFICACAO_FINANCEIRA: CampoQualificacao[] = [
-  { campo: 'plafond', rotulo: 'Plafond', tipo: 'euros' },
   { campo: 'modo_pagamento', rotulo: 'Modo de pagamento', tipo: 'lista', lista: 'modos_pagamento' },
   { campo: 'capitais_proprios', rotulo: 'Capitais próprios', tipo: 'lista', lista: 'sim_nao' },
   { campo: 'financiamento', rotulo: 'Financiamento', tipo: 'lista', lista: 'sim_nao' },
   { campo: 'qualificacao_bancaria', rotulo: 'Qualificação bancária', tipo: 'lista', lista: 'sim_nao' },
   { campo: 'entidade_bancaria', rotulo: 'Entidade bancária', tipo: 'lista', lista: 'entidades_bancarias' },
-  { campo: 'observacoes_qualificacao', rotulo: 'Observações da qualificação', tipo: 'longo' },
+  { campo: 'observacoes_qualificacao', rotulo: 'Observações da qualificação financeira', tipo: 'longo' },
 ]
 
-for (const c of [...QUALIFICACAO_COMPRADOR, ...PRE_QUALIFICACAO_FINANCEIRA]) NOMES_CAMPOS_PROCURA[c.campo] = c.rotulo
+/** Preferências do imóvel sem comparação automática (informativas), no fim dos critérios. */
+export const CRITERIOS_INFORMATIVOS: CampoQualificacao[] = [
+  { campo: 'piso', rotulo: 'Piso', tipo: 'texto', ajuda: 'Ex.: «não quer rés-do-chão».' },
+  { campo: 'exposicao_solar', rotulo: 'Exposição solar', tipo: 'texto' },
+  { campo: 'aceita_obras', rotulo: 'Obras', tipo: 'lista', lista: 'aceita_obras' },
+]
+
+for (const c of [...QUALIFICACAO_COMPRADOR, ...PRE_QUALIFICACAO_FINANCEIRA, ...CRITERIOS_INFORMATIVOS])
+  NOMES_CAMPOS_PROCURA[c.campo] = c.rotulo

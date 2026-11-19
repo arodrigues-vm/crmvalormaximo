@@ -8,7 +8,7 @@ from apps.localizacao.models import Concelho, Freguesia
 from .models import Procura
 
 IMPORTANCIAS = [
-    "imp_tipos", "imp_tipologias", "imp_localizacao", "imp_quartos", "imp_area", "imp_zonas_exteriores",
+    "imp_tipos", "imp_tipologias", "imp_localizacao", "imp_quartos", "imp_wcs", "imp_area", "imp_zonas_exteriores",
     "imp_elevador", "imp_estacionamento", "imp_condicoes",
 ]  # fmt: skip
 
@@ -27,7 +27,7 @@ LISTAS_QUALIFICACAO = {
 CAMPOS_QUALIFICACAO = [
     "destino_imovel", "nivel_motivacao", "motivacao", "compra_depende_venda", "prazo_aquisicao", "quando_iniciou",
     "o_que_quer", "o_que_nao_quer", "flexibilidade", "piso", "exposicao_solar", "aceita_obras",
-    "plafond", "modo_pagamento", "capitais_proprios", "financiamento", "qualificacao_bancaria",
+    "modo_pagamento", "capitais_proprios", "financiamento", "qualificacao_bancaria",
     "entidade_bancaria", "observacoes_qualificacao",
 ]  # fmt: skip
 
@@ -113,7 +113,7 @@ class ProcuraSerializer(ProcuraListaSerializer):
             "orcamento_max", "tolerancia_pct", "teto",
             "tipos", "imp_tipos", "tipologias", "imp_tipologias",
             "concelhos", "freguesias", "zonas_comerciais", "imp_localizacao",
-            "quartos_min", "imp_quartos", "area_min", "imp_area",
+            "quartos_min", "imp_quartos", "wcs_min", "imp_wcs", "area_min", "imp_area",
             "zonas_exteriores", "imp_zonas_exteriores", "exige_elevador", "imp_elevador",
             "estacionamento_min", "imp_estacionamento", "condicoes_fisicas", "imp_condicoes",
             "responsavel", "responsavel_nome", "observacoes", "nomes", "resumo",

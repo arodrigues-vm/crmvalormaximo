@@ -357,3 +357,47 @@ class TestAcompanhamentoD34:
         assert c["nomes"]["prioridade"] == "Alta"
         r = api.patch(detalhe(c["id"]), {"valor_vendido": "190000", "versao": c["versao"]}, format="json")
         assert r.json()["valor_comissao_estimado"] == "9500.00"
+
+
+class TestPartesSincronizadas:
+    """D-35: num CMI em curso, as partes proprietárias são sempre os proprietários do imóvel."""
+
+    def test_partes_acompanham_os_proprietarios(self, api, pessoas, imovel):
+        c = criar(api, pessoas.cons, imovel)
+        donos_iniciais = [p["entidade"] for p in c["intervenientes_detalhe"]]
+        assert donos_iniciais == list(imovel.proprietarios.values_list("entidade_id", flat=True))
+        assert all(p["do_imovel"] for p in c["intervenientes_detalhe"])
+        # Um procurador acrescentado no CMI mantém-se; tentar tirar um proprietário não tem efeito.
+        procurador = Entidade.objects.create(nome="Procurador Ensaio", responsavel=pessoas.cons)
+        papel = valor("papeis_interveniente_cmi", "Procurador").pk
+        r = como(api, pessoas.cons).patch(
+            detalhe(c["id"]),
+            {"intervenientes": [{"entidade": procurador.pk, "papel": papel}], "versao": c["versao"]},
+            format="json",
+        )
+        ids = [p["entidade"] for p in r.json()["intervenientes_detalhe"]]
+        assert ids == donos_iniciais + [procurador.pk]
+        # Mudar os proprietários no imóvel muda as partes do CMI em curso.
+        nova = Entidade.objects.create(nome="Nova Dona", responsavel=pessoas.cons)
+        i = como(api, pessoas.cons).get(reverse("imovel-detail", args=[imovel.pk])).json()
+        como(api, pessoas.cons).patch(
+            reverse("imovel-detail", args=[imovel.pk]),
+            {"proprietarios": [{"entidade": nova.pk, "quota": "100"}], "versao": i["versao"]},
+            format="json",
+        )
+        partes = como(api, pessoas.cons).get(detalhe(c["id"])).json()["intervenientes_detalhe"]
+        assert [(p["entidade"], p["quota"]) for p in partes] == [(nova.pk, "100.0000"), (procurador.pk, None)]
+
+    def test_contrato_fechado_nao_muda(self, api, pessoas, imovel):
+        c = criar(api, pessoas.cons, imovel)
+        a = Angariacao.objects.get(pk=c["id"])
+        a.situacao = Angariacao.Situacao.CANCELADA
+        a.save()
+        antes = list(a.intervenientes.values_list("entidade_id", flat=True))
+        nova = Entidade.objects.create(nome="Nova Dona", responsavel=pessoas.cons)
+        imovel.proprietarios.all().delete()
+        imovel.proprietarios.create(entidade=nova)
+        from apps.angariacoes.servicos import sincronizar_partes_do_imovel
+
+        sincronizar_partes_do_imovel(imovel)
+        assert list(a.intervenientes.values_list("entidade_id", flat=True)) == antes

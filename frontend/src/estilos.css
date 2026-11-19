@@ -1598,3 +1598,10 @@ a.botao-secundario {
   background: #ecfdf3;
   color: #067647;
 }
+
+.subtitulo-bloco {
+  margin: 20px 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--azul-marinho);
+}

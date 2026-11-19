@@ -40,7 +40,6 @@ export function AngariacoesLista() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [termo])
 
-  const opcoes = useQuery({ queryKey: ['angariacoes', 'opcoes'], queryFn: cmiApi.opcoes, staleTime: 60_000 })
   const consulta = Object.fromEntries(params.entries())
   const lista = useQuery({
     queryKey: ['angariacoes', 'lista', consulta],
@@ -82,11 +81,6 @@ export function AngariacoesLista() {
           <option value="fim">Data de fim (mais próxima)</option>
           <option value="referencia">Referência</option>
         </select>
-        {opcoes.data?.pode_criar && (
-          <Link to="/angariacoes/nova" className="botao-principal">
-            + Nova angariação
-          </Link>
-        )}
       </div>
 
       {lista.isError && <p className="erro">Não foi possível carregar as angariações.</p>}

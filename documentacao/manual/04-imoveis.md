@@ -30,18 +30,26 @@ No telemóvel a lista aparece em cartões:
 
 ![Novo imóvel](imagens/21-imovel-novo.png)
 
-### Comercialização
+O formulário tem 10 separadores, por esta ordem:
+
+### 1. Comercialização
 
 - **Operação:** por exemplo Venda ou Arrendamento (lista editável pelo Administrador).
-- **Preço (€):** deixe **vazio** se ainda não for conhecido. Vazio é diferente de 0 €.
 - **Estado de comercialização:** em que ponto está a comercialização (Em preparação, Disponível, Proposta,
   Reservado, Vendido, Arrendado, Retirado…). É a parte final da «fase de angariação»: as fases anteriores
   (Contacto, Pré-angariação, ACM apresentado, Pendente) registam-se na **oportunidade de angariação** e o
   contrato tem o seu próprio estado, calculado automaticamente (capítulo 5).
 - **Status:** por omissão *Ativo*, *Inativo* ou *Arquivado* (lista editável). Use *Arquivado* para imóveis
   que já não interessam ao dia a dia, sem os eliminar. Se não escolher nenhum, o imóvel fica *Ativo*.
+- **Valor (€):** deixe **vazio** se ainda não for conhecido. Vazio é diferente de 0 €.
+- **Link do site:** endereço do anúncio do imóvel.
 
-### Proprietários e quotas
+### 2. Identificação
+
+Tipo de imóvel, tipologia, **estado do imóvel** (Novo, Usado, Reabilitado, Restaurado, Ruína), destino do
+imóvel, ocupação e habitável.
+
+### 3. Proprietários e quotas
 
 1. Em **Acrescentar proprietário**, escreva parte do nome, NIF ou referência da entidade e escolha-a na lista.
 2. Indique a **quota** de cada proprietário, em percentagem (por exemplo, 50).
@@ -53,42 +61,50 @@ No telemóvel a lista aparece em cartões:
   procure-o.
 - Proprietários a que não tem acesso aparecem como *«Entidade a que não tem acesso»*: mantêm-se no imóvel,
   mas não os pode alterar.
-- Alterar os proprietários de um imóvel **não altera negócios já concluídos**: as propostas e transações
-  guardam os participantes da altura.
+- Os proprietários são também as **partes** dos contratos (CMI) em curso deste imóvel: ao alterá-los aqui, as
+  partes desses contratos atualizam-se sozinhas (capítulo 5).
 
-### Caracterização
+### 4. Caracterização
 
-Tipo, tipologia, **estado do imóvel** (Novo, Usado, Reabilitado, Restaurado, Ruína), quartos, WCs, ano de
-construção, piso, lugares de estacionamento e zonas exteriores (pode escolher várias), **destino do imóvel**,
-**ocupação**, **situação do imóvel**, **conservação**, **acabamentos** e **habitável**.
+Situação do imóvel, ano de construção, conservação, acabamentos, piso, **elevadores** (Não, 1, 2…),
+**garagem** (1 lugar, Box 2 lugares…), piscina e zonas exteriores (pode escolher várias). O número de lugares de
+estacionamento usado nas procuras é tirado da garagem (por exemplo, «Box 2 lugares» conta como 2).
 
-### Divisões e equipamento
+### 5. Divisões
 
-Suites, quartos +1, salas, WCs de serviço, cozinha, arrumação, climatização, caixilharias, **elevadores**
-(Não, 1, 2…), piscina e garagem.
+Quartos, suites, quartos +1, salas, WCs, WCs de serviço, cozinha, marquise, lavandaria (quantas), arrumação e
+**outras** (texto livre, por exemplo «escritório, sótão»).
 
-### Áreas (m²)
+### 6. Equipamentos e conforto
+
+Classe energética, n.º do certificado energético, climatização e caixilharias.
+
+### 7. Áreas (m²)
 
 Área bruta privativa, bruta dependente, útil, do lote, coberta, descoberta e de construção, a **fonte das
-áreas** (CPU/R, CRP, planta…) e a **conformidade de áreas**. Pode usar vírgula nas casas decimais (112,5).
+áreas** (CPU/R, CRP, planta…) e a **conformidade de áreas** (texto livre). Pode usar vírgula nas casas
+decimais (112,5).
 
-### Documentação
+### 8. Informação registal
 
-Classe energética, n.º do certificado energético, tipo de artigo (Urbano, Rústico, Misto), licença de
-construção, licença de habitabilidade e alvará de loteamento. Os documentos propriamente ditos ficam em
-pastas do OneDrive, ligadas na secção *Fotografias, documentos e outras ligações* (4.5).
+Artigo matricial, tipo de artigo (Urbano, Rústico, Misto), descrição do registo predial, licença de
+habitabilidade, licença de construção e alvará de loteamento. Os documentos propriamente ditos ficam em pastas
+do OneDrive, ligadas na secção *Fotografias, documentos e outras ligações* (4.5).
 
-Deixar um campo vazio significa *desconhecido*. Todas as opções das listas são editáveis pelo Administrador
-(anexo A). As características descritivas ficam no **imóvel** e mantêm-se mesmo que o contrato (CMI) seja
-cancelado.
+### 9. Localização
 
-### Localização
-
-- **Morada:** rua, número, complemento, código postal e localidade.
-- **Localização administrativa:** Distrito → Concelho → Freguesia (catálogo oficial CAOP).
+- **Link da localização** (por exemplo, do Google Maps).
+- **Morada:** rua, número de polícia, complemento, código postal e localidade.
+- **Distrito → Concelho → Freguesia** (catálogo oficial CAOP).
 - **Zona comercial:** a zona de atuação da agência (lista própria, diferente das freguesias).
 - **Localização descritiva:** texto livre, por exemplo *«junto ao parque da cidade»*.
-- **Link da localização** (por exemplo, do Google Maps) e **Link do site** (anúncio do imóvel).
+
+### 10. Descrição e observações
+
+Descrição do imóvel e observações internas.
+
+Deixar um campo vazio significa *desconhecido*. Todas as opções das listas são editáveis pelo Administrador
+(anexo A).
 
 ## 4.3 Consultar e editar
 
@@ -102,6 +118,19 @@ A ficha abre em consulta. Carregue em **Editar** para alterar e em **Guardar** p
   Moradia*).
 - As regras de edição são as mesmas das Entidades: aviso ao sair sem guardar, erros assinalados no campo e
   aviso se outra pessoa alterou o imóvel entretanto.
+
+### Duplicar imóvel (nova comercialização)
+
+Quando um imóvel vendido, cancelado ou rescindido **volta ao mercado**, não se reaproveita o registo antigo:
+cria-se um **imóvel novo**, para que cada comercialização tenha os seus proprietários e contratos.
+
+1. Abra a ficha do imóvel antigo e carregue em **Duplicar imóvel**.
+2. Leia a explicação e carregue em **Duplicar**.
+3. Abre-se a edição do imóvel novo, já com as mesmas características, proprietários e fotografia, e no estado
+   *Em preparação*. Atualize o que mudou — em especial os **proprietários** — e carregue em **Guardar**.
+
+O imóvel novo mostra um aviso com a ligação ao imóvel de origem. O imóvel antigo fica intacto, com o seu
+histórico e contratos. As ligações a pastas do OneDrive não são copiadas.
 
 ## 4.4 Fotografia principal
 

@@ -110,6 +110,11 @@ CAMPOS_D34 = [
     "quartos_extra",
     "salas",
     "wcs_servico",
+    "marquises",
+    "lavandarias",
+    "outras_divisoes",
+    "artigo_matricial",
+    "descricao_registo_predial",
 ]
 
 
@@ -149,6 +154,7 @@ class ImovelSerializer(serializers.ModelSerializer):
     proprietarios_detalhe = serializers.SerializerMethodField()
     localizacao = serializers.SerializerMethodField()
     responsavel_nome = serializers.CharField(source="responsavel.nome", read_only=True)
+    duplicado_de_referencia = serializers.CharField(source="duplicado_de.referencia", read_only=True, default=None)
     acoes = serializers.SerializerMethodField()
 
     class Meta:
@@ -161,10 +167,13 @@ class ImovelSerializer(serializers.ModelSerializer):
             "area_bruta_privativa", "area_bruta_dependente", "area_util", "area_terreno",
             "quartos", "casas_banho", "ano_construcao", "piso", "elevador", "lugares_estacionamento",
             "certificado_energetico", "zonas_exteriores", "descricao", *LISTAS_D34, *CAMPOS_D34,
+            "duplicado_de", "duplicado_de_referencia",
             "proprietarios", "proprietarios_detalhe", "responsavel", "responsavel_nome", "observacoes",
             "nomes", "tem_fotografia", "criado_em", "atualizado_em", "versao", "eliminado_em", "acoes",
         ]  # fmt: skip
-        read_only_fields = ["referencia", "criado_em", "atualizado_em", "eliminado_em"]
+        read_only_fields = [
+            "referencia", "criado_em", "atualizado_em", "eliminado_em", "lugares_estacionamento", "elevador",
+        ]  # fmt: skip
 
     def get_nomes(self, o) -> dict:
         """Nomes legíveis dos valores de listas (para a ficha de consulta)."""
@@ -239,6 +248,9 @@ class ImovelSerializer(serializers.ModelSerializer):
             Proprietario.objects.update_or_create(
                 imovel=imovel, entidade_id=p["entidade"], defaults={"quota": p.get("quota"), "ordem": ordem}
             )
+        from apps.angariacoes.servicos import sincronizar_partes_do_imovel
+
+        sincronizar_partes_do_imovel(imovel)  # D-35: Partes do CMI em curso = proprietários
 
     @transaction.atomic
     def create(self, dados):

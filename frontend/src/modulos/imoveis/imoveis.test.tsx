@@ -127,7 +127,7 @@ describe('Imóveis', () => {
     fireEvent.change(quotas[0], { target: { value: '60' } })
     expect(screen.getByText(/Soma das quotas indicadas: 110 %/)).toBeInTheDocument()
     fireEvent.change(quotas[0], { target: { value: '50' } })
-    fireEvent.change(screen.getByLabelText('Preço (€)'), { target: { value: '' } })
+    fireEvent.change(screen.getByLabelText('Valor (€)'), { target: { value: '' } })
     fireEvent.change(screen.getByLabelText('Elevadores'), { target: { value: '61' } })
     fireEvent.change(screen.getByLabelText('Área de construção (m²)'), { target: { value: '120,5' } })
     fireEvent.change(screen.getByLabelText('Suites'), { target: { value: '1' } })

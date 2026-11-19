@@ -2,6 +2,8 @@ import re
 import uuid
 from decimal import Decimal, InvalidOperation
 
+from django.core.files.base import ContentFile
+from django.db import transaction
 from django.db.models import Prefetch, Q
 from django.http import FileResponse, Http404
 from drf_spectacular.types import OpenApiTypes
@@ -13,7 +15,7 @@ from rest_framework.response import Response
 
 from apps.configuracao.campos import opcoes_lista
 from apps.contas.models import Operacao
-from apps.contas.permissoes import filtrar, pode_no_registo
+from apps.contas.permissoes import Ambito, ambito_efetivo, filtrar, pode_no_registo
 from apps.core.armazenamento import armazenamento_privado
 from apps.core.auditoria import registar
 from apps.core.imagens import ImagemInvalida, processar_fotografia
@@ -70,6 +72,7 @@ class ImovelViewSet(RegistoViewSet):
         "fotografia": Operacao.CONSULTAR,
         "angariacoes": Operacao.CONSULTAR,
         "procuras_compativeis": Operacao.CONSULTAR,
+        "duplicar": Operacao.CONSULTAR,  # e, além disso, permissão para criar (verificada na ação)
     }
     modulo = "imoveis"
     modelo = Imovel
@@ -209,6 +212,65 @@ class ImovelViewSet(RegistoViewSet):
                 armazenamento_privado.delete(nome)
         registar(acao, modulo=self.modulo, objeto=imovel, request=request)
         return Response(self.get_serializer(self.recarregar(imovel)).data)
+
+    # Campos que NÃO passam para a cópia.
+    NAO_DUPLICAR = {
+        "id", "referencia", "versao", "criado_em", "criado_por", "atualizado_em", "atualizado_por",
+        "eliminado_em", "eliminado_por", "fotografia", "fotografia_miniatura", "duplicado_de", "responsavel",
+        "estado_comercializacao", "status",
+    }  # fmt: skip
+
+    @action(detail=True, methods=["post"])
+    @transaction.atomic
+    def duplicar(self, request, pk=None):
+        """D-35: nova comercialização do mesmo imóvel (vendido, cancelado ou rescindido que volta ao
+        mercado). Cria um imóvel novo com as mesmas características, proprietários e fotografia, para
+        depois se atualizar o que mudou. O original fica intacto, com o seu histórico e contratos."""
+        original = self.get_object()
+        if not request.data.get("confirmar"):
+            raise ValidationError({"confirmar": "É necessário confirmar a duplicação."})
+        if ambito_efetivo(request.user, self.modulo, Operacao.CRIAR) == Ambito.NENHUM:
+            raise PermissionDenied("Não tem permissão para criar imóveis.")
+        dados = {
+            f.attname: getattr(original, f.attname)
+            for f in Imovel._meta.concrete_fields
+            if f.name not in self.NAO_DUPLICAR and f.attname not in self.NAO_DUPLICAR
+        }
+        from apps.configuracao.models import ValorLista
+
+        novo = Imovel(
+            **dados,
+            duplicado_de=original,
+            responsavel=request.user,
+            criado_por=request.user,
+            atualizado_por=request.user,
+            estado_comercializacao=ValorLista.objects.filter(
+                lista__chave="estados_comercializacao", categoria="preparacao", ativo=True
+            )
+            .order_by("ordem", "id")
+            .first(),
+            status=ValorLista.objects.filter(lista__chave="status_imovel", categoria="ativo", ativo=True)
+            .order_by("ordem", "id")
+            .first(),
+        )
+        novo.save()
+        novo.zonas_exteriores.set(original.zonas_exteriores.all())
+        for p in original.proprietarios.all():
+            Proprietario.objects.create(imovel=novo, entidade_id=p.entidade_id, quota=p.quota)
+        if original.fotografia:
+            sufixo = uuid.uuid4().hex[:12]
+            with original.fotografia.open("rb") as f:
+                novo.fotografia.save(f"foto-{sufixo}.webp", ContentFile(f.read()), save=False)
+            with original.fotografia_miniatura.open("rb") as f:
+                novo.fotografia_miniatura.save(f"mini-{sufixo}.webp", ContentFile(f.read()), save=False)
+            Imovel.objects.filter(pk=novo.pk).update(
+                fotografia=novo.fotografia.name, fotografia_miniatura=novo.fotografia_miniatura.name
+            )
+        registar(
+            "imovel.duplicado", modulo=self.modulo, objeto=novo, request=request,
+            descricao=f"Duplicado de {original.referencia}", dados={"original": original.pk},
+        )  # fmt: skip
+        return Response({"id": novo.pk, "referencia": novo.referencia}, status=201)
 
     @action(detail=True, methods=["get"])
     def angariacoes(self, request, pk=None):

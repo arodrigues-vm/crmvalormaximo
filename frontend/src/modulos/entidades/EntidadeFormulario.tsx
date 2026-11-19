@@ -497,6 +497,14 @@ function Formulario({ entidade }: { entidade?: Entidade }) {
             erro={erro('papeis')}
           />
           <CampoSelecao
+            rotulo="Status"
+            value={v.status}
+            vazio={entidade ? undefined : 'Por omissão: Ativo'}
+            onChange={(e) => mudar('status', e.target.value)}
+            opcoes={lista(o?.status)}
+            erro={erro('status')}
+          />
+          <CampoSelecao
             rotulo="Origem do contacto"
             value={v.origem}
             vazio="—"
@@ -504,14 +512,6 @@ function Formulario({ entidade }: { entidade?: Entidade }) {
             opcoes={(o?.origens ?? []).map((x) => ({ valor: x.id, nome: x.nome }))}
             erro={erro('origem')}
             ajuda={o && o.origens.length === 0 ? 'Sem origens configuradas (Configurações).' : undefined}
-          />
-          <CampoSelecao
-            rotulo="Status"
-            value={v.status}
-            vazio={entidade ? undefined : 'Por omissão: Ativo'}
-            onChange={(e) => mudar('status', e.target.value)}
-            opcoes={lista(o?.status)}
-            erro={erro('status')}
           />
           <SeletorPesquisavel
             rotulo="Quem recomendou"

@@ -194,8 +194,18 @@ describe('Angariações', () => {
   })
 
   it('modalidades de remuneração dependem da operação', async () => {
-    simularApi({ ...base, 'GET /api/angariacoes/': () => json({ count: 0, results: [] }) })
-    desenhar('/angariacoes/nova')
+    simularApi({
+      ...base,
+      'GET /api/angariacoes/': () => json({ count: 0, results: [] }),
+      'GET /api/imoveis/5/': () =>
+        json({
+          id: 5,
+          referencia: 'IMO-000005',
+          localidade: 'Ensaio',
+          nomes: { tipo: 'Apartamento', tipologia: 'T2' },
+        }),
+    })
+    desenhar('/angariacoes/nova?imovel=5')
     const operacao = await screen.findByLabelText('Tipo (operação)')
     await waitFor(() => expect(operacao.querySelectorAll('option').length).toBe(3))
     fireEvent.change(operacao, { target: { value: '41' } })
@@ -208,8 +218,15 @@ describe('Angariações', () => {
       ...base,
       'GET /api/angariacoes/': () => json({ count: 0, results: [] }),
       'POST /api/angariacoes/': () => json({ campos: {} }, 400),
+      'GET /api/imoveis/5/': () =>
+        json({
+          id: 5,
+          referencia: 'IMO-000005',
+          localidade: 'Ensaio',
+          nomes: { tipo: 'Apartamento', tipologia: 'T2' },
+        }),
     })
-    desenhar('/angariacoes/nova')
+    desenhar('/angariacoes/nova?imovel=5')
     expect(screen.queryByLabelText('Data de assinatura')).not.toBeInTheDocument()
     fireEvent.change(await screen.findByLabelText('Data de início'), { target: { value: '2026-01-31' } })
     fireEvent.change(screen.getByLabelText('Prazo (meses)'), { target: { value: '1' } })
@@ -226,5 +243,12 @@ describe('Angariações', () => {
       sinal_valor: '15',
       sinal_unidade: 'percentagem',
     })
+  })
+
+  it('sem imóvel não se cria angariação: indica o caminho pelo imóvel', async () => {
+    simularApi({ ...base })
+    desenhar('/angariacoes/nova')
+    expect(await screen.findByText(/criam-se a partir da ficha do imóvel/)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Guardar' })).not.toBeInTheDocument()
   })
 })

@@ -5,7 +5,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ErroApi } from '../../api/cliente'
 import { useSessao } from '../../app/sessao'
 import { Bloco } from '../../componentes/Bloco'
-import { CampoCaixa, Dado } from '../../componentes/campos'
+import { Dado } from '../../componentes/campos'
 import { Dialogo } from '../../componentes/Dialogo'
 import { CabecalhoRegisto, HistoricoRegisto } from '../../componentes/Ficha'
 import { formatarEuros, momentoPt } from '../../componentes/formatar'
@@ -25,7 +25,6 @@ export function OportunidadeConsulta() {
   const qc = useQueryClient()
   const { pode } = useSessao()
   const [dialogo, setDialogo] = useState<null | 'converter' | 'eliminar'>(null)
-  const [criarCmi, setCriarCmi] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
   const {
     data: o,
@@ -42,14 +41,14 @@ export function OportunidadeConsulta() {
   })
 
   const converter = useMutation({
-    mutationFn: () => oportunidadesApi.converter(Number(id), criarCmi),
+    mutationFn: () => oportunidadesApi.converter(Number(id), false),
     onSuccess: (r) => {
       qc.invalidateQueries({ queryKey: ['oportunidades'] })
       qc.invalidateQueries({ queryKey: ['imoveis'] })
       qc.invalidateQueries({ queryKey: ['angariacoes'] })
       setDialogo(null)
-      // Abre o CMI criado (para completar e assinar) ou o imóvel.
-      navegar(r.angariacao ? `/angariacoes/${r.angariacao}/editar` : `/imoveis/${r.imovel}`)
+      // D-35: o passo seguinte é completar o imóvel; o CMI cria-se depois, na ficha do imóvel.
+      navegar(`/imoveis/${r.imovel}/editar`)
     },
     onError: (e) => setErro(e instanceof ErroApi ? Object.values(e.campos).flat().join(' ') || e.message : 'Falhou.'),
   })
@@ -67,7 +66,7 @@ export function OportunidadeConsulta() {
   if (!o) return <p className="erro">Não foi possível carregar a oportunidade.</p>
   const n = o.nomes
   const registo = o as unknown as Record<string, unknown>
-  const podeConverter = o.acoes.editar && !o.angariacao_gerada && (o.imovel !== null || pode('imoveis', 'criar'))
+  const podeCriarImovel = o.acoes.editar && o.imovel === null && pode('imoveis', 'criar')
 
   return (
     <div className="ficha">
@@ -117,21 +116,24 @@ export function OportunidadeConsulta() {
           <Dado rotulo="Valor pretendido">{formatarEuros(o.preco_pretendido)}</Dado>
           <Dado rotulo="Responsável">{o.responsavel_nome}</Dado>
         </dl>
-        {podeConverter && (
+        {podeCriarImovel && (
           <div className="acoes-bloco">
             <button className="botao-principal" onClick={() => setDialogo('converter')}>
-              {o.imovel ? 'Criar CMI' : 'Converter em imóvel / CMI'}
+              Criar imóvel
             </button>
+          </div>
+        )}
+        {o.imovel !== null && (
+          <div className="acoes-bloco">
+            <Link to={`/imoveis/${o.imovel}`} className="botao-principal">
+              Abrir imóvel (atualizar e criar o CMI)
+            </Link>
           </div>
         )}
       </Bloco>
 
       <Bloco titulo="Qualificação do proprietário">
         <VerQualificacao campos={QUALIFICACAO_PROPRIETARIO} registo={registo} />
-      </Bloco>
-
-      <Bloco titulo="Negócio">
-        <VerQualificacao campos={QUALIFICACAO_NEGOCIO} registo={registo} />
       </Bloco>
 
       <Bloco titulo="Imóvel">
@@ -157,6 +159,10 @@ export function OportunidadeConsulta() {
             </a>
           </p>
         )}
+      </Bloco>
+
+      <Bloco titulo="Negócio">
+        <VerQualificacao campos={QUALIFICACAO_NEGOCIO} registo={registo} />
       </Bloco>
 
       <Bloco titulo="Contactos registados">
@@ -185,7 +191,7 @@ export function OportunidadeConsulta() {
       </Bloco>
 
       <Dialogo
-        titulo={o.imovel ? 'Criar CMI' : 'Converter em imóvel / CMI'}
+        titulo="Criar imóvel"
         aberto={dialogo === 'converter'}
         aoFechar={() => setDialogo(null)}
         acoes={
@@ -200,24 +206,13 @@ export function OportunidadeConsulta() {
         }
       >
         <div className="formulario-dialogo">
-          {o.imovel ? (
-            <p>Vai ser criada uma angariação (CMI) por assinar para o imóvel {o.imovel_descricao}.</p>
-          ) : (
-            <p>
-              Vai ser criado o <strong>imóvel</strong> «{o.imovel_descricao}», com {o.entidade_nome ?? 'o proprietário'}{' '}
-              como proprietário e o preço pretendido.
-            </p>
-          )}
-          {!o.imovel && (
-            <CampoCaixa
-              rotulo="Criar também a angariação (CMI) por assinar"
-              checked={criarCmi}
-              onChange={(e) => setCriarCmi(e.target.checked)}
-            />
-          )}
+          <p>
+            Vai ser criado o <strong>imóvel</strong> «{o.imovel_descricao}», com {o.entidade_nome ?? 'o proprietário'}{' '}
+            como proprietário e o valor pretendido. A seguir abre-se o imóvel para o completar.
+          </p>
           <p className="ajuda">
-            A oportunidade mantém-se, ligada ao que for criado. O estado não muda sozinho: atualize-o quando o CMI for
-            assinado.
+            Depois, na ficha do imóvel, crie a angariação (CMI) em <strong>Angariações (CMI)</strong>. A oportunidade
+            mantém-se, ligada ao imóvel. O estado não muda sozinho: atualize-o quando o CMI for assinado.
           </p>
           {erro && (
             <p className="erro" role="alert">
