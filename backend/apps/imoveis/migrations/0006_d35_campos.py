@@ -5,17 +5,6 @@ from django.db import migrations, models
 
 
 
-def lugares_para_garagem(apps, schema_editor):
-    """D-35: os lugares de estacionamento passam a vir da «Garagem». Converte os já registados."""
-    Imovel = apps.get_model("imoveis", "Imovel")
-    Valor = apps.get_model("configuracao", "ValorLista")
-    nomes = {1: "1 lugar", 2: "2 lugares", 3: "3 lugares", 4: "4 lugares", 5: "5 lugares"}
-    for i in Imovel.objects.filter(garagem__isnull=True, lugares_estacionamento__gt=0):
-        valor = Valor.objects.filter(lista__chave="garagens", nome=nomes.get(min(i.lugares_estacionamento, 5))).first()
-        if valor:
-            Imovel.objects.filter(pk=i.pk).update(garagem=valor)
-
-
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -129,5 +118,4 @@ class Migration(migrations.Migration):
             name="conformidade_areas",
             field=models.TextField(blank=True, verbose_name="conformidade de áreas"),
         ),
-        migrations.RunPython(lugares_para_garagem, migrations.RunPython.noop),
     ]
