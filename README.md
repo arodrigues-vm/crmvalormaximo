@@ -50,7 +50,7 @@ ssh utilizador@IP_DA_VPS
 ```bash
 cd /opt/orcamento && sudo docker compose up -d --build
 ```
-A app fica a correr em `127.0.0.1:8095` (a 8090 já está ocupada na VPS), acessível só a partir da própria VPS.
+A app fica a correr em `127.0.0.1:18095` (as portas 8090 e 8095 já estão ocupadas na VPS), acessível só a partir da própria VPS.
 
 ### 3. Nginx + HTTPS
 ```bash

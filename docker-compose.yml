@@ -4,6 +4,6 @@ services:
     container_name: orcamento
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8095:8090"   # só acessível localmente; o Nginx faz a ligação HTTPS
+      - "127.0.0.1:18095:8090"   # só acessível localmente; o Nginx faz a ligação HTTPS
     volumes:
       - ./pb_data:/app/pb_data  # base de dados, anexos e cópias de segurança

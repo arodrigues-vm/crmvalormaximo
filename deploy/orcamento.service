@@ -9,7 +9,7 @@ User=orcamento
 Group=orcamento
 WorkingDirectory=/opt/orcamento
 Environment=TZ=Europe/Lisbon
-ExecStart=/opt/orcamento/orcamento-server serve --http=127.0.0.1:8095
+ExecStart=/opt/orcamento/orcamento-server serve --http=127.0.0.1:18095
 Restart=on-failure
 RestartSec=5
 LimitNOFILE=4096
