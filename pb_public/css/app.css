@@ -142,6 +142,8 @@ body.offline .sem-rede { display: inline-flex; }
 .btn-primario { background: var(--primaria); color: var(--primaria-texto); border-color: transparent; }
 .btn-primario:hover { background: color-mix(in srgb, var(--primaria) 88%, black); }
 .btn-perigo { background: var(--critico); color: #fff; border-color: transparent; }
+.btn-perigo:hover { background: color-mix(in srgb, var(--critico) 85%, black); }
+.btn-perigo-texto:hover { background: color-mix(in srgb, var(--critico) 10%, transparent); }
 .btn-perigo-texto { color: var(--critico); }
 .btn-bloco { width: 100%; }
 .btn-texto { background: none; border: 0; color: var(--primaria); cursor: pointer; padding: 6px 8px; font-weight: 500; text-decoration: none; font-size: .875rem; border-radius: 8px; }

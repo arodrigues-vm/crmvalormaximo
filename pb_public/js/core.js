@@ -2,7 +2,7 @@
 import PocketBase from "../vendor/pocketbase.es.mjs"
 
 // Versão da app: atualizar aqui E em /versao.json a cada alteração publicada.
-export const VERSAO_APP = "1.5"
+export const VERSAO_APP = "1.6"
 
 export const pb = new PocketBase(location.origin)
 pb.autoCancellation(false)
