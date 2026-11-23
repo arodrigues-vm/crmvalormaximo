@@ -1,6 +1,6 @@
 // Service worker: guarda a aplicação no aparelho para abrir sem rede.
 // Os dados (/api) nunca são guardados aqui: a app usa a sua própria cache e fila de envio.
-const VERSAO = "orc-v4"
+const VERSAO = "orc-v5"
 const ESSENCIAIS = [
   "/", "/index.html", "/css/app.css", "/manifest.webmanifest", "/icons/icon.svg", "/icons/icon-192.png",
   "/vendor/pocketbase.es.mjs", "/vendor/chart.umd.min.js",
@@ -10,7 +10,10 @@ const ESSENCIAIS = [
 ]
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(VERSAO).then((c) => c.addAll(ESSENCIAIS)).then(() => self.skipWaiting()))
+  // cache: "reload" garante que a instalação descarrega sempre a versão nova do servidor
+  e.waitUntil(caches.open(VERSAO)
+    .then((c) => c.addAll(ESSENCIAIS.map((u) => new Request(u, { cache: "reload" }))))
+    .then(() => self.skipWaiting()))
 })
 
 self.addEventListener("activate", (e) => {
@@ -25,7 +28,7 @@ self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET" || url.origin !== location.origin) return
   if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/_/")) return
   e.respondWith(
-    fetch(e.request)
+    fetch(e.request, { cache: "no-cache" })
       .then((r) => {
         if (r.ok) { const copia = r.clone(); caches.open(VERSAO).then((c) => c.put(e.request, copia)) }
         return r
