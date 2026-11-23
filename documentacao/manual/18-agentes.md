@@ -38,5 +38,6 @@ Igual ao anterior, escolhendo o tipo **Rede** ou **Externa**.
 
 ## 18.5 Quem pode fazer o quê
 
-Por omissão, todos podem **consultar** agentes e agências; **criar e editar** é para o Responsável de Equipa e
-o Administrador (o Administrador pode alterar estas permissões).
+Por omissão, todos podem **consultar** agentes e agências. O **Consultor** pode **criar** agentes e agências e
+**editar os que criou**; o Responsável de Equipa e o Administrador editam todos. O Administrador pode alterar
+estas permissões.

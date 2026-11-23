@@ -60,6 +60,10 @@ def _ambito_omissao(perfil: str, modulo: str, operacao: str) -> str:
             return A.TODOS
         if perfil == Perfil.RESPONSAVEL and modulo in ("agentes", "agencias", "glossario"):
             return A.TODOS if operacao in (Op.CRIAR, Op.EDITAR) else A.NENHUM
+        # D-38: os consultores também registam agentes e agências (ex.: agente externo de uma visita);
+        # editam apenas os que criaram.
+        if perfil == Perfil.CONSULTOR and modulo in ("agentes", "agencias"):
+            return A.ATRIBUIDOS if operacao in (Op.CRIAR, Op.EDITAR) else A.NENHUM
         return A.NENHUM
 
     if modulo in PAINEIS:

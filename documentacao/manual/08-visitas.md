@@ -25,8 +25,7 @@ A forma mais rápida é a partir da ficha do imóvel (ou da entidade): secção 
 2. Escolha o **cliente**. Quando não tem os dados do comprador (por exemplo, cliente de um agente externo),
    use uma entidade genérica, como «Cliente externo».
 3. Indique o **agente responsável pelo comprador** e o **agente responsável pelo imóvel** (obrigatórios). Ambos
-   têm de estar registados em **Agentes** (capítulo 18); se faltar algum, peça ao Responsável de Equipa que o
-   registe.
+   têm de estar registados em **Agentes** (capítulo 18); se faltar algum, registe-o primeiro em **Agentes**.
 4. Indique a **data** e, se quiser, a **hora de entrada** e a **hora de saída**.
 5. Se forem mais pessoas, acrescente-as em **Acompanhantes**.
 6. Carregue em **Guardar**. A visita fica *Agendada*.

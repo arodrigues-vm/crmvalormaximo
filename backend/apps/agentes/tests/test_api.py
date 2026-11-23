@@ -46,8 +46,17 @@ def test_telefone_invalido_e_utilizador_unico(api, criar_utilizador):
     assert r.status_code == 400 and "utilizador" in str(r.json())
 
 
-def test_consultor_so_consulta(api, criar_utilizador):
+def test_consultor_cria_e_edita_os_seus(api, criar_utilizador):
+    """D-38: o Consultor regista agentes (ex.: o agente externo de uma visita) e edita os que criou."""
     cons = criar_utilizador(Perfil.CONSULTOR)
+    outro = criar_utilizador(Perfil.CONSULTOR)
     api.force_authenticate(cons)
-    assert api.get(reverse("agente-list")).status_code == 200
-    assert api.post(reverse("agente-list"), {"nome": "X"}, format="json").status_code == 403
+    r = api.post(reverse("agente-list"), {"nome": "Agente Externo Ensaio"}, format="json")
+    assert r.status_code == 201, r.content
+    a = r.json()
+    assert api.patch(reverse("agente-detail", args=[a["id"]]), {"email": "a@exemplo.pt", "versao": a["versao"]},
+                     format="json").status_code == 200  # fmt: skip
+    api.force_authenticate(outro)
+    assert api.get(reverse("agente-detail", args=[a["id"]])).status_code == 200  # todos consultam
+    r = api.patch(reverse("agente-detail", args=[a["id"]]), {"email": "b@exemplo.pt", "versao": 2}, format="json")
+    assert r.status_code in (403, 404)
