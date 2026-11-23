@@ -1,0 +1,7 @@
+# Alternativa ao Nginx: o Caddy obtém o certificado HTTPS automaticamente.
+orcamento.valormaximo.pt {
+    request_body {
+        max_size 30MB
+    }
+    reverse_proxy 127.0.0.1:8095
+}

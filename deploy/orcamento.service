@@ -1,0 +1,18 @@
+# Alternativa sem Docker: /etc/systemd/system/orcamento.service
+[Unit]
+Description=Orcamento (PocketBase)
+After=network.target
+
+[Service]
+Type=simple
+User=orcamento
+Group=orcamento
+WorkingDirectory=/opt/orcamento
+Environment=TZ=Europe/Lisbon
+ExecStart=/opt/orcamento/orcamento-server serve --http=127.0.0.1:8095
+Restart=on-failure
+RestartSec=5
+LimitNOFILE=4096
+
+[Install]
+WantedBy=multi-user.target
