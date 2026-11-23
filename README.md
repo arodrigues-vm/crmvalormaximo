@@ -163,7 +163,7 @@ As migrações de base de dados aplicam-se sozinhas no arranque.
 ```bash
 ./orcamento-server serve
 ```
-Abra http://127.0.0.1:8090. O frontend está em `pb_public/` (JavaScript sem passo de compilação: basta editar e recarregar). Ao alterar ficheiros JS/CSS, aumente `VERSAO` em `pb_public/sw.js` para os telemóveis receberem a nova versão.
+Abra http://127.0.0.1:8090. O frontend está em `pb_public/` (JavaScript sem passo de compilação: basta editar e recarregar). Ao publicar alterações, aumente a versão em `pb_public/js/core.js` (`VERSAO_APP`) e em `pb_public/versao.json` (o mesmo número): cada aparelho deteta a diferença ao abrir e atualiza-se sozinho.
 
 ## Estrutura
 ```

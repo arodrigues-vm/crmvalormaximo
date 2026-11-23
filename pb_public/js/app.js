@@ -1,7 +1,7 @@
 // Arranque, autenticação, navegação e estrutura da página.
 import {
   pb, state, h, ICONES, aviso, erroTexto, iniciarDados, pararSubscricoes, haModalAberto,
-  setAmbito, def, isAdmin, enviarPendentes,
+  setAmbito, def, isAdmin, enviarPendentes, VERSAO_APP,
 } from "./core.js"
 import { destruirGraficos } from "./graficos.js"
 import * as painel from "./views/painel.js"
@@ -29,7 +29,25 @@ if ("serviceWorker" in navigator) {
 }
 
 // ------------------------------------------------------------------ arranque
+// Se o servidor tiver uma versão diferente da que está a correr, limpa as cópias guardadas e recarrega.
+async function verificarVersao() {
+  if (!navigator.onLine) return false
+  try {
+    const { versao } = await fetch("/versao.json", { cache: "no-store" }).then((r) => r.json())
+    if (!versao || versao === VERSAO_APP) return false
+    const chave = `orc_recarregado_${versao}`
+    if (sessionStorage.getItem(chave)) return false   // evita ciclos se algo correr mal
+    sessionStorage.setItem(chave, "1")
+    if (window.caches) for (const k of await caches.keys()) await caches.delete(k)
+    const reg = await navigator.serviceWorker?.getRegistration()
+    await reg?.update().catch(() => {})
+    location.reload()
+    return true
+  } catch (_) { return false }
+}
+
 async function arrancar() {
+  if (await verificarVersao()) return
   if (!navigator.onLine) document.body.classList.add("offline")
   try {
     const estado = await fetch("/api/orc/estado").then((r) => r.json())
@@ -192,7 +210,7 @@ function montarEstrutura() {
         h("span", { class: "sem-rede", title: "Sem ligação: as alterações serão sincronizadas depois", html: ICONES.nuvem }),
         h("span", { class: "utilizador", title: u?.email }, u?.name || u?.email || ""),
         h("button", { class: "btn-icone", title: "Sair", "aria-label": "Sair", onclick: sair, html: ICONES.sair }))),
-    h("nav", { class: "nav", "aria-label": "Navegação principal" }, navLinks),
+    h("nav", { class: "nav", "aria-label": "Navegação principal" }, navLinks, h("span", { class: "nav-versao" }, `Versão ${VERSAO_APP}`)),
     conteudo,
   )
 }

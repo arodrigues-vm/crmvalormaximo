@@ -1,7 +1,7 @@
 // Configuração sem código: categorias, fornecedores, métodos, responsáveis, utilizadores, definições e perfil.
 import {
   pb, state, h, eur, abrirModal, fecharModal, aviso, erroTexto, confirmar, isAdmin, rotulo, nomeDe,
-  recarregar, emitir, lerLocal, gravarLocal,
+  recarregar, emitir, lerLocal, gravarLocal, VERSAO_APP,
 } from "../core.js"
 import { seccaoPasskeys } from "../passkey.js"
 
@@ -231,5 +231,5 @@ function perfil() {
   })
   return h("section", { class: "cartao" },
     h("header", { class: "cartao-topo" }, h("div", {}, h("h3", {}, "O meu perfil"),
-      h("p", { class: "sub" }, `Papel: ${rotulo(u?.papel)}`))), form)
+      h("p", { class: "sub" }, `Papel: ${rotulo(u?.papel)} · Versão da app: ${VERSAO_APP}`))), form)
 }

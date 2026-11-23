@@ -1,6 +1,9 @@
 // Núcleo: ligação ao servidor, estado partilhado, sincronização e utilitários de interface.
 import PocketBase from "../vendor/pocketbase.es.mjs"
 
+// Versão da app: atualizar aqui E em /versao.json a cada alteração publicada.
+export const VERSAO_APP = "1.2"
+
 export const pb = new PocketBase(location.origin)
 pb.autoCancellation(false)
 

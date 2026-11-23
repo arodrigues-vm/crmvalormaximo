@@ -349,3 +349,6 @@ body.offline .sem-rede { display: inline-flex; }
   box-shadow: 0 -6px 24px rgba(0, 0, 0, .18);
 }
 .modal-pergunta p { margin: 0 0 10px; }
+
+.nav-versao { display: none; }
+@media (min-width: 900px) { .nav-versao { display: block; margin-top: auto; padding: 8px 12px; font-size: .75rem; color: var(--texto-3); } }
