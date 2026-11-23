@@ -26,7 +26,12 @@ func main() {
 		registarRotasPasskeys(se)
 
 		publicDir := filepath.Join(app.DataDir(), "..", "pb_public")
-		se.Router.GET("/{path...}", apis.Static(os.DirFS(publicDir), true))
+		estaticos := apis.Static(os.DirFS(publicDir), true)
+		se.Router.GET("/{path...}", func(e *core.RequestEvent) error {
+			// obriga o browser a confirmar se há versão nova (evita ficar com código antigo após atualizar)
+			e.Response.Header().Set("Cache-Control", "no-cache")
+			return estaticos(e)
+		})
 		return se.Next()
 	})
 
