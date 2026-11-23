@@ -18,6 +18,9 @@ import { ImovelEditar, ImovelNovo } from '../modulos/imoveis/ImovelFormulario'
 import { OportunidadeConsulta } from '../modulos/oportunidades/OportunidadeConsulta'
 import { OportunidadeEditar, OportunidadeNova } from '../modulos/oportunidades/OportunidadeFormulario'
 import { OportunidadesLista } from '../modulos/oportunidades/OportunidadesLista'
+import { PropostaConsulta } from '../modulos/propostas/PropostaConsulta'
+import { PropostaEditar, PropostaNova } from '../modulos/propostas/PropostaFormulario'
+import { PropostasLista } from '../modulos/propostas/PropostasLista'
 import {
   AgenciaConsulta,
   AgenciaEditar,
@@ -120,6 +123,16 @@ export const rotas: RouteObject[] = [
           { path: 'novo', element: <AgenciaNovo /> },
           { path: ':id', element: <AgenciaConsulta /> },
           { path: ':id/editar', element: <AgenciaEditar /> },
+        ],
+      },
+      {
+        path: 'propostas',
+        element: <ExigeModulo modulo="propostas" />,
+        children: [
+          { index: true, element: <PropostasLista /> },
+          { path: 'nova', element: <PropostaNova /> },
+          { path: ':id', element: <PropostaConsulta /> },
+          { path: ':id/editar', element: <PropostaEditar /> },
         ],
       },
       {

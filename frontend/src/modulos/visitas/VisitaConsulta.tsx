@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { ErroApi } from '../../api/cliente'
+import { useSessao } from '../../app/sessao'
 import { Bloco } from '../../componentes/Bloco'
 import { Dado } from '../../componentes/campos'
 import { Dialogo } from '../../componentes/Dialogo'
@@ -15,6 +16,7 @@ export function VisitaConsulta() {
   const navegar = useNavigate()
   const qc = useQueryClient()
   const [eliminarAberto, setEliminarAberto] = useState(false)
+  const { pode } = useSessao()
   const { data: x, error, isLoading } = useQuery({ queryKey: ['visitas', id], queryFn: () => visitasApi.obter(id) })
   const opcoes = useQuery({ queryKey: ['visitas', 'opcoes'], queryFn: visitasApi.opcoes, staleTime: 60_000 })
   const eliminar = useMutation({
@@ -50,6 +52,11 @@ export function VisitaConsulta() {
               <button className="botao-secundario" onClick={() => setEliminarAberto(true)}>
                 Eliminar
               </button>
+            )}
+            {pode('propostas', 'criar') && x.estado_categoria === 'realizada' && (
+              <Link to={`/propostas/nova?visita=${x.id}`} className="botao-secundario">
+                Gerar Proposta
+              </Link>
             )}
             {x.acoes.editar && (
               <Link to={`/visitas/${x.id}/editar`} className="botao-principal">

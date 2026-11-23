@@ -11,10 +11,10 @@ Critérios completos: Especificação V1.4 §16 (em `fontes/`). Estados: Pendent
 | AT-05 | Plano de marketing 45 | F4-03 | — | Pendente |
 | AT-06 | Dashboard e finanças | F3-08; F4-06 | — | Pendente |
 | AT-07 | Pagamentos e estornos | F3-07/08 | — | Pendente |
-| AT-08 | Proposta a partir de Visita | F3-04 | — | Pendente |
+| AT-08 | Proposta a partir de Visita | F3-04 | `apps/propostas/tests/test_api.py` (prévia sem gravar, participantes pré-preenchidos, confirmação, duplicados, acesso) | Aprovado (testes automáticos) |
 | AT-09 | Transação e estados | F3-05/06 | — | Pendente |
 | AT-10 | Match Imóvel/Procura | F3-02 | `procuras/tests/test_correspondencias.py` (teto 250 000 € + 20% = 300 000 €, exclusão acima, obrigatórios excluem, preferenciais ordenam e explicam) | Aprovado (testes automáticos) |
-| AT-11 | Participantes históricos | F2-02; F3-05/09 | — | Pendente |
+| AT-11 | Participantes históricos | F2-02; F3-05/09 | Propostas: `test_gerar_proposta_da_visita_sem_duplicados` (fotografia dos participantes) — falta Transações | Em curso |
 | AT-12 | Importação Excel/Outlook | F2-07; F5-01 | — | Pendente |
 | AT-13 | Configuração no-code | F1-07; F2-05/06; F5-05 | `configuracao/tests.py` (listas: adicionar, renomear, desativar, ordenar, categorias fixas) | Em curso |
 | AT-14 | Brevo e WhatsApp | F4-07/08 | — | Pendente |

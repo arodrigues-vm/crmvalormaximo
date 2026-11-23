@@ -74,3 +74,7 @@ visitas e interesses, com botões para agendar uma visita ou registar um interes
 
 As visitas e os interesses seguem as permissões do módulo **Visitas** (por exemplo, o Consultor vê as suas e
 as partilhadas). Só pode marcar visitas para clientes e imóveis a que tem acesso.
+
+## 8.8 Gerar uma proposta
+
+Numa visita *Realizada*, o botão **Gerar Proposta** abre uma proposta pré-preenchida (capítulo 9).

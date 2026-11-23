@@ -50,6 +50,14 @@ CAT_TIPO_AGENCIA = [
     {"valor": "externa", "nome": "Externa"},
 ]
 
+CAT_ESTADO_PROPOSTA = [
+    {"valor": "negociacao", "nome": "Em negociação"},
+    {"valor": "aceite", "nome": "Aceite (pode gerar transação)"},
+    {"valor": "recusada", "nome": "Recusada"},
+    {"valor": "retirada", "nome": "Retirada pelo comprador"},
+    {"valor": "expirada", "nome": "Expirada"},
+]
+
 CATEGORIAS = {
     "operacoes": CAT_OPERACAO,
     "status_imovel": CAT_STATUS,
@@ -59,6 +67,7 @@ CATEGORIAS = {
     "estados_oportunidade": CAT_ESTADO_OPORTUNIDADE,
     "estados_procura": CAT_ESTADO_PROCURA,
     "estados_visita": CAT_ESTADO_VISITA,
+    "estados_proposta": CAT_ESTADO_PROPOSTA,
     "tipos_agencia": CAT_TIPO_AGENCIA,
     "status_agentes": CAT_STATUS,
     "estados_interesse": CAT_ESTADO_INTERESSE,
@@ -167,6 +176,19 @@ LISTAS = {
         "agentes",
         "",
         [("Ativo", "ativo"), ("Inativo", "inativo")],
+    ),
+    "estados_proposta": (
+        "Estados de proposta",
+        "propostas",
+        "Só as propostas de categoria «Aceite» podem gerar uma transação.",
+        [("Em negociação", "negociacao"), ("Aceite", "aceite"), ("Recusada", "recusada"),
+         ("Retirada", "retirada"), ("Expirada", "expirada")],
+    ),
+    "papeis_participante": (
+        "Papéis dos participantes (propostas e transações)",
+        "propostas",
+        "",
+        ["Comprador", "Proprietário", "Representante legal", "Procurador"],
     ),
     "estados_visita": (
         "Estados de visita",
