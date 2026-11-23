@@ -44,6 +44,12 @@ CAT_ESTADO_INTERESSE = [
     {"valor": "inativo", "nome": "Inativo"},
 ]
 
+CAT_TIPO_AGENCIA = [
+    {"valor": "propria", "nome": "Própria (a nossa agência)"},
+    {"valor": "rede", "nome": "Rede"},
+    {"valor": "externa", "nome": "Externa"},
+]
+
 CATEGORIAS = {
     "operacoes": CAT_OPERACAO,
     "status_imovel": CAT_STATUS,
@@ -53,6 +59,8 @@ CATEGORIAS = {
     "estados_oportunidade": CAT_ESTADO_OPORTUNIDADE,
     "estados_procura": CAT_ESTADO_PROCURA,
     "estados_visita": CAT_ESTADO_VISITA,
+    "tipos_agencia": CAT_TIPO_AGENCIA,
+    "status_agentes": CAT_STATUS,
     "estados_interesse": CAT_ESTADO_INTERESSE,
 }
 
@@ -146,6 +154,19 @@ LISTAS = {
         "Facilidade prevista de venda do imóvel angariado.",
         ["Imediato — até 6 meses", "Normal — 7 a 18 meses", "Difícil — 19 a 36 meses",
          "Muito difícil — mais de 36 meses"],
+    ),
+    "tipos_agencia": (
+        "Tipos de agência",
+        "agencias",
+        "A categoria «Própria» identifica a nossa agência (ex.: interesses automáticos das visitas).",
+        [("Própria", "propria"), ("Rede", "rede"), ("Externa", "externa")],
+    ),
+    "tipos_agente": ("Tipos de agente", "agentes", "", ["Consultor", "Agente da rede", "Agente externo"]),
+    "status_agentes": (
+        "Status de agentes e agências",
+        "agentes",
+        "",
+        [("Ativo", "ativo"), ("Inativo", "inativo")],
     ),
     "estados_visita": (
         "Estados de visita",

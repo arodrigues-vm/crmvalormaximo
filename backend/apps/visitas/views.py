@@ -30,6 +30,7 @@ class _Contexto:
                 | Q(entidade__nome_completo__unaccent__icontains=termo)
                 | Q(imovel__referencia__icontains=termo)
                 | Q(imovel__localidade__unaccent__icontains=termo)
+                | self.pesquisa_extra(termo)
             )
         for parametro, campo in (("estado", "estado_id"), ("entidade", "entidade_id"), ("imovel", "imovel_id")):
             if p.get(parametro):
@@ -40,11 +41,20 @@ class _Contexto:
 
 
 class VisitaViewSet(_Contexto, RegistoViewSet):
+    def pesquisa_extra(self, termo):
+        return (
+            Q(imovel_descricao__unaccent__icontains=termo)
+            | Q(imovel_localizacao__unaccent__icontains=termo)
+            | Q(agente_comprador__nome__unaccent__icontains=termo)
+            | Q(agente_imovel__nome__unaccent__icontains=termo)
+        )
+
     modulo = "visitas"
     modelo = Visita
     nome_registo = "visita"
     campos_auditados = [
-        "imovel_id", "entidade_id", "procura_id", "data", "hora_entrada", "hora_saida", "estado_id",
+        "imovel_id", "imovel_descricao", "imovel_localizacao", "agente_comprador_id", "agente_imovel_id",
+        "entidade_id", "procura_id", "data", "hora_entrada", "hora_saida", "estado_id",
         *[f"{c}_id" for c in CRITERIOS_AVALIACAO], "mais_gostou", "menos_gostou", "compraria_id",
         "responsavel_id", "observacoes",
     ]  # fmt: skip
@@ -55,6 +65,7 @@ class VisitaViewSet(_Contexto, RegistoViewSet):
     def base_queryset(self):
         return Visita.objects.select_related(
             "entidade", "imovel__tipo", "imovel__tipologia", "estado", "responsavel", "procura", "compraria",
+            "agente_comprador__agencia__tipo", "agente_imovel__agencia",
             *CRITERIOS_AVALIACAO,
         ).prefetch_related("acompanhantes")  # fmt: skip
 
@@ -87,6 +98,9 @@ class VisitaViewSet(_Contexto, RegistoViewSet):
 
 
 class InteresseViewSet(_Contexto, RegistoViewSet):
+    def pesquisa_extra(self, termo):
+        return Q(pk__in=[])
+
     modulo = "visitas"
     modelo = Interesse
     nome_registo = "interesse"

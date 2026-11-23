@@ -1,6 +1,7 @@
 from django.utils import timezone
 from rest_framework import serializers
 
+from apps.agentes.models import Agente
 from apps.configuracao.campos import CampoValorLista
 from apps.contas.models import Utilizador
 from apps.entidades.models import Entidade
@@ -18,6 +19,12 @@ def _nome(v):
 def _imovel(i) -> str:
     tipo = " ".join(filter(None, [_nome(i.tipo), _nome(i.tipologia)]))
     return " · ".join(filter(None, [i.referencia, tipo, i.localidade]))
+
+
+def _imovel_visita(o) -> str:
+    if o.imovel_id:
+        return _imovel(o.imovel)
+    return " · ".join(filter(None, [o.imovel_descricao, o.imovel_localizacao])) or "Imóvel não registado"
 
 
 class _Base(serializers.ModelSerializer):
@@ -43,6 +50,8 @@ class _Base(serializers.ModelSerializer):
         return e
 
     def validate_imovel(self, i):
+        if i is None:
+            return i
         atual = self.instance.imovel_id if self.instance else None
         if i.pk != atual and i.pk not in self.context.get("imoveis_visiveis", set()):
             raise serializers.ValidationError("Imóvel inexistente ou sem acesso.")
@@ -50,6 +59,9 @@ class _Base(serializers.ModelSerializer):
 
 
 class VisitaListaSerializer(_Base):
+    def get_imovel_descricao(self, o) -> str:
+        return _imovel_visita(o)
+
     class Meta:
         model = Visita
         fields = [
@@ -60,7 +72,15 @@ class VisitaListaSerializer(_Base):
 
 class VisitaSerializer(_Base):
     entidade = serializers.PrimaryKeyRelatedField(queryset=Entidade.objects.ativos())
-    imovel = serializers.PrimaryKeyRelatedField(queryset=Imovel.objects.ativos())
+    imovel = serializers.PrimaryKeyRelatedField(queryset=Imovel.objects.ativos(), allow_null=True, required=False)
+    agente_comprador = serializers.PrimaryKeyRelatedField(
+        queryset=Agente.objects.ativos(), allow_null=True, required=False
+    )
+    agente_imovel = serializers.PrimaryKeyRelatedField(
+        queryset=Agente.objects.ativos(), allow_null=True, required=False
+    )
+    agente_comprador_nome = serializers.SerializerMethodField()
+    agente_imovel_nome = serializers.SerializerMethodField()
     procura = serializers.PrimaryKeyRelatedField(queryset=Procura.objects.ativos(), allow_null=True, required=False)
     acompanhantes = serializers.PrimaryKeyRelatedField(queryset=Entidade.objects.ativos(), many=True, required=False)
     estado = CampoValorLista("estados_visita", allow_null=True, required=False)
@@ -75,7 +95,9 @@ class VisitaSerializer(_Base):
     class Meta:
         model = Visita
         fields = [
-            "id", "referencia", "imovel", "imovel_descricao", "entidade", "entidade_nome", "acompanhantes",
+            "id", "referencia", "imovel", "imovel_descricao", "imovel_descricao_livre", "imovel_localizacao",
+            "agente_comprador", "agente_comprador_nome", "agente_imovel", "agente_imovel_nome",
+            "entidade", "entidade_nome", "acompanhantes",
             "acompanhantes_detalhe", "procura", "procura_referencia", "data", "hora_entrada", "hora_saida",
             "estado", "estado_nome", "estado_categoria", *CRITERIOS_AVALIACAO, "mais_gostou", "menos_gostou",
             "compraria", "responsavel", "responsavel_nome", "observacoes", "nomes",
@@ -88,6 +110,25 @@ class VisitaSerializer(_Base):
         for c in CRITERIOS_AVALIACAO:
             campos[c] = CampoValorLista("avaliacoes_visita", allow_null=True, required=False)
         return campos
+
+    imovel_descricao_livre = serializers.CharField(
+        source="imovel_descricao", required=False, allow_blank=True, max_length=255
+    )
+
+    def get_imovel_descricao(self, o) -> str:
+        return _imovel_visita(o)
+
+    @staticmethod
+    def _agente(a) -> str | None:
+        if a is None:
+            return None
+        return f"{a.nome} ({a.agencia.nome})" if a.agencia_id else a.nome
+
+    def get_agente_comprador_nome(self, o) -> str | None:
+        return self._agente(o.agente_comprador)
+
+    def get_agente_imovel_nome(self, o) -> str | None:
+        return self._agente(o.agente_imovel)
 
     def get_nomes(self, o) -> dict:
         return {
@@ -118,6 +159,13 @@ class VisitaSerializer(_Base):
         estado, data = val("estado"), val("data")
         if estado and estado.categoria == "realizada" and data and data > timezone.localdate():
             raise serializers.ValidationError({"estado": "Uma visita com data futura não pode estar «Realizada»."})
+        if not val("imovel") and not (val("imovel_descricao") or "").strip():
+            raise serializers.ValidationError({"imovel": "Escolha o imóvel ou, se não estiver registado, descreva-o."})
+        if val("imovel"):
+            d["imovel_descricao"] = d["imovel_localizacao"] = ""  # com imóvel registado, não há descrição livre
+        for campo in ("agente_comprador", "agente_imovel"):
+            if not val(campo):
+                raise serializers.ValidationError({campo: "Indique o agente (registado em Agentes)."})
         procura = val("procura")
         if procura and procura.entidade_id != val("entidade").pk:
             raise serializers.ValidationError({"procura": "A procura tem de ser do mesmo cliente."})

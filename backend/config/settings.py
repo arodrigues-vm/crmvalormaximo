@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "apps.angariacoes",
     "apps.oportunidades",
     "apps.procuras",
+    "apps.agentes",
     "apps.visitas",
 ]
 

@@ -18,6 +18,16 @@ import { ImovelEditar, ImovelNovo } from '../modulos/imoveis/ImovelFormulario'
 import { OportunidadeConsulta } from '../modulos/oportunidades/OportunidadeConsulta'
 import { OportunidadeEditar, OportunidadeNova } from '../modulos/oportunidades/OportunidadeFormulario'
 import { OportunidadesLista } from '../modulos/oportunidades/OportunidadesLista'
+import {
+  AgenciaConsulta,
+  AgenciaEditar,
+  AgenciaNovo,
+  AgenciasLista,
+  AgenteConsulta,
+  AgenteEditar,
+  AgenteNovo,
+  AgentesLista,
+} from '../modulos/agentes/Paginas'
 import { InteresseConsulta } from '../modulos/visitas/InteresseConsulta'
 import { InteresseEditar, InteresseNovo } from '../modulos/visitas/InteresseFormulario'
 import { InteressesLista } from '../modulos/visitas/InteressesLista'
@@ -90,6 +100,26 @@ export const rotas: RouteObject[] = [
           { path: 'nova', element: <AngariacaoNova /> },
           { path: ':id', element: <AngariacaoConsulta /> },
           { path: ':id/editar', element: <AngariacaoEditar /> },
+        ],
+      },
+      {
+        path: 'agentes',
+        element: <ExigeModulo modulo="agentes" />,
+        children: [
+          { index: true, element: <AgentesLista /> },
+          { path: 'novo', element: <AgenteNovo /> },
+          { path: ':id', element: <AgenteConsulta /> },
+          { path: ':id/editar', element: <AgenteEditar /> },
+        ],
+      },
+      {
+        path: 'agencias',
+        element: <ExigeModulo modulo="agencias" />,
+        children: [
+          { index: true, element: <AgenciasLista /> },
+          { path: 'novo', element: <AgenciaNovo /> },
+          { path: ':id', element: <AgenciaConsulta /> },
+          { path: ':id/editar', element: <AgenciaEditar /> },
         ],
       },
       {

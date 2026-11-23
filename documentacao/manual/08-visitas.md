@@ -17,10 +17,19 @@ Abra **Visitas** no menu. No topo pode escolher entre **Visitas** e **Interesses
 A forma mais rápida é a partir da ficha do imóvel (ou da entidade): secção **Visitas e interessados** →
 **+ Agendar visita**. O imóvel (ou o cliente) já vem preenchido. Também pode usar **+ Nova visita** na lista.
 
-1. Escolha o **imóvel** (pode escrever várias palavras, por exemplo «10 T3 Maia») e o **cliente**.
-2. Indique a **data** e, se quiser, a **hora de entrada** e a **hora de saída**.
-3. Se forem mais pessoas, acrescente-as em **Acompanhantes**.
-4. Carregue em **Guardar**. A visita fica *Agendada*.
+1. Em **O imóvel está registado no CRM?**:
+   - **Sim:** escolha o **imóvel** (pode escrever várias palavras, por exemplo «10 T3 Maia»);
+   - **Não** (imóvel angariado por um agente externo ou da rede): escreva uma **descrição** curta (por exemplo
+     «Moradia T4 com piscina») e uma **localização** breve (por exemplo «junto à praia de Matosinhos»). Não é
+     preciso registar o imóvel.
+2. Escolha o **cliente**. Quando não tem os dados do comprador (por exemplo, cliente de um agente externo),
+   use uma entidade genérica, como «Cliente externo».
+3. Indique o **agente responsável pelo comprador** e o **agente responsável pelo imóvel** (obrigatórios). Ambos
+   têm de estar registados em **Agentes** (capítulo 18); se faltar algum, peça ao Responsável de Equipa que o
+   registe.
+4. Indique a **data** e, se quiser, a **hora de entrada** e a **hora de saída**.
+5. Se forem mais pessoas, acrescente-as em **Acompanhantes**.
+6. Carregue em **Guardar**. A visita fica *Agendada*.
 
 Para **reagendar**, edite a visita e mude a data: a data anterior fica no histórico.
 
@@ -36,13 +45,15 @@ Depois da visita, edite-a, mude o estado para **Realizada** e preencha a secçã
 
 1. Para cada ponto — localização/zona, infraestruturas/serviços, qualidade de construção, acabamentos, áreas,
    planta, vista, estacionamento e preço — escolha de *Muito mau* a *Muito bom*.
-2. Indique se **compraria este imóvel** e escreva **o que mais gostou** e **o que menos gostou**.
+2. Escreva **o que mais gostou** e **o que menos gostou** e, no fim, indique se **compraria este imóvel**.
 3. Carregue em **Guardar**.
 
 ## 8.5 Interesses
 
-Quando agenda uma visita, o CRM cria automaticamente o **interesse** desse cliente nesse imóvel (com origem
-*Visita*), se ainda não existir. Há só um interesse por cliente e imóvel. Quando a visita fica *Realizada*, o
+Quando agenda uma visita a um **imóvel registado** com um cliente **acompanhado pela nossa agência** (o agente
+do comprador é um utilizador do CRM ou pertence a uma agência do tipo *Própria*), o CRM cria automaticamente o
+**interesse** desse cliente nesse imóvel (com origem *Visita*), se ainda não existir. Visitas a imóveis não
+registados ou com clientes de agentes externos/da rede não criam interesses. Há só um interesse por cliente e imóvel. Quando a visita fica *Realizada*, o
 interesse mostra a data da **última visita**. Visitas canceladas ou faltas não criam interesse.
 
 Também pode registar um interesse à mão — por exemplo, quando um cliente telefona a perguntar por um imóvel —

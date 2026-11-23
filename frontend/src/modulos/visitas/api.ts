@@ -12,14 +12,21 @@ export interface VisitaResumo {
   hora_saida: string | null
   entidade: number
   entidade_nome: string | null
-  imovel: number
+  imovel: number | null
   imovel_descricao: string
   estado_nome: string | null
   estado_categoria: string | null
   responsavel_nome: string
 }
 
-export interface Visita extends VisitaResumo {
+export interface Visita extends Omit<VisitaResumo, 'imovel'> {
+  imovel: number | null
+  imovel_descricao_livre: string
+  imovel_localizacao: string
+  agente_comprador: number | null
+  agente_comprador_nome: string | null
+  agente_imovel: number | null
+  agente_imovel_nome: string | null
   acompanhantes: number[]
   acompanhantes_detalhe: { id: number; nome: string }[]
   procura: number | null
@@ -111,6 +118,10 @@ export const ETIQUETA_VISITA: Record<string, 'sucesso' | 'aviso' | 'neutra' | 'p
 
 export const NOMES_CAMPOS_VISITA: Record<string, string> = {
   imovel: 'Imóvel',
+  imovel_descricao: 'Descrição do imóvel (não registado)',
+  imovel_localizacao: 'Localização do imóvel (não registado)',
+  agente_comprador: 'Agente responsável pelo comprador',
+  agente_imovel: 'Agente responsável pelo imóvel',
   entidade: 'Cliente',
   procura: 'Procura',
   data: 'Data',

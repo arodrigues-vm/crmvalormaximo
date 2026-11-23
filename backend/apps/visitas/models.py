@@ -30,10 +30,24 @@ CRITERIOS_AVALIACAO = {
 class Visita(RegistoBase):
     PREFIXO_REFERENCIA = "VIS"
 
-    imovel = models.ForeignKey("imoveis.Imovel", on_delete=models.PROTECT, related_name="visitas")
+    # Imóvel registado no CRM OU (imóveis de agentes externos/da rede) descrição e localização breves (D-37).
+    imovel = models.ForeignKey(
+        "imoveis.Imovel", null=True, blank=True, on_delete=models.PROTECT, related_name="visitas"
+    )
+    imovel_descricao = models.CharField("descrição do imóvel (não registado)", max_length=255, blank=True)
+    imovel_localizacao = models.CharField("localização do imóvel (não registado)", max_length=200, blank=True)
     entidade = models.ForeignKey(
         "entidades.Entidade", on_delete=models.PROTECT, related_name="visitas", verbose_name="cliente"
     )
+    # Agentes envolvidos (D-37): obrigatórios nas visitas novas.
+    agente_comprador = models.ForeignKey(
+        "agentes.Agente", null=True, on_delete=models.PROTECT, related_name="+",
+        verbose_name="agente responsável pelo comprador",
+    )  # fmt: skip
+    agente_imovel = models.ForeignKey(
+        "agentes.Agente", null=True, on_delete=models.PROTECT, related_name="+",
+        verbose_name="agente responsável pelo imóvel",
+    )  # fmt: skip
     acompanhantes = models.ManyToManyField("entidades.Entidade", blank=True, related_name="+")
     procura = models.ForeignKey(
         "procuras.Procura", null=True, blank=True, on_delete=models.PROTECT, related_name="visitas"

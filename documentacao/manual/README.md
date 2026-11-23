@@ -26,7 +26,7 @@ As imagens usam apenas dados fictícios de demonstração.
 | 15 | Marketing de Entidades | Por escrever |
 | 16 | Dashboard e Estatísticas | Por escrever |
 | 17 | Comunicação (email e WhatsApp) | Por escrever |
-| 18 | Equipa, Agentes e Agências | Por escrever |
+| 18 | [Equipa, Agentes e Agências](18-agentes.md) | Agentes e Agências disponíveis; Equipa por escrever |
 | A | [Administração](A-administracao.md): listas de valores; utilizadores, perfis e permissões | Parcial |
 | B | Glossário | Por escrever |
 

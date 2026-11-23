@@ -8,6 +8,7 @@ import { CampoAreaTexto, CampoSelecao, CampoTexto } from '../../componentes/camp
 import { CabecalhoRegisto } from '../../componentes/Ficha'
 import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
 import { useGuardaSaida } from '../../componentes/useGuardaSaida'
+import { agentesApi } from '../agentes/api'
 import { entidadesApi } from '../entidades/api'
 import { imoveisApi, procurarImoveis } from '../imoveis/api'
 import { hora, visitasApi, type Visita } from './api'
@@ -15,6 +16,11 @@ import { hora, visitasApi, type Visita } from './api'
 interface Valores {
   entidade: OpcaoPesquisa | null
   imovel: OpcaoPesquisa | null
+  imovelRegistado: boolean
+  imovel_descricao: string
+  imovel_localizacao: string
+  agente_comprador: OpcaoPesquisa | null
+  agente_imovel: OpcaoPesquisa | null
   acompanhantes: OpcaoPesquisa[]
   data: string
   hora_entrada: string
@@ -83,7 +89,16 @@ function Formulario({
       entidade: visita
         ? { id: visita.entidade, titulo: visita.entidade_nome ?? 'Entidade a que não tem acesso' }
         : entidadeInicial,
-      imovel: visita ? { id: visita.imovel, titulo: visita.imovel_descricao } : imovelInicial,
+      imovel: visita?.imovel ? { id: visita.imovel, titulo: visita.imovel_descricao } : visita ? null : imovelInicial,
+      imovelRegistado: visita ? visita.imovel !== null : true,
+      imovel_descricao: visita?.imovel_descricao_livre ?? '',
+      imovel_localizacao: visita?.imovel_localizacao ?? '',
+      agente_comprador: visita?.agente_comprador
+        ? { id: visita.agente_comprador, titulo: visita.agente_comprador_nome ?? '' }
+        : null,
+      agente_imovel: visita?.agente_imovel
+        ? { id: visita.agente_imovel, titulo: visita.agente_imovel_nome ?? '' }
+        : null,
       acompanhantes: visita?.acompanhantes_detalhe.map((a) => ({ id: a.id, titulo: a.nome })) ?? [],
       data: visita?.data ?? '',
       hora_entrada: hora(visita?.hora_entrada ?? null) ?? '',
@@ -119,7 +134,11 @@ function Formulario({
     setErroGeral(null)
     const corpo = {
       entidade: v.entidade?.id ?? null,
-      imovel: v.imovel?.id ?? null,
+      imovel: v.imovelRegistado ? (v.imovel?.id ?? null) : null,
+      imovel_descricao_livre: v.imovelRegistado ? '' : v.imovel_descricao,
+      imovel_localizacao: v.imovelRegistado ? '' : v.imovel_localizacao,
+      agente_comprador: v.agente_comprador?.id ?? null,
+      agente_imovel: v.agente_imovel?.id ?? null,
       acompanhantes: v.acompanhantes.map((a) => a.id),
       data: v.data || null,
       hora_entrada: v.hora_entrada || null,
@@ -166,18 +185,55 @@ function Formulario({
 
       <Bloco
         titulo="Visita"
-        forcarAberto={temErro(['entidade', 'imovel', 'data', 'hora_entrada', 'hora_saida', 'estado'])}
+        forcarAberto={temErro([
+          'entidade',
+          'imovel',
+          'data',
+          'hora_entrada',
+          'hora_saida',
+          'estado',
+          'agente_comprador',
+          'agente_imovel',
+        ])}
       >
         <div className="grelha-campos">
-          <SeletorPesquisavel
-            rotulo="Imóvel"
-            chave="imoveis"
-            procurar={procurarImoveis}
-            valor={v.imovel}
-            aoMudar={(x) => mudar('imovel', x)}
-            erro={erros.imovel?.join(' ')}
-            placeholder="Ex.: 10 T3 Maia"
+          <CampoSelecao
+            rotulo="O imóvel está registado no CRM?"
+            value={v.imovelRegistado ? 'sim' : 'nao'}
+            onChange={(e) => mudar('imovelRegistado', e.target.value === 'sim')}
+            opcoes={[
+              { valor: 'sim', nome: 'Sim' },
+              { valor: 'nao', nome: 'Não (imóvel de agente externo ou da rede)' },
+            ]}
           />
+          {v.imovelRegistado ? (
+            <SeletorPesquisavel
+              rotulo="Imóvel"
+              chave="imoveis"
+              procurar={procurarImoveis}
+              valor={v.imovel}
+              aoMudar={(x) => mudar('imovel', x)}
+              erro={erros.imovel?.join(' ')}
+              placeholder="Ex.: 10 T3 Maia"
+            />
+          ) : (
+            <>
+              <CampoTexto
+                rotulo="Descrição do imóvel"
+                value={v.imovel_descricao}
+                onChange={(e) => mudar('imovel_descricao', e.target.value)}
+                erro={erros.imovel ?? erros.imovel_descricao_livre}
+                placeholder="Ex.: Moradia T4 com piscina"
+              />
+              <CampoTexto
+                rotulo="Localização (breve)"
+                value={v.imovel_localizacao}
+                onChange={(e) => mudar('imovel_localizacao', e.target.value)}
+                erro={erros.imovel_localizacao}
+                placeholder="Ex.: junto à praia de Matosinhos"
+              />
+            </>
+          )}
           <SeletorPesquisavel
             rotulo="Cliente"
             chave="entidades"
@@ -185,6 +241,24 @@ function Formulario({
             valor={v.entidade}
             aoMudar={(x) => mudar('entidade', x)}
             erro={erros.entidade?.join(' ')}
+          />
+          <SeletorPesquisavel
+            rotulo="Agente responsável pelo comprador"
+            chave="agentes"
+            procurar={agentesApi.procurar}
+            valor={v.agente_comprador}
+            aoMudar={(x) => mudar('agente_comprador', x)}
+            erro={erros.agente_comprador?.join(' ')}
+            placeholder="Nome do agente ou da agência"
+          />
+          <SeletorPesquisavel
+            rotulo="Agente responsável pelo imóvel"
+            chave="agentes"
+            procurar={agentesApi.procurar}
+            valor={v.agente_imovel}
+            aoMudar={(x) => mudar('agente_imovel', x)}
+            erro={erros.agente_imovel?.join(' ')}
+            placeholder="Nome do agente ou da agência"
           />
           <CampoSelecao
             rotulo="Estado"
@@ -272,14 +346,6 @@ function Formulario({
               erro={erros[c.campo]}
             />
           ))}
-          <CampoSelecao
-            rotulo="Compraria este imóvel?"
-            vazio="—"
-            value={v.compraria}
-            onChange={(e) => mudar('compraria', e.target.value)}
-            opcoes={lista(o?.sim_nao)}
-            erro={erros.compraria}
-          />
         </div>
         <CampoAreaTexto
           rotulo="O que mais gostou?"
@@ -291,6 +357,16 @@ function Formulario({
           value={v.menos_gostou}
           onChange={(e) => mudar('menos_gostou', e.target.value)}
         />
+        <div className="grelha-campos">
+          <CampoSelecao
+            rotulo="Compraria este imóvel?"
+            vazio="—"
+            value={v.compraria}
+            onChange={(e) => mudar('compraria', e.target.value)}
+            opcoes={lista(o?.sim_nao)}
+            erro={erros.compraria}
+          />
+        </div>
       </Bloco>
 
       <Bloco titulo="Observações" abertoInicial={!!v.observacoes}>

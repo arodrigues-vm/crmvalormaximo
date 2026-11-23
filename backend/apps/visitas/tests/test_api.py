@@ -30,17 +30,40 @@ def cliente(u):
 
 
 @pytest.fixture
+def agentes(u):
+    from apps.agentes.models import Agencia, Agente
+
+    nossa = Agencia.objects.create(nome="Valor Máximo Ensaio", tipo_id=v("tipos_agencia", "Própria"), responsavel=u)
+    fora = Agencia.objects.create(nome="Outra Agência Ensaio", tipo_id=v("tipos_agencia", "Externa"), responsavel=u)
+
+    class A:
+        meu = Agente.objects.create(nome="Consultor Ensaio", agencia=nossa, utilizador=u, responsavel=u)
+        externo = Agente.objects.create(nome="Agente Externo Ensaio", agencia=fora, responsavel=u)
+
+    return A
+
+
+@pytest.fixture
 def imovel(u):
     return Imovel.objects.create(responsavel=u, localidade="Maia")
+
+
+AGENTES = {}
+
+
+@pytest.fixture(autouse=True)
+def _agentes_por_omissao(agentes):
+    AGENTES.update(agente_comprador=agentes.meu.pk, agente_imovel=agentes.meu.pk)
 
 
 def criar(api, u, cliente, imovel, **extra):
     api.force_authenticate(u)
     corpo = {
         "entidade": cliente.pk,
-        "imovel": imovel.pk,
+        "imovel": imovel.pk if imovel else None,
         "data": str(HOJE + timedelta(days=2)),
         "hora_entrada": "10:00",
+        **AGENTES,
     }
     corpo.update(extra)
     r = api.post(reverse("visita-list"), corpo, format="json")
@@ -79,7 +102,7 @@ def test_realizada_com_avaliacao_atualiza_ultima_visita(api, u, cliente, imovel)
 def test_validacoes(api, u, cliente, imovel):
     api.force_authenticate(u)
     url = reverse("visita-list")
-    base = {"entidade": cliente.pk, "imovel": imovel.pk, "data": str(HOJE + timedelta(days=3))}
+    base = {"entidade": cliente.pk, "imovel": imovel.pk, "data": str(HOJE + timedelta(days=3)), **AGENTES}
     r = api.post(url, {**base, "estado": v("estados_visita", "Realizada")}, format="json")
     assert r.status_code == 400 and "estado" in str(r.json())
     r = api.post(url, {**base, "hora_entrada": "11:00", "hora_saida": "10:00"}, format="json")
@@ -117,3 +140,32 @@ def test_interesse_manual_unico(api, u, cliente, imovel):
     assert Interesse.objects.count() == 1 and Visita.objects.count() == 1
     filtrado = api.get(reverse("interesse-list"), {"imovel": imovel.pk}).json()
     assert filtrado["count"] == 1
+
+
+def test_agentes_obrigatorios(api, u, cliente, imovel):
+    api.force_authenticate(u)
+    r = api.post(
+        reverse("visita-list"), {"entidade": cliente.pk, "imovel": imovel.pk, "data": str(HOJE)}, format="json"
+    )
+    assert r.status_code == 400 and "agente_comprador" in str(r.json())
+
+
+def test_imovel_nao_registado_e_cliente_externo(api, u, cliente, agentes):
+    """D-37: imóvel de agente externo descrito em texto; cliente de agente externo não gera interesse."""
+    api.force_authenticate(u)
+    url = reverse("visita-list")
+    base = {"entidade": cliente.pk, "data": str(HOJE), **AGENTES}
+    r = api.post(url, base, format="json")
+    assert r.status_code == 400 and "imovel" in str(r.json())
+    vis = criar(api, u, cliente, None, imovel_descricao_livre="Moradia T4 com piscina",
+                imovel_localizacao="Junto à praia de Matosinhos", agente_imovel=agentes.externo.pk)  # fmt: skip
+    assert vis["imovel"] is None and vis["imovel_descricao"] == "Moradia T4 com piscina · Junto à praia de Matosinhos"
+    assert vis["agente_imovel_nome"] == "Agente Externo Ensaio (Outra Agência Ensaio)"
+    assert not Interesse.objects.exists()  # sem imóvel registado não há interesse
+
+
+def test_cliente_de_agente_externo_nao_cria_interesse(api, u, cliente, imovel, agentes):
+    criar(api, u, cliente, imovel, agente_comprador=agentes.externo.pk)
+    assert not Interesse.objects.exists()
+    criar(api, u, cliente, imovel)  # cliente acompanhado por nós
+    assert Interesse.objects.count() == 1

@@ -63,8 +63,16 @@ export function VisitaConsulta() {
       <Bloco titulo="Visita">
         <dl className="grelha-dados">
           <Dado rotulo="Imóvel">
-            <Link to={`/imoveis/${x.imovel}`}>{x.imovel_descricao}</Link>
+            {x.imovel ? (
+              <Link to={`/imoveis/${x.imovel}`}>{x.imovel_descricao}</Link>
+            ) : (
+              <>
+                {x.imovel_descricao} <small className="ajuda">(não registado no CRM)</small>
+              </>
+            )}
           </Dado>
+          <Dado rotulo="Agente responsável pelo comprador">{x.agente_comprador_nome}</Dado>
+          <Dado rotulo="Agente responsável pelo imóvel">{x.agente_imovel_nome}</Dado>
           <Dado rotulo="Cliente">
             {x.entidade_nome ? (
               <Link to={`/entidades/${x.entidade}`}>{x.entidade_nome}</Link>
@@ -90,13 +98,13 @@ export function VisitaConsulta() {
               {n[c.campo]}
             </Dado>
           ))}
-          <Dado rotulo="Compraria este imóvel?">{n.compraria}</Dado>
           <Dado rotulo="O que mais gostou?" largo>
             {x.mais_gostou && <span className="texto-livre">{x.mais_gostou}</span>}
           </Dado>
           <Dado rotulo="O que menos gostou?" largo>
             {x.menos_gostou && <span className="texto-livre">{x.menos_gostou}</span>}
           </Dado>
+          <Dado rotulo="Compraria este imóvel?">{n.compraria}</Dado>
         </dl>
       </Bloco>
 

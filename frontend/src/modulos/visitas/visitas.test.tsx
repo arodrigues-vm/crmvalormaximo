@@ -32,6 +32,37 @@ const OPCOES = {
 afterEach(() => vi.restoreAllMocks())
 
 describe('Visitas', () => {
+  it('imóvel não registado e agentes vão no pedido; «Compraria» fica no fim da avaliação', async () => {
+    const pedidos = simularApi({
+      '/api/auth/eu/': () => json(UTIL),
+      '/api/visitas/opcoes/': () => json(OPCOES),
+      'GET /api/agentes/': () =>
+        json({ count: 1, results: [{ id: 4, nome: 'Rita Externa', agencia_nome: 'Outra Agência', tipo_nome: null }] }),
+      'POST /api/visitas/': () => json({ campos: {} }, 400),
+    })
+    desenhar('/visitas/nova')
+    fireEvent.change(await screen.findByLabelText('O imóvel está registado no CRM?'), { target: { value: 'nao' } })
+    fireEvent.change(screen.getByLabelText('Descrição do imóvel'), { target: { value: 'Moradia T4' } })
+    fireEvent.change(screen.getByLabelText('Localização (breve)'), { target: { value: 'Matosinhos' } })
+    fireEvent.change(screen.getByRole('combobox', { name: 'Agente responsável pelo imóvel' }), {
+      target: { value: 'rita' },
+    })
+    fireEvent.mouseDown(await screen.findByRole('option', { name: /Rita Externa/ }))
+    fireEvent.change(screen.getByLabelText(/Data da visita/), { target: { value: '2026-12-01' } })
+    fireEvent.click(screen.getByRole('button', { name: /Avaliação do cliente/ }))
+    const rotulos = [...document.querySelectorAll('label')].map((l) => l.textContent)
+    expect(rotulos.indexOf('Compraria este imóvel?')).toBeGreaterThan(rotulos.indexOf('O que menos gostou?'))
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar' }))
+    await waitFor(() => expect(pedidos.some((p) => p.metodo === 'POST')).toBe(true))
+    expect(pedidos.find((p) => p.metodo === 'POST')!.corpo).toMatchObject({
+      imovel: null,
+      imovel_descricao_livre: 'Moradia T4',
+      imovel_localizacao: 'Matosinhos',
+      agente_imovel: 4,
+      agente_comprador: null,
+    })
+  })
+
   it('formulário envia data, horas e a avaliação da ficha de visita', async () => {
     const pedidos = simularApi({
       '/api/auth/eu/': () => json(UTIL),
