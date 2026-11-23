@@ -1,3 +1,4 @@
 pb_data/
 orcamento-server
 *.zip
+.env

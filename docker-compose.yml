@@ -1,12 +1,13 @@
+# Cada instalação (pasta em /opt) é independente: dados, utilizadores e porta próprios.
+# A porta e o domínio vêm do ficheiro .env (ver deploy/nova-instancia.sh).
 services:
   orcamento:
     build: .
-    container_name: orcamento
     restart: unless-stopped
     ports:
-      - "127.0.0.1:18095:8090"   # só acessível localmente; o Nginx faz a ligação HTTPS
+      - "127.0.0.1:${ORC_PORTA:-18095}:8090"   # só acessível localmente; o Nginx faz a ligação HTTPS
     environment:
       # domínio usado pela entrada com impressão digital (tem de ser https)
-      - ORC_URL=https://orcamento.valormaximo.pt
+      - ORC_URL=${ORC_URL:-https://orcamento.valormaximo.pt}
     volumes:
       - ./pb_data:/app/pb_data  # base de dados, anexos e cópias de segurança

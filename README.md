@@ -85,6 +85,18 @@ sudo certbot --nginx -d orcamento.valormaximo.pt
 
 ---
 
+## Outra instalação independente (ex.: orcamentopais.valormaximo.pt)
+Cada instalação tem os seus próprios dados, utilizadores e porta, na mesma VPS.
+1. No DNS, crie o registo **A** `orcamentopais` → `136.144.215.38` e aguarde até `getent hosts orcamentopais.valormaximo.pt` responder.
+2. Na VPS, com uma porta livre (ex.: 18096):
+   ```bash
+   sudo bash /opt/orcamento/deploy/nova-instancia.sh orcamentopais.valormaximo.pt 18096
+   ```
+   O script verifica DNS e porta, descarrega a app para `/opt/orcamentopais`, compila, configura o Nginx (sem mexer nos outros sites) e emite o certificado HTTPS.
+3. Abra `https://orcamentopais.valormaximo.pt` e crie o administrador dessa instalação.
+
+Atualizar cada instalação: `cd /opt/NOME && sudo git pull && sudo docker compose up -d --build`.
+
 ## Alternativa sem Docker (systemd)
 O executável `orcamento-server` incluído foi compilado para Linux x86-64.
 ```bash
