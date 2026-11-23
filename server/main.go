@@ -23,6 +23,8 @@ func main() {
 	})
 
 	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
+		registarRotasPasskeys(se)
+
 		publicDir := filepath.Join(app.DataDir(), "..", "pb_public")
 		se.Router.GET("/{path...}", apis.Static(os.DirFS(publicDir), true))
 		return se.Next()

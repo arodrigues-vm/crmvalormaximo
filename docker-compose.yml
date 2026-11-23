@@ -5,5 +5,8 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:18095:8090"   # só acessível localmente; o Nginx faz a ligação HTTPS
+    environment:
+      # domínio usado pela entrada com impressão digital (tem de ser https)
+      - ORC_URL=https://orcamento.valormaximo.pt
     volumes:
       - ./pb_data:/app/pb_data  # base de dados, anexos e cópias de segurança

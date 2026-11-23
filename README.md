@@ -115,6 +115,14 @@ Para compilar noutra arquitetura (ex.: ARM): `cd server && GOARCH=arm64 CGO_ENAB
 
 Para ocultar uma categoria ou fornecedor antigo, desmarque **Ativo**: o histórico mantém-se. Eliminar só é possível se não tiver movimentos associados.
 
+## Entrar com impressão digital (Face ID / Windows Hello)
+Usa a norma WebAuthn (passkeys): a impressão digital nunca sai do aparelho; o servidor guarda apenas uma chave pública por aparelho.
+- **Ativar:** depois de entrar com email e palavra-passe, a app pergunta se quer ativar. Também pode ativar em Configurar → O meu perfil → *Ativar neste aparelho*.
+- **Entrar:** no ecrã inicial, toque em **Entrar com impressão digital**.
+- **Bloqueio ao abrir:** em O meu perfil, ative *Pedir a impressão digital sempre que abro a app* (como nas apps dos bancos).
+- **Perdeu o telemóvel?** Noutro aparelho, em O meu perfil, remova esse aparelho.
+- Requer **https** e o domínio definido em `ORC_URL` no `docker-compose.yml` (por omissão `https://orcamento.valormaximo.pt`).
+
 ## Como é feita a previsão
 Para cada categoria e cada mês futuro:
 - **Fixa com recorrência registada**: soma das recorrências que vencem nesse mês. Respeita a periodicidade: o seguro anual só conta no mês em que vence.

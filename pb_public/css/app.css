@@ -328,3 +328,15 @@ body.offline .sem-rede { display: inline-flex; }
   .nav, .topo, .fab { display: none; }
   .conteudo { margin: 0; padding: 0; }
 }
+
+/* entrada com impressão digital */
+.entrada-digital { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+.btn-digital { min-height: 48px; font-size: 1rem; }
+.btn-digital svg { width: 22px; height: 22px; }
+.separador-ou { display: flex; align-items: center; gap: 10px; color: var(--texto-3); font-size: .8rem; margin-top: 6px; }
+.separador-ou::before, .separador-ou::after { content: ""; flex: 1; height: 1px; background: var(--borda); }
+.entrada-digital + .entrada-form { margin-top: 4px; }
+.entrada-cartao > .btn-texto { margin-top: 14px; }
+.lista-aparelhos { list-style: none; margin: 0 0 14px; padding: 0; }
+.lista-aparelhos li { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--grelha); }
+.lista-aparelhos .etiqueta { margin-left: 8px; }

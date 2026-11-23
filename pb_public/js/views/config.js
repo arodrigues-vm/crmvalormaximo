@@ -3,6 +3,7 @@ import {
   pb, state, h, eur, abrirModal, fecharModal, aviso, erroTexto, confirmar, isAdmin, rotulo, nomeDe,
   recarregar, emitir, lerLocal, gravarLocal,
 } from "../core.js"
+import { seccaoPasskeys } from "../passkey.js"
 
 // Descrição de cada tabela editável. Para acrescentar um campo novo basta criá-lo no painel
 // de administração (/_/) e acrescentá-lo aqui.
@@ -81,7 +82,7 @@ export function render(el) {
       onclick: () => { separador = k; gravarLocal("orc_config_sep", k); emitir() },
     }, t))),
   )
-  if (separador === "perfil") return el.append(perfil())
+  if (separador === "perfil") return el.append(perfil(), seccaoPasskeys())
 
   const t = TABELAS[separador]
   const podeCriar = admin || (t.qualquer || []).includes("create")

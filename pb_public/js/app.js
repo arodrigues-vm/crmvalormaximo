@@ -10,6 +10,7 @@ import * as analise from "./views/analise.js"
 import * as previsao from "./views/previsao.js"
 import * as recorrencias from "./views/recorrencias.js"
 import * as config from "./views/config.js"
+import { passkeyDisponivel, entrarComPasskey, proporAtivacao, bloqueioAtivo, textoErroPasskey } from "./passkey.js"
 
 const ROTAS = [
   { id: "painel", titulo: "Painel", icone: ICONES.painel, vista: painel },
@@ -36,6 +37,7 @@ async function arrancar() {
   } catch (_) { /* sem rede: segue com a sessão guardada */ }
 
   if (!pb.authStore.isValid) return ecraEntrada()
+  if (bloqueioAtivo()) return ecraBloqueio()
   try {
     if (navigator.onLine) await pb.collection("users").authRefresh()
   } catch (err) {
@@ -64,7 +66,7 @@ async function abrirApp() {
 }
 
 // ------------------------------------------------------------------ ecrãs de entrada
-function cartaoEntrada(titulo, texto, campos, botao, aoSubmeter) {
+function cartaoEntrada(titulo, texto, campos, botao, aoSubmeter, extra = null) {
   const erro = h("p", { class: "erro", role: "alert" })
   const form = h("form", {
     class: "entrada-form",
@@ -80,19 +82,57 @@ function cartaoEntrada(titulo, texto, campos, botao, aoSubmeter) {
   raiz.append(h("main", { class: "entrada" },
     h("div", { class: "entrada-cartao" },
       h("div", { class: "entrada-logo", html: '<img src="/icons/icon.svg" alt="" width="56" height="56">' }),
-      h("h1", {}, titulo), texto ? h("p", { class: "sub" }, texto) : null, form)))
+      h("h1", {}, titulo), texto ? h("p", { class: "sub" }, texto) : null, extra, form)))
+}
+
+// Botão "Entrar com impressão digital" (WebAuthn). aoEntrar corre depois de validado.
+function botaoPasskey(texto, aoEntrar, opcoes = {}) {
+  const erro = h("p", { class: "erro", role: "alert" })
+  const btn = h("button", {
+    type: "button", class: "btn btn-primario btn-bloco btn-digital",
+    onclick: async () => {
+      erro.textContent = ""
+      btn.disabled = true
+      try { await entrarComPasskey(opcoes); await aoEntrar() }
+      catch (err) { erro.textContent = textoErroPasskey(err); btn.disabled = false }
+    },
+  }, h("span", { html: ICONES.digital }), texto)
+  return { btn, erro }
 }
 
 const campo = (rotulo, input) => h("label", { class: "campo" }, h("span", {}, rotulo), input)
 
 function ecraEntrada() {
-  cartaoEntrada("Orçamento", "Entre com a sua conta.", [
+  let extra = null
+  if (passkeyDisponivel()) {
+    const { btn, erro } = botaoPasskey("Entrar com impressão digital", abrirApp)
+    extra = h("div", { class: "entrada-digital" }, btn, erro, h("div", { class: "separador-ou" }, h("span", {}, "ou com email")))
+  }
+  cartaoEntrada("Orçamento", passkeyDisponivel() ? null : "Entre com a sua conta.", [
     campo("Email", h("input", { name: "email", type: "email", required: true, autocomplete: "username" })),
     campo("Palavra-passe", h("input", { name: "password", type: "password", required: true, autocomplete: "current-password" })),
   ], "Entrar", async (fd) => {
     await pb.collection("users").authWithPassword(fd.get("email"), fd.get("password"))
     await abrirApp()
-  })
+    proporAtivacao()
+  }, extra)
+}
+
+// Com "Pedir a impressão digital ao abrir" ativo, a app fica bloqueada até confirmar.
+function ecraBloqueio() {
+  const { btn, erro } = botaoPasskey("Desbloquear com impressão digital", async () => {
+    try { if (navigator.onLine) await pb.collection("users").authRefresh() } catch (_) {}
+    await abrirApp()
+  }, { semRedeLocal: true })
+  raiz.innerHTML = ""
+  raiz.append(h("main", { class: "entrada" },
+    h("div", { class: "entrada-cartao" },
+      h("div", { class: "entrada-logo", html: '<img src="/icons/icon.svg" alt="" width="56" height="56">' }),
+      h("h1", {}, "Orçamento"),
+      h("p", { class: "sub" }, `Olá ${pb.authStore.record?.name || ""}. Confirme a sua identidade para continuar.`),
+      h("div", { class: "entrada-digital" }, btn, erro),
+      h("button", { type: "button", class: "btn-texto", onclick: () => { pb.authStore.clear(); ecraEntrada() } }, "Entrar com outra conta"))))
+  setTimeout(() => btn.focus(), 50)
 }
 
 function ecraConfiguracaoInicial() {
@@ -110,6 +150,7 @@ function ecraConfiguracaoInicial() {
     await pb.collection("users").authWithPassword(fd.get("email"), fd.get("password"))
     aviso("Administrador criado.", "ok")
     await abrirApp()
+    proporAtivacao()
   })
 }
 
