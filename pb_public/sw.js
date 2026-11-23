@@ -1,6 +1,6 @@
 // Service worker: guarda a aplicação no aparelho para abrir sem rede.
 // Os dados (/api) nunca são guardados aqui: a app usa a sua própria cache e fila de envio.
-const VERSAO = "orc-v6"
+const VERSAO = "orc-v7"
 const ESSENCIAIS = [
   "/", "/index.html", "/css/app.css", "/manifest.webmanifest", "/icons/icon.svg", "/icons/icon-192.png",
   "/vendor/pocketbase.es.mjs", "/vendor/chart.umd.min.js",

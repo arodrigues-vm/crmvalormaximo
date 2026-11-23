@@ -108,8 +108,8 @@ function abrirForm(r = null) {
   })
 
   async function eliminar() {
-    if (!(await confirmar("Eliminar esta recorrência? Os movimentos já lançados mantêm-se."))) return
-    try { await pb.collection("recorrencias").delete(r.id); aviso("Recorrência eliminada.", "ok"); await recarregar() }
+    if (!(await confirmar("Eliminar esta recorrência? Os movimentos já lançados mantêm-se.", { sim: "Eliminar" }))) return
+    try { await pb.collection("recorrencias").delete(r.id); fecharModal(); aviso("Recorrência eliminada.", "ok"); await recarregar() }
     catch (err) { aviso(erroTexto(err), "erro") }
   }
 

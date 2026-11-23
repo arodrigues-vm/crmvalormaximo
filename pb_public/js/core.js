@@ -2,7 +2,7 @@
 import PocketBase from "../vendor/pocketbase.es.mjs"
 
 // Versão da app: atualizar aqui E em /versao.json a cada alteração publicada.
-export const VERSAO_APP = "1.2"
+export const VERSAO_APP = "1.3"
 
 export const pb = new PocketBase(location.origin)
 pb.autoCancellation(false)
@@ -100,37 +100,42 @@ export function erroTexto(err) {
 }
 
 // ------------------------------------------------------------------ janela modal
+// Proteção contra perda de dados: ao abrir, guarda-se uma "fotografia" do formulário; ao tentar
+// sair (clicar fora, Esc, ✕, Duplicar…) compara-se com o estado atual e, se mudou, pergunta-se.
 let modalAberto = false
-let modalAlterado = false   // passa a true quando se escreve/escolhe algo no formulário
+let estadoInicial = ""
+let painelAtual = null   // { el, nao } — painel de pergunta/confirmação mostrado dentro da janela
 export const haModalAberto = () => modalAberto
+
+function estadoModal() {
+  const corpo = document.querySelector("#modal .modal-corpo")
+  if (!corpo) return ""
+  return JSON.stringify([...corpo.querySelectorAll("input, select, textarea, [aria-pressed]")].map((el) => {
+    if (el.hasAttribute("aria-pressed")) return el.getAttribute("aria-pressed")
+    if (el.type === "checkbox" || el.type === "radio") return el.checked
+    if (el.type === "file") return [...el.files].map((f) => f.name).join("|")
+    return el.value
+  }))
+}
+export const modalComAlteracoes = () => modalAberto && estadoModal() !== estadoInicial
 
 export function abrirModal(titulo, conteudo, { largo = false } = {}) {
   fecharModal()
   modalAberto = true
-  modalAlterado = false
-  // pergunta mostrada ao tentar fechar com alterações por guardar
-  const pergunta = h("div", { class: "modal-pergunta", hidden: true, role: "alertdialog", "aria-label": "Alterações por guardar" },
-    h("p", {}, h("strong", {}, "Tem alterações por guardar."), " Quer sair sem guardar?"),
-    h("div", { class: "acoes" },
-      h("button", { type: "button", class: "btn btn-perigo-texto", onclick: () => fecharModal() }, "Sair sem guardar"),
-      h("span", { class: "espaco" }),
-      h("button", { type: "button", class: "btn btn-primario", onclick: () => { pergunta.hidden = true } }, "Continuar a editar")))
   const caixa = h("div", { class: `modal ${largo ? "modal-largo" : ""}`, role: "dialog", "aria-modal": "true", "aria-label": titulo },
     h("header", { class: "modal-topo" },
       h("h2", {}, titulo),
-      h("button", { class: "btn-icone", "aria-label": "Fechar", onclick: tentarFecharModal, html: ICONES.fechar })),
-    h("div", { class: "modal-corpo" }, conteudo),
-    pergunta)
-  const marcarAlterado = (e) => { if (!pergunta.contains(e.target)) modalAlterado = true }
-  caixa.addEventListener("input", marcarAlterado)
-  caixa.addEventListener("change", marcarAlterado)
+      h("button", { class: "btn-icone", "aria-label": "Fechar", onclick: () => tentarFecharModal(), html: ICONES.fechar })),
+    h("div", { class: "modal-corpo" }, conteudo))
   const fundo = h("div", { class: "modal-fundo", id: "modal", onclick: (e) => { if (e.target === fundo) tentarFecharModal() } }, caixa)
   document.body.append(fundo)
   document.body.classList.add("sem-scroll")
+  estadoInicial = estadoModal()
   setTimeout(() => fundo.querySelector("input:not([type=hidden]), select, textarea")?.focus(), 50)
 }
 
 export function fecharModal() {
+  painelAtual = null
   document.getElementById("modal")?.remove()
   document.body.classList.remove("sem-scroll")
   if (modalAberto) {
@@ -138,21 +143,53 @@ export function fecharModal() {
     window.dispatchEvent(new CustomEvent("orc:modal-fechado"))
   }
 }
-// Fecho pedido pelo utilizador (clicar fora, Esc ou ✕): se houver alterações, pergunta primeiro.
-export function tentarFecharModal() {
-  const pergunta = document.querySelector("#modal .modal-pergunta")
-  if (modalAlterado && pergunta) {
-    pergunta.hidden = false
-    pergunta.querySelector(".btn-primario")?.focus()
-  } else fecharModal()
-}
-document.addEventListener("keydown", (e) => { if (e.key === "Escape" && modalAberto) tentarFecharModal() })
 
-export function confirmar(texto) {
+// Mostra uma pergunta dentro da janela aberta (sem a fechar nem perder o que foi escrito).
+function fecharPainel(executarNao) {
+  const p = painelAtual
+  painelAtual = null
+  if (!p) return
+  p.el.remove()
+  if (executarNao) p.nao?.()
+}
+function mostrarPainel({ titulo, texto = "", sim, classeSim = "btn-perigo-texto", aoSim, nao = "Cancelar", aoNao }) {
+  const caixa = document.querySelector("#modal .modal")
+  if (!caixa) return false
+  fecharPainel(true)
+  const el = h("div", { class: "modal-pergunta", role: "alertdialog", "aria-label": titulo },
+    h("p", {}, h("strong", {}, titulo), texto ? ` ${texto}` : ""),
+    h("div", { class: "acoes" },
+      h("button", { type: "button", class: `btn ${classeSim}`, onclick: () => { fecharPainel(false); aoSim() } }, sim),
+      h("span", { class: "espaco" }),
+      h("button", { type: "button", class: "btn btn-primario", onclick: () => fecharPainel(true) }, nao)))
+  painelAtual = { el, nao: aoNao }
+  caixa.append(el)
+  el.querySelector(".btn-primario").focus()
+  return true
+}
+
+// Executa "acao" (fechar, duplicar, abrir outra janela…) perguntando antes se há alterações por guardar.
+export function sairDoModal(acao = fecharModal) {
+  if (modalComAlteracoes()) {
+    mostrarPainel({ titulo: "Tem alterações por guardar.", texto: "Quer sair sem guardar?", sim: "Sair sem guardar", aoSim: acao, nao: "Continuar a editar" })
+  } else acao()
+}
+export const tentarFecharModal = () => sairDoModal(fecharModal)
+
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape" || !modalAberto) return
+  if (painelAtual) fecharPainel(true)
+  else tentarFecharModal()
+})
+
+// Confirmação (ex.: eliminar). Com uma janela aberta, aparece dentro dela e, se cancelar,
+// o formulário fica intacto; quem chama fecha a janela depois de concluir a ação.
+export function confirmar(texto, { sim = "Confirmar" } = {}) {
   return new Promise((resolve) => {
-    const sim = h("button", { class: "btn btn-perigo", onclick: () => { fecharModal(); resolve(true) } }, "Confirmar")
-    const nao = h("button", { class: "btn", onclick: () => { fecharModal(); resolve(false) } }, "Cancelar")
-    abrirModal("Confirmar", h("div", {}, h("p", {}, texto), h("div", { class: "acoes" }, nao, sim)))
+    if (modalAberto && mostrarPainel({ titulo: texto, sim, classeSim: "btn-perigo", aoSim: () => resolve(true), aoNao: () => resolve(false) })) return
+    const bSim = h("button", { class: "btn btn-perigo", onclick: () => { fecharModal(); resolve(true) } }, sim)
+    const bNao = h("button", { class: "btn", onclick: () => { fecharModal(); resolve(false) } }, "Cancelar")
+    abrirModal("Confirmar", h("div", {}, h("p", {}, texto), h("div", { class: "acoes" }, bNao, bSim)))
   })
 }
 

@@ -193,8 +193,8 @@ function abrirEditor(chave, r) {
   async function eliminar() {
     const aviso2 = ["categorias", "fornecedores", "metodos_pagamento", "responsaveis"].includes(chave)
       ? " Se já tiver movimentos associados, é preferível desmarcar \"Ativo\" em vez de eliminar." : ""
-    if (!(await confirmar(`Eliminar este registo?${aviso2}`))) return
-    try { await pb.collection(colecao).delete(r.id); aviso("Eliminado.", "ok"); await recarregar() }
+    if (!(await confirmar(`Eliminar este registo?${aviso2}`, { sim: "Eliminar" }))) return
+    try { await pb.collection(colecao).delete(r.id); fecharModal(); aviso("Eliminado.", "ok"); await recarregar() }
     catch (err) { aviso(`Não foi possível eliminar: ${erroTexto(err)}`, "erro") }
   }
 

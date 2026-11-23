@@ -1,6 +1,6 @@
 // Formulário de criação/edição de movimentos.
 import {
-  pb, state, h, abrirModal, fecharModal, aviso, erroTexto, confirmar, guardarMovimento, removerPendente,
+  pb, state, h, abrirModal, fecharModal, sairDoModal, aviso, erroTexto, confirmar, guardarMovimento, removerPendente,
   hojeISO, dataISO, paraPB, normalizar, lerLocal, gravarLocal, nomeDe, ICONES, emitir,
 } from "../core.js"
 
@@ -114,7 +114,7 @@ export function abrirFormMovimento(mov = null, { duplicar = false } = {}) {
     erro,
     h("div", { class: "acoes" },
       editar ? h("button", { type: "button", class: "btn btn-perigo-texto", onclick: eliminar }, "Eliminar") : null,
-      editar ? h("button", { type: "button", class: "btn", onclick: () => abrirFormMovimento(m, { duplicar: true }) }, "Duplicar") : null,
+      editar ? h("button", { type: "button", class: "btn", onclick: () => sairDoModal(() => abrirFormMovimento(m, { duplicar: true })) }, "Duplicar") : null,
       h("span", { class: "espaco" }),
       editar ? null : h("button", { type: "submit", class: "btn", value: "novo" }, "Guardar e novo"),
       h("button", { type: "submit", class: "btn btn-primario", value: "fechar" }, "Guardar")))
@@ -157,7 +157,7 @@ export function abrirFormMovimento(mov = null, { duplicar = false } = {}) {
   })
 
   async function eliminar() {
-    if (!(await confirmar("Eliminar este movimento? Esta ação não pode ser desfeita."))) return
+    if (!(await confirmar("Eliminar este movimento? Esta ação não pode ser desfeita.", { sim: "Eliminar" }))) return
     try {
       if (m._pendente) removerPendente(m.id)
       else {
@@ -165,6 +165,7 @@ export function abrirFormMovimento(mov = null, { duplicar = false } = {}) {
         state.movs = state.movs.filter((x) => x.id !== m.id)
         emitir()
       }
+      fecharModal()
       aviso("Movimento eliminado.", "ok")
     } catch (err) { aviso(erroTexto(err), "erro") }
   }
