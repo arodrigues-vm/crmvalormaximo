@@ -352,3 +352,8 @@ body.offline .sem-rede { display: inline-flex; }
 
 .nav-versao { display: none; }
 @media (min-width: 900px) { .nav-versao { display: block; margin-top: auto; padding: 8px 12px; font-size: .75rem; color: var(--texto-3); } }
+
+/* clicar fora da janela: pequeno sinal de que continua aberta */
+@keyframes modal-aviso { 0%, 100% { transform: scale(1); } 40% { transform: scale(1.015); } }
+.modal-aviso { animation: modal-aviso .22s ease-out; }
+@media (prefers-reduced-motion: reduce) { .modal-aviso { animation: none; } }

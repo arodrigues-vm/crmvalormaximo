@@ -2,7 +2,7 @@
 import PocketBase from "../vendor/pocketbase.es.mjs"
 
 // Versão da app: atualizar aqui E em /versao.json a cada alteração publicada.
-export const VERSAO_APP = "1.3"
+export const VERSAO_APP = "1.4"
 
 export const pb = new PocketBase(location.origin)
 pb.autoCancellation(false)
@@ -127,7 +127,13 @@ export function abrirModal(titulo, conteudo, { largo = false } = {}) {
       h("h2", {}, titulo),
       h("button", { class: "btn-icone", "aria-label": "Fechar", onclick: () => tentarFecharModal(), html: ICONES.fechar })),
     h("div", { class: "modal-corpo" }, conteudo))
-  const fundo = h("div", { class: "modal-fundo", id: "modal", onclick: (e) => { if (e.target === fundo) tentarFecharModal() } }, caixa)
+  // clicar fora NÃO fecha a janela (evita perder registos por engano): só ✕, Esc ou os botões
+  const fundo = h("div", { class: "modal-fundo", id: "modal", onclick: (e) => {
+    if (e.target !== fundo) return
+    caixa.classList.remove("modal-aviso")
+    void caixa.offsetWidth          // reinicia a animação
+    caixa.classList.add("modal-aviso")
+  } }, caixa)
   document.body.append(fundo)
   document.body.classList.add("sem-scroll")
   estadoInicial = estadoModal()
