@@ -98,17 +98,30 @@ export function erroTexto(err) {
 
 // ------------------------------------------------------------------ janela modal
 let modalAberto = false
+let modalAlterado = false   // passa a true quando se escreve/escolhe algo no formulário
 export const haModalAberto = () => modalAberto
 
 export function abrirModal(titulo, conteudo, { largo = false } = {}) {
   fecharModal()
   modalAberto = true
-  const fundo = h("div", { class: "modal-fundo", id: "modal", onclick: (e) => { if (e.target === fundo) fecharModal() } },
-    h("div", { class: `modal ${largo ? "modal-largo" : ""}`, role: "dialog", "aria-modal": "true", "aria-label": titulo },
-      h("header", { class: "modal-topo" },
-        h("h2", {}, titulo),
-        h("button", { class: "btn-icone", "aria-label": "Fechar", onclick: fecharModal, html: ICONES.fechar })),
-      h("div", { class: "modal-corpo" }, conteudo)))
+  modalAlterado = false
+  // pergunta mostrada ao tentar fechar com alterações por guardar
+  const pergunta = h("div", { class: "modal-pergunta", hidden: true, role: "alertdialog", "aria-label": "Alterações por guardar" },
+    h("p", {}, h("strong", {}, "Tem alterações por guardar."), " Quer sair sem guardar?"),
+    h("div", { class: "acoes" },
+      h("button", { type: "button", class: "btn btn-perigo-texto", onclick: () => fecharModal() }, "Sair sem guardar"),
+      h("span", { class: "espaco" }),
+      h("button", { type: "button", class: "btn btn-primario", onclick: () => { pergunta.hidden = true } }, "Continuar a editar")))
+  const caixa = h("div", { class: `modal ${largo ? "modal-largo" : ""}`, role: "dialog", "aria-modal": "true", "aria-label": titulo },
+    h("header", { class: "modal-topo" },
+      h("h2", {}, titulo),
+      h("button", { class: "btn-icone", "aria-label": "Fechar", onclick: tentarFecharModal, html: ICONES.fechar })),
+    h("div", { class: "modal-corpo" }, conteudo),
+    pergunta)
+  const marcarAlterado = (e) => { if (!pergunta.contains(e.target)) modalAlterado = true }
+  caixa.addEventListener("input", marcarAlterado)
+  caixa.addEventListener("change", marcarAlterado)
+  const fundo = h("div", { class: "modal-fundo", id: "modal", onclick: (e) => { if (e.target === fundo) tentarFecharModal() } }, caixa)
   document.body.append(fundo)
   document.body.classList.add("sem-scroll")
   setTimeout(() => fundo.querySelector("input:not([type=hidden]), select, textarea")?.focus(), 50)
@@ -122,7 +135,15 @@ export function fecharModal() {
     window.dispatchEvent(new CustomEvent("orc:modal-fechado"))
   }
 }
-document.addEventListener("keydown", (e) => { if (e.key === "Escape") fecharModal() })
+// Fecho pedido pelo utilizador (clicar fora, Esc ou ✕): se houver alterações, pergunta primeiro.
+export function tentarFecharModal() {
+  const pergunta = document.querySelector("#modal .modal-pergunta")
+  if (modalAlterado && pergunta) {
+    pergunta.hidden = false
+    pergunta.querySelector(".btn-primario")?.focus()
+  } else fecharModal()
+}
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && modalAberto) tentarFecharModal() })
 
 export function confirmar(texto) {
   return new Promise((resolve) => {
