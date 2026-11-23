@@ -39,12 +39,18 @@ export function render(el) {
     l.meses.forEach((v, i) => (tot.meses[i] += v))
     tot.total += l.total; tot.ant1 += l.ant1; tot.ant2 += l.ant2
   }
-  const mesesComDados = (() => {
+  // último mês a considerar no ano (para a comparação homóloga): dezembro em anos passados, o mês atual no ano corrente
+  const mesFim = (() => {
     const hoje = new Date()
     if (ano < hoje.getFullYear()) return 12
     if (ano > hoje.getFullYear()) return 0
     return hoje.getMonth() + 1
   })()
+  // média mensal: conta só os meses desde o 1.º movimento registado (e não o ano inteiro)
+  const primeiraData = movsFiltrados().reduce((min, m) => { const d = dataISO(m.data); return !min || d < min ? d : min }, "")
+  const mesInicio = !primeiraData || Number(primeiraData.slice(0, 4)) > ano ? 13
+    : Number(primeiraData.slice(0, 4)) < ano ? 1 : Number(primeiraData.slice(5, 7))
+  const mesesComDados = Math.max(0, mesFim - mesInicio + 1)
 
   const anos = []
   for (let a = new Date().getFullYear() + 1; a >= new Date().getFullYear() - 2; a--) anos.push(a)
@@ -64,7 +70,9 @@ export function render(el) {
       h("div", { class: "tile" }, h("span", { class: "tile-rotulo" }, `${tipoTxt} ${ano}`), h("strong", { class: "tile-valor" }, eur(tot.total))),
       h("div", { class: "tile" }, h("span", { class: "tile-rotulo" }, "Média mensal"),
         h("strong", { class: "tile-valor" }, eur(mesesComDados ? tot.total / mesesComDados : 0)),
-        h("span", { class: "tile-det" }, `${mesesComDados} mes(es)`)),
+        h("span", { class: "tile-det" }, mesesComDados
+          ? `${mesesComDados} ${mesesComDados === 1 ? "mês" : "meses"} com registos (${MESES[mesInicio - 1]}${mesesComDados > 1 ? `–${MESES[mesFim - 1]}` : ""})`
+          : "sem registos")),
       h("div", { class: "tile" }, h("span", { class: "tile-rotulo" }, `${tipoTxt} ${ano - 1}`), h("strong", { class: "tile-valor" }, eur(tot.ant1))),
       h("div", { class: "tile" }, h("span", { class: "tile-rotulo" }, `${tipoTxt} ${ano - 2}`), h("strong", { class: "tile-valor" }, eur(tot.ant2)))),
   )
@@ -96,7 +104,7 @@ export function render(el) {
           h("th", { class: "num destaque" }, `Total ${ano}`), h("th", { class: "num" }, "Média"),
           h("th", { class: "num" }, String(ano - 1)), h("th", { class: "num" }, String(ano - 2)), h("th", { class: "num" }, "Var."))),
         h("tbody", {}, ordem.map(([k, l]) => {
-          const homologo = homologoAnt(movs, ano, mesesComDados, (m) => (dim.chave(m) || "") === k)
+          const homologo = homologoAnt(movs, ano, mesFim, (m) => (dim.chave(m) || "") === k)
           return h("tr", {},
             h("th", { scope: "row", class: "fixa-col" }, dim.nome(k) || "(não indicado)"),
             l.meses.map(celula),
@@ -110,7 +118,7 @@ export function render(el) {
           h("td", { class: "num destaque" }, eur0(tot.total)),
           h("td", { class: "num" }, eur0(mesesComDados ? tot.total / mesesComDados : 0)),
           celula(tot.ant1), celula(tot.ant2),
-          h("td", { class: "num" }, pct(tot.total, homologoAnt(movs, ano, mesesComDados, () => true))))))) : h("p", { class: "vazio" }, "Sem movimentos neste ano."),
+          h("td", { class: "num" }, pct(tot.total, homologoAnt(movs, ano, mesFim, () => true))))))) : h("p", { class: "vazio" }, "Sem movimentos neste ano."),
   ))
 }
 
