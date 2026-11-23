@@ -13,6 +13,7 @@ import { ImoveisDaEntidade } from './ImoveisDaEntidade'
 import { NegociosDaEntidade } from './NegociosDaEntidade'
 import { useSessao } from '../../app/sessao'
 import { RelacoesEntidade } from './RelacoesEntidade'
+import { VisitasDoRegisto } from '../visitas/VisitasDoRegisto'
 
 const dataPt = (d: string | null) => (d ? new Date(`${d}T00:00:00`).toLocaleDateString('pt-PT') : null)
 const momentoPt = (d: string) =>
@@ -204,6 +205,12 @@ export function EntidadeConsulta() {
       {(pode('oportunidades') || pode('procuras')) && (
         <Bloco titulo="Oportunidades e procuras">
           <NegociosDaEntidade entidadeId={e.id} podeOport={pode('oportunidades')} podeProc={pode('procuras')} />
+        </Bloco>
+      )}
+
+      {pode('visitas') && (
+        <Bloco titulo="Visitas e interesses" abertoInicial={false}>
+          {() => <VisitasDoRegisto filtro={{ entidade: e.id }} podeCriar={pode('visitas', 'criar')} />}
         </Bloco>
       )}
 

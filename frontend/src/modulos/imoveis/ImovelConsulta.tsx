@@ -31,6 +31,7 @@ import {
 import { AngariacoesDoImovel } from './AngariacoesDoImovel'
 import { ProcurasCompativeis } from './ProcurasCompativeis'
 import { FotografiaImovel } from './FotografiaImovel'
+import { VisitasDoRegisto } from '../visitas/VisitasDoRegisto'
 import { useSessao } from '../../app/sessao'
 
 export function ImovelConsulta() {
@@ -205,6 +206,12 @@ export function ImovelConsulta() {
           tipos={tiposLigacao.data ?? []}
         />
       </Bloco>
+
+      {pode('visitas') && (
+        <Bloco titulo="Visitas e interessados" abertoInicial={false}>
+          {() => <VisitasDoRegisto filtro={{ imovel: i.id }} podeCriar={pode('visitas', 'criar')} />}
+        </Bloco>
+      )}
 
       {pode('procuras') && (
         <Bloco titulo="Procuras compatíveis" abertoInicial={false}>

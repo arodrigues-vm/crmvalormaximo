@@ -1605,3 +1605,7 @@ a.botao-secundario {
   font-weight: 600;
   color: var(--azul-marinho);
 }
+
+p.ajuda + .grelha-campos {
+  margin-top: 10px;
+}

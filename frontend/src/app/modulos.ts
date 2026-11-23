@@ -29,7 +29,7 @@ export const GRUPOS: GrupoModulos[] = [
       m('angariacoes', 'Angariações', true),
       m('oportunidades', 'Oportunidades de Angariação', true),
       m('procuras', 'Procuras e Qualificação', true),
-      m('visitas', 'Visitas'),
+      m('visitas', 'Visitas', true),
       m('propostas', 'Propostas'),
       m('transacoes', 'Transações'),
       m('pos-venda', 'Pós-Venda'),

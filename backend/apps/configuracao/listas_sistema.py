@@ -32,6 +32,18 @@ CAT_ESTADO_PROCURA = [
     {"valor": "inativa", "nome": "Inativa"},
 ]
 
+CAT_ESTADO_VISITA = [
+    {"valor": "agendada", "nome": "Agendada"},
+    {"valor": "confirmada", "nome": "Confirmada"},
+    {"valor": "realizada", "nome": "Realizada"},
+    {"valor": "cancelada", "nome": "Cancelada"},
+    {"valor": "nao_compareceu", "nome": "Não compareceu"},
+]
+CAT_ESTADO_INTERESSE = [
+    {"valor": "ativo", "nome": "Ativo (em acompanhamento)"},
+    {"valor": "inativo", "nome": "Inativo"},
+]
+
 CATEGORIAS = {
     "operacoes": CAT_OPERACAO,
     "status_imovel": CAT_STATUS,
@@ -40,6 +52,8 @@ CATEGORIAS = {
     "estados_comercializacao": CAT_ESTADO_COMERCIALIZACAO,
     "estados_oportunidade": CAT_ESTADO_OPORTUNIDADE,
     "estados_procura": CAT_ESTADO_PROCURA,
+    "estados_visita": CAT_ESTADO_VISITA,
+    "estados_interesse": CAT_ESTADO_INTERESSE,
 }
 
 LISTAS = {
@@ -132,6 +146,32 @@ LISTAS = {
         "Facilidade prevista de venda do imóvel angariado.",
         ["Imediato — até 6 meses", "Normal — 7 a 18 meses", "Difícil — 19 a 36 meses",
          "Muito difícil — mais de 36 meses"],
+    ),
+    "estados_visita": (
+        "Estados de visita",
+        "visitas",
+        "A categoria decide o comportamento (ex.: só uma visita «Realizada» atualiza a última visita do interesse).",
+        [("Agendada", "agendada"), ("Confirmada", "confirmada"), ("Realizada", "realizada"),
+         ("Cancelada", "cancelada"), ("Não compareceu", "nao_compareceu")],
+    ),
+    "avaliacoes_visita": (
+        "Avaliações da visita",
+        "visitas",
+        "Escala usada nos critérios da ficha de visita.",
+        ["Muito mau", "Mau", "Médio", "Bom", "Muito bom"],
+    ),
+    "origens_interesse": (
+        "Origens de interesse",
+        "visitas",
+        "",
+        ["Visita", "Contacto telefónico", "Site / portal", "Email", "Outro"],
+    ),
+    "graus_interesse": ("Graus de interesse", "visitas", "", ["Muito baixo", "Baixo", "Médio", "Alto", "Muito alto"]),
+    "estados_interesse": (
+        "Estados de interesse",
+        "visitas",
+        "Só os interesses de categoria «Ativo» aparecem como em acompanhamento.",
+        [("Ativo", "ativo"), ("Em negociação", "ativo"), ("Desistiu", "inativo"), ("Concluído", "inativo")],
     ),
     "momentos_pagamento_comissao": (
         "Momentos de pagamento da comissão",
