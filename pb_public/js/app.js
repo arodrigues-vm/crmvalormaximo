@@ -239,7 +239,9 @@ function desenhar() {
     console.error(err)
     conteudo.append(h("p", { class: "erro" }, `Erro ao mostrar esta página: ${err.message}`))
   }
+  // mesma página (atualização de dados): mantém a posição; página nova: começa no topo
   if (rota.id === estadoUltimaRota) window.scrollTo(0, scroll)
+  else window.scrollTo(0, 0)
   estadoUltimaRota = rota.id
 }
 let estadoUltimaRota = null
