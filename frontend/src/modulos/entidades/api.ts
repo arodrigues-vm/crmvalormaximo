@@ -28,6 +28,8 @@ export interface Entidade {
   localizacao: { freguesia: string; concelho: string; distrito: string; codigo: string } | null
   papeis: number[]
   papeis_nomes: string[]
+  /** D-46: tem um «Tipo de cliente» da categoria «Cliente externo». */
+  cliente_externo?: boolean
   origem: number | null
   origem_nome: string | null
   responsavel: number

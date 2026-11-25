@@ -106,6 +106,19 @@ Descrição do imóvel e observações internas.
 Deixar um campo vazio significa *desconhecido*. Todas as opções das listas são editáveis pelo Administrador
 (anexo A).
 
+### Angariação e responsável
+
+No separador **Comercialização**:
+
+1. Em **Angariação**, escolha *Própria*, *Rede* ou *Externa* (vazio conta como *Própria*). As opções editam-se em
+   **Configurações → Listas de valores → Tipos de angariação**.
+2. Em **Responsável**:
+   - com angariação **Própria**, escolhe-se um membro da **Equipa**;
+   - com angariação de **Rede** ou **Externa**, escolhe-se um agente em **Agentes** (obrigatório).
+
+Com responsável de fora, quem criou o imóvel continua a poder vê-lo e editá-lo; o Administrador pode mudar isso.
+O Responsável indicado aqui é o que aparece nas visitas e propostas a este imóvel.
+
 ## 4.3 Consultar e editar
 
 A ficha abre em consulta. Carregue em **Editar** para alterar e em **Guardar** para gravar.

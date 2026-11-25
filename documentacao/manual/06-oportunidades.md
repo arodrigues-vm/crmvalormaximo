@@ -67,3 +67,9 @@ Quando o proprietário aceitar avançar:
 
 A oportunidade fica ligada ao imóvel e não cria um segundo imóvel. O estado da oportunidade **não muda
 sozinho**: quando o CMI for assinado, mude-o para *Angariado*.
+
+## Responsável
+
+Cada oportunidade tem um **Responsável**, escolhido entre os membros da **Equipa**. O Administrador pode escolher
+qualquer membro e o Responsável de equipa um membro da sua equipa; o Consultor fica como responsável das
+oportunidades que cria (o campo aparece, mas não se pode mudar). A mudança fica registada no histórico.

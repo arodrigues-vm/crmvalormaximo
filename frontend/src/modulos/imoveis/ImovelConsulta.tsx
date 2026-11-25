@@ -105,8 +105,10 @@ export function ImovelConsulta() {
         return <Dado rotulo="Estado de comercialização">{n.estado_comercializacao}</Dado>
       case 'status':
         return <Dado rotulo="Status">{n.status}</Dado>
+      case 'angariacao':
+        return <Dado rotulo="Angariação">{(n.angariacao as string | null) ?? 'Própria'}</Dado>
       case 'responsavel':
-        return <Dado rotulo="Responsável">{i!.responsavel_nome}</Dado>
+        return <Dado rotulo="Responsável">{i!.responsavel_imovel_nome}</Dado>
       case 'zonas_exteriores':
         return (
           <Dado rotulo="Zonas exteriores" largo>

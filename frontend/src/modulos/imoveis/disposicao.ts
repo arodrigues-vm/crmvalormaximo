@@ -21,7 +21,7 @@ const PADRAO: BlocoDisposicao[] = [
   {
     chave: 'comercializacao',
     titulo: 'Comercialização',
-    campos: ['operacao', 'estado_comercializacao', 'status', 'responsavel', ...c(IMOVEL_COMERCIALIZACAO)],
+    campos: ['operacao', 'estado_comercializacao', 'status', 'angariacao', 'responsavel', ...c(IMOVEL_COMERCIALIZACAO)],
   },
   { chave: 'identificacao', titulo: 'Identificação', campos: c(IMOVEL_IDENTIFICACAO) },
   { chave: 'proprietarios', titulo: 'Proprietários', campos: ['proprietarios'] },
@@ -45,7 +45,8 @@ export const ECRA_IMOVEL: DefinicaoEcra = {
     operacao: 'Operação',
     estado_comercializacao: 'Estado de comercialização',
     status: 'Status',
-    responsavel: 'Responsável',
+    angariacao: 'Angariação (própria / rede / externa)',
+    responsavel: 'Responsável (Equipa ou agente)',
     proprietarios: 'Proprietários',
     zonas_exteriores: 'Zonas exteriores',
     freguesia: 'Distrito, concelho e freguesia',

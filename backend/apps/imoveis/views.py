@@ -160,6 +160,7 @@ class ImovelViewSet(RegistoViewSet):
                 **{nome: opcoes_lista(chave) for nome, chave in LISTAS.items()},
                 "operacoes": opcoes_lista("operacoes"),
                 "status": opcoes_lista("status_imovel"),
+                "tipos_angariacao": opcoes_lista("tipos_angariacao"),
                 **self.permissoes_gerais(request),
             }
         )

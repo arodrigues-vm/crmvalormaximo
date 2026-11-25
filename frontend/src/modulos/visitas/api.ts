@@ -27,6 +27,9 @@ export interface Visita extends Omit<VisitaResumo, 'imovel'> {
   agente_comprador_nome: string | null
   agente_imovel: number | null
   agente_imovel_nome: string | null
+  /** D-46: responsável pelo imóvel / pela entidade (membro da Equipa ou agente). */
+  responsavel_imovel_nome?: string | null
+  responsavel_comprador_nome?: string | null
   acompanhantes: number[]
   acompanhantes_detalhe: { id: number; nome: string }[]
   procura: number | null

@@ -140,9 +140,11 @@ export function PropostaConsulta() {
           </Dado>
         )
       case 'agente_comprador':
-        return <Dado rotulo="Agente responsável pelo comprador">{pr.agente_comprador_nome}</Dado>
+        return (
+          <Dado rotulo="Responsável pela entidade">{pr.responsavel_comprador_nome ?? pr.agente_comprador_nome}</Dado>
+        )
       case 'agente_imovel':
-        return <Dado rotulo="Agente responsável pelo imóvel">{pr.agente_imovel_nome}</Dado>
+        return <Dado rotulo="Responsável pelo imóvel">{pr.responsavel_imovel_nome ?? pr.agente_imovel_nome}</Dado>
       case 'visita':
         return (
           <Dado rotulo="Visita de origem">

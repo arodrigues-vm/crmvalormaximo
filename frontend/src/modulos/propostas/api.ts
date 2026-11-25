@@ -57,6 +57,9 @@ export interface Proposta extends PropostaResumo {
   agente_comprador_nome: string | null
   agente_imovel: number | null
   agente_imovel_nome: string | null
+  /** D-46: responsável pelo imóvel / pela entidade (membro da Equipa ou agente). */
+  responsavel_imovel_nome?: string | null
+  responsavel_comprador_nome?: string | null
   estado: number | null
   participantes_detalhe: ParticipanteDetalhe[]
   rondas: Ronda[]
@@ -80,6 +83,9 @@ export interface Previa {
   agente_comprador_nome: string | null
   agente_imovel: number | null
   agente_imovel_nome: string | null
+  /** D-46: responsável pelo imóvel / pela entidade (membro da Equipa ou agente). */
+  responsavel_imovel_nome?: string | null
+  responsavel_comprador_nome?: string | null
   valor_sugerido: string | null
   participantes: { entidade: number; nome: string; papel: number | null; quota: string | null }[]
 }

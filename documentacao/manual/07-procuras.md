@@ -77,3 +77,9 @@ o imóvel serve, com a mesma explicação. É útil quando entra um imóvel novo
 
 As procuras com estado da categoria *Ativa* geram correspondências. Quando o cliente comprar, desistir ou fizer
 uma pausa, mude o estado (por omissão: *Concluída*, *Desistiu*, *Em pausa*).
+
+## Responsável
+
+Cada procura tem um **Responsável**, escolhido entre os membros da **Equipa**. O Administrador pode escolher
+qualquer membro e o Responsável de equipa um membro da sua equipa; o Consultor fica como responsável das
+procuras que cria (o campo aparece, mas não se pode mudar). A mudança fica registada no histórico.

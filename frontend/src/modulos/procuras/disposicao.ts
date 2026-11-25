@@ -43,7 +43,7 @@ export const ECRA_PROCURA: DefinicaoEcra = {
     pretende: 'O cliente pretende',
     estado: 'Estado',
     urgencia: 'Urgência',
-    responsavel: 'Responsável (só na consulta)',
+    responsavel: 'Responsável',
     orcamento_max: 'Valor de aquisição previsto',
     tolerancia_pct: 'Tolerância e preço máximo aceite',
     explicacao_criterios: 'Texto: Obrigatório / Preferencial (só na edição)',

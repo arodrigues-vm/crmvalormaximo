@@ -18,6 +18,7 @@ import { SeletorLocalizacao } from '../../componentes/SeletorLocalizacao'
 import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
 import { comoRegistoCp, usePersonalizados } from '../../componentes/personalizados'
 import { useGuardaSaida } from '../../componentes/useGuardaSaida'
+import { agentesApi } from '../agentes/api'
 import { entidadesApi } from '../entidades/api'
 import { CAMPOS_IMOVEL, etiquetaStatus, imoveisApi, tituloImovel, type Imovel } from './api'
 import { ECRA_IMOVEL, IMOVEL_SECUNDARIOS } from './disposicao'
@@ -33,6 +34,8 @@ interface ProprietarioEditavel {
  * componentes próprios; todos os outros campos vêm das listas de campos por separador (`api.ts`). */
 interface Valores {
   responsavel: string
+  angariacao: string
+  agente_responsavel: OpcaoPesquisa | null
   operacao: string
   estado_comercializacao: string
   status: string
@@ -46,6 +49,8 @@ const t = (v: string | number | null | undefined) => (v === null || v === undefi
 
 const VAZIO: Valores = {
   responsavel: '',
+  angariacao: '',
+  agente_responsavel: null,
   operacao: '',
   estado_comercializacao: '',
   status: '',
@@ -58,6 +63,10 @@ const VAZIO: Valores = {
 function deImovel(i: Imovel): Valores {
   return {
     responsavel: String(i.responsavel),
+    angariacao: t(i.angariacao),
+    agente_responsavel: i.agente_responsavel
+      ? { id: i.agente_responsavel, titulo: i.agente_responsavel_nome ?? '' }
+      : null,
     operacao: t(i.operacao),
     estado_comercializacao: t(i.estado_comercializacao),
     status: t(i.status),
@@ -82,6 +91,8 @@ const num = (v: string) => (v.trim() === '' ? null : v.trim().replace(',', '.'))
 function paraApi(v: Valores) {
   return {
     responsavel: v.responsavel ? Number(v.responsavel) : undefined,
+    angariacao: id(v.angariacao),
+    agente_responsavel: v.agente_responsavel?.id ?? null,
     operacao: id(v.operacao),
     estado_comercializacao: id(v.estado_comercializacao),
     status: id(v.status),
@@ -246,6 +257,9 @@ function Formulario({ imovel }: { imovel?: Imovel }) {
       </div>
     </>
   )
+  // D-46: sem tipo de angariação conta como própria.
+  const categoriaAngariacao = o?.tipos_angariacao?.find((x) => String(x.id) === v.angariacao)?.categoria
+  const propria = !categoriaAngariacao || categoriaAngariacao === 'propria'
   function desenharCampo(c: string) {
     const q = CAMPOS_IMOVEL.find((x) => x.campo === c)
     if (q) return <EditarCampoQ c={q} ctx={ctx} />
@@ -288,7 +302,31 @@ function Formulario({ imovel }: { imovel?: Imovel }) {
             erro={erro('status')}
           />
         )
+      case 'angariacao':
+        return (
+          <CampoSelecao
+            rotulo="Angariação"
+            vazio="— (própria)"
+            value={v.angariacao}
+            onChange={(e) => mudar('angariacao', e.target.value)}
+            opcoes={comAtual(lista(o?.tipos_angariacao), v.angariacao, n?.angariacao as string | null)}
+            erro={erro('angariacao')}
+            ajuda="Própria: o responsável é da nossa Equipa. Rede ou externa: escolhe-se em Agentes."
+          />
+        )
       case 'responsavel':
+        if (!propria)
+          return (
+            <SeletorPesquisavel
+              rotulo="Responsável"
+              chave="agentes"
+              procurar={agentesApi.procurar}
+              valor={v.agente_responsavel}
+              aoMudar={(x) => mudar('agente_responsavel', x)}
+              erro={erro('agente_responsavel')?.join(' ')}
+              placeholder="Nome do agente ou da agência"
+            />
+          )
         return (
           <CampoResponsavel
             modulo="imoveis"

@@ -30,7 +30,7 @@ export const ECRA_OPORTUNIDADE: DefinicaoEcra = {
     estado: 'Estado',
     origem: 'Origem do contacto',
     preco_pretendido: 'Valor pretendido pelo imóvel',
-    responsavel: 'Responsável (só na consulta)',
+    responsavel: 'Responsável',
     imovel: 'Imóvel já registado',
     tipo_imovel: 'Tipo de imóvel',
     tipologia: 'Tipologia',

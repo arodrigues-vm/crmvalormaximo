@@ -5,6 +5,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ErroApi } from '../../api/cliente'
 import { BlocosConfiguraveis, Largo } from '../../componentes/BlocosConfiguraveis'
 import { CampoAreaTexto, CampoSelecao, CampoTexto } from '../../componentes/campos'
+import { CampoResponsavel } from '../../componentes/CampoResponsavel'
 import { CabecalhoRegisto } from '../../componentes/Ficha'
 import { EditarCampoQ } from '../../componentes/Qualificacao'
 import { qualificacaoParaApi, valoresQualificacao } from '../../componentes/camposQualificacao'
@@ -17,6 +18,7 @@ import { oportunidadesApi, QUALIFICACAO_NEGOCIO, QUALIFICACAO_PROPRIETARIO, type
 import { ECRA_OPORTUNIDADE } from './disposicao'
 
 interface Valores {
+  responsavel: string
   entidade: OpcaoPesquisa | null
   imovel: OpcaoPesquisa | null
   tipo_imovel: string
@@ -63,6 +65,7 @@ function Formulario({ o, entidadeInicial = null }: { o?: Oportunidade; entidadeI
   const qc = useQueryClient()
   const inicial = useMemo<Valores>(
     () => ({
+      responsavel: o ? String(o.responsavel) : '',
       entidade: o ? { id: o.entidade, titulo: o.entidade_nome ?? 'Entidade a que não tem acesso' } : entidadeInicial,
       imovel: o?.imovel ? { id: o.imovel, titulo: o.imovel_descricao } : null,
       tipo_imovel: t(o?.tipo_imovel),
@@ -109,6 +112,16 @@ function Formulario({ o, entidadeInicial = null }: { o?: Oportunidade; entidadeI
     if (q) return <EditarCampoQ c={q} ctx={ctxQ} />
     if (v.imovel && ['tipo_imovel', 'tipologia', 'localidade', 'descricao_imovel'].includes(c)) return null
     switch (c) {
+      case 'responsavel':
+        return (
+          <CampoResponsavel
+            modulo="oportunidades"
+            valor={v.responsavel}
+            atual={o ? { id: o.responsavel, nome: o.responsavel_nome } : null}
+            aoMudar={(x) => mudar('responsavel', x)}
+            erro={erros.responsavel}
+          />
+        )
       case 'entidade':
         return (
           <SeletorPesquisavel
@@ -247,6 +260,7 @@ function Formulario({ o, entidadeInicial = null }: { o?: Oportunidade; entidadeI
     setErros({})
     setErroGeral(null)
     const corpo = {
+      responsavel: v.responsavel ? Number(v.responsavel) : undefined,
       entidade: v.entidade?.id ?? null,
       imovel: v.imovel?.id ?? null,
       tipo_imovel: idOuNull(v.tipo_imovel),

@@ -55,9 +55,11 @@ export function VisitaConsulta() {
           </Dado>
         )
       case 'agente_comprador':
-        return <Dado rotulo="Agente responsável pelo comprador">{vis.agente_comprador_nome}</Dado>
+        return (
+          <Dado rotulo="Responsável pela entidade">{vis.responsavel_comprador_nome ?? vis.agente_comprador_nome}</Dado>
+        )
       case 'agente_imovel':
-        return <Dado rotulo="Agente responsável pelo imóvel">{vis.agente_imovel_nome}</Dado>
+        return <Dado rotulo="Responsável pelo imóvel">{vis.responsavel_imovel_nome ?? vis.agente_imovel_nome}</Dado>
       case 'entidade':
         return (
           <Dado rotulo="Cliente">

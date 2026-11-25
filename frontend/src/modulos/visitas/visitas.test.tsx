@@ -44,7 +44,7 @@ describe('Visitas', () => {
     fireEvent.change(await screen.findByLabelText('O imóvel está registado no CRM?'), { target: { value: 'nao' } })
     fireEvent.change(screen.getByLabelText('Descrição do imóvel'), { target: { value: 'Moradia T4' } })
     fireEvent.change(screen.getByLabelText('Localização (breve)'), { target: { value: 'Matosinhos' } })
-    fireEvent.change(screen.getByRole('combobox', { name: 'Agente responsável pelo imóvel' }), {
+    fireEvent.change(screen.getByRole('combobox', { name: 'Responsável pelo imóvel' }), {
       target: { value: 'rita' },
     })
     fireEvent.mouseDown(await screen.findByRole('option', { name: /Rita Externa/ }))
@@ -67,10 +67,20 @@ describe('Visitas', () => {
     const pedidos = simularApi({
       '/api/auth/eu/': () => json(UTIL),
       '/api/visitas/opcoes/': () => json(OPCOES),
-      'GET /api/imoveis/5/': () => json({ id: 5, referencia: 'IMO-000005', localidade: 'Maia', nomes: {} }),
+      'GET /api/imoveis/5/': () =>
+        json({
+          id: 5,
+          referencia: 'IMO-000005',
+          localidade: 'Maia',
+          nomes: {},
+          responsavel_imovel_nome: 'Consultor Ensaio',
+        }),
       'POST /api/visitas/': () => json({ campos: {} }, 400),
     })
     desenhar('/visitas/nova?imovel=5')
+    // D-46: o responsável pelo imóvel vem da ficha do imóvel (não se escolhe).
+    await waitFor(() => expect(screen.getByLabelText('Responsável pelo imóvel')).toHaveValue('Consultor Ensaio'))
+    expect(screen.getByLabelText('Responsável pelo imóvel')).toBeDisabled()
     fireEvent.change(await screen.findByLabelText(/Data da visita/), { target: { value: '2026-12-01' } })
     fireEvent.change(screen.getByLabelText('Hora de entrada'), { target: { value: '10:00' } })
     fireEvent.click(screen.getByRole('button', { name: /Avaliação do cliente/ }))

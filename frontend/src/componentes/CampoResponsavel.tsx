@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 
 import { equipaApi } from '../modulos/equipa/api'
-import { CampoSelecao } from './campos'
+import { useSessao } from '../app/sessao'
+import { CampoSelecao, CampoTexto } from './campos'
 
 /**
- * «Responsável» do registo, escolhido entre os membros da Equipa (D-41). Só aparece a quem pode atribuir
- * registos a outras pessoas (âmbito de transferência); a API volta a verificar sempre.
+ * «Responsável» do registo, escolhido entre os membros da Equipa (D-41). Aparece sempre (D-46); só pode ser
+ * mudado por quem pode atribuir registos a outras pessoas (âmbito de transferência). A API volta a verificar.
  */
 export function CampoResponsavel({
   modulo,
@@ -26,7 +27,19 @@ export function CampoResponsavel({
     queryFn: () => equipaApi.responsaveis(modulo),
     staleTime: 60_000,
   })
-  if (data.length <= 1) return null
+  const { utilizador } = useSessao()
+  if (data.length <= 1) {
+    // Sem escolha possível: mostra quem é (ou será) o responsável, sem poder mudar.
+    return (
+      <CampoTexto
+        rotulo="Responsável"
+        value={atual?.nome ?? data[0]?.nome ?? utilizador?.nome ?? ''}
+        disabled
+        readOnly
+        ajuda={atual ? undefined : 'Fica como responsável quem cria o registo.'}
+      />
+    )
+  }
   const opcoes = data.map((u) => ({ valor: u.id, nome: u.equipa ? `${u.nome} (${u.equipa})` : u.nome }))
   if (atual && !data.some((u) => u.id === atual.id)) opcoes.push({ valor: atual.id, nome: atual.nome })
   return (

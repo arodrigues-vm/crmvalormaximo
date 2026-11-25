@@ -6,10 +6,11 @@ import { ErroApi } from '../../api/cliente'
 import { BlocosConfiguraveis, Largo } from '../../componentes/BlocosConfiguraveis'
 import { CampoAreaTexto, CampoSelecao, CampoTexto } from '../../componentes/campos'
 import { CabecalhoRegisto } from '../../componentes/Ficha'
+import { CampoResponsavelVisita } from '../../componentes/ResponsaveisVisita'
+import { useResponsaveisDasFichas } from '../../componentes/responsaveisVisita'
 import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
 import { comoRegistoCp, usePersonalizados } from '../../componentes/personalizados'
 import { useGuardaSaida } from '../../componentes/useGuardaSaida'
-import { agentesApi } from '../agentes/api'
 import { entidadesApi } from '../entidades/api'
 import { imoveisApi, procurarImoveis } from '../imoveis/api'
 import { hora, visitasApi, type Visita } from './api'
@@ -123,6 +124,7 @@ function Formulario({
   const [erroGeral, setErroGeral] = useState<string | null>(null)
   const [aGravar, setAGravar] = useState(false)
   const [novoAcompanhante, setNovoAcompanhante] = useState<OpcaoPesquisa | null>(null)
+  const fichas = useResponsaveisDasFichas(v.imovelRegistado ? (v.imovel?.id ?? null) : null, v.entidade?.id ?? null)
   const cp = usePersonalizados(ECRA_VISITA, comoRegistoCp(visita))
   const guarda = useGuardaSaida(JSON.stringify(v) !== JSON.stringify(inicial) || cp.alterado)
   const mudar = <K extends keyof Valores>(c: K, x: Valores[K]) => setV((a) => ({ ...a, [c]: x }))
@@ -139,8 +141,8 @@ function Formulario({
       imovel: v.imovelRegistado ? (v.imovel?.id ?? null) : null,
       imovel_descricao_livre: v.imovelRegistado ? '' : v.imovel_descricao,
       imovel_localizacao: v.imovelRegistado ? '' : v.imovel_localizacao,
-      agente_comprador: v.agente_comprador?.id ?? null,
-      agente_imovel: v.agente_imovel?.id ?? null,
+      agente_comprador: fichas.clienteExterno ? (v.agente_comprador?.id ?? null) : null,
+      agente_imovel: v.imovelRegistado ? null : (v.agente_imovel?.id ?? null),
       acompanhantes: v.acompanhantes.map((a) => a.id),
       data: v.data || null,
       hora_entrada: v.hora_entrada || null,
@@ -243,26 +245,32 @@ function Formulario({
         )
       case 'agente_comprador':
         return (
-          <SeletorPesquisavel
-            rotulo="Agente responsável pelo comprador"
-            chave="agentes"
-            procurar={agentesApi.procurar}
+          <CampoResponsavelVisita
+            rotulo="Responsável pela entidade"
+            escolher={fichas.clienteExterno}
+            daFicha={fichas.entidade?.responsavel_nome}
+            semFicha={v.entidade ? '…' : 'Escolha primeiro o cliente.'}
             valor={v.agente_comprador}
             aoMudar={(x) => mudar('agente_comprador', x)}
-            erro={erros.agente_comprador?.join(' ')}
-            placeholder="Nome do agente ou da agência"
+            erro={erros.agente_comprador}
           />
         )
       case 'agente_imovel':
         return (
-          <SeletorPesquisavel
-            rotulo="Agente responsável pelo imóvel"
-            chave="agentes"
-            procurar={agentesApi.procurar}
+          <CampoResponsavelVisita
+            rotulo="Responsável pelo imóvel"
+            escolher={!v.imovelRegistado}
+            daFicha={fichas.imovel?.responsavel_imovel_nome}
+            semFicha={
+              !v.imovel
+                ? 'Escolha primeiro o imóvel.'
+                : fichas.imovel
+                  ? 'O imóvel não tem responsável: indique-o na ficha do imóvel.'
+                  : '…'
+            }
             valor={v.agente_imovel}
             aoMudar={(x) => mudar('agente_imovel', x)}
-            erro={erros.agente_imovel?.join(' ')}
-            placeholder="Nome do agente ou da agência"
+            erro={erros.agente_imovel}
           />
         )
       case 'estado':

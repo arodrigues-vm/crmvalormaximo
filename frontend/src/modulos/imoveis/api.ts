@@ -50,6 +50,12 @@ export interface Imovel {
   proprietarios_detalhe: ProprietarioDetalhe[]
   responsavel: number
   responsavel_nome: string
+  /** D-46: angariação própria (responsável da Equipa) ou de rede/externa (responsável em Agentes). */
+  angariacao: number | null
+  angariacao_propria: boolean
+  agente_responsavel: number | null
+  agente_responsavel_nome: string | null
+  responsavel_imovel_nome: string | null
   observacoes: string
   nomes: {
     tipo: string | null
@@ -91,6 +97,7 @@ export interface ImovelResumo {
 }
 
 export interface OpcoesImovel {
+  tipos_angariacao?: { id: number; nome: string; categoria: string }[]
   tipos: Opcao[]
   tipologias: Opcao[]
   estados_comercializacao: Opcao[]
@@ -184,6 +191,8 @@ export const NOMES_CAMPOS_IMOVEL: Record<string, string> = {
   certificado_energetico: 'Certificado energético',
   descricao: 'Descrição',
   responsavel: 'Responsável',
+  angariacao: 'Angariação',
+  agente_responsavel: 'Responsável (agente)',
   observacoes: 'Observações',
   eliminado_em: 'Eliminado em',
 }

@@ -24,9 +24,14 @@ A forma mais rápida é a partir da ficha do imóvel (ou da entidade): secção 
      «Moradia T4 com piscina») e uma **localização** breve (por exemplo «junto à praia de Matosinhos»). Não é
      preciso registar o imóvel.
 2. Escolha o **cliente**. Quando não tem os dados do comprador (por exemplo, cliente de um agente externo),
-   use uma entidade genérica, como «Cliente externo».
-3. Indique o **agente responsável pelo comprador** e o **agente responsável pelo imóvel** (obrigatórios). Ambos
-   têm de estar registados em **Agentes** (capítulo 18); se faltar algum, registe-o primeiro em **Agentes**.
+   use uma entidade cujo **Tipo de cliente** seja «Cliente externo».
+3. Os responsáveis preenchem-se sozinhos, a partir das fichas:
+   - **Responsável pelo imóvel**: vem da ficha do imóvel (o responsável da Equipa, se a angariação é própria,
+     ou o agente, se é de rede ou externa). Se o imóvel não estiver registado no CRM, escolha-o em **Agentes**.
+   - **Responsável pela entidade**: vem da ficha da entidade. Se a entidade for «Cliente externo», escolha
+     em **Agentes** o agente que acompanha esse cliente.
+
+   Os agentes têm de estar registados em **Agentes** (capítulo 18); se faltar algum, registe-o primeiro.
 4. Indique a **data** e, se quiser, a **hora de entrada** e a **hora de saída**.
 5. Se forem mais pessoas, acrescente-as em **Acompanhantes**.
 6. Carregue em **Guardar**. A visita fica *Agendada*.

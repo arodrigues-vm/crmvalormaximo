@@ -6,6 +6,7 @@ import { ErroApi } from '../../api/cliente'
 import { BlocosConfiguraveis, Largo } from '../../componentes/BlocosConfiguraveis'
 import { CampoAreaTexto, CampoCaixa, CampoMultiplo, CampoSelecao, CampoTexto } from '../../componentes/campos'
 import { qualificacaoParaApi, valoresQualificacao, type Opcoes } from '../../componentes/camposQualificacao'
+import { CampoResponsavel } from '../../componentes/CampoResponsavel'
 import { CabecalhoRegisto } from '../../componentes/Ficha'
 import { EditarCampoQ } from '../../componentes/Qualificacao'
 import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
@@ -26,6 +27,7 @@ import { ECRA_PROCURA } from './disposicao'
 
 type Imp = Importancia
 interface Valores {
+  responsavel: string
   entidade: OpcaoPesquisa | null
   pretende: string
   estado: string
@@ -64,6 +66,7 @@ const CAMPOS_Q = [...QUALIFICACAO_COMPRADOR, ...PRE_QUALIFICACAO_FINANCEIRA, ...
 
 function deProcura(p?: Procura, entidade?: OpcaoPesquisa | null): Valores {
   return {
+    responsavel: p ? String(p.responsavel) : '',
     entidade: p ? { id: p.entidade, titulo: p.entidade_nome ?? 'Entidade a que não tem acesso' } : (entidade ?? null),
     pretende: p?.pretende ?? 'comprar',
     estado: t(p?.estado),
@@ -202,6 +205,7 @@ function Formulario({ p, entidadeInicial = null }: { p?: Procura; entidadeInicia
     setErros({})
     setErroGeral(null)
     const corpo = {
+      responsavel: v.responsavel ? Number(v.responsavel) : undefined,
       entidade: v.entidade?.id ?? null,
       pretende: v.pretende,
       estado: v.estado ? Number(v.estado) : null,
@@ -263,6 +267,16 @@ function Formulario({ p, entidadeInicial = null }: { p?: Procura; entidadeInicia
     const q = CAMPOS_Q.find((x) => x.campo === c)
     if (q) return <EditarCampoQ c={q} ctx={ctxQ} />
     switch (c) {
+      case 'responsavel':
+        return (
+          <CampoResponsavel
+            modulo="procuras"
+            valor={v.responsavel}
+            atual={p ? { id: p.responsavel, nome: p.responsavel_nome } : null}
+            aoMudar={(x) => mudar('responsavel', x)}
+            erro={erros.responsavel}
+          />
+        )
       case 'entidade':
         return (
           <SeletorPesquisavel

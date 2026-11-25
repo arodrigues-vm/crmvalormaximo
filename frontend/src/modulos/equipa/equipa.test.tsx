@@ -68,7 +68,7 @@ describe('Equipa', () => {
         ]),
     })
     desenhar('/entidades/nova')
-    const campo = await screen.findByLabelText('Responsável')
+    const campo = await screen.findByRole('combobox', { name: 'Responsável' })
     expect([...campo.querySelectorAll('option')].map((o) => o.textContent)).toEqual([
       'Eu próprio',
       'Administrador Demo',
