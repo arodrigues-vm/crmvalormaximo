@@ -1,0 +1,514 @@
+{
+  "versao": 1,
+  "objecoes": [
+    {
+      "id": "o1",
+      "momento": "Telefone",
+      "objecao": "Não quero trabalhar com imobiliárias.",
+      "origem": "formacao",
+      "fontes": [
+        "1.1",
+        "P1.1",
+        "P1.2"
+      ],
+      "resposta": "Compreendo. Calculo que o motivo sejam os honorários; com certeza pretende poupar esse valor, compreendo perfeitamente. Desejo-lhe o maior sucesso: pelo que vi, a casa é muito interessante e acredito que a venda corra bem.",
+      "passos": [
+        "Coloco-me ao seu dispor: qualquer dúvida com documentação, em qualquer fase, uma vez que está a fazer a venda sozinho, pode ligar-me. Terei todo o gosto em ajudar, sem qualquer custo. O meu nome é {meuNome}, da {agencia}.",
+        "(Só se a sua empresa tiver intermediação de crédito ou um parceiro.) Muitos proprietários que vendem sozinhos dizem-me que já têm comprador, mas esperam há um ou dois meses pela resposta do banco. Se for o seu caso, o nosso especialista de crédito trata de tudo. Não paga nada, nem o comprador: quem nos remunera é o banco.",
+        "Não o empato mais, foi muito simpático. Permite-me que lhe ligue daqui a 30 dias, para saber como está a correr?",
+        "Posso enviar-lhe já por WhatsApp o meu cartão, para ficar com o contacto?"
+      ],
+      "caminhos_por_causa": [],
+      "porque_funciona": "Nunca contra-argumente. “Compreendo” põe-no do lado da pessoa sem dizer que concorda. Ela espera uma reação negativa e recebe simpatia e ajuda concreta. Dizer quem paga o crédito (o banco) dá credibilidade, porque “tudo grátis” parece falso.",
+      "nota": "Se quiser perceber o motivo, use uma pergunta neutra: “Há algum motivo em especial que o leve a decidir assim?” Não pergunte “já teve uma má experiência?”: ao telefone ainda é um desconhecido.",
+      "proximo_passo": "Esta objeção ultrapassa-se em duas etapas. Quando tiver um comprador real compatível, ligue antes dos 30 dias (guião “Segundo telefonema”). Registe já a tipologia, a zona, o preço e a data de seguimento.",
+      "cuidado": "A ajuda gratuita tem de ser real. Se a pessoa ligar com uma dúvida, ajude mesmo.",
+      "guiao_relacionado": "naoquer"
+    },
+    {
+      "id": "o2",
+      "momento": "Telefone",
+      "objecao": "Exclusividade não dou a ninguém, não perca tempo.",
+      "origem": "formacao",
+      "fontes": [
+        "P1.2",
+        "P2.1",
+        "P4"
+      ],
+      "resposta": "Compreendo o que refere, Sr. {proprietario}. Não há qualquer problema: é possível fazer o acordo com ou sem exclusividade, consoante os casos. Posso até adiantar que só oferecemos a exclusividade cumprindo alguns critérios. O importante é que faça como achar melhor para si; fique tranquilo. Dava-lhe então mais jeito às {hora1} ou às {hora2}?",
+      "passos": [],
+      "caminhos_por_causa": [],
+      "porque_funciona": "Ao telefone não se discute a exclusividade: perde-se com facilidade. O objetivo da chamada é a reunião, e a pessoa só pode querer o que conhece.",
+      "nota": null,
+      "proximo_passo": "Trate o assunto pessoalmente, depois de apresentar o serviço.",
+      "cuidado": "Diga que trabalha das duas formas só se a sua agência o permitir. Não diga “depois falamos disso quando aí for”: soa a que vai impor.",
+      "guiao_relacionado": null
+    },
+    {
+      "id": "o3",
+      "momento": "Telefone",
+      "objecao": "O anúncio diz que não quer ser contactado por imobiliárias.",
+      "origem": "adaptacao",
+      "fontes": [
+        "P1.2",
+        "P2.1"
+      ],
+      "resposta": "(Deixe a pessoa desabafar sem a interromper.) Com certeza, li, e de modo algum estou a ligar para angariar a sua casa; compreendo e respeito. Ligava apenas para o ajudar: muitos proprietários que vendem sozinhos têm interessados com dificuldade no crédito. Se tiver um comprador que dependa do banco, conte comigo, sem custo para si nem para o comprador. Desejo-lhe o maior sucesso.",
+      "passos": [],
+      "caminhos_por_causa": [],
+      "porque_funciona": "Diga logo que não está a ligar para angariar: isso acalma a pessoa. Nunca diga “o senhor não ouviu o que tenho para dizer”. Assim fica num grupo diferente de todos os consultores que já lhe ligaram.",
+      "nota": "Alternativa honesta, usada por uma participante: enviar uma mensagem a dizer que leu o anúncio, que tem um imóvel em exclusivo na mesma zona e que gostaria de poder mostrar o dele a clientes a quem esse não agrade, com o vídeo. Ligar uns dias depois.",
+      "proximo_passo": "Peça para voltar a ligar daqui a uns dias, para saber como corre a venda.",
+      "cuidado": "O formador sugere também dizer que representa um investidor estrangeiro. Use isso apenas se tiver mesmo um mandato de comprador. Inventar um cliente é enganar.",
+      "guiao_relacionado": null
+    },
+    {
+      "id": "o4",
+      "momento": "Telefone",
+      "objecao": "Já entreguei a um amigo que é consultor.",
+      "origem": "formacao",
+      "fontes": [
+        "P2.1",
+        "4"
+      ],
+      "resposta": "Compreendo, e ao dizer-me isso nem eu me sentiria confortável em lhe pedir outra coisa; está muito bem apoiado. Não perdemos nada em conversar: gostava de partilhar consigo o que eu faria para vender esta casa. Até pode encontrar ideias para passar ao seu amigo. Dava-lhe mais jeito às {hora1} ou às {hora2}?",
+      "passos": [
+        "(Na reunião, depois de apresentar o serviço.) O seu amigo inclui no serviço o que lhe mostrei? Com toda a transparência: se isto estivesse a ser feito, a casa já estaria vendida?",
+        "Se outra agência ou um vizinho comprar, quanto ganha o seu amigo?",
+        "Para não melindrar o seu amigo: fazemos o nosso acordo e deixo por escrito que ele pode trazer os clientes que quiser. Eu preparo o imóvel antes de cada visita; se ele vender, ganha os honorários da venda e eu os do trabalho de preparação. E continuo a defendê-lo nas propostas. Vamos fazer o nosso acordo?"
+      ],
+      "caminhos_por_causa": [],
+      "porque_funciona": "O proprietário quer vender. Não tem de “tirar” a casa ao amigo: ganha um serviço que o amigo não lhe dá. O formador conta casos em que esta partilha resolveu a questão sem custo extra para o proprietário.",
+      "nota": null,
+      "proximo_passo": "Vá sempre à reunião: no pior dos casos, ficou a conhecer mais uma pessoa.",
+      "cuidado": "Partilhe com o amigo apenas nos termos que a sua agência permite.",
+      "guiao_relacionado": null
+    },
+    {
+      "id": "o5",
+      "momento": "Telefone",
+      "objecao": "Quero X limpo; ponham a vossa comissão por cima.",
+      "origem": "formacao",
+      "fontes": [
+        "P3.2",
+        "P1.1"
+      ],
+      "resposta": "Compreendo: quer {preco} limpos e que os honorários fiquem por cima. Sem conhecer o imóvel não me é fácil comentar. Proponho encontrarmo-nos em sua casa: conheço o imóvel e ofereço-lhe um relatório de avaliação; basta ter a caderneta predial, que se tira online. Depois falamos: se o valor de mercado o permitir, com todo o gosto, e se sobrar mais, melhor para si, porque nós só cobramos os honorários. Se não for possível, digo-lhe logo as possibilidades e o senhor decide. Às {hora1} ou às {hora2}?",
+      "passos": [],
+      "caminhos_por_causa": [],
+      "porque_funciona": "Não prometa nem recuse ao telefone. Não “chova no molhado”: feche logo com o horário.",
+      "nota": null,
+      "proximo_passo": "Vá à reunião com duas análises da concorrência: a do segmento certo e a do segmento onde ele quer pôr a casa.",
+      "cuidado": "Ofereça o relatório apenas se o fizer de facto.",
+      "guiao_relacionado": null
+    },
+    {
+      "id": "o6",
+      "momento": "Telefone",
+      "objecao": "Estou no estrangeiro / só aceito contacto por email.",
+      "origem": "formacao",
+      "fontes": [
+        "P1.2"
+      ],
+      "resposta": "Para não atrasar o seu processo, proponho uma videochamada: envio-lhe já um link, ficamos a conhecer-nos e partilho no ecrã a informação. Tem dez minutos agora?",
+      "passos": [
+        "(Só por email.) Sou consultor especialista neste mercado. Posso enviar-lhe sem custo informação útil para decidir: o valor médio por metro quadrado na zona, o tempo médio de venda por tipologia e a documentação necessária. Basta pedir-ma.",
+        "(Depois.) Teve oportunidade de ver o documento? Qual é a forma mais cómoda de conversarmos: telefone, WhatsApp ou videochamada?"
+      ],
+      "caminhos_por_causa": [],
+      "porque_funciona": "Faça o que os outros não estão dispostos a fazer.",
+      "nota": null,
+      "proximo_passo": null,
+      "cuidado": "O contrato tem de ser assinado pelo proprietário ou por um procurador com poderes expressos para o contrato de mediação.",
+      "guiao_relacionado": null
+    },
+    {
+      "id": "o7",
+      "momento": "Reunião",
+      "objecao": "Não quero exclusividade.",
+      "origem": "formacao",
+      "fontes": [
+        "P1.1",
+        "P2.2",
+        "P3.1"
+      ],
+      "resposta": "Compreendo o que refere. Gostaria de o compreender um pouco melhor: o que é que o preocupa em concreto no regime de exclusividade?",
+      "passos": [],
+      "caminhos_por_causa": [
+        {
+          "causa": "Quer rapidez: pôr em várias agências",
+          "passos": [
+            "Compreendo; no seu lugar, talvez também pensasse que mais agências dão mais oportunidades. Neste modelo qualquer agência pode vender a sua casa: partilhamos com todas e o senhor não paga mais por isso.",
+            "Em sua opinião, quando entrega a cinco ou seis agências, o que vai fazer cada uma para vender?",
+            "Então vai encontrar a sua casa cinco ou seis vezes no mesmo portal, com fotos, textos, áreas e preços diferentes. Se fosse comprador, o que pensaria?",
+            "E se visse quatro ou cinco placas na varanda, acharia o proprietário tranquilo ou com pressa? Seria provável fazer uma proposta mais baixa? É isso que quer que aconteça consigo?",
+            "Prefere ver a sua casa muitas vezes, com fotos simples, lá para a quinta página, ou uma vez só, em destaque, com fotos profissionais e home staging? O que vende mais depressa?",
+            "Se fosse consultor: a uma casa entregue só a si ou a outra entregue a dez agências, a qual dedicaria mais tempo? Vamos fazer o nosso acordo?"
+          ],
+          "nota": null
+        },
+        {
+          "causa": "Quer poder vender ele próprio",
+          "passos": [
+            "Acha que seria justo o senhor arranjar o comprador e eu receber a comissão completa sem ter feito essa venda?",
+            "E acha igualmente justo que, depois da análise da concorrência, da SWOT, do relatório e do home staging, o senhor venda graças a tudo isso e nós não ganhemos nada?",
+            "Tenho uma proposta de que vai gostar: fazemos o acordo como está e escrevemos que, se for o senhor a trazer o comprador, paga apenas 50% dos honorários, e continua com o apoio jurídico, fiscal, o crédito ao seu comprador e o acompanhamento até à escritura. Se partilhamos com outras agências, porque não com o dono? Vamos fazer o nosso acordo?"
+          ],
+          "nota": "Não ofereça os 50% logo de início: as perguntas é que fazem o trabalho. Use esta cláusula (um aditamento ao contrato) apenas se a sua agência a aceitar. O formador diz que na prática raramente chega a ser usada."
+        },
+        {
+          "causa": "Já teve uma má experiência",
+          "passos": [
+            "Lamento muito o que me contou; não é a primeira vez que ouço histórias assim. Não vou comentar, não me ficaria bem falar de colegas.",
+            "Sei que não confia, mas pergunto-lhe: imagine que fazia o acordo comigo e eu cumpria rigorosamente tudo isto. Ficava satisfeito?",
+            "Então proponho algo de que acho que vai gostar: anexamos este plano de serviço ao nosso acordo e eu assino que, se não o cumprir, pode terminar o contrato de imediato. Sente-se mais confortável assim? Vamos fazer o nosso acordo?"
+          ],
+          "nota": "Se eu dou a minha palavra, o que me custa assiná-la?"
+        }
+      ],
+      "porque_funciona": "“Não quero exclusivo” é o que a pessoa diz; por trás há quase sempre uma de três causas. Não se ultrapassa uma objeção que não se conhece. Argumentar (“vai arrepender-se”) é tentar ganhar uma batalha; as perguntas deixam a pessoa concluir sozinha.",
+      "nota": null,
+      "proximo_passo": "Se mesmo assim só quiser sem compromisso e não trabalhar dessa forma, saia com elegância: “Compreendo, e tive todo o gosto em conhecê-lo. Prefiro não o iludir com um serviço em que não faria tudo isto. Fico sempre ao dispor.”",
+      "cuidado": "A cláusula dos 50% e o compromisso assinado têm de respeitar a política da sua agência e ficar bem redigidos.",
+      "guiao_relacionado": null
+    },
+    {
+      "id": "o8",
+      "momento": "Reunião",
+      "objecao": "Seis meses é muito tempo.",
+      "origem": "formacao",
+      "fontes": [
+        "P2.2"
+      ],
+      "resposta": "Compreendo a preocupação com o tempo. Diga-me: em sua opinião, se puser a casa em várias agências sem exclusividade, quanto tempo acha que demora a vender?",
+      "passos": [
+        "No nosso serviço, o tempo médio até à venda tem sido de [o seu número real] dias, e o plano de marketing é de oito semanas.",
+        "Se eu cumprir tudo o que está neste plano, a que agência entregaria a casa para fazer mais?",
+        "O que eu faço fica feito: o relatório, o home staging, as fotografias. Não me sentiria confortável em fazer tudo isto e, ao fim de dois meses, ver o trabalho passar para quem não o faz."
+      ],
+      "caminhos_por_causa": [],
+      "porque_funciona": "Muitas vezes a questão não é o tempo, é não querer compromisso. Se houver um motivo real (por exemplo, muda de cidade daqui a dois meses), aceite um prazo mais curto.",
+      "nota": "Com contratos muito curtos, um interessado que o proprietário conheça pode simplesmente esperar que o contrato acabe para comprar diretamente.",
+      "proximo_passo": null,
+      "cuidado": "Use apenas tempos médios que tenha registado de facto.",
+      "guiao_relacionado": null
+    },
+    {
+      "id": "o9",
+      "momento": "Reunião",
+      "objecao": "Não pago 5% de comissão.",
+      "origem": "formacao",
+      "fontes": [
+        "P3.1",
+        "P1.2",
+        "4"
+      ],
+      "resposta": "(Escute em silêncio, olhe nos olhos, não interrompa até a pessoa parar.) Compreendo, Sr. {proprietario}. Gostava de o compreender um pouco melhor: em função do serviço que lhe apresentei, qual seria em seu entender o valor justo?",
+      "passos": [
+        "Como chegou a esse valor? Porquê 3% e não 2% ou 4%?",
+        "Os colegas que cobram 3% trouxeram-lhe uma análise da concorrência? E uma análise SWOT? Um relatório de avaliação? Home staging? (Uma pergunta de cada vez.)",
+        "Se fosse meu colega e prestasse este serviço, sentia-se confortável em cobrar 3%, como quem não faz nada disto?",
+        "Se um colega de outra agência tiver um comprador e aqui ganhar menos do que nos outros imóveis, seria provável levar o cliente para outra casa? Compreende porque não posso: quem ficava prejudicado era o senhor.",
+        "Seja totalmente sincero: se hoje lhe trouxessem uma proposta 2% abaixo do que pede, vendia? (…) Há alguma coisa em mim que lhe desagrade? (…) Em segundos, baixou esse valor a um comprador que nem existe. Peço-lhe que mo pague a mim, para o defender. Se defendo assim os meus honorários, imagine como defendo o preço da sua casa. Vamos fazer o nosso acordo?",
+        "Se eu retirasse tudo isto e fizesse só fotografias, anúncio e placa por 3%, assinava agora? Consegue tirar fotos com o telemóvel e pôr um anúncio? Então paga 3% por algo que sabe fazer, e acha caros mais 2% por todo este serviço?"
+      ],
+      "caminhos_por_causa": [],
+      "porque_funciona": "Em abstrato, o proprietário acha que os outros “fazem o mesmo”. Ao detalhar com perguntas, é ele que vê a diferença. As pessoas concordam quando sentem que os prejudicados seriam elas.",
+      "nota": null,
+      "proximo_passo": "Se mesmo assim quiser o serviço básico: “Agradeço a sua honestidade. O serviço que procura não é este; posso indicar-lhe colegas que o fazem.”",
+      "cuidado": "Não justifique a comissão com os seus custos (fotógrafo, destaques, “metade é da agência”): se vender depressa, vão pedir desconto. A história pessoal que o formador usa (o computador da filha) só faz sentido se for verdadeira para si.",
+      "guiao_relacionado": null
+    },
+    {
+      "id": "o10",
+      "momento": "Reunião",
+      "objecao": "Vendeu tão depressa que merece desconto.",
+      "origem": "formacao",
+      "fontes": [
+        "P3.1"
+      ],
+      "resposta": "Fico contente que tenha sido rápido, era o que queria. Diga-me: se tivesse demorado dez ou doze meses, estaria disposto a pagar mais? Então porquê pagar menos por ter sido rápido?",
+      "passos": [],
+      "caminhos_por_causa": [],
+      "porque_funciona": "Por isso nunca se deixa a comissão “para falarmos no fim”: a pessoa lembra-se e pede desconto.",
+      "nota": null,
+      "proximo_passo": null,
+      "cuidado": null,
+      "guiao_relacionado": null
+    },
+    {
+      "id": "o11",
+      "momento": "Reunião",
+      "objecao": "A minha casa vale mais do que isso.",
+      "origem": "formacao",
+      "fontes": [
+        "P3.2",
+        "2.1",
+        "2.2",
+        "4"
+      ],
+      "resposta": "Compreendo. Como chegou a esse valor? Vamos ver juntos o que um comprador encontra hoje: estes são os imóveis à venda aqui à volta.",
+      "passos": [
+        "Pelo valor por metro quadrado destes imóveis, aplicado à sua área, falamos de cerca de [valor]. Vamos fazer o relatório, mas, mesmo valorizando, dificilmente passaria o limite deste segmento.",
+        "Ao pô-la no valor que pretende, vai competir com estes (análise do segmento acima). Se fosse comprador, comprava este T3 com garagem pelo mesmo valor ou pagava isso pelo seu? (Repita com vários.)",
+        "Imagine que um comprador vinha ver a casa e me perguntava se o estou a tentar enganar. O que lhe devo responder?",
+        "Seja transparente: depois de ver o que está à venda, pagava esse valor pela sua casa?",
+        "Os honorários dependem do preço: quanto mais alto, mais ganho. Mas não me sinto bem em influenciá-lo a pôr um valor que o vai prejudicar. Podemos pôr um pouco acima, dentro do segmento, para ter margem."
+      ],
+      "caminhos_por_causa": [],
+      "porque_funciona": "Nos primeiros 30 dias aparecem quase todos os interessados. Uma casa acima do segmento não é vista por quem a compraria; depois baixa aos poucos e fica “queimada”.",
+      "nota": null,
+      "proximo_passo": "Use o “alvo de preço” e o cálculo do tempo até ao valor pedido, no separador Método.",
+      "cuidado": "Distinga preços pedidos de preços de venda. Use dados reais da sua zona; uma análise da concorrência não é uma avaliação certificada.",
+      "guiao_relacionado": null
+    },
+    {
+      "id": "o12",
+      "momento": "Reunião",
+      "objecao": "Comprei caro / tenho um crédito alto.",
+      "origem": "formacao",
+      "fontes": [
+        "P3.2"
+      ],
+      "resposta": "Compreendo. Mas deixe-me perguntar: se tivesse comprado 50% abaixo do valor, hoje vendia 50% abaixo? E se a casa lhe tivesse sido oferecida, oferecia-a agora?",
+      "passos": [
+        "O negócio que fez na altura foi o seu; quem compra hoje faz o dele.",
+        "Se fosse comprar e o vendedor lhe dissesse “vendo caro porque comprei caro”, o que lhe responderia?"
+      ],
+      "caminhos_por_causa": [],
+      "porque_funciona": "A pessoa vê por si que o preço depende do mercado e não da sua história.",
+      "nota": null,
+      "proximo_passo": null,
+      "cuidado": null,
+      "guiao_relacionado": null
+    },
+    {
+      "id": "o13",
+      "momento": "Reunião",
+      "objecao": "Fiz obras de muitos milhares de euros.",
+      "origem": "formacao",
+      "fontes": [
+        "P3.2"
+      ],
+      "resposta": "As obras ficaram muito interessantes, ao seu gosto. Mas quem compra pode querer personalizar. Se tivesse posto puxadores de luxo de 50 mil euros, acha que alguém os pagava? (Com humor.)",
+      "passos": [
+        "O que gastou deu-lhe conforto durante estes anos. Valorizou a casa, mas não na mesma proporção do investimento."
+      ],
+      "caminhos_por_causa": [],
+      "porque_funciona": "Obras simples (chão, cozinha corrente) valorizam. Acabamentos de luxo desajustados ao segmento não se recuperam.",
+      "nota": null,
+      "proximo_passo": null,
+      "cuidado": null,
+      "guiao_relacionado": null
+    },
+    {
+      "id": "o14",
+      "momento": "Reunião",
+      "objecao": "Não tenho pressa nenhuma.",
+      "origem": "formacao",
+      "fontes": [
+        "P3.2",
+        "P4"
+      ],
+      "resposta": "Compreendo. Se o mercado na sua zona cresce cerca de [X]% por ano, para a casa valer o que pede faltam cerca de [N] meses. Quer vender hoje pelo valor justo ou esperar esse tempo?",
+      "passos": [
+        "Se a puser hoje à venda com o valor de daqui a três anos, quando ela lá chegar as pessoas vão dizer que já ninguém a quis.",
+        "Nesse caso, o meu conselho é não a pôr já à venda. Eu só lhe sou útil se quiser mesmo vender."
+      ],
+      "caminhos_por_causa": [],
+      "porque_funciona": "Quem decide pôr a casa à venda tem algum objetivo; perguntar pelo tempo torna-o claro.",
+      "nota": null,
+      "proximo_passo": "Calcule os meses com a ferramenta do separador Método, usando dados oficiais de evolução de preços.",
+      "cuidado": null,
+      "guiao_relacionado": null
+    },
+    {
+      "id": "o15",
+      "momento": "Reunião",
+      "objecao": "Não quero placa.",
+      "origem": "formacao",
+      "fontes": [
+        "P2.2"
+      ],
+      "resposta": "Compreendo. Há alguma coisa que o preocupe em concreto na placa?",
+      "passos": [
+        "(Vizinhos curiosos.) Ainda bem que me diz. Só trazemos quem tem capacidade de compra: qualificamos sempre antes.",
+        "Mas se um vizinho quiser comprar para si ou para um filho, não autoriza?",
+        "Quanto tempo seria o ideal para vender? Então vamos aproveitar todas as oportunidades e pôr a placa?"
+      ],
+      "caminhos_por_causa": [],
+      "porque_funciona": "Muitas vezes a objeção desfaz-se sozinha. Se for uma questão real de privacidade, aceite: o formador abdicava da placa e nem fotografava a fachada.",
+      "nota": "Comece pelas cartas aos vizinhos, sem dizer qual é a casa: quem quer trocar liga-lhe a si.",
+      "proximo_passo": null,
+      "cuidado": "Em casa habitada, o formador só põe a placa depois do prazo de livre resolução (cerca de 14 dias). Confirme o prazo legal.",
+      "guiao_relacionado": null
+    },
+    {
+      "id": "o16",
+      "momento": "Reunião",
+      "objecao": "Também quero pôr a minha placa e vender eu.",
+      "origem": "formacao",
+      "fontes": [
+        "P2.2"
+      ],
+      "resposta": "Compreendo. Gostava de lhe perguntar: qual é o benefício que sente na minha ajuda? Sinto que há vontade de continuar a ser o senhor a promover a casa.",
+      "passos": [
+        "A casa está à venda há mais de um ano: o que muda a partir de agora?",
+        "Se trouxer o senhor o comprador, já falámos do que acontece (se a agência o permitir). Mas não faz sentido eu investir em fotografias, vídeo e marketing para depois ser o seu número na placa."
+      ],
+      "caminhos_por_causa": [],
+      "porque_funciona": "Esclareça o papel de cada um com perguntas, sem confronto.",
+      "nota": null,
+      "proximo_passo": null,
+      "cuidado": null,
+      "guiao_relacionado": null
+    },
+    {
+      "id": "o17",
+      "momento": "Reunião",
+      "objecao": "Tenho uma amiga interessada, à espera do crédito.",
+      "origem": "formacao",
+      "fontes": [
+        "P2.2"
+      ],
+      "resposta": "Compreendo, e é justo que me diga. Proponho avançarmos com o nosso acordo e escrevemos uma exceção: se vender a essa pessoa, não paga qualquer comissão, porque já lhe mostrou a casa antes de mim. Se ela não avançar, já estamos a trabalhar.",
+      "passos": [],
+      "caminhos_por_causa": [],
+      "porque_funciona": "Remove o obstáculo sem perder tempo.",
+      "nota": null,
+      "proximo_passo": null,
+      "cuidado": null,
+      "guiao_relacionado": null
+    },
+    {
+      "id": "o18",
+      "momento": "Reunião",
+      "objecao": "Quero estar presente nas visitas.",
+      "origem": "adaptacao",
+      "fontes": [
+        "2.1",
+        "2.2",
+        "P2.1"
+      ],
+      "resposta": "Compreendo perfeitamente, a casa é sua. Deixe-me explicar como trabalho: preparo o imóvel antes de cada visita, conheço os pontos fortes e as respostas para as fragilidades que os compradores usam para baixar o preço. Depois de cada visita dou-lhe notícias, e de quinze em quinze dias envio-lhe um resumo. Se quiser estar numa primeira fase, combinamos assim e vemos como corre.",
+      "passos": [],
+      "caminhos_por_causa": [],
+      "porque_funciona": "Esta vontade nasce muitas vezes quando o consultor, na primeira visita, só apontou defeitos: o proprietário acha que tem de ser ele a vender. Previna-a falando da casa como falaria a um comprador.",
+      "nota": null,
+      "proximo_passo": "Mostre o plano de marketing e o calendário de relatórios.",
+      "cuidado": null,
+      "guiao_relacionado": null
+    },
+    {
+      "id": "o19",
+      "momento": "Reunião",
+      "objecao": "Vamos pensar e depois dizemos alguma coisa.",
+      "origem": "proposta_complementar",
+      "fontes": [
+        "2.2",
+        "4",
+        "P2.1"
+      ],
+      "resposta": "Faz todo o sentido conversarem. Para vos ajudar, há alguma questão que tenha ficado por esclarecer? (ouvir) Proponho então o seguinte: deixo-vos a análise da concorrência e o plano, e falamos amanhã. Dá mais jeito às {hora1} ou às {hora2}?",
+      "passos": [],
+      "caminhos_por_causa": [],
+      "porque_funciona": "O formador defende fazer tudo na mesma visita e levar sempre o contrato: entre visitas muitos desistem ou entregam a outra agência. Garanta, ao marcar, que estão presentes todos os que decidem.",
+      "nota": null,
+      "proximo_passo": "Não saia sem data marcada.",
+      "cuidado": null,
+      "guiao_relacionado": null
+    },
+    {
+      "id": "o20",
+      "momento": "Reunião",
+      "objecao": "Sente-se, vamos tomar um café primeiro.",
+      "origem": "formacao",
+      "fontes": [
+        "2.2",
+        "P2.1"
+      ],
+      "resposta": "Agradeço imenso a gentileza. Confesso que achava mais interessante começarmos por visitar o imóvel, porque sem o conhecer não sei o que lhe diga. Se mantiver a proposta, tomamos o café no final, e aí já tenho uma opinião para lhe dar. O que lhe parece?",
+      "passos": [],
+      "caminhos_por_causa": [],
+      "porque_funciona": "Antes de ver a casa, a conversa vai logo para comissões e exclusividade, fora de ordem. Comece a visita pela sala, onde se recebem as visitas.",
+      "nota": null,
+      "proximo_passo": "Percorra a casa vendo-a como a veria um comprador.",
+      "cuidado": null,
+      "guiao_relacionado": null
+    },
+    {
+      "id": "o21",
+      "momento": "Reunião",
+      "objecao": "(Proprietário mal-educado ou agressivo.)",
+      "origem": "formacao",
+      "fontes": [
+        "P1.1"
+      ],
+      "resposta": "(Sorria e mantenha o tom.) Compreendo o que diz. Neste caso, infelizmente, não lhe poderia oferecer os nossos serviços: o que procura não é o que defendemos. Se quiser, deixo-lhe contactos de colegas da zona.",
+      "passos": [],
+      "caminhos_por_causa": [],
+      "porque_funciona": "Saia de cabeça erguida. Ninguém tem o poder de alterar o seu estado; se precisar de desabafar, faça-o sozinho, nunca com o cliente.",
+      "nota": null,
+      "proximo_passo": null,
+      "cuidado": null,
+      "guiao_relacionado": null
+    },
+    {
+      "id": "o22",
+      "momento": "Reunião",
+      "objecao": "Traga o cliente e, se ele gostar, assinamos depois.",
+      "origem": "formacao",
+      "fontes": [
+        "1.1",
+        "P1.1",
+        "P3.1"
+      ],
+      "resposta": "Com todo o gosto. E quanto à documentação, tem tudo tratado? Se o cliente gostar amanhã, vai querer avançar para o contrato-promessa. Sugiro encontrarmo-nos hoje para analisarmos os documentos e eu conhecer a casa. Dá-lhe mais jeito às 18h00 ou às 19h30?",
+      "passos": [
+        "(Em casa, com tudo visto.) A casa está direitinha e a documentação em ordem. Para amanhã, preciso que assinemos o nosso acordo e a sua autorização para apresentar a casa a este cliente, ou a outros, se este escolher outra."
+      ],
+      "caminhos_por_causa": [],
+      "porque_funciona": "Ao telefone dizem “traga o cliente”; presencialmente, depois de ver a casa e os documentos, a conversa é outra. Nunca mostre um imóvel sem contrato escrito.",
+      "nota": null,
+      "proximo_passo": "Se a pessoa não puder hoje, ofereça outros dois horários. Se não houver forma, “não aproveitamos este cliente, virão outros”.",
+      "cuidado": null,
+      "guiao_relacionado": "docs"
+    },
+    {
+      "id": "o23",
+      "momento": "Telefone",
+      "objecao": "Isso de ter um cliente, dizem todos.",
+      "origem": "formacao",
+      "fontes": [
+        "1.1",
+        "P1.1"
+      ],
+      "resposta": "Tem toda a razão em desconfiar. Por isso lhe conto: ontem estive reunido com um casal com dois filhos que procura um {tipologia} até {preco}, perto da escola. A visita está marcada para amanhã às {hora1}. Quer aproveitar esta oportunidade?",
+      "passos": [],
+      "caminhos_por_causa": [],
+      "porque_funciona": "Contar a história concreta (sem identificar o comprador) dá credibilidade. Dizer apenas “tenho um cliente” não convence.",
+      "nota": null,
+      "proximo_passo": "Se aceitar, marque a ida a casa antes da visita.",
+      "cuidado": "Só quando é verdade. Nunca invente compradores, visitas ou mandatos.",
+      "guiao_relacionado": null
+    },
+    {
+      "id": "o24",
+      "momento": "Comprador",
+      "objecao": "(Comprador) Quando tiver alguma coisa, ligue-me.",
+      "origem": "formacao",
+      "fontes": [
+        "1.1",
+        "2.1"
+      ],
+      "resposta": "Prefiro não o deixar à espera. Vamos combinar já: amanhã reunimo-nos aqui e apresento-lhe as possibilidades disponíveis no mercado. Dá-lhe mais jeito às {hora1} ou às {hora2}?",
+      "passos": [],
+      "caminhos_por_causa": [],
+      "porque_funciona": "Quem procura casa está num momento de mudança e procura ativamente. Se não marcar, vai a outra agência no mesmo dia.",
+      "nota": null,
+      "proximo_passo": "Lance de imediato a angariação reativa.",
+      "cuidado": null,
+      "guiao_relacionado": "ainda"
+    }
+  ]
+}

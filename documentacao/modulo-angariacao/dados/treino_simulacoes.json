@@ -1,0 +1,596 @@
+{
+  "versao": 1,
+  "nota": "Cada nó tem a fala do proprietário e as escolhas do consultor: [texto, pontos 0-2, comentário, nó seguinte]. Os nós finais estão em 'finais'.",
+  "simulacoes": [
+    {
+      "id": "frio",
+      "titulo": "Primeira chamada a um particular",
+      "introducao": "Viu o anúncio de um T2 na Quinta Nova e liga ao proprietário, o Sr. António.",
+      "inicio": "a",
+      "nos": {
+        "a": {
+          "proprietario": "Estou, sim?",
+          "escolhas": [
+            {
+              "texto": "Boa tarde, falo com o Sr. António? O meu nome é {meuNome}, da {agencia}. Sou especialista nesta zona e liguei assim que vi o seu anúncio.",
+              "pontos": 2,
+              "comentario": "Boa abertura: apresenta-se e explica porque liga.",
+              "seguinte": "b"
+            },
+            {
+              "texto": "Boa tarde, sou de uma imobiliária e gostava muito de angariar a sua casa.",
+              "pontos": 0,
+              "comentario": "Assim, quem ganha é você. A pessoa não tem razão nenhuma para querer.",
+              "seguinte": "x"
+            },
+            {
+              "texto": "Boa tarde, vi o anúncio. Que comissão estaria disposto a pagar?",
+              "pontos": 0,
+              "comentario": "Começou pela comissão: o pior assunto para abrir.",
+              "seguinte": "x"
+            }
+          ]
+        },
+        "b": {
+          "proprietario": "Sim, sou eu. Diga.",
+          "escolhas": [
+            {
+              "texto": "Só uma questão: o seu apartamento fica na urbanização da Quinta Nova, não fica? Sei que têm imensa luz natural.",
+              "pontos": 2,
+              "comentario": "Lateralidade: o foco vai para a casa e ele começa a valorizá-la.",
+              "seguinte": "c"
+            },
+            {
+              "texto": "Trabalho com um serviço completo em exclusivo, com fotografias profissionais e vídeo.",
+              "pontos": 0,
+              "comentario": "Cedo demais. A palavra “exclusivo” põe-no logo na defensiva.",
+              "seguinte": "x"
+            },
+            {
+              "texto": "Qual é o preço mínimo que aceita?",
+              "pontos": 0,
+              "comentario": "Pergunta agressiva, que o leva a fechar-se.",
+              "seguinte": "x"
+            }
+          ]
+        },
+        "c": {
+          "proprietario": "Fica, sim! A sala tem sol a tarde toda e dá para o parque.",
+          "escolhas": [
+            {
+              "texto": "Era mesmo o que eu pensava. A razão do meu telefonema é ver como o poderia ajudar numa venda mais rápida e nas melhores condições. Propunha visitar o imóvel e dar-lhe a minha opinião sobre a melhor estratégia. Dá-lhe mais jeito hoje às 18h00 ou amanhã às 10h00?",
+              "pontos": 2,
+              "comentario": "Perfeito: o benefício é dele, duas opções e sem pausas.",
+              "seguinte": "d"
+            },
+            {
+              "texto": "Ótimo. Posso passar aí um dia destes?",
+              "pontos": 0,
+              "comentario": "Quem marca é você. “Um dia destes” fica sempre para depois.",
+              "seguinte": "w"
+            },
+            {
+              "texto": "Ótimo. Então… (pausa) acha que nos podíamos reunir?",
+              "pontos": 0,
+              "comentario": "A pausa e a pergunta de “sim ou não” abrem caminho à recusa.",
+              "seguinte": "x"
+            }
+          ]
+        },
+        "w": {
+          "proprietario": "Um dia destes… logo se vê. Ligue-me para a semana.",
+          "escolhas": [
+            {
+              "texto": "Então proponho já: amanhã às 10h00 ou ao fim da tarde, às 18h30? O que lhe parece?",
+              "pontos": 1,
+              "comentario": "Recuperou bem, com duas opções concretas.",
+              "seguinte": "d"
+            },
+            {
+              "texto": "Está bem, eu ligo para a semana.",
+              "pontos": 0,
+              "comentario": "Ficou sem nada marcado.",
+              "seguinte": "fail"
+            }
+          ]
+        },
+        "d": {
+          "proprietario": "Pode ser amanhã às 10h00.",
+          "escolhas": [
+            {
+              "texto": "Combinado. Confirma-me a morada? Se puder, tenha à mão a documentação do imóvel. Ao fim da tarde ligo-lhe só a confirmar.",
+              "pontos": 2,
+              "comentario": "Confirma a morada, pede a documentação e marca a confirmação no turno anterior.",
+              "seguinte": "ok"
+            },
+            {
+              "texto": "Ok, então até amanhã.",
+              "pontos": 1,
+              "comentario": "Ficou marcado, mas falta a morada, a documentação e a confirmação.",
+              "seguinte": "ok"
+            }
+          ]
+        },
+        "x": {
+          "proprietario": "Olhe, não estou interessado em imobiliárias.",
+          "escolhas": [
+            {
+              "texto": "Compreendo perfeitamente, com certeza tem a ver com os honorários. Desejo-lhe muito sucesso, a casa parece muito interessante. Fico ao dispor: o meu nome é {meuNome}. Permite-me que lhe ligue daqui a 30 dias para saber como está a correr?",
+              "pontos": 2,
+              "comentario": "Saída correta: deixa a porta aberta e o imóvel fica registado.",
+              "seguinte": "banho"
+            },
+            {
+              "texto": "Mas sozinho vai demorar muito mais a vender, sabe?",
+              "pontos": 0,
+              "comentario": "Discutir só confirma a ideia que ele tinha das imobiliárias.",
+              "seguinte": "fail"
+            },
+            {
+              "texto": "Posso fazer-lhe metade da comissão.",
+              "pontos": 0,
+              "comentario": "Desvaloriza o seu serviço logo à partida.",
+              "seguinte": "fail"
+            }
+          ]
+        }
+      },
+      "finais": {
+        "ok": {
+          "resultado": "bom",
+          "texto": "Reunião marcada. Agora prepare a análise da concorrência e confirme no turno anterior."
+        },
+        "banho": {
+          "resultado": "intermedio",
+          "texto": "Sem reunião, mas com a relação intacta. Registe o imóvel e ligue daqui a 30 dias, ou antes, se tiver um comprador."
+        },
+        "fail": {
+          "resultado": "mau",
+          "texto": "A conversa terminou sem reunião e sem porta aberta. Volte a tentar."
+        }
+      }
+    },
+    {
+      "id": "fecho",
+      "titulo": "Fecho da reunião de angariação",
+      "introducao": "Acabou de apresentar os serviços ao Sr. Miguel, sentados à mesa da sala.",
+      "inicio": "a",
+      "nos": {
+        "a": {
+          "proprietario": "Gostei muito da apresentação.",
+          "escolhas": [
+            {
+              "texto": "Fico contente. Diga-me: quando pensa na mediação imobiliária, pensa em tudo isto que lhe apresentei?",
+              "pontos": 2,
+              "comentario": "Primeira pergunta de fecho.",
+              "seguinte": "b"
+            },
+            {
+              "texto": "Então, assina o contrato de exclusividade?",
+              "pontos": 0,
+              "comentario": "Saltou etapas e usou as duas palavras que mais assustam.",
+              "seguinte": "x"
+            },
+            {
+              "texto": "Quer pensar e eu volto cá na próxima semana?",
+              "pontos": 0,
+              "comentario": "Entre visitas muitos desistem ou entregam a outro.",
+              "seguinte": "risk"
+            }
+          ]
+        },
+        "b": {
+          "proprietario": "Sinceramente, não. Achava que só punham a casa na internet.",
+          "escolhas": [
+            {
+              "texto": "E quanto ao serviço que lhe apresentei, acrescentaria algo mais para que fosse cinco estrelas para si?",
+              "pontos": 2,
+              "comentario": "Segunda pergunta: é ele a dizer que o serviço é excelente.",
+              "seguinte": "c"
+            },
+            {
+              "texto": "Pois, a maioria dos colegas não faz nada.",
+              "pontos": 0,
+              "comentario": "Nunca denigra os colegas: desvaloriza o setor e a si próprio.",
+              "seguinte": "c"
+            }
+          ]
+        },
+        "c": {
+          "proprietario": "Não, acho que está muito completo.",
+          "escolhas": [
+            {
+              "texto": "E quanto a mim, acha que estou à altura para o representar na venda da sua casa?",
+              "pontos": 2,
+              "comentario": "Terceira pergunta.",
+              "seguinte": "d"
+            },
+            {
+              "texto": "Então vamos assinar o contrato de exclusividade.",
+              "pontos": 0,
+              "comentario": "Faltam as duas últimas perguntas, e “contrato de exclusividade” cria resistência.",
+              "seguinte": "x"
+            }
+          ]
+        },
+        "d": {
+          "proprietario": "Acho que sim.",
+          "escolhas": [
+            {
+              "texto": "Fico muito feliz. Então gostaria de lhe perguntar se confia apenas a mim a venda do seu imóvel?",
+              "pontos": 2,
+              "comentario": "O pedido, sem a palavra “exclusivo”.",
+              "seguinte": "e"
+            }
+          ]
+        },
+        "e": {
+          "proprietario": "Sim, confio.",
+          "escolhas": [
+            {
+              "texto": "Só oferecemos este serviço quando gostamos do imóvel, a documentação está em ordem, o preço está ajustado ao segmento e o proprietário valoriza o serviço. É o seu caso. Vamos então fazer o nosso acordo? Pode ir buscar o seu cartão de cidadão? Vamos lendo e preenchendo em conjunto.",
+              "pontos": 2,
+              "comentario": "Fecho completo: os critérios reforçam o valor e o contrato é feito na hora.",
+              "seguinte": "ok"
+            },
+            {
+              "texto": "Ótimo, deixo-lhe o contrato para ler e passo cá depois.",
+              "pontos": 0,
+              "comentario": "Deixou o acordo para depois.",
+              "seguinte": "risk"
+            }
+          ]
+        },
+        "x": {
+          "proprietario": "Hum… exclusivo não dou a ninguém.",
+          "escolhas": [
+            {
+              "texto": "Compreendo. Há duas formas de trabalhar com a mediação: uma sem compromisso de parte a parte e este serviço diferente que lhe mostrei. É o senhor quem escolhe. Diga-me: quando pensava na mediação, pensava em tudo isto?",
+              "pontos": 1,
+              "comentario": "Recuperou com as “duas formas” e voltou às perguntas.",
+              "seguinte": "b"
+            },
+            {
+              "texto": "Então fica em aberto, não há problema.",
+              "pontos": 0,
+              "comentario": "Desistiu do serviço que acabou de apresentar.",
+              "seguinte": "open"
+            }
+          ]
+        }
+      },
+      "finais": {
+        "ok": {
+          "resultado": "bom",
+          "texto": "Acordo feito na primeira visita. Agora: vídeo curto, cartas na vizinhança e marcação das fotografias."
+        },
+        "risk": {
+          "resultado": "mau",
+          "texto": "Sem acordo assinado. O formador alerta que, até à visita seguinte, muitos proprietários desistem ou entregam a outra agência."
+        },
+        "open": {
+          "resultado": "intermedio",
+          "texto": "Ficou em aberto. Pode ser uma decisão válida, mas não chegou a usar as perguntas de fecho."
+        }
+      }
+    },
+    {
+      "id": "exclusivo",
+      "titulo": "“Não quero exclusividade” na reunião",
+      "introducao": "Apresentou o serviço ao Sr. Tomás e perguntou se confia apenas em si a venda da casa.",
+      "inicio": "a",
+      "nos": {
+        "a": {
+          "proprietario": "Isso é exclusividade, não é? Exclusividade não quero.",
+          "escolhas": [
+            {
+              "texto": "Compreendo o que refere. Gostaria de o compreender um pouco melhor: o que é que o preocupa em concreto no regime de exclusividade?",
+              "pontos": 2,
+              "comentario": "Antes de responder, descubra a causa.",
+              "seguinte": "b"
+            },
+            {
+              "texto": "Mas o exclusivo é muito melhor para si, vai ver que se arrepende se não o fizer.",
+              "pontos": 0,
+              "comentario": "Contra-argumentar põe-no na defensiva.",
+              "seguinte": "x"
+            },
+            {
+              "texto": "Não se preocupe, o nosso exclusivo é só de promoção: partilhamos com todas as agências.",
+              "pontos": 1,
+              "comentario": "Pode acertar, mas também pode responder a uma preocupação que ele não tem.",
+              "seguinte": "b"
+            }
+          ]
+        },
+        "b": {
+          "proprietario": "Quero pôr em várias agências, para vender mais depressa.",
+          "escolhas": [
+            {
+              "texto": "Compreendo; no seu lugar talvez pensasse o mesmo. Diga-me: em sua opinião, o que vai fazer cada uma dessas agências para vender?",
+              "pontos": 2,
+              "comentario": "Uma pergunta, em vez de uma resposta.",
+              "seguinte": "c"
+            },
+            {
+              "texto": "Pôr em várias agências queima a casa, é um erro.",
+              "pontos": 0,
+              "comentario": "Está a dizer-lhe que está errado.",
+              "seguinte": "x"
+            }
+          ]
+        },
+        "c": {
+          "proprietario": "Publicidade, acho eu.",
+          "escolhas": [
+            {
+              "texto": "Então vai encontrar a sua casa cinco ou seis vezes no mesmo portal, com fotos e preços diferentes. Se fosse comprador, o que pensaria?",
+              "pontos": 2,
+              "comentario": "Agora é ele que se põe no lugar do comprador.",
+              "seguinte": "d"
+            },
+            {
+              "texto": "Pois, e fazem todos muito mal.",
+              "pontos": 0,
+              "comentario": "Nunca denigra colegas.",
+              "seguinte": "x"
+            }
+          ]
+        },
+        "d": {
+          "proprietario": "Que o dono está com pressa… se calhar até fazia uma proposta mais baixa.",
+          "escolhas": [
+            {
+              "texto": "É isso que quer que aconteça consigo? E prefere ver a casa muitas vezes com fotos simples, lá para a quinta página, ou uma vez só, em destaque, com fotos profissionais e home staging?",
+              "pontos": 2,
+              "comentario": "Ele conclui sozinho o que é melhor para ele.",
+              "seguinte": "e"
+            }
+          ]
+        },
+        "e": {
+          "proprietario": "Uma vez em destaque, claro.",
+          "escolhas": [
+            {
+              "texto": "E lembre-se: qualquer agência pode vender a sua casa, nós partilhamos e o senhor não paga mais por isso. Vamos fazer o nosso acordo?",
+              "pontos": 2,
+              "comentario": "Fecho leve, sem “contrato” nem “exclusivo”.",
+              "seguinte": "ok"
+            },
+            {
+              "texto": "Então assine aqui o contrato de exclusividade.",
+              "pontos": 0,
+              "comentario": "As duas palavras que criam resistência.",
+              "seguinte": "risk"
+            }
+          ]
+        },
+        "x": {
+          "proprietario": "Lá está, vocês querem é impor.",
+          "escolhas": [
+            {
+              "texto": "Peço desculpa, compreendo. Gostava de o compreender melhor: o que é que o preocupa em concreto?",
+              "pontos": 1,
+              "comentario": "Recuperou a tempo, com uma pergunta.",
+              "seguinte": "b"
+            },
+            {
+              "texto": "Então fica em aberto, não faz mal.",
+              "pontos": 0,
+              "comentario": "Desistiu sem perceber a causa.",
+              "seguinte": "open"
+            }
+          ]
+        }
+      },
+      "finais": {
+        "ok": {
+          "resultado": "bom",
+          "texto": "Acordo feito, e foi ele a concluir que era o melhor."
+        },
+        "risk": {
+          "resultado": "mau",
+          "texto": "Ficou perto, mas a forma do pedido criou resistência."
+        },
+        "open": {
+          "resultado": "intermedio",
+          "texto": "Ficou em aberto sem saber o que o preocupava."
+        }
+      }
+    },
+    {
+      "id": "comissao",
+      "titulo": "“Não pago 5%”",
+      "introducao": "Apresentou os honorários de 5% ao Sr. Henrique, que quer vender por 300 mil euros.",
+      "inicio": "a",
+      "nos": {
+        "a": {
+          "proprietario": "Gostei de tudo, mas 5% não pago. Isso são 15 mil euros!",
+          "escolhas": [
+            {
+              "texto": "(Escuta em silêncio até ele parar.) Compreendo, Sr. Henrique. Gostava de o compreender melhor: em função do serviço que lhe apresentei, qual seria o valor justo?",
+              "pontos": 2,
+              "comentario": "Escutou e devolveu a pergunta com leveza.",
+              "seguinte": "b"
+            },
+            {
+              "texto": "É o nosso preço, não fazemos descontos.",
+              "pontos": 0,
+              "comentario": "Fecha a conversa sem a ter percebido.",
+              "seguinte": "x"
+            },
+            {
+              "texto": "Posso fazer-lhe 4%.",
+              "pontos": 0,
+              "comentario": "Cedeu à primeira e desvalorizou o serviço.",
+              "seguinte": "fail"
+            }
+          ]
+        },
+        "b": {
+          "proprietario": "3% é o justo.",
+          "escolhas": [
+            {
+              "texto": "Como chegou a esse valor? Porquê 3% e não 2% ou 4%?",
+              "pontos": 2,
+              "comentario": "Ele vai dizer que é o que outros cobram.",
+              "seguinte": "c"
+            },
+            {
+              "texto": "3% é muito pouco para tudo o que eu faço.",
+              "pontos": 0,
+              "comentario": "Argumento seu, não conclusão dele.",
+              "seguinte": "x"
+            }
+          ]
+        },
+        "c": {
+          "proprietario": "É o que as outras agências cobram.",
+          "escolhas": [
+            {
+              "texto": "Conheço colegas que cobram isso. E quando o visitaram, trouxeram-lhe uma análise da concorrência? Uma SWOT? Um relatório de avaliação? Home staging?",
+              "pontos": 2,
+              "comentario": "Ao detalhar, é ele que vê a diferença.",
+              "seguinte": "d"
+            },
+            {
+              "texto": "Pois, mas essas não fazem nada.",
+              "pontos": 0,
+              "comentario": "Nunca fale mal de colegas.",
+              "seguinte": "x"
+            }
+          ]
+        },
+        "d": {
+          "proprietario": "Isso não… não trouxeram nada disso.",
+          "escolhas": [
+            {
+              "texto": "Se fosse meu colega e prestasse este serviço, sentia-se confortável em cobrar 3%, como quem não faz nada disto?",
+              "pontos": 2,
+              "comentario": "Ele põe-se no seu lugar.",
+              "seguinte": "e"
+            }
+          ]
+        },
+        "e": {
+          "proprietario": "Pois… se calhar não.",
+          "escolhas": [
+            {
+              "texto": "Seja sincero: se hoje lhe oferecessem 294 mil, vendia? (…) Em segundos baixou 6 mil euros a um comprador que nem existe. Prefiro que mos pague a mim, para o defender. Se defendo assim os meus honorários, imagine como defendo o preço da sua casa. Vamos fazer o nosso acordo?",
+              "pontos": 2,
+              "comentario": "Ele sente que precisa de alguém que o defenda.",
+              "seguinte": "ok"
+            }
+          ]
+        },
+        "x": {
+          "proprietario": "Então não chegamos a acordo.",
+          "escolhas": [
+            {
+              "texto": "Compreendo. Gostava de o perceber melhor: em sua opinião, qual seria o valor justo para este serviço?",
+              "pontos": 1,
+              "comentario": "Voltou às perguntas.",
+              "seguinte": "b"
+            },
+            {
+              "texto": "Está bem, faço por 3%.",
+              "pontos": 0,
+              "comentario": "Cedeu sem que ele tivesse visto a diferença.",
+              "seguinte": "fail"
+            }
+          ]
+        }
+      },
+      "finais": {
+        "ok": {
+          "resultado": "bom",
+          "texto": "Acordo aos 5%, e foi o proprietário a concluir que valia a pena."
+        },
+        "fail": {
+          "resultado": "mau",
+          "texto": "Baixou os honorários sem necessidade. Repita, usando só perguntas."
+        }
+      }
+    },
+    {
+      "id": "preco",
+      "titulo": "“A minha casa vale mais”",
+      "introducao": "A análise da concorrência indica cerca de 266 mil euros. O Sr. Rodrigo quer pôr a casa a 320 mil.",
+      "inicio": "a",
+      "nos": {
+        "a": {
+          "proprietario": "Eu quero 320 mil pela casa, nem menos.",
+          "escolhas": [
+            {
+              "texto": "Compreendo. Como chegou a esse valor?",
+              "pontos": 2,
+              "comentario": "Primeiro perceber, depois mostrar.",
+              "seguinte": "b"
+            },
+            {
+              "texto": "Isso é muito acima do mercado, ninguém compra.",
+              "pontos": 0,
+              "comentario": "Atacou o preço dele; vai defender-se.",
+              "seguinte": "x"
+            }
+          ]
+        },
+        "b": {
+          "proprietario": "Um vizinho vendeu bem, e a minha casa é melhor.",
+          "escolhas": [
+            {
+              "texto": "Vamos ver juntos o que um comprador encontra hoje por esse valor. (Mostra o segmento acima.) Se fosse comprador, comprava este T3 com garagem por 325 mil ou pagava 320 mil pelo seu T2?",
+              "pontos": 2,
+              "comentario": "As evidências falam por si.",
+              "seguinte": "c"
+            }
+          ]
+        },
+        "c": {
+          "proprietario": "Bem… se calhar o T3.",
+          "escolhas": [
+            {
+              "texto": "Os honorários dependem do preço: quanto mais alto, mais ganho. Mas não me sinto bem em deixá-lo pôr um valor que o vai prejudicar. Podemos pôr um pouco acima, dentro do segmento, por exemplo 285 mil, para ter margem. O que lhe parece?",
+              "pontos": 2,
+              "comentario": "Mostra que está do lado dele.",
+              "seguinte": "ok"
+            },
+            {
+              "texto": "Pois, então baixe para 266 mil.",
+              "pontos": 1,
+              "comentario": "Certo no valor, mas sem lhe dar margem nem escolha.",
+              "seguinte": "ok"
+            }
+          ]
+        },
+        "x": {
+          "proprietario": "Então vou a outra agência que me ponha a 320.",
+          "escolhas": [
+            {
+              "texto": "Compreendo. Antes, permite-me que lhe mostre o que está hoje à venda por esse valor? Depois decide.",
+              "pontos": 1,
+              "comentario": "Voltou às evidências.",
+              "seguinte": "b"
+            },
+            {
+              "texto": "Está bem, pomos a 320.",
+              "pontos": 0,
+              "comentario": "Vai ficar meses parada e queimada.",
+              "seguinte": "fail"
+            }
+          ]
+        }
+      },
+      "finais": {
+        "ok": {
+          "resultado": "bom",
+          "texto": "Preço dentro do segmento, decidido pelo proprietário com base nas evidências."
+        },
+        "fail": {
+          "resultado": "mau",
+          "texto": "Aceitou um preço fora do segmento: a casa vai ficar meses parada."
+        }
+      }
+    }
+  ]
+}

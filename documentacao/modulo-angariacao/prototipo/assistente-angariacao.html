@@ -1,0 +1,1437 @@
+<title>Assistente de Angariação</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap">
+<style>
+/* Layout: barra azul-marinho fixa no topo com separadores; área de trabalho numa coluna legível; navegação inferior no telemóvel */
+:root{
+  --bg:#F5F6F9; --surface:#FFFFFF; --surface-2:#EEF1F6; --ink:#14213D; --muted:#5A6377; --line:#DCE1EA;
+  --navy:#12233F; --navy-ink:#F4F6FA; --gold:#B8892B; --gold-ink:#7E5B12; --gold-soft:#F4EAD3;
+  --blue:#2B5797; --blue-soft:#E3ECF8; --grey-soft:#ECEEF2; --warn:#A8461F; --warn-soft:#FBE9E1; --ok:#2E7A52; --ok-soft:#E2F2E9;
+  --mark:#FFF1C9; --mark-ink:#5E4100;
+  --f-display:"Outfit",ui-sans-serif,system-ui,sans-serif; --f-body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0C1424; --surface:#131E33; --surface-2:#1A2740; --ink:#E7EBF3; --muted:#9BA6BC; --line:#25314B;
+  --navy:#09111F; --navy-ink:#EEF1F7; --gold:#D6AB52; --gold-ink:#E7C47C; --gold-soft:#33291A;
+  --blue:#8DB2EA; --blue-soft:#1C2B47; --grey-soft:#1E2840; --warn:#F09A76; --warn-soft:#3A2119; --ok:#7FCFA2; --ok-soft:#173527;
+  --mark:#4A3A14; --mark-ink:#FBE3A6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0C1424; --surface:#131E33; --surface-2:#1A2740; --ink:#E7EBF3; --muted:#9BA6BC; --line:#25314B;
+  --navy:#09111F; --navy-ink:#EEF1F7; --gold:#D6AB52; --gold-ink:#E7C47C; --gold-soft:#33291A;
+  --blue:#8DB2EA; --blue-soft:#1C2B47; --grey-soft:#1E2840; --warn:#F09A76; --warn-soft:#3A2119; --ok:#7FCFA2; --ok-soft:#173527;
+  --mark:#4A3A14; --mark-ink:#FBE3A6; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--navy)}
+h1,h2,h3,h4{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.2}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* Cabeçalho */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--navy);color:var(--navy-ink);border-bottom:2px solid var(--gold)}
+.top .wrap{display:flex;align-items:center;gap:12px;padding-block:10px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.brand-mark{width:30px;height:30px;flex:none}
+.brand h1{font-size:17px;font-weight:600;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand small{display:block;font-family:var(--f-body);font-size:11px;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;font-weight:600}
+.icon-btn{background:transparent;border:1px solid rgba(255,255,255,.22);color:var(--navy-ink);border-radius:8px;padding:6px 10px;font-size:13px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.icon-btn:hover{border-color:var(--gold)}
+.tabs{display:flex;gap:2px}
+.tab{background:transparent;border:0;color:rgba(244,246,250,.72);padding:8px 12px;border-radius:8px;font-weight:500;font-size:14px;white-space:nowrap}
+.tab[aria-current="page"]{color:var(--navy-ink);background:rgba(255,255,255,.08);box-shadow:inset 0 -2px 0 var(--gold)}
+.tab:hover{color:var(--navy-ink)}
+.bottom-nav{display:none}
+@media (max-width:760px){
+  .top .tabs{display:none}
+  .bottom-nav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--navy);border-top:2px solid var(--gold);
+    padding:4px max(6px,env(safe-area-inset-right,0px)) calc(4px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px))}
+  .bottom-nav .tab{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;padding:6px 2px}
+  .bottom-nav .tab svg{width:20px;height:20px}
+  main{padding-bottom:84px}
+}
+.bottom-nav .tab svg,.tabs .tab svg{display:block}
+.tabs .tab svg{display:none}
+
+/* Estrutura geral */
+main .wrap{padding-block:20px 40px;display:flex;flex-direction:column;gap:18px}
+.view-head{display:flex;flex-direction:column;gap:6px}
+.view-head h2{font-size:26px;font-weight:600}
+.view-head p{margin:0;color:var(--muted);max-width:65ch}
+.eyebrow{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--gold-ink)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:500}
+.chip[aria-pressed="true"]{background:var(--navy);color:var(--navy-ink);border-color:var(--navy)}
+:root[data-theme="dark"] .chip[aria-pressed="true"]{background:var(--gold);color:#1B1305;border-color:var(--gold)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .chip[aria-pressed="true"]{background:var(--gold);color:#1B1305;border-color:var(--gold)}}
+.search{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 12px;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--gold)}
+.btn.primary{background:var(--navy);color:var(--navy-ink);border-color:var(--navy)}
+:root[data-theme="dark"] .btn.primary{background:var(--gold);color:#1B1305;border-color:var(--gold)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.primary{background:var(--gold);color:#1B1305;border-color:var(--gold)}}
+.btn.ghost{background:transparent}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+
+/* Badges de origem */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;letter-spacing:.03em;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.b-form{background:var(--gold-soft);color:var(--gold-ink)}
+.b-adapt{background:var(--blue-soft);color:var(--blue)}
+.b-comp{background:var(--grey-soft);color:var(--muted)}
+.b-src{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.b-warn{background:var(--warn-soft);color:var(--warn)}
+
+/* Dados da situação */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+details.panel>summary{list-style:none;cursor:pointer;padding:12px 14px;display:flex;align-items:center;gap:10px;font-weight:600}
+details.panel>summary::-webkit-details-marker{display:none}
+details.panel>summary .chev{margin-left:auto;transition:transform .15s}
+details.panel[open]>summary .chev{transform:rotate(180deg)}
+.fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;padding:0 14px 14px}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field label{font-size:12px;color:var(--muted);font-weight:500}
+.field input{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);width:100%}
+
+/* Cartões de guião */
+.list{display:flex;flex-direction:column;gap:10px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.card>summary{list-style:none;cursor:pointer;padding:14px 16px;display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:start}
+.card>summary::-webkit-details-marker{display:none}
+.card>summary h3{font-size:16px;font-weight:600}
+.card>summary .when{grid-column:1/2;color:var(--muted);font-size:13px}
+.card>summary .meta{grid-row:1/3;grid-column:2;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.card[open]>summary{border-bottom:1px solid var(--line)}
+.card-body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:14px}
+.steps{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.say{border-left:3px solid var(--gold);background:var(--surface-2);padding:10px 12px;border-radius:0 8px 8px 0;white-space:pre-line}
+.say .who{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-ink);font-weight:600;margin-bottom:2px}
+.note{font-size:13px;color:var(--muted);padding-left:15px;position:relative}
+.note::before{content:"";position:absolute;left:3px;top:.6em;width:6px;height:6px;border-radius:50%;background:var(--muted)}
+mark.ph{background:var(--mark);color:var(--mark-ink);border-radius:3px;padding:0 3px}
+mark.ph.empty{font-style:italic}
+.keys{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:14px}
+.callout{border-radius:8px;padding:10px 12px;font-size:13.5px;display:flex;gap:8px;align-items:flex-start}
+.callout.warn{background:var(--warn-soft);color:var(--warn)}
+.callout.info{background:var(--blue-soft);color:var(--blue)}
+.callout.ok{background:var(--ok-soft);color:var(--ok)}
+.callout b{font-weight:600}
+.callout svg{flex:none;margin-top:2px}
+.sub{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+
+/* Objeções */
+.obj-q{font-family:var(--f-display);font-size:17px;font-weight:600}
+.obj-q::before{content:"\201C"}.obj-q::after{content:"\201D"}
+
+/* Checklist */
+.progress{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.progress>i{display:block;height:100%;background:var(--gold);width:0;transition:width .2s}
+.phase{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.phase>summary{list-style:none;cursor:pointer;padding:14px 16px;display:flex;gap:12px;align-items:center}
+.phase>summary::-webkit-details-marker{display:none}
+.phase-num{width:28px;height:28px;border-radius:50%;background:var(--navy);color:var(--navy-ink);display:grid;place-items:center;font-family:var(--f-display);font-weight:600;font-size:14px;flex:none}
+.phase.done .phase-num{background:var(--ok);color:#fff}
+.phase-title{flex:1;min-width:0}
+.phase-title h3{font-size:16px;font-weight:600}
+.phase-title span{font-size:13px;color:var(--muted)}
+.phase-count{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.checks{list-style:none;margin:0;padding:0 16px 14px;display:flex;flex-direction:column}
+.check{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--line);align-items:flex-start}
+.check input{width:20px;height:20px;margin-top:2px;flex:none;accent-color:var(--gold)}
+.check label{flex:1;min-width:0;cursor:pointer}
+.check .t{font-weight:500}
+.check .d{display:block;font-size:13px;color:var(--muted);margin-top:2px;white-space:pre-line}
+.check input:checked+label .t{text-decoration:line-through;text-decoration-color:var(--muted);color:var(--muted)}
+.check .badge{margin-left:4px;vertical-align:1px}
+
+/* Treino */
+.train-modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.mode{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:4px}
+.mode[aria-pressed="true"]{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
+.mode h3{font-size:16px;font-weight:600}
+.mode span{font-size:13px;color:var(--muted)}
+.stage{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:14px}
+.stage-top{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.scenario{font-size:16px;font-weight:500}
+.options{display:flex;flex-direction:column;gap:8px}
+.opt{text-align:left;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;line-height:1.45}
+.opt:hover:not([disabled]){border-color:var(--gold)}
+.opt[disabled]{cursor:default}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--warn);background:var(--warn-soft)}
+.bubble{background:var(--surface-2);border-radius:12px 12px 12px 2px;padding:10px 14px;max-width:85%;align-self:flex-start}
+.bubble .who{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.bubble.me{align-self:flex-end;border-radius:12px 12px 2px 12px;background:var(--gold-soft);color:var(--ink)}
+.bubble.me .who{color:var(--gold-ink)}
+.chat{display:flex;flex-direction:column;gap:8px}
+.fb{font-size:13.5px;border-radius:8px;padding:8px 12px}
+.fb.good{background:var(--ok-soft);color:var(--ok)}
+.fb.bad{background:var(--warn-soft);color:var(--warn)}
+.fb.mid{background:var(--blue-soft);color:var(--blue)}
+textarea{width:100%;min-height:110px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);resize:vertical}
+.score{font-family:var(--f-display);font-weight:600;font-size:15px;font-variant-numeric:tabular-nums}
+
+/* Método */
+.grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.principle{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:6px}
+.principle h4{font-size:15px;font-weight:600}
+.principle p{margin:0;font-size:14px}
+.calc{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.funnel{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.funnel-row{display:grid;grid-template-columns:130px 1fr 70px;gap:10px;align-items:center;font-size:14px}
+.funnel-bar{height:22px;background:var(--surface-2);border-radius:4px;overflow:hidden}
+.funnel-bar i{display:block;height:100%;background:var(--navy)}
+:root[data-theme="dark"] .funnel-bar i{background:var(--gold)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .funnel-bar i{background:var(--gold)}}
+.funnel-row b{font-variant-numeric:tabular-nums;text-align:right}
+.dont{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.dont li{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:0 8px 8px 0;padding:10px 12px;font-size:14px}
+.dont li b{display:block;font-weight:600}
+.section{display:flex;flex-direction:column;gap:10px}
+.section>h3{font-size:19px;font-weight:600}
+
+/* Painel dos meus dados */
+.sheet-bg{position:fixed;inset:0;background:rgba(6,12,24,.55);z-index:20;display:flex;align-items:flex-start;justify-content:center;padding:calc(40px + env(safe-area-inset-top,0px)) 16px 16px}
+.sheet{background:var(--surface);border-radius:14px;width:min(560px,100%);max-height:calc(100vh - 80px);overflow:auto;padding:18px;display:flex;flex-direction:column;gap:14px;border:1px solid var(--line)}
+.sheet .fields{padding:0}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));background:var(--navy);color:var(--navy-ink);padding:8px 14px;border-radius:8px;font-size:14px;z-index:30;border:1px solid var(--gold)}
+@media (min-width:761px){.toast{bottom:24px}}
+.confirm-inline{display:inline-flex;gap:6px;align-items:center;font-size:13px}
+.empty{padding:20px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:var(--r)}
+.ed-sheet{width:min(720px,100%)}
+.ed-form{display:flex;flex-direction:column;gap:14px}
+.ed-form textarea{min-height:0}
+.ed-form select,.ed-form input{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);width:100%}
+.ed-list{display:flex;flex-direction:column;gap:8px}
+.ed-row{display:flex;gap:6px;align-items:flex-start}
+.ed-col{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.ed-ctl{display:flex;flex-direction:column;gap:4px;flex:none}
+.ed-mini{padding:4px 9px}
+.ed-cause{border:1px solid var(--line);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.ed-cause .row input{min-width:0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (max-width:520px){
+  .card>summary{grid-template-columns:1fr}
+  .card>summary .meta{grid-row:auto;grid-column:1;flex-direction:row;align-items:center;flex-wrap:wrap}
+  .funnel-row{grid-template-columns:95px 1fr 56px}
+  .view-head h2{font-size:22px}
+  #openMe span{display:none}
+}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="7" fill="none" stroke="var(--gold)" stroke-width="2"/><path d="M8 17 16 9l8 8v7a1 1 0 0 1-1 1h-4v-5h-6v5H9a1 1 0 0 1-1-1z" fill="var(--gold)"/></svg>
+      <div style="min-width:0"><small>Apoio à angariação</small><h1>Assistente de Angariação</h1></div>
+    </div>
+    <nav class="tabs" aria-label="Secções" id="tabsTop"></nav>
+    <button class="icon-btn" id="openMe" type="button" aria-haspopup="dialog">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+      <span>Os meus dados</span>
+    </button>
+  </div>
+</header>
+
+<main><div class="wrap" id="app"></div></main>
+<nav class="bottom-nav" aria-label="Secções" id="tabsBottom"></nav>
+<div id="overlay"></div>
+
+<script>
+(function(){
+"use strict";
+/* ---------- Armazenamento local (só neste navegador) ---------- */
+const KEY="assistente-angariacao.v1";
+let store={};
+try{store=JSON.parse(localStorage.getItem(KEY)||"{}")||{}}catch(e){store={}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}}
+store.me=store.me||{meuNome:"",agencia:"",ami:"",telefone:""};
+store.sit=store.sit||{proprietario:"António Silva",tipologia:"T2",zona:"Antas",urbanizacao:"Quinta Nova",preco:"300 mil euros",hora1:"16h00",hora2:"19h30",dia:"3 de março"};
+store.checks=store.checks||{};
+store.quizBest=store.quizBest||0;
+
+/* ---------- Fontes ---------- */
+const SRC={"1.1":"Gravação 1.1","1.2":"Gravação 1.2","2.1":"Gravação 2.1","2.2":"Gravação 2.2","3.1":"Gravação 3.1","3.2":"Gravação 3.2","4":"Gravação 4","P1.1":"PNL 1.1","P1.2":"PNL 1.2","P2.1":"PNL 2.1","P2.2":"PNL 2.2","P3.1":"PNL 3.1","P3.2":"PNL 3.2","P4":"PNL 4"};
+const TYPE={form:["b-form","Formação"],adapt:["b-adapt","Adaptação"],comp:["b-comp","Proposta complementar"],risk:["b-warn","Não recomendado"],own:["b-adapt","Texto próprio"]};
+const PH={meuNome:"o seu nome",agencia:"agência",ami:"n.º licença AMI",telefone:"o seu telefone",zona:"zona",proprietario:"nome do proprietário",tipologia:"tipologia",urbanizacao:"urbanização / edifício",preco:"preço",hora1:"hora 1",hora2:"hora 2",dia:"data combinada"};
+
+/* ---------- Guiões ---------- */
+let SCRIPTS=[
+{id:"frio",cat:"Telefone",t:"Primeiro contacto com proprietário particular",when:"Viu um anúncio de um particular e vai ligar pela primeira vez.",type:"form",src:["2.1","P1.1","P1.2"],
+ steps:[
+  ["s","Muito boa tarde, falo com o Senhor {proprietario}? Muito boa tarde, Senhor {proprietario}. O meu nome é {meuNome}, sou consultor imobiliário na {agencia}. Sou especialista aqui na zona de {zona}, por isso, assim que vi o seu anúncio, liguei-lhe de imediato."],
+  ["n","Faça uma pergunta sobre a casa. O formador chama-lhe lateralidade: o foco passa de si e da comissão para o imóvel."],
+  ["s","Gostaria de lhe colocar só uma questão: o seu imóvel fica na urbanização {urbanizacao}, não fica? Sei que esses apartamentos são conhecidos pela luz natural."],
+  ["n","Deixe o proprietário falar e valorizar a casa. Ouça."],
+  ["s","Era mesmo o que eu pensava. A razão do meu telefonema é ver de que forma o poderia ajudar numa venda mais rápida e nas melhores condições. Por isso, se lhe parecer bem, propunha reunirmo-nos: terei todo o gosto em visitar o imóvel e, depois de o conhecer, dizer-lhe qual seria para mim a melhor estratégia. Dava-lhe mais jeito hoje às {hora1} ou às {hora2}?"],
+  ["n","Na parte final, não faça pausas. Só espera pela resposta depois de dar as duas opções de horário."],
+  ["n","Antes de desligar, peça para enviar o seu cartão por WhatsApp (guião “Cartão virtual por WhatsApp”)."]],
+ keys:["O objetivo da chamada é reunir e conhecer o imóvel, não “angariar”.","Nunca diga “gostava de angariar a sua casa”: assim, quem ganha é você.","Quem marca é sempre você, com duas opções de horário.","Sorria ao telefone e adapte-se à pessoa. Isto é um modelo, não uma cassete.","Trate por Senhor ou Senhora Dona até a pessoa pedir outra coisa.","A pergunta sobre a casa deve ter resposta “sim”; o ideal é a pessoa elogiar a casa.","Não diga “sem compromisso” à partida: só se a pessoa levantar a objeção."],
+ ifno:"Compreendo perfeitamente, Sr. {proprietario}. Desejo-lhe as maiores felicidades com a venda. Depois registe o imóvel (tipologia, zona, preço), porque pode precisar dele na angariação reativa."},
+{id:"naoquer",cat:"Telefone",t:"“Não quero trabalhar com imobiliárias”",when:"O proprietário recusa logo no primeiro contacto.",type:"form",src:["1.1"],
+ steps:[
+  ["s","Compreendo perfeitamente o que diz. Com certeza tem a ver com os honorários, compreendo."],
+  ["s","Desejo-lhe muito sucesso. A casa parece-me muito interessante, por isso espero que corra tudo bem."],
+  ["s","Fico ao seu dispor para qualquer dúvida que surja. O meu nome é {meuNome}, da {agencia}. Basta ligar-me, terei todo o gosto em ajudar."],
+  ["n","Só se a sua agência tiver intermediação de crédito registada:"],
+  ["s","Aproveito para lhe dizer que muitos proprietários nesta situação julgam que a casa já está vendida e ficam à espera da resposta do crédito do comprador. Para que isso não seja um dissabor: somos intermediários de crédito autorizados pelo Banco de Portugal e o apoio é gratuito para si."],
+  ["s","Permite-me que lhe ligue daqui a 30 dias, para saber como está a correr?"]],
+ keys:["Psicologia inversa: a pessoa espera uma má reação e recebe simpatia.","Diga o seu nome e o da agência três vezes ao longo da conversa (efeito de repetição).","Registe sempre o imóvel. É a base do 2.º nível da angariação reativa.","Agende já a chamada dos 30 dias."],
+ warn:"Mencione a intermediação de crédito só se a sua empresa a tiver efetivamente registada."},
+{id:"segunda",cat:"Telefone",t:"Segundo telefonema: tenho um comprador",when:"Tem um comprador real, com visita marcada, para um imóvel de alguém que antes recusou.",type:"form",src:["1.1","2.1"],
+ steps:[
+  ["s","Muito boa tarde, Sr. {proprietario}. Fala {meuNome}, da {agencia}. Peço-lhe desde já desculpa por ligar antes do combinado, porque tínhamos ficado de falar a {dia}. Mas vai compreender já o porquê do meu telefonema."],
+  ["s","Ontem estive reunido com um casal com dois filhos pequenos que procura um {tipologia} perto da escola, até {preco}. Lembrei-me logo do seu imóvel, que me pareceu muito interessante no anúncio."],
+  ["s","Como sabe, também tratamos do crédito, por isso falta apenas o imóvel. A razão do meu telefonema é saber se quer aproveitar esta oportunidade e fazermos a visita com este casal amanhã às {hora1}. O que lhe parece?"],
+  ["n","Se aceitar, siga para o guião “Ir a casa antes da visita”."]],
+ keys:["“Vai compreender já o porquê do meu telefonema” aumenta a atenção.","Conte a história do comprador (necessidade, motivo, orçamento) sem o identificar.","“Aproveitar esta oportunidade”: a escolha fica com o proprietário.","Pedir desculpa por não cumprir o prazo combinado mostra profissionalismo."],
+ warn:"Use apenas com um comprador e uma visita que existam de facto. O formador insiste nisto: sem cliente agendado soa a mentira. Os 85% de sucesso que refere são a experiência dele, não uma garantia."},
+{id:"docs",cat:"Telefone",t:"Ir a casa antes da visita do comprador",when:"O proprietário aceitou a visita e diz “traga o cliente e depois logo se vê”.",type:"form",src:["1.1"],
+ steps:[
+  ["s","Combinado, amanhã às {hora1} lá estaremos. Gostaria de lhe perguntar: quanto à documentação do imóvel, tem tudo tratado? Certidão, caderneta, certificado energético? Imagino que, se o cliente gostar mesmo da casa, amanhã aceite assinar o contrato-promessa."],
+  ["s","Não se preocupe, estamos cá para facilitar. Sugiro encontrarmo-nos ainda hoje: analisamos o que falta e amanhã de manhã tratamos de o recolher, para não ser impedimento da visita. Dá-lhe mais jeito às 18h00 ou às 19h30?"],
+  ["n","Se já tiver tudo:"],
+  ["s","Ótimo. Mesmo assim, temos de nos reunir hoje para analisar os documentos e eu conhecer a casa. Assim preparo a apresentação de amanhã a partir do que vir hoje. 18h00 ou 19h30?"]],
+ keys:["Nunca mostre um imóvel sem o conhecer, sem analisar a documentação e sem contrato escrito.","Não pergunte se a pessoa quer fazer algo que é obrigatório. Pergunte quando."],
+ warn:"O contrato de mediação tem de ser escrito. Quando estiver em casa do proprietário, explique-o com transparência antes de o assinarem."},
+{id:"confirma",cat:"Telefone",t:"Confirmar a visita no turno anterior",when:"Tem uma reunião marcada em casa do proprietário.",type:"form",src:["2.1"],
+ steps:[
+  ["s","Boa tarde, falo com o Sr. {proprietario}? Fala {meuNome}. Combinámos amanhã às {hora1} em sua casa. A razão do meu telefonema é apenas confirmar se está tudo certo."],
+  ["n","Se houver um contratempo:"],
+  ["s","Com certeza, não há problema nenhum. Em vez das {hora1}, fica às {hora2}? Eu ajusto a minha agenda. Fique tranquilo, não tem de se apressar."],
+  ["n","Depois envie uma mensagem com o seu nome, contacto e hora confirmada."]],
+ keys:["Visita sábado de manhã: ligue sexta à tarde. Visita à tarde: ligue nessa manhã.","Muitos proprietários não guardaram o seu número no primeiro contacto.","Ajustar com simpatia evita ficar à porta à espera."]},
+{id:"placa",cat:"Telefone",t:"Ligaram pela placa, mas procuram outra tipologia",when:"Tem um T1 com placa e quem liga procura um T2 na zona.",type:"form",src:["2.1"],
+ steps:[
+  ["s","Esse imóvel é um T1. Diga-me: procura um {tipologia} nesta zona, até que valor? Neste momento não o tenho na agência, mas estou a tratar de soluções aqui na zona. Caso consiga preparar um imóvel para visitas, teria disponibilidade amanhã ou no sábado, às 11h00 ou às 15h30? O que lhe parece?"],
+  ["s","Com quem estou a falar? Muito bem. Deixe-me fazer uns contactos e volto a ligar-lhe para confirmar a visita, ou para nos encontrarmos e lhe apresentar as soluções disponíveis."]],
+ keys:["Não se despeça de um comprador: fique com o nome e o contacto.","Com um comprador concreto, lance uma angariação reativa (colegas, CRM, cartas na urbanização)."]},
+{id:"exclientes",cat:"Telefone",t:"Clientes antigos da agência na sua zona",when:"Proprietários que compraram ou venderam com a agência e vivem na sua zona.",type:"form",src:["1.2"],
+ steps:[
+  ["s","Muito bom dia, Sr. {proprietario}, como vai? O meu nome é {meuNome} e ligo da {agencia}. Sei que é nosso cliente. Sou o consultor especialista aqui na zona e estou ao seu dispor: qualquer questão sobre o seu imóvel, conte comigo."],
+  ["s","Como boas-vindas, tenho ao seu dispor um relatório de avaliação atualizado do seu imóvel. Amanhã tenho uma reunião aí perto às 16h30. Dá-lhe jeito por volta das 15h00, ou prefere às 17h30, no final da reunião? Terei todo o gosto em entregar-lho em mão."]],
+ keys:["Inclua clientes de consultores que já saíram da agência: muitas vezes ninguém lhes dá seguimento.","Um contacto destes pode trazer a casa dele ou de um familiar."],
+ warn:"Use apenas dados que a agência pode tratar para este fim (RGPD)."},
+{id:"credito",cat:"Telefone",t:"Cliente antigo com prestação alta",when:"Tem intermediação de crédito e clientes com prestações que subiram.",type:"form",src:["1.2"],
+ steps:[
+  ["s","Olá, D. {proprietario}, como está? Ligo porque é nossa cliente há alguns anos e lembro-me do valor da prestação nessa altura. Imagino que hoje esteja bem mais alta. Queria saber se está confortável com os encargos ou se a podemos ajudar. Temos intermediação de crédito e podemos analisar uma transferência que lhe dê alguma poupança mensal."],
+  ["n","Se a transferência não chegar, leve o relatório de avaliação já preparado."],
+  ["s","Comprou por 200 mil euros e hoje o imóvel vale cerca de 320 mil. Tem aqui uma mais-valia que lhe dá opções. Se não se sente confortável, podemos ajudá-la a vender e a encontrar outra solução, até porque a vida também mudou nestes anos."]],
+ keys:["De forma natural, nunca imposta.","Pode gerar uma angariação e uma nova compra com o mesmo cliente."]},
+{id:"colega",cat:"Telefone",t:"Partilha com colega de outra marca",when:"4.º nível da angariação reativa: já tentou tudo o resto.",type:"form",src:["1.1"],
+ steps:[["s","Olá, colega, como vai? O meu nome é {meuNome} e ligo da {agencia}. Vi que tem um {tipologia} no edifício {urbanizacao}. Tenho um cliente disponível para visitar amanhã às {hora1}. Seria possível fazermos a visita e partilharmos?"]],
+ keys:["Antes disto: 1) mensagem “SOS” aos colegas da agência; 2) proprietários que disseram não; 3) prospeção e cartas no local.","Partilhar é bom, mas a partilha dá metade da comissão."]},
+{id:"rua",cat:"Presencial",t:"Abordagem na rua",when:"Está na sua zona de prospeção (alternativa a bater às portas).",type:"form",src:["1.2","1.1"],
+ steps:[
+  ["n","Escolha pessoas tranquilas: à saída do café, a passear o cão. Nunca quem vai a correr."],
+  ["s","Peço desculpa de incomodar. Por acaso reside aqui no bairro? Muito bem. O meu nome é {meuNome}, sou consultor imobiliário especialista nesta zona e vim cá especificamente porque procuro um {tipologia}. Conhece algum vizinho que esteja a pensar vender?"],
+  ["n","Se a pessoa for simpática, deixe um cartão e peça o contacto. Volte a ligar quando procurar outra tipologia. Com o tempo, passa a ser ela a avisá-lo."]],
+ keys:["Ninguém se ofende com esta pergunta.","Crie uma rede de pessoas na zona: donos de cafés, porteiros, vizinhos."],
+ warn:"Diga “para um cliente com visita marcada” apenas se for verdade."},
+{id:"placacolega",cat:"Presencial",t:"Imóvel com placa de outro colega",when:"Na zona, vê um imóvel com a placa de outra agência e tem um comprador.",type:"form",src:["1.1"],
+ steps:[["s","Peço imensa desculpa. Ando à procura de um apartamento para um casal com visita marcada amanhã às {hora1}. Este imóvel está à venda? Muito bem. Não sei que tipo de contrato tem com o colega; seja como for, estará bem apoiado. Se for em exclusividade, gostaria muito de falar com o seu consultor. Quer dar-lhe uma palavrinha e perguntar se concorda? Por mim, é com todo o gosto."]],
+ keys:["Nunca denigra o colega nem tente “passar-lhe a perna”.","Se o contrato for em aberto, pode fazer também um contrato em aberto."]},
+{id:"certificado",cat:"Presencial",t:"Pedido recente de certificado energético",when:"Consultou certificados emitidos recentemente na sua zona.",type:"form",src:["1.2"],
+ steps:[["s","Muito boa tarde. Fala com o proprietário? Tive conhecimento de que pediu recentemente o certificado energético do seu apartamento. Não sei se já o vendeu ou arrendou, nem qual é a finalidade, mas, como sou consultor especialista nesta urbanização, vim colocar-me ao seu dispor. Se quiser vender, posso ajudá-lo numa venda mais rápida e nas melhores condições."]],
+ keys:["“Tudo, desde que seja com bons modos e boa intenção.”","Muitas vezes já têm comprador. Aceite e siga em frente."],
+ warn:"Confirme com o seu responsável que este uso da informação é admissível à luz do RGPD."},
+{id:"c-reativa",cat:"Cartas",t:"Carta: procuro para cliente com visita marcada",when:"Angariação reativa, 3.º nível: prospeção na urbanização certa.",type:"form",src:["1.1"],
+ letter:"Caro senhor proprietário,\n\nSe equaciona a possibilidade de vender o seu imóvel, por favor contacte-me com urgência. Procuro um {tipologia} nesta urbanização, até {preco}, para um cliente com visita marcada para amanhã às {hora1}.\n\nAo seu dispor,\n{meuNome} · {telefone}\n{agencia} · Licença AMI {ami}",
+ keys:["Preto e branco, com ar de escrito à pressa. Um flyer bonito parece publicidade.","Só nos prédios do segmento certo, debaixo da porta.","Nunca escreva “tenho clientes para esta zona”: soa a bluff."],
+ warn:"Inclua sempre a denominação da empresa e a licença AMI: é obrigatório em qualquer comunicação. Entre num prédio apenas quando alguém o deixar entrar. A frase “visita marcada” só se for verdade."},
+{id:"c-vendido",cat:"Cartas",t:"Carta: acabámos de vender na urbanização",when:"Um imóvel (seu ou de um colega) foi vendido na zona.",type:"form",src:["1.1","1.2"],
+ letter:"Caro senhor proprietário,\n\nEm virtude de termos vendido o imóvel em {urbanizacao}, temos clientes interessados a quem já não o podemos apresentar. Procuramos ativamente soluções alternativas nesta urbanização.\n\nSe equaciona a possibilidade de vender a sua casa, por favor ligue-me com urgência.\n\nAo seu dispor,\n{meuNome} · {telefone}\n{agencia} · Licença AMI {ami}",
+ keys:["Junte uma fotografia da placa “Vendido”.","O formador recomenda tornar isto obrigatório após cada venda. Conta o caso de uma consultora que angariou 9 imóveis assim."],
+ warn:"O formador fala em “visitas agendadas que não vamos poder cumprir”. Escreva-o só se for verdade."},
+{id:"c-angariado",cat:"Cartas",t:"Carta: acabei de angariar (vizinhança)",when:"Logo após angariar, na envolvente do imóvel.",type:"form",src:["1.2","2.2"],
+ letter:"Caro senhor proprietário,\n\nSe gostaria de trazer para morar junto de si um familiar, um amigo ou um colega de trabalho, temos ao seu dispor um fantástico {tipologia} nesta urbanização: [três pontos fortes da análise SWOT].\n\nNão perca esta oportunidade e partilhe este código QR com quem possa ter interesse.\n\nAo seu dispor,\n{meuNome} · {telefone}\n{agencia} · Licença AMI {ami}",
+ keys:["Muitas vezes quem liga é o próprio vizinho, que quer trocar de casa.","Gera contactos de compradores e de vendedores."]},
+{id:"c-tipologia",cat:"Cartas",t:"Carta: procuram uma tipologia que não tenho",when:"A sua placa atrai pedidos de outra tipologia.",type:"form",src:["2.1"],
+ letter:"Caro senhor proprietário,\n\nSe equaciona a possibilidade de vender o seu imóvel e se este é de tipologia {tipologia}, agradecia que me contactasse com alguma urgência. Em virtude de termos um imóvel publicitado nesta urbanização ({urbanizacao}), temos clientes que manifestam interesse por esta tipologia. Caso seja essa a sua intenção, contacte-me para agendarmos visitas.\n\nAo seu dispor,\n{meuNome} · {telefone}\n{agencia} · Licença AMI {ami}",
+ keys:["Indique onde está o seu imóvel (bloco, número) para dar um caráter de verdade."]},
+{id:"video",cat:"Redes sociais",t:"Vídeo curto ao angariar (15 a 20 s)",when:"Acabou de assinar o contrato. Grave já, com a urbanização atrás.",type:"form",src:["1.2","4"],
+ steps:[["s","Olá a todos! Estou muito satisfeito: acabei de angariar um imóvel aqui em {zona}. Tem áreas fabulosas, sobretudo nas zonas sociais, e vistas desafogadas. Fique atento: dentro de quatro ou cinco dias estará disponível para visitas. Até já!"]],
+ keys:["Não diga o bloco nem a porta.","Gera chamadas antes de o anúncio sair."]},
+{id:"zona-rs",cat:"Redes sociais",t:"Publicação: “hoje estou na zona”",when:"Dias de prospeção no terreno.",type:"form",src:["1.2"],
+ steps:[["s","Hoje estou na zona de {zona}. Se é um dos meus seguidores e gostaria de conhecer o valor do seu imóvel, ou tirar alguma dúvida, contacte-me hoje mesmo. Terei todo o gosto em falar consigo pessoalmente."]],
+ keys:["Todos os seus contactos devem saber o que faz.","Mostre que está sempre em movimento no mercado."]},
+{id:"f8",cat:"Fidelização",t:"Pós-escritura: chamada dos 8 dias",when:"Oito dias depois da escritura.",type:"form",src:["1.1","2.1"],
+ steps:[["s","Olá, {proprietario}, é o {meuNome}. Como correu a mudança? Correu tudo como esperavam? Chegaram a usar alguma das empresas da lista que vos deixei? Pergunto porque, se alguma falhou, quero retirá-la da lista."]],
+ keys:["No dia da escritura entregue uma folha de contactos úteis: condomínio, mudanças, eletricidade, gás, água, telecomunicações, canalizador, carpinteiro, pintor.","Avise que não conhece todos e peça que lhe digam se algum correr mal.","Uma participante sugere pedir aqui um testemunho escrito."]},
+{id:"f30",cat:"Fidelização",t:"Pós-escritura: 30 dias e um presente",when:"Um mês depois da escritura.",type:"form",src:["1.1"],
+ steps:[["s","Olá, {proprietario}! Está tudo bem convosco? A casa nova está a corresponder ao que esperavam? Sabem que faz hoje um mês que compraram a casa? Gostava muito de vos dar um abraço. Estão em casa hoje? Posso passar aí?"],["n","Leve um presente."]],
+ keys:["No dia da escritura um presente não surpreende. Um mês depois, já ninguém o espera e supera a expectativa."]},
+{id:"fano",cat:"Fidelização",t:"Datas importantes e relatório anual",when:"Ao longo dos anos seguintes.",type:"form",src:["1.1","2.1"],
+ steps:[
+  ["n","Agende na escritura: “Escritura Sr. X (ano)”, a repetir todos os anos. Junte aniversários, início do ano letivo dos filhos e Natal. Telefone; nunca envie mensagens automáticas da empresa."],
+  ["s","Olá, {proprietario}, como estão? E a família? Ligo porque é nosso cliente há alguns anos e temos algo para lhe oferecer: um relatório de avaliação atualizado da sua casa. Quando lhe daria jeito passar pelo escritório?"]],
+ keys:["Três a cinco contactos por ano, sem interesse.","Fidelize apenas os clientes de quem gostou.","Nunca diga “não se esqueça de mim”.","Responda sempre a dúvidas, mesmo quando não ganha nada com isso."]},
+{id:"alternativas",cat:"Compradores",t:"O comprador pede algo que não existe",when:"Os critérios do comprador não existem no mercado.",type:"form",src:["1.1"],
+ steps:[
+  ["s","Compreendo perfeitamente: a zona é importante por causa da escola dos miúdos, e os {preco} são o valor confortável para manterem a vossa qualidade de vida."],
+  ["s","Infelizmente, os T3 no centro começam nos 375 mil euros e neste momento não há nenhum abaixo desse valor, em nenhuma agência."],
+  ["s","Por isso, gostava de vos perguntar o que será mais confortável: um T2 até {preco} aqui no centro, enquanto os miúdos são pequenos, ou um T3 mais definitivo numa zona a dez minutos de carro, com um quarto para cada um? O que vos parece mais confortável?"]],
+ keys:["Nunca diga “tem de ir para outra zona” ou “só consegue um T2”: o comprador sente que não foi ouvido.","Valide tudo antes de dar as alternativas.","Termine com “O que lhe parece?”."]},
+{id:"ainda",cat:"Compradores",t:"Existe no mercado, mas ainda não o tenho",when:"O pedido é realista, mas não tem esse imóvel na carteira.",type:"form",src:["1.1","2.1"],
+ steps:[
+  ["s","Compreendi perfeitamente o que procura: um {tipologia} até {preco} em {zona}. Hoje não estou em condições de lhe mostrar, mas sugiro reunirmo-nos amanhã aqui no escritório para analisarmos as possibilidades disponíveis. Vemos imagens no computador e seguimos logo para a visita do que lhe interessar. Dá-lhe mais jeito às {hora1} ou às {hora2}? O que lhe parece?"],
+  ["n","Depois, por esta ordem: 1) mensagem “SOS” no grupo dos colegas da agência; 2) ligar aos proprietários que disseram não; 3) prospeção e cartas na urbanização; 4) partilha com outras marcas."],
+  ["n","Se no fim não houver nada: mostre-lhe na internet que não existe no mercado (não apenas na sua agência) e volte às perguntas alternativas."]],
+ keys:["A palavra-chave é “ainda”.","Nunca diga “deixe o contacto que eu ligo quando surgir”: o comprador vai logo a outra agência.","Não prometa visitas a imóveis que não tem. Marque uma reunião."]},
+{id:"whats",cat:"Mensagens",t:"Cartão virtual por WhatsApp",when:"Logo a seguir a qualquer telefonema, mesmo que a pessoa tenha recusado.",type:"form",src:["P1.1","2.1"],
+ steps:[
+  ["n","Peça autorização antes de desligar: “Posso enviar-lhe já por WhatsApp o meu cartão, para ficar com o contacto?”"],
+  ["s","Sr. {proprietario}, agradeço a simpatia com que me atendeu. Aqui fica o meu cartão virtual, para guardar e falar comigo sempre que entender. Fico ao seu dispor.\n{meuNome} · {telefone}\n{agencia} · Licença AMI {ami}"],
+  ["n","Depois de uma reunião marcada, envie também a confirmação:"],
+  ["s","Sr. {proprietario}, confirmo a nossa reunião amanhã às {hora1}. Qualquer imprevisto, ligue-me para o {telefone}. Até amanhã! {meuNome}"]],
+ keys:["Quando voltar a ligar, o seu nome já aparece no telemóvel da pessoa.","A licença AMI é obrigatória em qualquer comunicação."]},
+{id:"decisores",cat:"Telefone",t:"Garantir que estão todos os que decidem",when:"Ao marcar a reunião, quando ainda não sabe se a casa é de mais alguém.",type:"form",src:["P2.1"],
+ steps:[
+  ["s","Peço desculpa, nem lhe perguntei: a casa é só da senhora ou de mais alguém? Muito bem. Seria interessante estarmos os três. Qual é o horário mais conveniente para os dois: às {hora1} ou às {hora2}?"],
+  ["n","Se um dos proprietários estiver longe, proponha que se junte por videochamada. Se quem decide for um filho (por exemplo, com pais idosos), convide-o também, mesmo que não assine."]],
+ keys:["Quem não ouviu a apresentação não vai sentir o mesmo quando lha contarem.","Sem todos os que assinam, o contrato fica para depois, e depois muitos desistem."]},
+{id:"comprador-primeiro",cat:"Telefone",t:"Confirmar com o comprador antes de ligar ao proprietário",when:"Um proprietário recusou, mas tem no CRM um comprador compatível.",type:"form",src:["P1.2"],
+ steps:[
+  ["s","Olá, está tudo bem? Ligo-lhe com uma possibilidade. Não lhe posso garantir nada ainda, mas é possível que consiga um {tipologia} até {preco} em {zona}. Se tratarmos da documentação, teria disponibilidade para visitar no sábado, às 11h00, ou ao fim da tarde, às 15h30?"],
+  ["n","Com a visita do comprador confirmada, faça o “Segundo telefonema” ao proprietário."]],
+ keys:["Com um comprador real e agendado, o segundo telefonema tem verdade.","Diga ao comprador exatamente o que sabe e o que ainda não sabe."]},
+{id:"guia-vende-sozinho",cat:"Telefone",t:"Oferecer um guia a quem vende sozinho",when:"Proprietário que quer mesmo vender sem imobiliária. Só se tiver o guia feito.",type:"adapt",src:["P1.2","P2.1"],
+ steps:[
+  ["s","Sr. {proprietario}, compreendo perfeitamente que queira vender sozinho. Preparámos um guia para quem vende sem imobiliária: documentação necessária, cuidados a ter ao receber desconhecidos em casa, como definir o preço. Posso enviar-lho sem custo? Gostava apenas de saber depois se lhe foi útil e o que acrescentaria."],
+  ["n","Daqui a dois dias:"],
+  ["s","Teve oportunidade de ver o guia? O que lhe pareceu útil? Sentiu falta de alguma informação? O que mais conta para vender bem é o preço: como chegou ao seu valor? Se quiser, posso preparar-lhe uma análise do que está à venda na sua zona."]],
+ keys:["É um pretexto honesto para voltar a falar e mostrar que sabe do assunto.","Aproveite as respostas para melhorar o guia."],
+ warn:"O formador apresenta o guia como “em fase de validação” e “à venda a partir de junho”. Diga apenas o que for verdade."},
+{id:"honorarios",cat:"Presencial",t:"Apresentar os honorários",when:"No fecho, enquanto preenchem o acordo juntos.",type:"form",src:["P3.1","P1.2"],
+ steps:[
+  ["s","Chegamos aos honorários, uma parte importante para si e para nós. Praticamos 5% mais IVA sobre o valor pelo qual o imóvel vier a ser vendido: se baixar o preço, é sobre o valor da venda. São pagos no contrato-promessa se o sinal for superior a 10%; se for inferior, só na escritura. Incluem o tratamento de toda a documentação, sua e do comprador, e o acompanhamento até à escritura. Propomos um acordo de seis meses, o normal para este tipo de imóvel. O tempo médio de venda dos imóveis que trabalhamos assim tem sido de [o seu número real] dias."],
+  ["n","Continue a preencher. Não faça pausa nem pergunte “parece-lhe bem?”."]],
+ keys:["Apresente com segurança, a olhar nos olhos e a sorrir.","Uma pausa depois do valor convida a pessoa a discordar.","Não justifique com os seus custos, nem deixe a comissão “para falarmos no fim”."],
+ warn:"Adapte a percentagem, o momento do pagamento e o prazo às condições reais do seu contrato."},
+{id:"preco-telefone",cat:"Telefone",t:"Proprietário que quer o preço “limpo”",when:"Ao telefone, pede que a comissão fique por cima do preço que quer.",type:"form",src:["P3.2"],
+ steps:[["s","Compreendo: quer {preco} limpos e que os honorários fiquem por cima. Sem conhecer o imóvel não me é fácil comentar. Proponho encontrarmo-nos em sua casa: conheço o imóvel e ofereço-lhe um relatório de avaliação; basta ter a caderneta predial, que se tira online. Depois falamos: se o valor de mercado o permitir, com todo o gosto, e se sobrar mais, melhor para si. Se não for possível, digo-lhe logo as possibilidades e o senhor decide. Às {hora1} ou às {hora2}?"]],
+ keys:["Não prometa nem recuse ao telefone.","Leve duas análises da concorrência: a do segmento certo e a do segmento onde ele quer pôr a casa."]},
+{id:"r-investidor",cat:"Consultar com cuidado",t:"“Represento um investidor estrangeiro”",when:"Sugerido pelo formador para quem escreve no anúncio que não quer imobiliárias.",type:"risk",src:["P1.2","P2.1"],
+ steps:[
+  ["n","O que o formador sugere: deixar a pessoa desabafar, dizer que não está a ligar para angariar e apresentar-se como representante de um comprador."],
+  ["s","Com certeza, li o anúncio, e de modo algum estou a ligar para angariar a sua casa. Represento um cliente que está fora do país e já fez vários investimentos connosco; pediu-me soluções para um novo investimento e o seu imóvel pareceu-me interessante. A lei não permite dupla remuneração: quem me paga é ele, o senhor não paga nada. Dava-lhe mais jeito às {hora1} ou às {hora2}?"],
+  ["n","Depois, o formador mantém a pessoa à espera de uma “decisão do cliente” durante dias e, por fim, diz que o cliente escolheu outro imóvel, oferecendo então os seus serviços ao proprietário."]],
+ warn:"Se o cliente não existir, é uma declaração falsa a um consumidor: pode constituir prática comercial enganosa, pôr em causa a sua licença e destruir a confiança quando for descoberto. O próprio formador chama-lhe “uma pequena mentira”. Só é válido com um mandato real de comprador (contrato de mediação com o comprador).",
+ alt:"a resposta da objeção “O anúncio diz que não quer ser contactado por imobiliárias” (oferecer ajuda real com o crédito) ou a mensagem sobre um imóvel exclusivo na mesma zona."},
+{id:"r-guia-validacao",cat:"Consultar com cuidado",t:"Guia “em validação” e oferta com prazo",when:"Sugerido pelo formador para quem vende sozinho.",type:"risk",src:["P1.2"],
+ steps:[
+  ["s","Desenvolvemos um dossiê para proprietários que vendem sem imobiliária, que vai ser comercializado a partir de junho. Nesta fase estamos a validá-lo e oferecemo-lo em troca do seu feedback."],
+  ["s","Estamos a oferecer relatórios de avaliação gratuitos até 31 de março. Amanhã tenho uma reunião às 16h00 aí na sua urbanização; dá-lhe jeito às 15h00 ou às 17h30?"]],
+ warn:"Prazos, fases de validação e reuniões “aí perto” inventados criam uma urgência falsa. Se forem verdade, pode usá-los; se não, não.",
+ alt:"o guião “Oferecer um guia a quem vende sozinho”."},
+{id:"r-ja-vendido",cat:"Consultar com cuidado",t:"Carta “o imóvel já está vendido” para rescindir",when:"Sugerido pelo formador quando o proprietário tem contratos em aberto e quer dar-lhe exclusividade.",type:"risk",src:["3.1"],
+ steps:[
+  ["s","Venho por este meio pedir a rescisão do contrato de mediação n.º [n.º], em virtude de já ter prometido vender o imóvel, pelo que agradeço que o retirem de imediato de publicidade."],
+  ["n","O formador sugere ainda dizer, se as agências ligarem, que a venda anterior falhou por causa do crédito."]],
+ warn:"É uma declaração falsa assinada pelo proprietário. As agências podem pedir prova ou reclamar comissão, e o proprietário fica exposto. Lembre-se de que um exclusivo sobre contratos ainda em vigor não produz efeito.",
+ alt:"o proprietário denuncia os contratos nos termos e prazos que eles preveem, dizendo apenas que decidiu deixar de trabalhar com essa agência. Até lá, faça um contrato em aberto ou espere."},
+{id:"r-pos-datar",cat:"Consultar com cuidado",t:"Pós-datar o contrato de exclusividade",when:"Sugerido pelo formador em conjunto com a carta anterior.",type:"risk",src:["3.1"],
+ steps:[["n","O que o formador sugere: assinar hoje o contrato de exclusividade com uma data alguns dias à frente, para ficar posterior às rescisões."]],
+ warn:"Um contrato com data falsa pode ser visto como má-fé num litígio e pôr em causa a comissão.",
+ alt:"assinar o exclusivo apenas depois de as rescisões produzirem efeito, com a data verdadeira."},
+{id:"r-minuta-nula",cat:"Consultar com cuidado",t:"Assinar uma minuta não validada e substituí-la depois",when:"Sugerido pelo formador enquanto a minuta da agência não está validada pelo IMPIC.",type:"risk",src:["3.1"],
+ steps:[["s","Temos aqui o contrato que assinámos na semana passada, mas estava escrito à mão. É rigorosamente igual, apenas passámos tudo a computador. Confirme comigo e assine este, por favor."],["n","O formador sugere pôr no novo contrato a data do primeiro."]],
+ warn:"Pedir ao proprietário que assine um documento com data anterior, escondendo o motivo, é enganoso.",
+ alt:"usar desde o início um contrato em texto corrido, sem escolhas múltiplas, que não depende da validação da minuta."},
+{id:"r-rescisao-diferida",cat:"Consultar com cuidado",t:"Rescisão que só produz efeito meses depois",when:"Contado pelo formador para um proprietário que diz já não querer vender.",type:"risk",src:["P2.2"],
+ steps:[["s","Não se preocupe, retiramos já a publicidade e ninguém mostra mais a sua casa. (O termo de rescisão assinado só produz efeito no fim dos seis meses.)"]],
+ warn:"O proprietário assina julgando que fica livre. Se vier a vender diretamente, a cobrança da comissão pode ser contestada e a sua reputação sofre.",
+ alt:"se suspeitar de uma venda direta, fale abertamente da cláusula de comissão do contrato e do que acontece se vender a quem conheceu através do seu trabalho."},
+{id:"r-historia-pessoal",cat:"Consultar com cuidado",t:"História pessoal para defender a comissão",when:"Usado pelo formador como último recurso quando o proprietário não aceita os honorários.",type:"risk",src:["P3.1"],
+ steps:[["s","A minha filha está a estudar e prometi-lhe um computador se passasse a todas as cadeiras. Trabalho todos os dias para cumprir essa promessa. O que lhe devo dizer em junho? Que não lhe posso dar o computador porque o ofereci no desconto da comissão?"]],
+ warn:"Se a história não for sua, é manipulação. Mesmo verdadeira, pode soar a pressão emocional.",
+ alt:"a sequência de perguntas da objeção “Não pago 5% de comissão”."},
+{id:"r-apresentar-fim",cat:"Consultar com cuidado",t:"Só dizer que é de uma imobiliária no fim da chamada",when:"Variante relatada por uma rede que diz marcar mais visitas assim. O formador rejeita-a.",type:"risk",src:["2.1","P1.1"],
+ steps:[["s","Boa tarde, vi o seu anúncio. Era possível ver a casa hoje, às {hora1} ou às {hora2}? (…) Ah, já agora, o meu nome é {meuNome}, da {agencia}."]],
+ warn:"A pessoa sente-se enganada logo no início e a relação começa mal. Nunca chegue a casa de alguém sem ter dito que é de uma imobiliária: também por segurança.",
+ alt:"o guião “Primeiro contacto com proprietário particular”."},
+{id:"r-foto-placa",cat:"Consultar com cuidado",t:"“Um amigo mandou-me uma foto da vossa placa”",when:"Pretexto partilhado por um participante.",type:"risk",src:["P4"],
+ steps:[["s","Boa tarde, peço desculpa por ligar, mas um amigo mandou-me uma fotografia da vossa placa. Isto fica perto da churrasqueira?"]],
+ warn:"É um pretexto falso, ainda que pequeno. Se a pessoa perceber, perde credibilidade.",
+ alt:"“Passei na zona e vi a sua placa. Isto fica perto da churrasqueira?”"}
+];
+
+/* ---------- Objeções ---------- */
+let OBJ=[
+{id:"o1",ctx:"Telefone",q:"Não quero trabalhar com imobiliárias.",type:"form",src:["1.1","P1.1","P1.2"],
+ a:"Compreendo. Calculo que o motivo sejam os honorários; com certeza pretende poupar esse valor, compreendo perfeitamente. Desejo-lhe o maior sucesso: pelo que vi, a casa é muito interessante e acredito que a venda corra bem.",
+ steps:[
+  "Coloco-me ao seu dispor: qualquer dúvida com documentação, em qualquer fase, uma vez que está a fazer a venda sozinho, pode ligar-me. Terei todo o gosto em ajudar, sem qualquer custo. O meu nome é {meuNome}, da {agencia}.",
+  "(Só se a sua empresa tiver intermediação de crédito ou um parceiro.) Muitos proprietários que vendem sozinhos dizem-me que já têm comprador, mas esperam há um ou dois meses pela resposta do banco. Se for o seu caso, o nosso especialista de crédito trata de tudo. Não paga nada, nem o comprador: quem nos remunera é o banco.",
+  "Não o empato mais, foi muito simpático. Permite-me que lhe ligue daqui a 30 dias, para saber como está a correr?",
+  "Posso enviar-lhe já por WhatsApp o meu cartão, para ficar com o contacto?"],
+ why:"Nunca contra-argumente. “Compreendo” põe-no do lado da pessoa sem dizer que concorda. Ela espera uma reação negativa e recebe simpatia e ajuda concreta. Dizer quem paga o crédito (o banco) dá credibilidade, porque “tudo grátis” parece falso.",
+ next:"Esta objeção ultrapassa-se em duas etapas. Quando tiver um comprador real compatível, ligue antes dos 30 dias (guião “Segundo telefonema”). Registe já a tipologia, a zona, o preço e a data de seguimento.",
+ extra:"Se quiser perceber o motivo, use uma pergunta neutra: “Há algum motivo em especial que o leve a decidir assim?” Não pergunte “já teve uma má experiência?”: ao telefone ainda é um desconhecido.",
+ warn:"A ajuda gratuita tem de ser real. Se a pessoa ligar com uma dúvida, ajude mesmo.",script:"naoquer"},
+{id:"o2",ctx:"Telefone",q:"Exclusividade não dou a ninguém, não perca tempo.",type:"form",src:["P1.2","P2.1","P4"],
+ a:"Compreendo o que refere, Sr. {proprietario}. Não há qualquer problema: é possível fazer o acordo com ou sem exclusividade, consoante os casos. Posso até adiantar que só oferecemos a exclusividade cumprindo alguns critérios. O importante é que faça como achar melhor para si; fique tranquilo. Dava-lhe então mais jeito às {hora1} ou às {hora2}?",
+ why:"Ao telefone não se discute a exclusividade: perde-se com facilidade. O objetivo da chamada é a reunião, e a pessoa só pode querer o que conhece.",
+ next:"Trate o assunto pessoalmente, depois de apresentar o serviço.",
+ warn:"Diga que trabalha das duas formas só se a sua agência o permitir. Não diga “depois falamos disso quando aí for”: soa a que vai impor."},
+{id:"o3",ctx:"Telefone",q:"O anúncio diz que não quer ser contactado por imobiliárias.",type:"adapt",src:["P1.2","P2.1"],
+ a:"(Deixe a pessoa desabafar sem a interromper.) Com certeza, li, e de modo algum estou a ligar para angariar a sua casa; compreendo e respeito. Ligava apenas para o ajudar: muitos proprietários que vendem sozinhos têm interessados com dificuldade no crédito. Se tiver um comprador que dependa do banco, conte comigo, sem custo para si nem para o comprador. Desejo-lhe o maior sucesso.",
+ why:"Diga logo que não está a ligar para angariar: isso acalma a pessoa. Nunca diga “o senhor não ouviu o que tenho para dizer”. Assim fica num grupo diferente de todos os consultores que já lhe ligaram.",
+ next:"Peça para voltar a ligar daqui a uns dias, para saber como corre a venda.",
+ extra:"Alternativa honesta, usada por uma participante: enviar uma mensagem a dizer que leu o anúncio, que tem um imóvel em exclusivo na mesma zona e que gostaria de poder mostrar o dele a clientes a quem esse não agrade, com o vídeo. Ligar uns dias depois.",
+ warn:"O formador sugere também dizer que representa um investidor estrangeiro. Use isso apenas se tiver mesmo um mandato de comprador. Inventar um cliente é enganar."},
+{id:"o4",ctx:"Telefone",q:"Já entreguei a um amigo que é consultor.",type:"form",src:["P2.1","4"],
+ a:"Compreendo, e ao dizer-me isso nem eu me sentiria confortável em lhe pedir outra coisa; está muito bem apoiado. Não perdemos nada em conversar: gostava de partilhar consigo o que eu faria para vender esta casa. Até pode encontrar ideias para passar ao seu amigo. Dava-lhe mais jeito às {hora1} ou às {hora2}?",
+ steps:[
+  "(Na reunião, depois de apresentar o serviço.) O seu amigo inclui no serviço o que lhe mostrei? Com toda a transparência: se isto estivesse a ser feito, a casa já estaria vendida?",
+  "Se outra agência ou um vizinho comprar, quanto ganha o seu amigo?",
+  "Para não melindrar o seu amigo: fazemos o nosso acordo e deixo por escrito que ele pode trazer os clientes que quiser. Eu preparo o imóvel antes de cada visita; se ele vender, ganha os honorários da venda e eu os do trabalho de preparação. E continuo a defendê-lo nas propostas. Vamos fazer o nosso acordo?"],
+ why:"O proprietário quer vender. Não tem de “tirar” a casa ao amigo: ganha um serviço que o amigo não lhe dá. O formador conta casos em que esta partilha resolveu a questão sem custo extra para o proprietário.",
+ next:"Vá sempre à reunião: no pior dos casos, ficou a conhecer mais uma pessoa.",
+ warn:"Partilhe com o amigo apenas nos termos que a sua agência permite."},
+{id:"o5",ctx:"Telefone",q:"Quero X limpo; ponham a vossa comissão por cima.",type:"form",src:["P3.2","P1.1"],
+ a:"Compreendo: quer {preco} limpos e que os honorários fiquem por cima. Sem conhecer o imóvel não me é fácil comentar. Proponho encontrarmo-nos em sua casa: conheço o imóvel e ofereço-lhe um relatório de avaliação; basta ter a caderneta predial, que se tira online. Depois falamos: se o valor de mercado o permitir, com todo o gosto, e se sobrar mais, melhor para si, porque nós só cobramos os honorários. Se não for possível, digo-lhe logo as possibilidades e o senhor decide. Às {hora1} ou às {hora2}?",
+ why:"Não prometa nem recuse ao telefone. Não “chova no molhado”: feche logo com o horário.",
+ next:"Vá à reunião com duas análises da concorrência: a do segmento certo e a do segmento onde ele quer pôr a casa.",
+ warn:"Ofereça o relatório apenas se o fizer de facto."},
+{id:"o6",ctx:"Telefone",q:"Estou no estrangeiro / só aceito contacto por email.",type:"form",src:["P1.2"],
+ a:"Para não atrasar o seu processo, proponho uma videochamada: envio-lhe já um link, ficamos a conhecer-nos e partilho no ecrã a informação. Tem dez minutos agora?",
+ steps:["(Só por email.) Sou consultor especialista neste mercado. Posso enviar-lhe sem custo informação útil para decidir: o valor médio por metro quadrado na zona, o tempo médio de venda por tipologia e a documentação necessária. Basta pedir-ma.","(Depois.) Teve oportunidade de ver o documento? Qual é a forma mais cómoda de conversarmos: telefone, WhatsApp ou videochamada?"],
+ why:"Faça o que os outros não estão dispostos a fazer.",
+ warn:"O contrato tem de ser assinado pelo proprietário ou por um procurador com poderes expressos para o contrato de mediação."},
+{id:"o7",ctx:"Reunião",q:"Não quero exclusividade.",type:"form",src:["P1.1","P2.2","P3.1"],
+ a:"Compreendo o que refere. Gostaria de o compreender um pouco melhor: o que é que o preocupa em concreto no regime de exclusividade?",
+ why:"“Não quero exclusivo” é o que a pessoa diz; por trás há quase sempre uma de três causas. Não se ultrapassa uma objeção que não se conhece. Argumentar (“vai arrepender-se”) é tentar ganhar uma batalha; as perguntas deixam a pessoa concluir sozinha.",
+ causes:[
+  {t:"Quer rapidez: pôr em várias agências",steps:[
+   "Compreendo; no seu lugar, talvez também pensasse que mais agências dão mais oportunidades. Neste modelo qualquer agência pode vender a sua casa: partilhamos com todas e o senhor não paga mais por isso.",
+   "Em sua opinião, quando entrega a cinco ou seis agências, o que vai fazer cada uma para vender?",
+   "Então vai encontrar a sua casa cinco ou seis vezes no mesmo portal, com fotos, textos, áreas e preços diferentes. Se fosse comprador, o que pensaria?",
+   "E se visse quatro ou cinco placas na varanda, acharia o proprietário tranquilo ou com pressa? Seria provável fazer uma proposta mais baixa? É isso que quer que aconteça consigo?",
+   "Prefere ver a sua casa muitas vezes, com fotos simples, lá para a quinta página, ou uma vez só, em destaque, com fotos profissionais e home staging? O que vende mais depressa?",
+   "Se fosse consultor: a uma casa entregue só a si ou a outra entregue a dez agências, a qual dedicaria mais tempo? Vamos fazer o nosso acordo?"]},
+  {t:"Quer poder vender ele próprio",steps:[
+   "Acha que seria justo o senhor arranjar o comprador e eu receber a comissão completa sem ter feito essa venda?",
+   "E acha igualmente justo que, depois da análise da concorrência, da SWOT, do relatório e do home staging, o senhor venda graças a tudo isso e nós não ganhemos nada?",
+   "Tenho uma proposta de que vai gostar: fazemos o acordo como está e escrevemos que, se for o senhor a trazer o comprador, paga apenas 50% dos honorários, e continua com o apoio jurídico, fiscal, o crédito ao seu comprador e o acompanhamento até à escritura. Se partilhamos com outras agências, porque não com o dono? Vamos fazer o nosso acordo?"],
+   note:"Não ofereça os 50% logo de início: as perguntas é que fazem o trabalho. Use esta cláusula (um aditamento ao contrato) apenas se a sua agência a aceitar. O formador diz que na prática raramente chega a ser usada."},
+  {t:"Já teve uma má experiência",steps:[
+   "Lamento muito o que me contou; não é a primeira vez que ouço histórias assim. Não vou comentar, não me ficaria bem falar de colegas.",
+   "Sei que não confia, mas pergunto-lhe: imagine que fazia o acordo comigo e eu cumpria rigorosamente tudo isto. Ficava satisfeito?",
+   "Então proponho algo de que acho que vai gostar: anexamos este plano de serviço ao nosso acordo e eu assino que, se não o cumprir, pode terminar o contrato de imediato. Sente-se mais confortável assim? Vamos fazer o nosso acordo?"],
+   note:"Se eu dou a minha palavra, o que me custa assiná-la?"}],
+ next:"Se mesmo assim só quiser sem compromisso e não trabalhar dessa forma, saia com elegância: “Compreendo, e tive todo o gosto em conhecê-lo. Prefiro não o iludir com um serviço em que não faria tudo isto. Fico sempre ao dispor.”",
+ warn:"A cláusula dos 50% e o compromisso assinado têm de respeitar a política da sua agência e ficar bem redigidos."},
+{id:"o8",ctx:"Reunião",q:"Seis meses é muito tempo.",type:"form",src:["P2.2"],
+ a:"Compreendo a preocupação com o tempo. Diga-me: em sua opinião, se puser a casa em várias agências sem exclusividade, quanto tempo acha que demora a vender?",
+ steps:["No nosso serviço, o tempo médio até à venda tem sido de [o seu número real] dias, e o plano de marketing é de oito semanas.","Se eu cumprir tudo o que está neste plano, a que agência entregaria a casa para fazer mais?","O que eu faço fica feito: o relatório, o home staging, as fotografias. Não me sentiria confortável em fazer tudo isto e, ao fim de dois meses, ver o trabalho passar para quem não o faz."],
+ why:"Muitas vezes a questão não é o tempo, é não querer compromisso. Se houver um motivo real (por exemplo, muda de cidade daqui a dois meses), aceite um prazo mais curto.",
+ extra:"Com contratos muito curtos, um interessado que o proprietário conheça pode simplesmente esperar que o contrato acabe para comprar diretamente.",
+ warn:"Use apenas tempos médios que tenha registado de facto."},
+{id:"o9",ctx:"Reunião",q:"Não pago 5% de comissão.",type:"form",src:["P3.1","P1.2","4"],
+ a:"(Escute em silêncio, olhe nos olhos, não interrompa até a pessoa parar.) Compreendo, Sr. {proprietario}. Gostava de o compreender um pouco melhor: em função do serviço que lhe apresentei, qual seria em seu entender o valor justo?",
+ steps:[
+  "Como chegou a esse valor? Porquê 3% e não 2% ou 4%?",
+  "Os colegas que cobram 3% trouxeram-lhe uma análise da concorrência? E uma análise SWOT? Um relatório de avaliação? Home staging? (Uma pergunta de cada vez.)",
+  "Se fosse meu colega e prestasse este serviço, sentia-se confortável em cobrar 3%, como quem não faz nada disto?",
+  "Se um colega de outra agência tiver um comprador e aqui ganhar menos do que nos outros imóveis, seria provável levar o cliente para outra casa? Compreende porque não posso: quem ficava prejudicado era o senhor.",
+  "Seja totalmente sincero: se hoje lhe trouxessem uma proposta 2% abaixo do que pede, vendia? (…) Há alguma coisa em mim que lhe desagrade? (…) Em segundos, baixou esse valor a um comprador que nem existe. Peço-lhe que mo pague a mim, para o defender. Se defendo assim os meus honorários, imagine como defendo o preço da sua casa. Vamos fazer o nosso acordo?",
+  "Se eu retirasse tudo isto e fizesse só fotografias, anúncio e placa por 3%, assinava agora? Consegue tirar fotos com o telemóvel e pôr um anúncio? Então paga 3% por algo que sabe fazer, e acha caros mais 2% por todo este serviço?"],
+ why:"Em abstrato, o proprietário acha que os outros “fazem o mesmo”. Ao detalhar com perguntas, é ele que vê a diferença. As pessoas concordam quando sentem que os prejudicados seriam elas.",
+ next:"Se mesmo assim quiser o serviço básico: “Agradeço a sua honestidade. O serviço que procura não é este; posso indicar-lhe colegas que o fazem.”",
+ warn:"Não justifique a comissão com os seus custos (fotógrafo, destaques, “metade é da agência”): se vender depressa, vão pedir desconto. A história pessoal que o formador usa (o computador da filha) só faz sentido se for verdadeira para si."},
+{id:"o10",ctx:"Reunião",q:"Vendeu tão depressa que merece desconto.",type:"form",src:["P3.1"],
+ a:"Fico contente que tenha sido rápido, era o que queria. Diga-me: se tivesse demorado dez ou doze meses, estaria disposto a pagar mais? Então porquê pagar menos por ter sido rápido?",
+ why:"Por isso nunca se deixa a comissão “para falarmos no fim”: a pessoa lembra-se e pede desconto."},
+{id:"o11",ctx:"Reunião",q:"A minha casa vale mais do que isso.",type:"form",src:["P3.2","2.1","2.2","4"],
+ a:"Compreendo. Como chegou a esse valor? Vamos ver juntos o que um comprador encontra hoje: estes são os imóveis à venda aqui à volta.",
+ steps:[
+  "Pelo valor por metro quadrado destes imóveis, aplicado à sua área, falamos de cerca de [valor]. Vamos fazer o relatório, mas, mesmo valorizando, dificilmente passaria o limite deste segmento.",
+  "Ao pô-la no valor que pretende, vai competir com estes (análise do segmento acima). Se fosse comprador, comprava este T3 com garagem pelo mesmo valor ou pagava isso pelo seu? (Repita com vários.)",
+  "Imagine que um comprador vinha ver a casa e me perguntava se o estou a tentar enganar. O que lhe devo responder?",
+  "Seja transparente: depois de ver o que está à venda, pagava esse valor pela sua casa?",
+  "Os honorários dependem do preço: quanto mais alto, mais ganho. Mas não me sinto bem em influenciá-lo a pôr um valor que o vai prejudicar. Podemos pôr um pouco acima, dentro do segmento, para ter margem."],
+ why:"Nos primeiros 30 dias aparecem quase todos os interessados. Uma casa acima do segmento não é vista por quem a compraria; depois baixa aos poucos e fica “queimada”.",
+ next:"Use o “alvo de preço” e o cálculo do tempo até ao valor pedido, no separador Método.",
+ warn:"Distinga preços pedidos de preços de venda. Use dados reais da sua zona; uma análise da concorrência não é uma avaliação certificada."},
+{id:"o12",ctx:"Reunião",q:"Comprei caro / tenho um crédito alto.",type:"form",src:["P3.2"],
+ a:"Compreendo. Mas deixe-me perguntar: se tivesse comprado 50% abaixo do valor, hoje vendia 50% abaixo? E se a casa lhe tivesse sido oferecida, oferecia-a agora?",
+ steps:["O negócio que fez na altura foi o seu; quem compra hoje faz o dele.","Se fosse comprar e o vendedor lhe dissesse “vendo caro porque comprei caro”, o que lhe responderia?"],
+ why:"A pessoa vê por si que o preço depende do mercado e não da sua história."},
+{id:"o13",ctx:"Reunião",q:"Fiz obras de muitos milhares de euros.",type:"form",src:["P3.2"],
+ a:"As obras ficaram muito interessantes, ao seu gosto. Mas quem compra pode querer personalizar. Se tivesse posto puxadores de luxo de 50 mil euros, acha que alguém os pagava? (Com humor.)",
+ steps:["O que gastou deu-lhe conforto durante estes anos. Valorizou a casa, mas não na mesma proporção do investimento."],
+ why:"Obras simples (chão, cozinha corrente) valorizam. Acabamentos de luxo desajustados ao segmento não se recuperam."},
+{id:"o14",ctx:"Reunião",q:"Não tenho pressa nenhuma.",type:"form",src:["P3.2","P4"],
+ a:"Compreendo. Se o mercado na sua zona cresce cerca de [X]% por ano, para a casa valer o que pede faltam cerca de [N] meses. Quer vender hoje pelo valor justo ou esperar esse tempo?",
+ steps:["Se a puser hoje à venda com o valor de daqui a três anos, quando ela lá chegar as pessoas vão dizer que já ninguém a quis.","Nesse caso, o meu conselho é não a pôr já à venda. Eu só lhe sou útil se quiser mesmo vender."],
+ why:"Quem decide pôr a casa à venda tem algum objetivo; perguntar pelo tempo torna-o claro.",
+ next:"Calcule os meses com a ferramenta do separador Método, usando dados oficiais de evolução de preços."},
+{id:"o15",ctx:"Reunião",q:"Não quero placa.",type:"form",src:["P2.2"],
+ a:"Compreendo. Há alguma coisa que o preocupe em concreto na placa?",
+ steps:["(Vizinhos curiosos.) Ainda bem que me diz. Só trazemos quem tem capacidade de compra: qualificamos sempre antes.","Mas se um vizinho quiser comprar para si ou para um filho, não autoriza?","Quanto tempo seria o ideal para vender? Então vamos aproveitar todas as oportunidades e pôr a placa?"],
+ why:"Muitas vezes a objeção desfaz-se sozinha. Se for uma questão real de privacidade, aceite: o formador abdicava da placa e nem fotografava a fachada.",
+ extra:"Comece pelas cartas aos vizinhos, sem dizer qual é a casa: quem quer trocar liga-lhe a si.",
+ warn:"Em casa habitada, o formador só põe a placa depois do prazo de livre resolução (cerca de 14 dias). Confirme o prazo legal."},
+{id:"o16",ctx:"Reunião",q:"Também quero pôr a minha placa e vender eu.",type:"form",src:["P2.2"],
+ a:"Compreendo. Gostava de lhe perguntar: qual é o benefício que sente na minha ajuda? Sinto que há vontade de continuar a ser o senhor a promover a casa.",
+ steps:["A casa está à venda há mais de um ano: o que muda a partir de agora?","Se trouxer o senhor o comprador, já falámos do que acontece (se a agência o permitir). Mas não faz sentido eu investir em fotografias, vídeo e marketing para depois ser o seu número na placa."],
+ why:"Esclareça o papel de cada um com perguntas, sem confronto."},
+{id:"o17",ctx:"Reunião",q:"Tenho uma amiga interessada, à espera do crédito.",type:"form",src:["P2.2"],
+ a:"Compreendo, e é justo que me diga. Proponho avançarmos com o nosso acordo e escrevemos uma exceção: se vender a essa pessoa, não paga qualquer comissão, porque já lhe mostrou a casa antes de mim. Se ela não avançar, já estamos a trabalhar.",
+ why:"Remove o obstáculo sem perder tempo."},
+{id:"o18",ctx:"Reunião",q:"Quero estar presente nas visitas.",type:"adapt",src:["2.1","2.2","P2.1"],
+ a:"Compreendo perfeitamente, a casa é sua. Deixe-me explicar como trabalho: preparo o imóvel antes de cada visita, conheço os pontos fortes e as respostas para as fragilidades que os compradores usam para baixar o preço. Depois de cada visita dou-lhe notícias, e de quinze em quinze dias envio-lhe um resumo. Se quiser estar numa primeira fase, combinamos assim e vemos como corre.",
+ why:"Esta vontade nasce muitas vezes quando o consultor, na primeira visita, só apontou defeitos: o proprietário acha que tem de ser ele a vender. Previna-a falando da casa como falaria a um comprador.",
+ next:"Mostre o plano de marketing e o calendário de relatórios."},
+{id:"o19",ctx:"Reunião",q:"Vamos pensar e depois dizemos alguma coisa.",type:"comp",src:["2.2","4","P2.1"],
+ a:"Faz todo o sentido conversarem. Para vos ajudar, há alguma questão que tenha ficado por esclarecer? (ouvir) Proponho então o seguinte: deixo-vos a análise da concorrência e o plano, e falamos amanhã. Dá mais jeito às {hora1} ou às {hora2}?",
+ why:"O formador defende fazer tudo na mesma visita e levar sempre o contrato: entre visitas muitos desistem ou entregam a outra agência. Garanta, ao marcar, que estão presentes todos os que decidem.",
+ next:"Não saia sem data marcada."},
+{id:"o20",ctx:"Reunião",q:"Sente-se, vamos tomar um café primeiro.",type:"form",src:["2.2","P2.1"],
+ a:"Agradeço imenso a gentileza. Confesso que achava mais interessante começarmos por visitar o imóvel, porque sem o conhecer não sei o que lhe diga. Se mantiver a proposta, tomamos o café no final, e aí já tenho uma opinião para lhe dar. O que lhe parece?",
+ why:"Antes de ver a casa, a conversa vai logo para comissões e exclusividade, fora de ordem. Comece a visita pela sala, onde se recebem as visitas.",
+ next:"Percorra a casa vendo-a como a veria um comprador."},
+{id:"o21",ctx:"Reunião",q:"(Proprietário mal-educado ou agressivo.)",type:"form",src:["P1.1"],
+ a:"(Sorria e mantenha o tom.) Compreendo o que diz. Neste caso, infelizmente, não lhe poderia oferecer os nossos serviços: o que procura não é o que defendemos. Se quiser, deixo-lhe contactos de colegas da zona.",
+ why:"Saia de cabeça erguida. Ninguém tem o poder de alterar o seu estado; se precisar de desabafar, faça-o sozinho, nunca com o cliente."},
+{id:"o22",ctx:"Reunião",q:"Traga o cliente e, se ele gostar, assinamos depois.",type:"form",src:["1.1","P1.1","P3.1"],
+ a:"Com todo o gosto. E quanto à documentação, tem tudo tratado? Se o cliente gostar amanhã, vai querer avançar para o contrato-promessa. Sugiro encontrarmo-nos hoje para analisarmos os documentos e eu conhecer a casa. Dá-lhe mais jeito às 18h00 ou às 19h30?",
+ steps:["(Em casa, com tudo visto.) A casa está direitinha e a documentação em ordem. Para amanhã, preciso que assinemos o nosso acordo e a sua autorização para apresentar a casa a este cliente, ou a outros, se este escolher outra."],
+ why:"Ao telefone dizem “traga o cliente”; presencialmente, depois de ver a casa e os documentos, a conversa é outra. Nunca mostre um imóvel sem contrato escrito.",
+ next:"Se a pessoa não puder hoje, ofereça outros dois horários. Se não houver forma, “não aproveitamos este cliente, virão outros”.",script:"docs"},
+{id:"o23",ctx:"Telefone",q:"Isso de ter um cliente, dizem todos.",type:"form",src:["1.1","P1.1"],
+ a:"Tem toda a razão em desconfiar. Por isso lhe conto: ontem estive reunido com um casal com dois filhos que procura um {tipologia} até {preco}, perto da escola. A visita está marcada para amanhã às {hora1}. Quer aproveitar esta oportunidade?",
+ why:"Contar a história concreta (sem identificar o comprador) dá credibilidade. Dizer apenas “tenho um cliente” não convence.",
+ next:"Se aceitar, marque a ida a casa antes da visita.",
+ warn:"Só quando é verdade. Nunca invente compradores, visitas ou mandatos."},
+{id:"o24",ctx:"Comprador",q:"(Comprador) Quando tiver alguma coisa, ligue-me.",type:"form",src:["1.1","2.1"],
+ a:"Prefiro não o deixar à espera. Vamos combinar já: amanhã reunimo-nos aqui e apresento-lhe as possibilidades disponíveis no mercado. Dá-lhe mais jeito às {hora1} ou às {hora2}?",
+ why:"Quem procura casa está num momento de mudança e procura ativamente. Se não marcar, vai a outra agência no mesmo dia.",
+ next:"Lance de imediato a angariação reativa.",script:"ainda"}
+];
+
+/* ---------- Checklist da reunião ---------- */
+let PHASES=[
+{id:"prep",t:"Preparar",s:"Antes de sair do escritório",items:[
+ ["Confirmar a visita no turno anterior","Telefone e, a seguir, mensagem com nome, contacto e hora.","2.1"],
+ ["Análise da concorrência impressa","Imóveis comparáveis à venda hoje, com links, área, preço e €/m². Valor médio e desvio-padrão (o formador aceita até cerca de 15%). Em papel timbrado, para oferecer.","2.2"],
+ ["Pasta de angariação","Apresentação dos serviços, plano de marketing com o nome do proprietário e do imóvel, testemunhos genuínos.","4"],
+ ["Enviar antes a apresentação, se fizer sentido","Inclua perguntas que o proprietário pode querer fazer: experiência no mercado, como vai vender, como avalia, onde promove, de quanto em quanto tempo dá notícias.","4"],
+ ["Saber exatamente o que vai oferecer","Liste os serviços que presta mesmo e o benefício de cada um. Nunca prometa o que não faz.","2.2"],
+ ["Contrato de mediação na pasta","Minuta validada pelo IMPIC, ou contrato em texto corrido. Leve-o sempre na primeira visita.","3.1"],
+ ["Lista dos documentos a pedir","Use a fase “Documentos e contrato” abaixo.","3.2"],
+ ["Imagem segura e cuidada","Ir forte, como um bom advogado, e nunca com ar frágil.","2.2"],
+ ["Confirmar quem decide", "Casal: os dois presentes. Pais idosos: convidar o filho que decide, mesmo que não assine. Se alguém estiver longe, videochamada.", "P2.1"],
+ ["Preço anunciado alto? Levar também a análise do segmento acima", "Para o proprietário ver o que se compra por esse valor.", "P3.2"],
+ ["Ter os seus números reais", "Tempo médio de venda dos seus exclusivos, vendas recentes da zona. Só cite o que tiver registado.", "P2.1"],
+ ["Plano de serviço pronto a anexar ao acordo", "Para quem já teve uma má experiência: compromisso assinado por si.", "P2.2"]]},
+{id:"chegar",t:"Chegar",s:"Os primeiros minutos",items:[
+ ["Cumprimentar olhos nos olhos, com um sorriso","Aperto de mão firme, dizer o nome. Não há segunda oportunidade para uma primeira boa impressão.","2.1"],
+ ["“Dá-me licença? Com licença.”","","2.1"],
+ ["Adiar o café para depois da visita","“Agradeço imenso. Se lhe parecer bem, começamos por ver o imóvel e depois conversamos.”","2.2"],
+ ["Postura segura", "Queixo na horizontal, olhar nos olhos, sorriso verdadeiro.", "P2.1"],
+ ["Começar a visita pela sala", "É onde se recebem as visitas; depois os espaços mais privados.", "P2.1"]]},
+{id:"visita",t:"Percorrer a casa",s:"Criar relação: o proprietário tem de gostar de si",items:[
+ ["Falar da casa como falaria a um comprador","Elogie o que é bom: luz, decoração, orientação. Não aponte defeitos para baixar o preço.","2.1"],
+ ["Sem prancheta nem checklist à vista","A grelha técnica fica para depois de angariar. Agora o foco é a pessoa.","2.2"],
+ ["Ficar à direita do proprietário","Técnica de PNL defendida pelo formador: a direita está associada ao futuro. Se a pessoa for “invertida”, fique à esquerda.","2.1"],
+ ["Anotar mentalmente forças e fragilidades","Para a análise SWOT: o que distingue a casa e o que os compradores vão usar para pedir desconto.","2.2"],
+ ["Perceber a motivação e o preço","“Como chegou a esse valor? Que ideia tem da venda?” Ajuda a perceber a flexibilidade.","2.1"],
+ ["Casal: o mesmo olhar e interesse para os dois", "Se um deles não gostar de si, não há acordo.", "P2.1"],
+ ["Linguagem", "“Acolhedora”, “confortável”, “interessante”. Sem diminutivos. Não mencione defeitos: ficam para a SWOT.", "P1.1"]]},
+{id:"reuniao",t:"Apresentar o serviço",s:"Sentados à mesa: dar razões para o escolherem",items:[
+ ["Transição para a mesa","“A casa é muito interessante, obrigado por me receber. Seria útil conversarmos uns minutos: dava-lhe a minha opinião sobre o que ajudaria a vender mais rápido. Podemos usar a mesa da sala?”","2.2"],
+ ["Oferecer a análise da concorrência","“É uma oferta minha, independentemente de trabalharmos juntos.” Pergunte se sabia quantos imóveis competem com o dele.","4"],
+ ["Apresentar as duas formas de trabalhar","Uma sem compromisso de parte a parte, e o serviço diferenciado. Sem dizer “exclusivo”.","2.2"],
+ ["Análise SWOT","Pontos fortes para a publicidade; fragilidades convertidas em oportunidades (ex.: portas da cozinha).","2.2"],
+ ["Relatório de avaliação, com as três razões","Para o proprietário (preço justo), para os compradores (justifica o valor) e para si (não aceita imóveis fora do segmento).","2.2"],
+ ["Home staging","Preparar a casa com o que existe, sem obras.","2.2"],
+ ["Reportagem fotográfica","Grande angular. O objetivo é prender o comprador até à 5.ª fotografia.","2.2"],
+ ["Vídeo imobiliário","Percurso como numa visita real, para criar o desejo de visitar.","2.2"],
+ ["Plano de marketing semana a semana","Inclui a apresentação à equipa, cartas na vizinhança, portais e redes. Relatório de 15 em 15 dias e reunião mensal.","2.2"],
+ ["Apoios incluídos (se os tiver)","Jurídico (contrato-promessa), fiscal, crédito e acompanhamento até à escritura.","2.2"],
+ ["Honorários sem pausas", "Apresente-os enquanto preenchem o acordo, sem “parece-lhe bem?”. Ver guião “Apresentar os honorários”.", "P3.1"]]},
+{id:"fecho",t:"Fechar",s:"As quatro perguntas, por esta ordem",items:[
+ ["1. “Quando pensa na mediação imobiliária, pensa em tudo isto que lhe apresentei?”","Esperado: não. Quebra a crença de que “são todos iguais”.","2.2"],
+ ["2. “Gostou? Acrescentaria algo mais para que este serviço fosse cinco estrelas para si?”","Esperado: não. É o proprietário a dizer que o serviço é excelente.","2.2"],
+ ["3. “E quanto a mim, acha que estou à altura para o representar na venda da sua casa?”","Esperado: sim.","2.2"],
+ ["4. “Fico muito feliz. Gostaria de lhe perguntar se confia apenas a mim a venda do seu imóvel?”","“Apenas” substitui a palavra “exclusivo”.","2.2"],
+ ["Os quatro critérios","“Só oferecemos este serviço quando gostamos do imóvel, a documentação está em ordem, o preço está ajustado ao segmento e o proprietário valoriza este tipo de serviço.”","2.2"],
+ ["“Vamos então fazer o nosso acordo?”","Peça o cartão de cidadão e preencham o contrato em conjunto, lendo-o juntos.","2.2"],
+ ["Se disser “não quero exclusividade”", "Pergunte o que o preocupa em concreto e siga o caminho da causa (separador Objeções).", "P2.2"],
+ ["Se reclamar da comissão ou do preço", "Escute em silêncio, diga “compreendo” e continue com perguntas, nunca com argumentos.", "P3.1"]]},
+{id:"docs",t:"Documentos e contrato",s:"Confirme antes de promover",items:[
+ ["Caderneta predial (Portal das Finanças)","Atenção: uma garagem que é fração autónoma tem caderneta própria.","3.1"],
+ ["Certidão permanente do registo predial","É o documento que confirma os titulares. Veja os ónus: hipoteca, penhoras, usufruto, direito de superfície.","3.2"],
+ ["Certificado energético","Obrigatório para promover, salvo as isenções previstas.","3.2"],
+ ["Licença de utilização ou documento equivalente","Prédios anteriores a 7 de agosto de 1951: averbamento ou certidão da Câmara. O formador aconselha manter este cuidado mesmo quando a escritura já não o exige.","3.1"],
+ ["Ficha técnica da habitação","Quando aplicável.","3.2"],
+ ["Condomínio","Quotas em dívida e obras ou quotas extra já aprovadas.","3.2"],
+ ["Identificação dos proprietários","Estado civil (assinatura do cônjuge), herdeiros, menores, procurações. Comprovativo da profissão para a prevenção do branqueamento de capitais.","3.2"],
+ ["Direitos de preferência","Inquilino, confinantes e outros. Planeie a comunicação.","3.2"],
+ ["Contratos de mediação já em vigor","Um contrato em exclusivo não produz efeito sobre contratos em aberto ainda válidos.","3.1"],
+ ["Contrato de mediação preenchido","Regime (exclusivo ou não), prazo, remuneração, ónus e dívida, identificação do imóvel. Assinado pelo representante legal da empresa.","3.2"]]},
+{id:"depois",t:"Depois da reunião",s:"Nas horas seguintes",items:[
+ ["Se angariou: vídeo curto para as redes","Ver o guião “Vídeo curto ao angariar”.","4"],
+ ["Cartas na vizinhança","Ver o guião “Acabei de angariar”.","1.2"],
+ ["Marcar home staging, fotografias e vídeo","","2.2"],
+ ["Procurar mais dois imóveis no mesmo subsegmento","Para ter sempre três para mostrar a quem ligar.","1.2"],
+ ["Se não angariou: desejar sucesso e marcar o próximo contacto","Registe o imóvel no CRM para uma futura angariação reativa.","1.1"],
+ ["Enviar o cartão virtual por WhatsApp", "", "P1.1"],
+ ["Registar a data do contrato", "Quando vender, registe os dias até à venda e a margem negocial. São os números que vai poder mostrar.", "P2.1"]]}
+];
+
+/* ---------- Treino: perguntas ---------- */
+let QUIZ=[
+{q:"Ao telefone, o proprietário diz: “Não quero trabalhar com imobiliárias.” O que recomenda o formador?",o:["Insistir nas vantagens da exclusividade até ele mudar de ideias.","Desejar-lhe sucesso, pôr-se ao dispor, dizer o nome e pedir para ligar daqui a 30 dias.","Desligar educadamente e riscar o contacto.","Oferecer logo uma comissão mais baixa."],c:1,e:"Psicologia inversa: ele espera uma má reação. Fica a porta aberta e o imóvel registado para quando tiver um comprador.",s:"1.1"},
+{q:"No fim do primeiro telefonema, como deve propor a reunião?",o:["“Quando é que lhe dá jeito?”","“Posso passar aí um dia destes?”","Dar duas opções de horário seguidas, sem fazer pausa antes.","Pedir o email para enviar informação."],c:2,e:"Quem marca é sempre o consultor. Uma pausa antes das opções convida ao “não”.",s:"2.1"},
+{q:"Um casal quer um T3 no centro por 300 mil euros e esse imóvel não existe no mercado. O que faz?",o:["Diz-lhes que vão ter de ir para a periferia.","Valida as razões deles e pergunta se preferem um T2 no centro ou um T3 a dez minutos.","Diz que liga quando surgir algo.","Mostra-lhes um T3 de 375 mil euros para os convencer."],c:1,e:"É a técnica das perguntas alternativas: as duas opções são realistas e a escolha é deles. Termine com “O que lhe parece?”.",s:"1.1"},
+{q:"Marcou uma visita com um comprador para amanhã e não tem o imóvel. Qual é o primeiro passo?",o:["Ligar logo a colegas de outras marcas para partilhar.","Mensagem “SOS” no grupo dos colegas da própria agência.","Pôr um anúncio a dizer que procura imóveis.","Esperar que algum proprietário ligue."],c:1,e:"A ordem é: colegas da agência, proprietários que disseram não, prospeção e cartas no local e, só no fim, partilha com outras marcas (50% da comissão).",s:"1.1"},
+{q:"Chega a casa do proprietário e ele convida-o a sentar-se para um café. O que faz?",o:["Aceita e começa a explicar as comissões.","Agradece e propõe ver primeiro a casa; o café fica para depois.","Recusa sem explicar.","Abre logo a checklist técnica."],c:1,e:"Sem ter visto a casa, a conversa vai para comissões e exclusividade fora de ordem.",s:"2.2"},
+{q:"Durante a visita à casa, qual é a atitude certa?",o:["Apontar defeitos para preparar uma descida de preço.","Ver a casa como a veria um comprador e elogiar o que tem de bom.","Preencher a grelha técnica com cuidado.","Falar já da duração do contrato."],c:1,e:"Ninguém entrega em exclusivo a quem não gosta. Apontar defeitos também faz o proprietário querer estar em todas as visitas.",s:"2.1"},
+{q:"O que é a análise da concorrência que leva para a reunião?",o:["Os preços a que se venderam casas na zona.","Os imóveis comparáveis que estão à venda hoje.","Uma avaliação certificada.","O valor patrimonial tributário."],c:1,e:"Mostra com que imóveis o proprietário vai competir. Não é uma avaliação. Pode oferecê-la logo no início da conversa.",s:"2.2"},
+{q:"Como deve apresentar os regimes de contrato?",o:["“Eu só trabalho em exclusivo.”","“Há duas formas de trabalhar com a mediação: uma sem compromisso de parte a parte e um serviço diferente que lhe quero mostrar.”","Não falar disso até ao fim.","Propor primeiro o contrato em aberto."],c:1,e:"A escolha fica com o proprietário e ele deixa de estar na defensiva. As palavras “exclusivo” e “não exclusivo” não se usam.",s:"2.2"},
+{q:"Qual é a ordem das perguntas de fecho?",o:["Confia apenas a mim → gostou → estou à altura → pensa em tudo isto.","Pensa em tudo isto → acrescentaria algo → estou à altura → confia apenas a mim.","Estou à altura → confia apenas a mim → assinamos.","Gostou → assinamos o exclusivo?"],c:1,e:"Primeiro desmontam-se as crenças, depois é o proprietário a dizer que o serviço é excelente, depois a confiança em si e, só no fim, o pedido.",s:"2.2"},
+{q:"Quais são as três razões do relatório de avaliação?",o:["Para o proprietário, para os compradores e para o próprio consultor.","Para o banco, para as Finanças e para o notário.","Só para justificar a comissão.","Para cumprir a lei."],c:0,e:"O proprietário fica a saber o preço justo, os compradores têm de justificar as propostas baixas e o consultor não aceita imóveis acima do segmento.",s:"2.2"},
+{q:"Acabou de angariar um T2 entre 250 e 300 mil euros. Qual é a preocupação seguinte?",o:["Só publicitar este imóvel.","Angariar mais dois imóveis no mesmo subsegmento.","Baixar o preço para vender depressa.","Partilhar com todas as agências."],c:1,e:"O consultor pesca “à rede”: quem liga por um imóvel deve ter três para ver. Roda-se a publicidade entre eles.",s:"1.2"},
+{q:"Um cliente comprou casa consigo há um mês. O que recomenda o formador?",o:["Nada: o negócio está fechado.","Uma mensagem automática da empresa.","Ligar, perguntar como está e passar lá com um presente.","Pedir logo referências."],c:2,e:"No dia da escritura um presente não surpreende. Um mês depois, supera a expectativa.",s:"1.1"},
+{q:"Tem uma reunião no sábado às 11h. Quando confirma?",o:["No sábado de manhã.","Na sexta à tarde.","Não confirma, para não dar hipótese de desmarcar.","Na quinta-feira."],c:1,e:"Confirme no turno útil anterior e, se houver contratempo, ajuste com simpatia.",s:"2.1"},
+{q:"O proprietário tem o imóvel em aberto em duas agências, com contratos válidos, e quer dar-lhe exclusividade. O que deve saber?",o:["Pode assinar o exclusivo e os outros deixam de contar.","O exclusivo só produz efeito depois de rescindidos os contratos em vigor.","Basta pôr no contrato uma data posterior.","Deve dizer às agências que o imóvel já está vendido."],c:1,e:"Segundo o formador (que cita o IMPIC), o exclusivo sobre contratos válidos não tem eficácia. A rescisão deve ser feita com verdade.",s:"3.1"},
+{q:"O que é obrigatório numa carta deixada debaixo das portas?",o:["Apenas o nome do consultor.","A denominação da empresa e o número da licença AMI.","Uma fotografia do consultor.","O preço do imóvel."],c:1,e:"Vale para qualquer comunicação: cartas, emails, placas, envelopes. O formador refere coimas por incumprimento.",s:"1.2"},
+{q:"Na reunião, o proprietário diz “isso é exclusividade, não quero”. Qual é o primeiro passo?",o:["Explicar porque é que o exclusivo é melhor para ele.","Dizer que o vosso exclusivo é só de promoção.","Dizer “compreendo” e perguntar o que o preocupa em concreto no regime de exclusividade.","Aceitar logo fazer em aberto."],c:2,e:"Por trás do “não quero exclusivo” há uma causa: quer rapidez, quer poder vender ele próprio ou teve uma má experiência. Só depois de a conhecer pode responder ao que interessa.",s:"P2.2"},
+{q:"Qual é a diferença entre dizer “compreendo” e dizer “concordo”?",o:["Nenhuma, são sinónimos.","“Compreendo” põe-no do lado da pessoa sem dizer que ela tem razão.","“Concordo” é mais simpático e por isso é preferível.","“Compreendo” soa a frio e deve ser evitado."],c:1,e:"Ninguém reage mal a “compreendo”. “Concordo” daria razão à pessoa e tiraria o sentido à sua chamada.",s:"P1.1"},
+{q:"Ao apresentar os honorários, o que deve evitar?",o:["Dizer a percentagem.","Fazer uma pausa ou perguntar “parece-lhe bem?” depois do valor.","Explicar quando é pago.","Falar do prazo do acordo."],c:1,e:"Apresente com segurança e continue. Uma pausa ou um pedido de aprovação convida a pessoa a discordar.",s:"P3.1"},
+{q:"O proprietário diz que 3% é o justo. Qual é a pergunta seguinte que o formador recomenda?",o:["“3% é muito pouco para o meu trabalho.”","“Como chegou a esse valor? Porquê 3% e não 2% ou 4%?”","“Então faço 4%.”","“Os outros não fazem nada.”"],c:1,e:"A pergunta leva-o a dizer que é o que outros cobram. A seguir pergunta, um a um, se esses colegas incluíam análise da concorrência, SWOT, relatório e home staging.",s:"P3.1"},
+{q:"O proprietário quer pôr a casa 20% acima do valor do segmento. O que leva para a reunião?",o:["Só a análise da concorrência do segmento certo.","A análise do segmento certo e também a do segmento acima, para lhe perguntar se compraria a casa dele em vez das outras.","Nada: deixa-o pôr o preço que quer.","Uma lista de defeitos da casa."],c:1,e:"Ao ver o que se vende pelo valor que ele quer (maior, mais novo, com garagem), é o próprio proprietário que conclui.",s:"P3.2"},
+{q:"O proprietário teve uma má experiência com um exclusivo. O que propõe o formador?",o:["Dizer que você é diferente e pedir que confie.","Criticar a agência anterior.","Perguntar se ficaria satisfeito se cumprisse tudo e propor anexar o plano ao acordo, com a possibilidade de o terminar se não cumprir.","Fazer um contrato de um mês."],c:2,e:"Se dá a sua palavra, o que lhe custa assiná-la? Ele deixa de arriscar.",s:"P2.2"},
+{q:"Ao telefone, o proprietário avisa: “exclusividade não dou a ninguém”. O que faz?",o:["Explica as vantagens do exclusivo ao telefone.","Diz que trabalha das duas formas, que ele decide o que acha melhor, e propõe dois horários.","Desliga, porque só trabalha em exclusivo.","Diz “depois falamos disso aí”."],c:1,e:"Ao telefone discutir o exclusivo é perder. O objetivo é a reunião. (Só diga que trabalha das duas formas se a sua agência o permitir.)",s:"P1.2"},
+{q:"Quais são os rácios mínimos que o formador considera aceitáveis?",o:["5% dos contactos dão visita e 10% das visitas dão contrato.","20% dos contactos dão visita e 30% das visitas dão contrato.","50% e 50%.","Não há mínimos."],c:1,e:"Abaixo disso, reveja a forma de abordar. Com 20% e 30%, a conversão global ronda os 6%.",s:"P1.2"},
+{q:"A sala é pequena. Como fala dela com o proprietário?",o:["“A salinha é um bocadinho pequena.”","“É um salão!”","“Não é muito grande, mas é muito acolhedora e permite dois ambientes.”","Não fala da sala."],c:2,e:"Não mente nem aponta defeitos. Evite diminutivos (“salinha”), que fazem parecer tudo mais pequeno.",s:"P2.1"},
+{q:"Quantas etapas são precisas, normalmente, para ultrapassar o “não quero imobiliária”?",o:["Uma: insistir até aceitar.","Duas: primeiro deixar a porta aberta com simpatia e ajuda; depois voltar a ligar quando tiver um comprador real.","Três: email, carta e visita.","É impossível ultrapassar."],c:1,e:"É a objeção mais difícil e não se resolve num só contacto.",s:"P1.1"}
+];
+
+/* ---------- Treino: simulações ---------- */
+const SIMS={
+frio:{t:"Primeira chamada a um particular",intro:"Viu o anúncio de um T2 na Quinta Nova e liga ao proprietário, o Sr. António.",start:"a",nodes:{
+ a:{say:"Estou, sim?",ch:[
+  ["Boa tarde, falo com o Sr. António? O meu nome é {meuNome}, da {agencia}. Sou especialista nesta zona e liguei assim que vi o seu anúncio.",2,"Boa abertura: apresenta-se e explica porque liga.","b"],
+  ["Boa tarde, sou de uma imobiliária e gostava muito de angariar a sua casa.",0,"Assim, quem ganha é você. A pessoa não tem razão nenhuma para querer.","x"],
+  ["Boa tarde, vi o anúncio. Que comissão estaria disposto a pagar?",0,"Começou pela comissão: o pior assunto para abrir.","x"]]},
+ b:{say:"Sim, sou eu. Diga.",ch:[
+  ["Só uma questão: o seu apartamento fica na urbanização da Quinta Nova, não fica? Sei que têm imensa luz natural.",2,"Lateralidade: o foco vai para a casa e ele começa a valorizá-la.","c"],
+  ["Trabalho com um serviço completo em exclusivo, com fotografias profissionais e vídeo.",0,"Cedo demais. A palavra “exclusivo” põe-no logo na defensiva.","x"],
+  ["Qual é o preço mínimo que aceita?",0,"Pergunta agressiva, que o leva a fechar-se.","x"]]},
+ c:{say:"Fica, sim! A sala tem sol a tarde toda e dá para o parque.",ch:[
+  ["Era mesmo o que eu pensava. A razão do meu telefonema é ver como o poderia ajudar numa venda mais rápida e nas melhores condições. Propunha visitar o imóvel e dar-lhe a minha opinião sobre a melhor estratégia. Dá-lhe mais jeito hoje às 18h00 ou amanhã às 10h00?",2,"Perfeito: o benefício é dele, duas opções e sem pausas.","d"],
+  ["Ótimo. Posso passar aí um dia destes?",0,"Quem marca é você. “Um dia destes” fica sempre para depois.","w"],
+  ["Ótimo. Então… (pausa) acha que nos podíamos reunir?",0,"A pausa e a pergunta de “sim ou não” abrem caminho à recusa.","x"]]},
+ w:{say:"Um dia destes… logo se vê. Ligue-me para a semana.",ch:[
+  ["Então proponho já: amanhã às 10h00 ou ao fim da tarde, às 18h30? O que lhe parece?",1,"Recuperou bem, com duas opções concretas.","d"],
+  ["Está bem, eu ligo para a semana.",0,"Ficou sem nada marcado.","fail"]]},
+ d:{say:"Pode ser amanhã às 10h00.",ch:[
+  ["Combinado. Confirma-me a morada? Se puder, tenha à mão a documentação do imóvel. Ao fim da tarde ligo-lhe só a confirmar.",2,"Confirma a morada, pede a documentação e marca a confirmação no turno anterior.","ok"],
+  ["Ok, então até amanhã.",1,"Ficou marcado, mas falta a morada, a documentação e a confirmação.","ok"]]},
+ x:{say:"Olhe, não estou interessado em imobiliárias.",ch:[
+  ["Compreendo perfeitamente, com certeza tem a ver com os honorários. Desejo-lhe muito sucesso, a casa parece muito interessante. Fico ao dispor: o meu nome é {meuNome}. Permite-me que lhe ligue daqui a 30 dias para saber como está a correr?",2,"Saída correta: deixa a porta aberta e o imóvel fica registado.","banho"],
+  ["Mas sozinho vai demorar muito mais a vender, sabe?",0,"Discutir só confirma a ideia que ele tinha das imobiliárias.","fail"],
+  ["Posso fazer-lhe metade da comissão.",0,"Desvaloriza o seu serviço logo à partida.","fail"]]}},
+ ends:{ok:["good","Reunião marcada. Agora prepare a análise da concorrência e confirme no turno anterior."],banho:["mid","Sem reunião, mas com a relação intacta. Registe o imóvel e ligue daqui a 30 dias, ou antes, se tiver um comprador."],fail:["bad","A conversa terminou sem reunião e sem porta aberta. Volte a tentar."]}},
+fecho:{t:"Fecho da reunião de angariação",intro:"Acabou de apresentar os serviços ao Sr. Miguel, sentados à mesa da sala.",start:"a",nodes:{
+ a:{say:"Gostei muito da apresentação.",ch:[
+  ["Fico contente. Diga-me: quando pensa na mediação imobiliária, pensa em tudo isto que lhe apresentei?",2,"Primeira pergunta de fecho.","b"],
+  ["Então, assina o contrato de exclusividade?",0,"Saltou etapas e usou as duas palavras que mais assustam.","x"],
+  ["Quer pensar e eu volto cá na próxima semana?",0,"Entre visitas muitos desistem ou entregam a outro.","risk"]]},
+ b:{say:"Sinceramente, não. Achava que só punham a casa na internet.",ch:[
+  ["E quanto ao serviço que lhe apresentei, acrescentaria algo mais para que fosse cinco estrelas para si?",2,"Segunda pergunta: é ele a dizer que o serviço é excelente.","c"],
+  ["Pois, a maioria dos colegas não faz nada.",0,"Nunca denigra os colegas: desvaloriza o setor e a si próprio.","c"]]},
+ c:{say:"Não, acho que está muito completo.",ch:[
+  ["E quanto a mim, acha que estou à altura para o representar na venda da sua casa?",2,"Terceira pergunta.","d"],
+  ["Então vamos assinar o contrato de exclusividade.",0,"Faltam as duas últimas perguntas, e “contrato de exclusividade” cria resistência.","x"]]},
+ d:{say:"Acho que sim.",ch:[
+  ["Fico muito feliz. Então gostaria de lhe perguntar se confia apenas a mim a venda do seu imóvel?",2,"O pedido, sem a palavra “exclusivo”.","e"]]},
+ e:{say:"Sim, confio.",ch:[
+  ["Só oferecemos este serviço quando gostamos do imóvel, a documentação está em ordem, o preço está ajustado ao segmento e o proprietário valoriza o serviço. É o seu caso. Vamos então fazer o nosso acordo? Pode ir buscar o seu cartão de cidadão? Vamos lendo e preenchendo em conjunto.",2,"Fecho completo: os critérios reforçam o valor e o contrato é feito na hora.","ok"],
+  ["Ótimo, deixo-lhe o contrato para ler e passo cá depois.",0,"Deixou o acordo para depois.","risk"]]},
+ x:{say:"Hum… exclusivo não dou a ninguém.",ch:[
+  ["Compreendo. Há duas formas de trabalhar com a mediação: uma sem compromisso de parte a parte e este serviço diferente que lhe mostrei. É o senhor quem escolhe. Diga-me: quando pensava na mediação, pensava em tudo isto?",1,"Recuperou com as “duas formas” e voltou às perguntas.","b"],
+  ["Então fica em aberto, não há problema.",0,"Desistiu do serviço que acabou de apresentar.","open"]]}},
+ ends:{ok:["good","Acordo feito na primeira visita. Agora: vídeo curto, cartas na vizinhança e marcação das fotografias."],risk:["bad","Sem acordo assinado. O formador alerta que, até à visita seguinte, muitos proprietários desistem ou entregam a outra agência."],open:["mid","Ficou em aberto. Pode ser uma decisão válida, mas não chegou a usar as perguntas de fecho."]}},
+exclusivo:{t:"“Não quero exclusividade” na reunião",intro:"Apresentou o serviço ao Sr. Tomás e perguntou se confia apenas em si a venda da casa.",start:"a",nodes:{
+ a:{say:"Isso é exclusividade, não é? Exclusividade não quero.",ch:[
+  ["Compreendo o que refere. Gostaria de o compreender um pouco melhor: o que é que o preocupa em concreto no regime de exclusividade?",2,"Antes de responder, descubra a causa.","b"],
+  ["Mas o exclusivo é muito melhor para si, vai ver que se arrepende se não o fizer.",0,"Contra-argumentar põe-no na defensiva.","x"],
+  ["Não se preocupe, o nosso exclusivo é só de promoção: partilhamos com todas as agências.",1,"Pode acertar, mas também pode responder a uma preocupação que ele não tem.","b"]]},
+ b:{say:"Quero pôr em várias agências, para vender mais depressa.",ch:[
+  ["Compreendo; no seu lugar talvez pensasse o mesmo. Diga-me: em sua opinião, o que vai fazer cada uma dessas agências para vender?",2,"Uma pergunta, em vez de uma resposta.","c"],
+  ["Pôr em várias agências queima a casa, é um erro.",0,"Está a dizer-lhe que está errado.","x"]]},
+ c:{say:"Publicidade, acho eu.",ch:[
+  ["Então vai encontrar a sua casa cinco ou seis vezes no mesmo portal, com fotos e preços diferentes. Se fosse comprador, o que pensaria?",2,"Agora é ele que se põe no lugar do comprador.","d"],
+  ["Pois, e fazem todos muito mal.",0,"Nunca denigra colegas.","x"]]},
+ d:{say:"Que o dono está com pressa… se calhar até fazia uma proposta mais baixa.",ch:[
+  ["É isso que quer que aconteça consigo? E prefere ver a casa muitas vezes com fotos simples, lá para a quinta página, ou uma vez só, em destaque, com fotos profissionais e home staging?",2,"Ele conclui sozinho o que é melhor para ele.","e"]]},
+ e:{say:"Uma vez em destaque, claro.",ch:[
+  ["E lembre-se: qualquer agência pode vender a sua casa, nós partilhamos e o senhor não paga mais por isso. Vamos fazer o nosso acordo?",2,"Fecho leve, sem “contrato” nem “exclusivo”.","ok"],
+  ["Então assine aqui o contrato de exclusividade.",0,"As duas palavras que criam resistência.","risk"]]},
+ x:{say:"Lá está, vocês querem é impor.",ch:[
+  ["Peço desculpa, compreendo. Gostava de o compreender melhor: o que é que o preocupa em concreto?",1,"Recuperou a tempo, com uma pergunta.","b"],
+  ["Então fica em aberto, não faz mal.",0,"Desistiu sem perceber a causa.","open"]]}},
+ ends:{ok:["good","Acordo feito, e foi ele a concluir que era o melhor."],risk:["bad","Ficou perto, mas a forma do pedido criou resistência."],open:["mid","Ficou em aberto sem saber o que o preocupava."]}},
+comissao:{t:"“Não pago 5%”",intro:"Apresentou os honorários de 5% ao Sr. Henrique, que quer vender por 300 mil euros.",start:"a",nodes:{
+ a:{say:"Gostei de tudo, mas 5% não pago. Isso são 15 mil euros!",ch:[
+  ["(Escuta em silêncio até ele parar.) Compreendo, Sr. Henrique. Gostava de o compreender melhor: em função do serviço que lhe apresentei, qual seria o valor justo?",2,"Escutou e devolveu a pergunta com leveza.","b"],
+  ["É o nosso preço, não fazemos descontos.",0,"Fecha a conversa sem a ter percebido.","x"],
+  ["Posso fazer-lhe 4%.",0,"Cedeu à primeira e desvalorizou o serviço.","fail"]]},
+ b:{say:"3% é o justo.",ch:[
+  ["Como chegou a esse valor? Porquê 3% e não 2% ou 4%?",2,"Ele vai dizer que é o que outros cobram.","c"],
+  ["3% é muito pouco para tudo o que eu faço.",0,"Argumento seu, não conclusão dele.","x"]]},
+ c:{say:"É o que as outras agências cobram.",ch:[
+  ["Conheço colegas que cobram isso. E quando o visitaram, trouxeram-lhe uma análise da concorrência? Uma SWOT? Um relatório de avaliação? Home staging?",2,"Ao detalhar, é ele que vê a diferença.","d"],
+  ["Pois, mas essas não fazem nada.",0,"Nunca fale mal de colegas.","x"]]},
+ d:{say:"Isso não… não trouxeram nada disso.",ch:[
+  ["Se fosse meu colega e prestasse este serviço, sentia-se confortável em cobrar 3%, como quem não faz nada disto?",2,"Ele põe-se no seu lugar.","e"]]},
+ e:{say:"Pois… se calhar não.",ch:[
+  ["Seja sincero: se hoje lhe oferecessem 294 mil, vendia? (…) Em segundos baixou 6 mil euros a um comprador que nem existe. Prefiro que mos pague a mim, para o defender. Se defendo assim os meus honorários, imagine como defendo o preço da sua casa. Vamos fazer o nosso acordo?",2,"Ele sente que precisa de alguém que o defenda.","ok"]]},
+ x:{say:"Então não chegamos a acordo.",ch:[
+  ["Compreendo. Gostava de o perceber melhor: em sua opinião, qual seria o valor justo para este serviço?",1,"Voltou às perguntas.","b"],
+  ["Está bem, faço por 3%.",0,"Cedeu sem que ele tivesse visto a diferença.","fail"]]}},
+ ends:{ok:["good","Acordo aos 5%, e foi o proprietário a concluir que valia a pena."],fail:["bad","Baixou os honorários sem necessidade. Repita, usando só perguntas."]}},
+preco:{t:"“A minha casa vale mais”",intro:"A análise da concorrência indica cerca de 266 mil euros. O Sr. Rodrigo quer pôr a casa a 320 mil.",start:"a",nodes:{
+ a:{say:"Eu quero 320 mil pela casa, nem menos.",ch:[
+  ["Compreendo. Como chegou a esse valor?",2,"Primeiro perceber, depois mostrar.","b"],
+  ["Isso é muito acima do mercado, ninguém compra.",0,"Atacou o preço dele; vai defender-se.","x"]]},
+ b:{say:"Um vizinho vendeu bem, e a minha casa é melhor.",ch:[
+  ["Vamos ver juntos o que um comprador encontra hoje por esse valor. (Mostra o segmento acima.) Se fosse comprador, comprava este T3 com garagem por 325 mil ou pagava 320 mil pelo seu T2?",2,"As evidências falam por si.","c"]]},
+ c:{say:"Bem… se calhar o T3.",ch:[
+  ["Os honorários dependem do preço: quanto mais alto, mais ganho. Mas não me sinto bem em deixá-lo pôr um valor que o vai prejudicar. Podemos pôr um pouco acima, dentro do segmento, por exemplo 285 mil, para ter margem. O que lhe parece?",2,"Mostra que está do lado dele.","ok"],
+  ["Pois, então baixe para 266 mil.",1,"Certo no valor, mas sem lhe dar margem nem escolha.","ok"]]},
+ x:{say:"Então vou a outra agência que me ponha a 320.",ch:[
+  ["Compreendo. Antes, permite-me que lhe mostre o que está hoje à venda por esse valor? Depois decide.",1,"Voltou às evidências.","b"],
+  ["Está bem, pomos a 320.",0,"Vai ficar meses parada e queimada.","fail"]]}},
+ ends:{ok:["good","Preço dentro do segmento, decidido pelo proprietário com base nas evidências."],fail:["bad","Aceitou um preço fora do segmento: a casa vai ficar meses parada."]}}
+};
+
+/* ---------- Método: princípios ---------- */
+let PRINCIPLES=[
+["Perguntas alternativas","Dê sempre duas opções e termine com “O que lhe parece?”. Nunca pergunte se a pessoa quer fazer algo obrigatório: pergunte quando.",["1.1","2.1"]],
+["Sem pausas no fecho da chamada","Diga o objetivo e as duas opções de horário de seguida. Só espera depois.",["2.1"]],
+["A palavra “ainda”","“Ainda não tenho” muda tudo: existe no mercado e vai procurá-lo já.",["1.1"]],
+["“Vai compreender já o porquê do meu telefonema”","Aumenta a expectativa e a atenção de quem ouve.",["1.1","2.1"]],
+["O seu nome três vezes","Nome e agência repetidos ao longo da conversa ficam na memória.",["1.1"]],
+["Os dois vetores da visita","O proprietário tem de gostar de si e de o achar competente. Sem os dois, não entrega em exclusivo.",["2.1","2.2"]],
+["Decide-se com emoção","As pessoas decidem pela emoção e justificam com a razão. Primeiro a relação, depois as razões.",["2.2"]],
+["Três imóveis por subsegmento","O proprietário pesca “ao anzol”, o consultor “à rede”. Cada angariação pede mais duas no mesmo subsegmento.",["1.2"]],
+["Os segmentos de preço","Os compradores pesquisam em saltos de 25 mil euros nos valores baixos, 50 mil nos médios e 100 mil nos altos.",["1.2"]],
+["Conhecer a zona","Uma semana com duas horas por dia a pé: acessos, estacionamento, transportes, comércio, tipo de edificado, valores mínimos e máximos por tipologia.",["1.2"]],
+["Angariação reativa em quatro níveis","1) colegas da agência; 2) proprietários que disseram não; 3) prospeção e cartas no local; 4) partilha com outras marcas.",["1.1"]],
+["Portais três vezes por dia","Manhã, antes das 14h30 e à noite. Os particulares carregam anúncios fora de horas; ligue antes de todos.",["1.2"]],
+["Rede de contactos","Advogados, solicitadores, engenheiros, arquitetos, promotores (mesmo os que já venderam tudo) e os cafés da sua zona.",["1.2"]],
+["Anunciar segmentos altos","Quem compra uma casa de 500 a 700 mil euros costuma ter de vender a sua: “Este imóvel depende da venda de outro?”",["1.1","1.2"]],
+["Medir os canais","Saiba de onde vêm as angariações, os compradores e as vendas fechadas.",["2.1"]],
+["Fidelizar desde a escritura","Folha de contactos úteis, chamada aos 8 dias, presente aos 30, datas importantes e relatório de avaliação ao fim de alguns anos.",["1.1"]],
+["Só prometer o que faz","Defina por escrito o seu serviço e explique o benefício de cada parte. O benefício tem de ser maior do que o custo.",["2.2"]],
+["Duas horas por dia no terreno","Bloqueie duas horas diárias para angariar na sua zona. O formador sugere experimentar durante 30 dias.",["1.2"]]
+];
+let DONT=[
+["Dizer às agências anteriores que o imóvel “já está vendido”","Sugerido na gravação 3.1 para rescindir contratos em aberto. É uma declaração falsa. Rescinda com verdade (por exemplo, retirada da venda) ou espere pelo fim dos contratos."],
+["Pós-datar o contrato de exclusividade","Sugerido na mesma gravação. Pode ser visto como má-fé."],
+["Assinar uma minuta não validada sabendo que é nula e substituí-la depois com a mesma data","Use um contrato em texto corrido até ter a validação do IMPIC."],
+["Ocultar até ao fim da chamada que é de uma imobiliária","O próprio formador diz que não recomenda esta variante."],
+["Invocar compradores, investidores ou visitas que não existem","Os guiões de “cliente com visita marcada” só servem quando isso é verdade."],
+["Entrar em prédios sem autorização","Deixe cartas apenas onde alguém o deixou entrar ou onde é permitido."],
+["Apresentar as estatísticas citadas como garantias","85% de sucesso, 72% das objeções, 4,5 meses, 10 a 12%, 93%: são experiências ou estudos citados pelo formador, não verificados."],
+["Tomar as matérias jurídicas e fiscais como regra atual","Lei 15/2013, validação pelo IMPIC, licenças, preferências, IMI e IMT: confirme sempre em fontes oficiais atualizadas."]
+];
+
+let PNL=[
+["Compreendo, não concordo","“Compreendo” põe-no do lado da pessoa sem lhe dar razão. Use-o sempre antes de responder a uma objeção.",["P1.1"]],
+["Nunca contra-argumentar","Argumentar soa a “o senhor está errado” e põe a pessoa na defensiva. Troque argumentos por perguntas.",["P1.1","P2.2"]],
+["Perguntas poderosas","Perguntas cuja resposta leva a pessoa a concluir sozinha (“Se fosse comprador, o que pensaria?”). Foi ela que o disse, por isso convence-se.",["P1.2","P2.2","P3.1"]],
+["Descobrir a causa primeiro","O que a pessoa diz raramente é o problema. Pergunte “o que o preocupa em concreto?” e responda só a essa causa.",["P1.1","P2.2"]],
+["Escutar em silêncio","Quando a pessoa reclama, olhe-a nos olhos, não interrompa e não mostre emoção. Só fala quando ela parar.",["P3.1","P1.2"]],
+["Sem pausas no pedido","Ao propor uma reunião ou apresentar os honorários, não pare à espera de aprovação. A pergunta é “às 15h ou às 18h?”, nunca “quer?”.",["P1.1","P3.1"]],
+["Pergunta sobre a casa com resposta “sim”","Ao telefone, faça uma pergunta sobre o imóvel cuja resposta seja afirmativa (lateralidade). O ideal é a pessoa elogiar a casa.",["P1.1"]],
+["Senhor, Senhora Dona","Ao telefone, trate sempre por Senhor ou Senhora Dona. Passe ao nome só se a pessoa o pedir.",["P1.2"]],
+["“Se lhe parecer bem”","Mostra que a decisão é da pessoa. E termine com “O que lhe parece?”.",["P1.1","P4"]],
+["Ajudar, não angariar","Diga “ver de que forma o posso ajudar a vender mais depressa e nas melhores condições”: são os dois desejos de quem vende.",["P1.1","P4"]],
+["Quem paga o “grátis”","Quando oferece algo gratuito, diga quem o paga (por exemplo, o banco). “Tudo à borla” parece falso.",["P1.1"]],
+["Palavras que ajudam","“Acolhedora” e “confortável” em vez de “pequena”; “fragilidades” ou “espaço para melhoria” em vez de “defeitos”; “interessante” como elogio diplomático. Sem diminutivos.",["P1.1","P3.2"]],
+["“O nosso acordo”, “apenas a mim”","Nunca diga “contrato” nem “exclusivo”. “Vamos então fazer o nosso acordo?” e “Confia apenas a mim a venda do seu imóvel?”.",["P2.1","P2.2"]],
+["Postura","Queixo na horizontal, olhar nos olhos, sorriso verdadeiro. Uma pessoa frágil não é escolhida para defender a casa de ninguém.",["P2.1"]],
+["Estado inalterado","Um “não” não muda o seu dia. Agir em vez de reagir. Sair sempre de cabeça erguida, com ou sem acordo.",["P1.1","P4"]],
+["Obrigação de consciência","Ligue a todos os proprietários da sua zona: se não o fizer, podem cair nas mãos de alguém menos correto. Se disserem não, nada perdeu.",["P1.1","P2.1"]],
+["É ecológico?","Antes de reagir, pergunte-se: o que ganho e o que perco com isto? Discutir com um cliente nunca compensa.",["P1.1"]],
+["Treinar em voz alta","Escreva as suas próprias frases, diga-as em voz alta, grave-se no telemóvel e reveja. Ensaie com um colega antes das reuniões.",["P1.2","P3.1","P4"]],
+["Projetar o futuro","Defina onde quer estar daqui a cinco anos e recue ano a ano até saber o que tem de fazer este ano.",["P3.1"]]
+];
+let DONT_PNL=[
+["Dizer que representa um investidor estrangeiro que não existe","Sugerido nas gravações PNL 1.2 e 2.1 para quem escreve “não quero imobiliárias”. O próprio formador chama-lhe “uma pequena mentira”. Só com um mandato real de comprador."],
+["Manter o proprietário à espera de uma resposta inventada","Na mesma abordagem, o formador inventa respostas do “cliente” durante dias. Não aplicar."],
+["Apresentar um guia como “em validação” ou “à venda em junho” se não for verdade","Ofereça o guia, mas diga só o que é real. O mesmo para “ofertas válidas até 31 de março” ou reuniões inventadas no prédio."],
+["Assinar uma rescisão que só produz efeito seis meses depois, dando a entender o contrário","Contado na gravação PNL 2.2. Induz o proprietário em erro."],
+["Usar uma história pessoal que não é sua","O exemplo do computador da filha (PNL 3.1) só funciona com verdade. Inventado, é manipulação."],
+["Dizer “um amigo mandou-me uma foto da vossa placa”","Pretexto falso sugerido por um participante (PNL 4). Use a verdade: viu o anúncio ou passou na rua."]
+];
+
+/* ---------- Utilitários ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function val(k){return (store.me[k]!==undefined?store.me[k]:store.sit[k])||""}
+function fillHTML(t){return esc(t).replace(/\{(\w+)\}/g,(m,k)=>{if(!PH[k])return m;const v=val(k);return v?`<mark class="ph">${esc(v)}</mark>`:`<mark class="ph empty">[${PH[k]}]</mark>`})}
+function fillText(t){return t.replace(/\{(\w+)\}/g,(m,k)=>PH[k]?(val(k)||`[${PH[k]}]`):m)}
+function srcBadges(arr){return (arr||[]).filter(s=>SRC[s]).map(s=>`<span class="badge b-src">${SRC[s]}</span>`).join("")}
+function typeBadge(t){const [c,l]=TYPE[t]||TYPE.own;return `<span class="badge ${c}">${l}</span>`}
+const ICON={warn:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3 2 21h20L12 3z"/><path d="M12 10v5M12 18h.01"/></svg>',
+ info:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg>',
+ copy:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',
+ chev:'<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>'};
+let toastT;
+function toast(msg){let el=$("#toast");if(!el){el=document.createElement("div");el.id="toast";el.className="toast";el.setAttribute("role","status");document.body.appendChild(el)}el.textContent=msg;el.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>el.hidden=true,1800)}
+function copy(text,btn){
+  const done=()=>toast("Texto copiado");
+  try{navigator.clipboard.writeText(text).then(done,()=>fallback())}catch(e){fallback()}
+  function fallback(){const ta=document.createElement("textarea");ta.value=text;ta.setAttribute("readonly","");ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");done()}catch(e){toast("Selecione o texto e copie manualmente")}ta.remove()}
+}
+
+/* ---------- Navegação ---------- */
+const VIEWS=[
+ ["guioes","Guiões",'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>'],
+ ["objecoes","Objeções",'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M9 10h6"/></svg>'],
+ ["reuniao","Reunião",'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="4" y="4" width="16" height="17" rx="2"/><path d="m8 12 3 3 5-6"/></svg>'],
+ ["treino","Treino",'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/></svg>'],
+ ["metodo","Método",'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 5h6a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v13a2 2 0 0 1 2-2h6z"/></svg>']];
+function buildNav(){
+  const h=VIEWS.map(([id,l,ic])=>`<button class="tab" type="button" data-view="${id}">${ic}<span>${l}</span></button>`).join("");
+  $("#tabsTop").innerHTML=h;$("#tabsBottom").innerHTML=h;
+  document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",()=>{location.hash=b.dataset.view}));
+}
+function current(){const h=(location.hash||"").slice(1);return VIEWS.some(v=>v[0]===h)?h:"guioes"}
+function route(){
+  const v=current();
+  document.querySelectorAll("[data-view]").forEach(b=>b.dataset.view===v?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current"));
+  ({guioes:viewScripts,objecoes:viewObj,reuniao:viewMeeting,treino:viewTrain,metodo:viewMethod})[v]();
+  window.scrollTo(0,0);
+}
+
+/* ---------- Painel de dados da situação ---------- */
+function sitPanel(){
+  const f=["proprietario","tipologia","zona","urbanizacao","preco","hora1","hora2","dia"];
+  return `<details class="panel" id="sitPanel"${store.sitOpen?" open":""}><summary><span>Dados da situação</span><span class="muted small" style="font-weight:400">Os guiões preenchem-se com estes dados (exemplo)</span>${ICON.chev}</summary>
+  <div class="fields">${f.map(k=>`<div class="field"><label for="sit-${k}">${PH[k][0].toUpperCase()+PH[k].slice(1)}</label><input id="sit-${k}" data-sit="${k}" value="${esc(store.sit[k]||"")}" autocomplete="off"></div>`).join("")}</div></details>`;
+}
+function bindSit(onChange){
+  const p=$("#sitPanel");if(!p)return;
+  p.addEventListener("toggle",()=>{store.sitOpen=p.open;save()});
+  p.querySelectorAll("[data-sit]").forEach(i=>i.addEventListener("input",()=>{store.sit[i.dataset.sit]=i.value.trim();save();onChange()}));
+}
+function meNotice(){
+  if(store.me.meuNome)return "";
+  return `<div class="callout info">${ICON.info}<span>Preencha <b>Os meus dados</b> (nome, agência, licença AMI, telefone) para que os guiões e as cartas saiam com os seus dados.</span></div>`;
+}
+
+/* ---------- Vista: Guiões ---------- */
+let scriptCat="Todos",scriptQ="";
+function scriptHTML(s){
+  const body=[];
+  if(s.steps){body.push(`<ol class="steps">${s.steps.map(([k,t])=>k==="s"?`<li class="say"><span class="who">Diga</span>${fillHTML(t)}</li>`:`<li class="note">${fillHTML(t)}</li>`).join("")}</ol>`)}
+  if(s.letter){body.push(`<div class="say"><span class="who">Texto da carta</span>${fillHTML(s.letter)}</div>`)}
+  if(s.ifno){body.push(`<div class="callout info">${ICON.info}<span><b>Se recusar:</b> ${fillHTML(s.ifno)}</span></div>`)}
+  if(s.keys){body.push(`<div><p class="sub">Pontos-chave</p><ul class="keys">${s.keys.map(k=>`<li>${esc(k)}</li>`).join("")}</ul></div>`)}
+  if(s.warn){body.push(`<div class="callout warn">${ICON.warn}<span><b>${s.type==="risk"?"Riscos":"Cuidado"}:</b> ${esc(s.warn)}</span></div>`)}
+  if(s.alt){body.push(`<div class="callout ok">${ICON.info}<span><b>Alternativa honesta:</b> ${fillHTML(s.alt)}</span></div>`)}
+  body.push(`<div class="actions"><button class="btn" type="button" data-copy="${s.id}">${ICON.copy} Copiar texto</button>${editBtn("script",s.id)}</div>`);
+  return `<details class="card" data-id="${s.id}"><summary><h3>${esc(s.t)}</h3><span class="when">${esc(s.when)}</span><span class="meta">${typeBadge(s.type)}${editedBadge("script",s.id)}<span class="badge b-src">${esc(s.cat)}</span></span></summary><div class="card-body">${body.join("")}<div class="row small muted">Fonte: ${srcBadges(s.src)}</div></div></details>`;
+}
+function scriptPlain(s){
+  let out=s.t+"\n\n";
+  if(s.steps)out+=s.steps.filter(x=>x[0]==="s").map(x=>fillText(x[1])).join("\n\n");
+  if(s.letter)out+=fillText(s.letter);
+  return out;
+}
+function viewScripts(){
+  const cats=["Todos",...new Set(SCRIPTS.map(s=>s.cat))];
+  $("#app").innerHTML=`<div class="view-head"><span class="eyebrow">Telefone, presencial, cartas e redes</span><h2>Guiões de abordagem</h2><p>Os textos seguem o discurso do formador e preenchem-se com os seus dados. Adapte-os à conversa real: são modelos, não cassetes.</p></div>
+  ${meNotice()}${sitPanel()}
+  <input class="search" id="q" type="search" placeholder="Procurar guião (ex.: carta, comprador, 30 dias)" value="${esc(scriptQ)}" aria-label="Procurar guião">
+  <div class="row" role="group" aria-label="Categorias">${cats.map(c=>`<button class="chip" type="button" data-cat="${esc(c)}" aria-pressed="${c===scriptCat}">${esc(c)}</button>`).join("")}</div>
+  <div class="row">${newBtn("script","Novo guião")}</div>
+  <div class="list" id="list"></div>`;
+  const draw=()=>{
+    const open=[...document.querySelectorAll("#list details[open]")].map(d=>d.dataset.id);
+    const q=scriptQ.toLowerCase();
+    const items=SCRIPTS.filter(s=>(scriptCat==="Todos"||s.cat===scriptCat)&&(!q||JSON.stringify(s).toLowerCase().includes(q)));
+    $("#list").innerHTML=items.length?items.map(scriptHTML).join(""):`<div class="empty">Nenhum guião encontrado.</div>`;
+    open.forEach(id=>{const d=$(`#list details[data-id="${id}"]`);if(d)d.open=true});
+    if(store.openScript){const d=$(`#list details[data-id="${store.openScript}"]`);if(d){d.open=true;d.scrollIntoView({block:"start"})}store.openScript=null}
+  };
+  draw();
+  $("#q").addEventListener("input",e=>{scriptQ=e.target.value;draw()});
+  document.querySelectorAll("[data-cat]").forEach(b=>b.addEventListener("click",()=>{scriptCat=b.dataset.cat;document.querySelectorAll("[data-cat]").forEach(x=>x.setAttribute("aria-pressed",x===b));draw()}));
+  $("#list").addEventListener("click",e=>{const b=e.target.closest("[data-copy]");if(b){copy(scriptPlain(SCRIPTS.find(s=>s.id===b.dataset.copy)),b)}});
+  bindSit(draw);
+}
+
+/* ---------- Vista: Objeções ---------- */
+let objQ="",objCtx="Todas";
+function objPlain(o){
+  let t=fillText(o.a);
+  if(o.steps)t+="\n\n"+o.steps.map(s=>fillText(s)).join("\n\n");
+  if(o.causes)t+="\n\n"+o.causes.map(c=>c.t.toUpperCase()+"\n"+c.steps.map(s=>fillText(s)).join("\n")).join("\n\n");
+  return t;
+}
+function stepList(arr){return `<ol class="steps">${arr.map((s,i)=>`<li class="say"><span class="who">${i+1}.º passo</span>${fillHTML(s)}</li>`).join("")}</ol>`}
+function viewObj(){
+  const ctxs=["Todas","Telefone","Reunião","Comprador"];
+  $("#app").innerHTML=`<div class="view-head"><span class="eyebrow">Respostas preparadas, com as técnicas de PNL</span><h2>Objeções frequentes</h2><p>Cada resposta começa por compreender e segue com perguntas, para a pessoa concluir sozinha. A origem está indicada: <span class="badge b-form">Formação</span> segue o formador, <span class="badge b-adapt">Adaptação</span> aplica o método a um caso que ele não tratou e <span class="badge b-comp">Proposta complementar</span> é uma sugestão minha.</p></div>
+  <input class="search" id="oq" type="search" placeholder="Procurar objeção (ex.: comissão, placa, amigo, preço)" value="${esc(objQ)}" aria-label="Procurar objeção">
+  <div class="row" role="group" aria-label="Momento">${ctxs.map(c=>`<button class="chip" type="button" data-ctx="${esc(c)}" aria-pressed="${c===objCtx}">${esc(c==="Todas"?"Todas":c==="Telefone"?"Ao telefone":c==="Reunião"?"Na reunião":"Com compradores")}</button>`).join("")}</div>
+  <div class="row">${newBtn("obj","Nova objeção")}</div>
+  <div class="list" id="olist"></div>`;
+  const draw=()=>{
+    const q=objQ.toLowerCase();
+    const items=OBJ.filter(o=>(objCtx==="Todas"||o.ctx===objCtx)&&(!q||JSON.stringify(o).toLowerCase().includes(q)));
+    $("#olist").innerHTML=items.length?items.map(o=>`<details class="card" data-id="${o.id}"><summary><span class="obj-q">${esc(o.q)}</span><span class="meta">${typeBadge(o.type)}${editedBadge("obj",o.id)}<span class="badge b-src">${esc(o.ctx)}</span></span></summary>
+     <div class="card-body"><div class="say"><span class="who">${o.causes?"Primeiro, descubra a causa":"Resposta"}</span>${fillHTML(o.a)}</div>
+     ${o.steps?`<div><p class="sub">Se for preciso, continue com</p>${stepList(o.steps)}</div>`:""}
+     ${o.causes?`<div><p class="sub">Depois, siga o caminho da causa</p><div class="list" style="margin-top:6px">${o.causes.map(c=>`<details class="phase"><summary><span class="phase-title"><h3>${esc(c.t)}</h3></span>${ICON.chev}</summary><div class="card-body" style="padding-top:0">${stepList(c.steps)}${c.note?`<p class="note" style="margin:0">${esc(c.note)}</p>`:""}</div></details>`).join("")}</div></div>`:""}
+     <div><p class="sub">Porque funciona</p><p style="margin:4px 0 0">${esc(o.why)}</p></div>
+     ${o.extra?`<div class="callout info">${ICON.info}<span>${esc(o.extra)}</span></div>`:""}
+     ${o.next?`<div><p class="sub">Próximo passo</p><p style="margin:4px 0 0">${esc(o.next)}</p></div>`:""}
+     ${o.warn?`<div class="callout warn">${ICON.warn}<span><b>Cuidado:</b> ${esc(o.warn)}</span></div>`:""}
+     <div class="actions"><button class="btn" type="button" data-ocopy="${o.id}">${ICON.copy} Copiar texto</button>${editBtn("obj",o.id)}${o.script?`<button class="btn ghost" type="button" data-goscript="${o.script}">Abrir o guião completo</button>`:""}</div>
+     <div class="row small muted">Fonte: ${srcBadges(o.src)}</div></div></details>`).join(""):`<div class="empty">Nenhuma objeção encontrada.</div>`;
+  };
+  draw();
+  $("#oq").addEventListener("input",e=>{objQ=e.target.value;draw()});
+  document.querySelectorAll("[data-ctx]").forEach(b=>b.addEventListener("click",()=>{objCtx=b.dataset.ctx;document.querySelectorAll("[data-ctx]").forEach(x=>x.setAttribute("aria-pressed",x===b));draw()}));
+  $("#olist").addEventListener("click",e=>{
+    const c=e.target.closest("[data-ocopy]");if(c){copy(objPlain(OBJ.find(o=>o.id===c.dataset.ocopy)))}
+    const g=e.target.closest("[data-goscript]");if(g){store.openScript=g.dataset.goscript;scriptCat="Todos";scriptQ="";location.hash="guioes"}
+  });
+}
+
+/* ---------- Vista: Reunião ---------- */
+function viewMeeting(){
+  const total=PHASES.reduce((n,p)=>n+p.items.length,0);
+  $("#app").innerHTML=`<div class="view-head"><span class="eyebrow">Checklist da visita e reunião de angariação</span><h2>Reunião de angariação</h2><p>Siga as fases pela ordem do formador: preparar, criar relação na visita, dar razões à mesa e fechar. Os itens marcados ficam guardados neste dispositivo.</p></div>
+  <div class="panel" style="padding:14px;display:flex;flex-direction:column;gap:8px">
+   <div class="row" style="justify-content:space-between"><span><b id="pDone">0</b> de ${total} itens</span><span id="resetZone"><button class="btn ghost" type="button" id="resetBtn">Nova reunião (limpar)</button></span></div>
+   <div class="progress" aria-hidden="true"><i id="pBar"></i></div></div>
+  <div class="list" id="phases">${PHASES.map((p,pi)=>`<details class="phase" data-ph="${p.id}"${pi<2?" open":""}><summary><span class="phase-num">${pi+1}</span><span class="phase-title"><h3>${esc(p.t)}</h3><span>${esc(p.s)}</span></span><span class="phase-count" data-count="${p.id}"></span>${ICON.chev}</summary>
+   <ul class="checks">${p.items.map((it,ii)=>{const id=p.id+"-"+ii;return `<li class="check"><input type="checkbox" id="ck-${id}" data-ck="${id}"${store.checks[id]?" checked":""}><label for="ck-${id}"><span class="t">${esc(it[0])}</span>${it[2]&&SRC[it[2]]?`<span class="badge b-src">${SRC[it[2]]}</span>`:""}${it[1]?`<span class="d">${esc(it[1])}</span>`:""}</label></li>`}).join("")}</ul>${canEditTexts?`<div class="actions" style="padding:0 16px 14px">${editBtn("phase",p.id,"Editar esta fase")}</div>`:""}</details>`).join("")}</div>
+  <div class="row">${newBtn("phase","Nova fase")}</div>
+  <div class="callout warn">${ICON.warn}<span><b>Matérias jurídicas:</b> os pontos de documentação e contrato resumem o que o formador disse nas gravações 3.1 e 3.2. Confirme-os em fontes oficiais atualizadas antes de os usar como regra.</span></div>`;
+  const upd=()=>{
+    let done=0;
+    PHASES.forEach(p=>{const n=p.items.filter((_,i)=>store.checks[p.id+"-"+i]).length;done+=n;const el=$(`[data-count="${p.id}"]`);el.textContent=`${n}/${p.items.length}`;$(`[data-ph="${p.id}"]`).classList.toggle("done",n===p.items.length)});
+    $("#pDone").textContent=done;$("#pBar").style.width=(done/total*100)+"%";
+  };
+  upd();
+  $("#phases").addEventListener("change",e=>{const c=e.target.closest("[data-ck]");if(!c)return;if(c.checked)store.checks[c.dataset.ck]=1;else delete store.checks[c.dataset.ck];save();upd()});
+  $("#resetZone").addEventListener("click",e=>{
+    if(e.target.id==="resetBtn"){$("#resetZone").innerHTML=`<span class="confirm-inline">Limpar todos os itens? <button class="btn primary" type="button" id="yesReset">Limpar</button><button class="btn ghost" type="button" id="noReset">Cancelar</button></span>`}
+    else if(e.target.id==="yesReset"){store.checks={};save();viewMeeting();toast("Checklist limpa")}
+    else if(e.target.id==="noReset"){$("#resetZone").innerHTML=`<button class="btn ghost" type="button" id="resetBtn">Nova reunião (limpar)</button>`}
+  });
+}
+
+/* ---------- Vista: Treino ---------- */
+let trainMode="quiz";
+function viewTrain(){
+  $("#app").innerHTML=`<div class="view-head"><span class="eyebrow">Praticar com base na formação</span><h2>Treino</h2><p>Escolha um modo. As respostas certas e os comentários seguem o que o formador ensinou, com indicação da gravação.</p></div>
+  <div class="train-modes" role="group" aria-label="Modo de treino">
+   <button class="mode" type="button" data-mode="quiz" aria-pressed="${trainMode==="quiz"}"><h3>Perguntas de situação</h3><span>${QUIZ.length} situações reais, com explicação.</span></button>
+   <button class="mode" type="button" data-mode="sim" aria-pressed="${trainMode==="sim"}"><h3>Simular uma conversa</h3><span>Escolha o que diz e veja como o proprietário reage.</span></button>
+   <button class="mode" type="button" data-mode="ensaio" aria-pressed="${trainMode==="ensaio"}"><h3>Ensaiar objeções</h3><span>Responda por palavras suas e compare com o modelo.</span></button>
+  </div><div id="stage"></div>`;
+  document.querySelectorAll("[data-mode]").forEach(b=>b.addEventListener("click",()=>{trainMode=b.dataset.mode;viewTrain()}));
+  ({quiz:runQuiz,sim:simMenu,ensaio:runEnsaio})[trainMode]();
+}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function runQuiz(){
+  const order=shuffle(QUIZ.map((_,i)=>i));let idx=0,score=0;
+  const st=$("#stage");
+  const show=()=>{
+    if(idx>=order.length){
+      if(score>store.quizBest){store.quizBest=score;save()}
+      const pct=score/order.length;
+      st.innerHTML=`<div class="stage"><h3 style="font-size:20px">Resultado: ${score} de ${order.length}</h3><div class="fb ${pct>=.8?"good":pct>=.5?"mid":"bad"}">${pct>=.8?"Excelente: domina o método.":pct>=.5?"Bom caminho. Reveja as explicações das que falhou.":"Vale a pena rever os guiões e o separador Método."}</div><p class="muted small" style="margin:0">Melhor resultado neste dispositivo: ${store.quizBest} de ${order.length}</p><div class="actions"><button class="btn primary" type="button" id="again">Repetir</button></div></div>`;
+      $("#again").onclick=runQuiz;return;
+    }
+    const q=QUIZ[order[idx]];const opts=shuffle(q.o.map((t,i)=>({t,i})));
+    st.innerHTML=`<div class="stage"><div class="stage-top"><span class="eyebrow">Situação ${idx+1} de ${order.length}</span><span class="score">Pontos: ${score}</span></div>
+     <p class="scenario" style="margin:0">${esc(q.q)}</p>
+     <div class="options">${opts.map(o=>`<button class="opt" type="button" data-i="${o.i}">${esc(o.t)}</button>`).join("")}</div><div id="fbq"></div></div>`;
+    st.querySelectorAll(".opt").forEach(b=>b.addEventListener("click",()=>{
+      const ok=+b.dataset.i===q.c;if(ok)score++;
+      st.querySelectorAll(".opt").forEach(x=>{x.disabled=true;if(+x.dataset.i===q.c)x.classList.add("right")});
+      if(!ok)b.classList.add("wrong");
+      $("#fbq").innerHTML=`<div class="fb ${ok?"good":"bad"}"><b>${ok?"Certo.":"Não é isso."}</b> ${esc(q.e)} ${q.s&&SRC[q.s]?`<span class="badge b-src" style="margin-left:4px">${SRC[q.s]}</span>`:""}</div><div class="actions" style="margin-top:10px"><button class="btn primary" type="button" id="nextQ">${idx+1<order.length?"Seguinte":"Ver resultado"}</button>${editBtn("quiz",q.id,"Editar esta pergunta")}${newBtn("quiz","Nova pergunta")}</div>`;
+      $("#nextQ").onclick=()=>{idx++;show()};$("#nextQ").focus();
+    }));
+  };
+  show();
+}
+function simMenu(){
+  $("#stage").innerHTML=`<div class="row">${Object.entries(SIMS).map(([k,s])=>`<button class="btn" type="button" data-sim="${k}">${esc(s.t)}</button>`).join("")}</div><div id="simArea" style="margin-top:12px"></div>`;
+  document.querySelectorAll("[data-sim]").forEach(b=>b.addEventListener("click",()=>runSim(b.dataset.sim)));
+  runSim("frio");
+}
+function runSim(key){
+  document.querySelectorAll("[data-sim]").forEach(b=>b.classList.toggle("primary",b.dataset.sim===key));
+  const sim=SIMS[key];let node=sim.start,score=0,max=0;const log=[];
+  const area=$("#simArea");
+  const draw=()=>{
+    const n=sim.nodes[node];const end=sim.ends[node];
+    let h=`<div class="stage"><div class="stage-top"><span class="eyebrow">${esc(sim.t)}</span><span class="score">Pontos: ${score}</span></div><p class="muted small" style="margin:0">${esc(sim.intro)}</p><div class="chat">`;
+    log.forEach(l=>{h+=l});
+    if(end){
+      h+=`</div><div class="fb ${end[0]}"><b>Fim da simulação.</b> ${esc(end[1])} Pontuação: ${score} de ${max}.</div><div class="actions"><button class="btn primary" type="button" id="simAgain">Repetir</button></div></div>`;
+      area.innerHTML=h;$("#simAgain").onclick=()=>runSim(key);return;
+    }
+    h+=`<div class="bubble"><span class="who">Proprietário</span>${esc(n.say)}</div></div><p class="sub">O que responde?</p><div class="options">${n.ch.map((c,i)=>`<button class="opt" type="button" data-c="${i}">${fillHTML(c[0])}</button>`).join("")}</div></div>`;
+    area.innerHTML=h;
+    area.querySelectorAll(".opt").forEach(b=>b.addEventListener("click",()=>{
+      const c=n.ch[+b.dataset.c];score+=c[1];max+=2;
+      log.push(`<div class="bubble"><span class="who">Proprietário</span>${esc(n.say)}</div>`,`<div class="bubble me"><span class="who">Você</span>${fillHTML(c[0])}</div>`,`<div class="fb ${c[1]===2?"good":c[1]===1?"mid":"bad"}">${esc(c[2])}</div>`);
+      node=c[3];draw();
+    }));
+  };
+  draw();
+}
+function runEnsaio(){
+  let order=shuffle(OBJ.map((_,i)=>i)),idx=0;
+  const st=$("#stage");
+  const show=()=>{
+    if(idx>=order.length){order=shuffle(order);idx=0}
+    const o=OBJ[order[idx]];
+    st.innerHTML=`<div class="stage"><div class="stage-top"><span class="eyebrow">Objeção ${idx+1} de ${order.length}</span>${typeBadge(o.type)}</div>
+     <div class="bubble"><span class="who">Proprietário</span>${esc(o.q)}</div>
+     <label for="myAns" class="sub">A sua resposta (pode dizê-la em voz alta ou escrevê-la)</label>
+     <textarea id="myAns" placeholder="Escreva aqui como responderia…"></textarea>
+     <div class="actions"><button class="btn primary" type="button" id="reveal">Ver resposta modelo</button><button class="btn ghost" type="button" id="skip">Outra objeção</button></div><div id="model"></div></div>`;
+    $("#skip").onclick=()=>{idx++;show()};
+    $("#reveal").onclick=()=>{
+      $("#model").innerHTML=`<div class="say"><span class="who">Resposta modelo</span>${fillHTML(o.a)}</div><p style="margin:10px 0 0"><b>Porque funciona:</b> ${esc(o.why)}</p>
+      <p class="sub" style="margin-top:12px">Autoavaliação: a sua resposta…</p>
+      <ul class="checks" style="padding:0">${["Mostrou compreensão antes de responder","Não discutiu nem desvalorizou o proprietário","Deu uma razão centrada no benefício dele","Terminou com um próximo passo concreto (duas opções ou data)"].map((t,i)=>`<li class="check"><input type="checkbox" id="sa${i}"><label for="sa${i}"><span class="t">${t}</span></label></li>`).join("")}</ul>
+      <div class="actions"><button class="btn primary" type="button" id="nextE">Próxima objeção</button></div>`;
+      $("#reveal").disabled=true;$("#nextE").onclick=()=>{idx++;show()};
+    };
+  };
+  show();
+}
+
+/* ---------- Vista: Método ---------- */
+function viewMethod(){
+  const f=store.funnel||{c:4,d:20,v:20,k:30,goal:10};
+  const p=store.price||{mv:266000,ask:320000,g:5.8,vis:"muitas",prop:"nao"};
+  $("#app").innerHTML=`<div class="view-head"><span class="eyebrow">O que o formador ensinou, em resumo</span><h2>Método</h2><p>Os três tipos de angariação, a comunicação com PNL, as ferramentas de preço e as metas, com a gravação de origem. No fim, os pontos das formações que não deve aplicar tal como estão.</p></div>
+  <div class="section"><h3>Os três tipos de angariação</h3><div class="grid2">
+   <div class="principle"><span class="eyebrow">Passiva</span><h4>Vêm ter consigo</h4><p>Por recomendação, por clientes antigos ou pela marca. Cresce com a fidelização. Mesmo assim, visite sempre o imóvel e cumpra o que promete.</p><div class="row">${srcBadges(["1.1","2.1"])}</div></div>
+   <div class="principle"><span class="eyebrow">Reativa</span><h4>Tem um comprador sem imóvel</h4><p>Marque já com o comprador e angarie para ele, pelos quatro níveis. A comissão chega mais depressa, porque o comprador já existe.</p><div class="row">${srcBadges(["1.1"])}</div></div>
+   <div class="principle"><span class="eyebrow">Proativa</span><h4>Procura o produto que quer vender</h4><p>Defina segmento, zona e objetivo. Prospete todos os dias pelo telefone, no terreno, nas redes e com a sua rede de contactos.</p><div class="row">${srcBadges(["1.2"])}</div></div>
+  </div></div>
+  <div class="section"><h3>Comunicar com PNL</h3><p class="muted" style="margin:0">O que a formação de objeções acrescenta: compreender, perguntar e deixar a pessoa decidir.</p><div class="grid2">${eff("pnl").map(q=>`<div class="principle"><h4>${esc(q.t)}</h4><p>${esc(q.p)}</p><div class="row">${srcBadges(q.src)}${editedBadge("pnl",q.id)}${editBtn("pnl",q.id)}</div></div>`).join("")}</div><div class="row">${newBtn("pnl","Novo princípio")}</div></div>
+  <div class="section"><h3>Ferramentas de preço</h3><p class="muted" style="margin:0">Para mostrar evidências ao proprietário, como recomenda o formador. Use sempre os números reais do imóvel e da sua zona.</p>
+   <div class="grid2">
+    <div class="panel" style="padding:14px;display:flex;flex-direction:column;gap:10px">
+     <h4 style="font-size:15px">Alvo de ajuste de preço</h4>
+     <div class="calc">
+      <div class="field"><label for="pv">Visitas</label><select id="pv" class="search" style="padding:8px"><option value="muitas">Muitas</option><option value="poucas">Poucas</option><option value="nenhuma">Nenhuma</option></select></div>
+      <div class="field"><label for="pp">Propostas</label><select id="pp" class="search" style="padding:8px"><option value="sim">Sim</option><option value="nao">Não</option></select></div>
+     </div>
+     <div id="alvo" class="callout" style="font-size:14px"></div>
+     <div class="row">${srcBadges(["P3.2"])}<span class="small muted">Percentagens do formador; ajuste-as ao seu mercado.</span></div>
+    </div>
+    <div class="panel" style="padding:14px;display:flex;flex-direction:column;gap:10px">
+     <h4 style="font-size:15px">Tempo até ao valor pedido</h4>
+     <div class="calc">
+      <div class="field"><label for="tm">Valor de mercado (€)</label><input id="tm" type="number" min="0" step="1000" value="${p.mv}"></div>
+      <div class="field"><label for="ta">Preço pedido (€)</label><input id="ta" type="number" min="0" step="1000" value="${p.ask}"></div>
+      <div class="field"><label for="tg">Valorização anual (%)</label><input id="tg" type="number" min="0" step="0.1" value="${p.g}"></div>
+     </div>
+     <p id="tempo" style="margin:0;font-size:14px"></p>
+     <div class="row">${srcBadges(["P3.2","P4"])}<span class="small muted">Use dados oficiais de evolução de preços da sua zona.</span></div>
+    </div>
+   </div></div>
+  <div class="section"><h3>Funil de angariação</h3><p class="muted" style="margin:0">Contactos, visitas ao imóvel, contratos. O formador considera mínimos 20% de contactos que dão visita e 30% de visitas que dão contrato; ajuste aos seus números reais.</p>
+   <div class="panel" style="padding:14px;display:flex;flex-direction:column;gap:12px">
+    <div class="calc">
+     <div class="field"><label for="fc">Contactos por dia</label><input id="fc" type="number" min="0" step="1" value="${f.c}"></div>
+     <div class="field"><label for="fd">Dias úteis por mês</label><input id="fd" type="number" min="0" step="1" value="${f.d}"></div>
+     <div class="field"><label for="fv">% contactos que dão visita</label><input id="fv" type="number" min="0" max="100" step="1" value="${f.v}"></div>
+     <div class="field"><label for="fk">% visitas que dão contrato</label><input id="fk" type="number" min="0" max="100" step="1" value="${f.k}"></div>
+     <div class="field"><label for="fg">Objetivo de angariações</label><input id="fg" type="number" min="1" step="1" value="${f.goal}"></div>
+    </div>
+    <div class="funnel" id="funnel"></div><p class="small muted" id="funnelNote" style="margin:0"></p>
+   </div></div>
+  <div class="section"><h3>Princípios de prospeção e de serviço</h3><div class="grid2">${eff("princ").map(q=>`<div class="principle"><h4>${esc(q.t)}</h4><p>${esc(q.p)}</p><div class="row">${srcBadges(q.src)}${editedBadge("princ",q.id)}${editBtn("princ",q.id)}</div></div>`).join("")}</div><div class="row">${newBtn("princ","Novo princípio")}</div></div>
+  <div class="section"><h3>Pontos das formações a não aplicar tal como estão</h3><p class="muted" style="margin:0">Estas sugestões aparecem nas gravações, mas implicam declarações falsas, riscos legais ou números não verificados.</p>
+   <ul class="dont">${eff("dont").map(d=>`<li><b>${esc(d.t)}</b>${esc(d.p)}<div class="row" style="margin-top:6px">${editedBadge("dont",d.id)}${editBtn("dont",d.id)}</div></li>`).join("")}</ul><p class="muted small" style="margin:0">As abordagens completas estão nos guiões da categoria “Consultar com cuidado”.</p><div class="row">${newBtn("dont","Novo ponto")}</div></div>
+  ${canEditTexts?`<div class="section"><h3>Textos originais alterados</h3><p class="muted" style="margin:0">Pode repor aqui qualquer texto original que tenha editado ou apagado.</p>${editedListHTML()}</div>`:""}`;
+  $("#pv").value=p.vis;$("#pp").value=p.prop;
+  const fmt=n=>n.toLocaleString("pt-PT",{maximumFractionDigits:1});
+  const calc=()=>{
+    const g=id=>Math.max(0,parseFloat($(id).value)||0);
+    const c=g("#fc"),d=g("#fd"),v=Math.min(100,g("#fv")),k=Math.min(100,g("#fk")),goal=Math.max(1,g("#fg"));
+    store.funnel={c,d,v,k,goal};save();
+    const contacts=c*d,visits=contacts*v/100,contracts=visits*k/100;
+    const rows=[["Contactos / mês",contacts],["Visitas / mês",visits],["Contratos / mês",contracts]];
+    const mx=Math.max(contacts,1);
+    $("#funnel").innerHTML=rows.map(r=>`<div class="funnel-row"><span>${r[0]}</span><span class="funnel-bar"><i style="width:${Math.max(r[1]/mx*100,r[1]>0?1.5:0)}%"></i></span><b>${fmt(r[1])}</b></div>`).join("");
+    const months=contracts>0?Math.ceil(goal/contracts):null;
+    const low=[];if(v<20)low.push("contacto → visita abaixo de 20%");if(k<30)low.push("visita → contrato abaixo de 30%");
+    $("#funnelNote").textContent=(contracts>0?`Conversão global de ${fmt(v*k/100)}%. A este ritmo, chega a ${goal} angariações em cerca de ${months} ${months===1?"mês":"meses"}. É uma projeção, não um resultado garantido.`:"Com estes valores o funil não gera contratos.")+(low.length?` Atenção: ${low.join(" e ")}, o mínimo indicado pelo formador.`:"");
+  };
+  const alvo=()=>{
+    const vis=$("#pv").value,prop=$("#pp").value;
+    store.price=Object.assign({},store.price||p,{vis,prop});save();
+    let cls,txt;
+    if(prop==="sim"){cls="ok";txt="<b>No alvo.</b> Há visitas e propostas: o preço está certo. Trabalhe as propostas."}
+    else if(vis==="muitas"){cls="info";txt="<b>Muitas visitas, sem propostas.</b> O formador sugere propor um ajuste de cerca de 5%."}
+    else if(vis==="poucas"){cls="warn";txt="<b>Poucas visitas, sem propostas.</b> O formador sugere um ajuste de 5% a 8%."}
+    else{cls="warn";txt="<b>Sem visitas nem propostas.</b> O formador sugere um ajuste de 10% a 12%."}
+    const el=$("#alvo");el.className="callout "+cls;el.innerHTML=txt;
+  };
+  const tempo=()=>{
+    const mv=Math.max(0,parseFloat($("#tm").value)||0),ask=Math.max(0,parseFloat($("#ta").value)||0),gr=Math.max(0,parseFloat($("#tg").value)||0);
+    store.price=Object.assign({},store.price||p,{mv,ask,g:gr});save();
+    const el=$("#tempo");
+    if(!mv||!ask){el.textContent="Preencha o valor de mercado e o preço pedido.";return}
+    const diff=(ask/mv-1)*100;
+    if(diff<=0){el.textContent="O preço pedido está dentro do valor de mercado.";return}
+    if(!gr){el.textContent=`O preço pedido está ${fmt(diff)}% acima do valor de mercado. Sem valorização, nunca lá chega.`;return}
+    const m=Math.ceil(Math.log(ask/mv)/Math.log(1+gr/100)*12);
+    el.innerHTML=`O preço pedido está <b>${fmt(diff)}%</b> acima do valor de mercado. A ${fmt(gr)}% ao ano, a casa só valeria isso daqui a cerca de <b>${m} meses</b> (${fmt(m/12)} anos), se o mercado se mantiver. Pergunta: “Quer vender hoje pelo valor justo ou esperar esse tempo?”`;
+  };
+  ["#fc","#fd","#fv","#fk","#fg"].forEach(id=>$(id).addEventListener("input",calc));
+  ["#pv","#pp"].forEach(id=>$(id).addEventListener("change",alvo));
+  ["#tm","#ta","#tg"].forEach(id=>$(id).addEventListener("input",tempo));
+  calc();alvo();tempo();
+}
+
+/* ---------- Os meus dados ---------- */
+function openMe(){
+  const f=["meuNome","agencia","ami","telefone"];
+  const labels={meuNome:"O seu nome",agencia:"Agência (denominação)",ami:"N.º da licença AMI",telefone:"Telefone"};
+  $("#overlay").innerHTML=`<div class="sheet-bg" id="sheetBg"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="meTitle">
+   <div class="row" style="justify-content:space-between"><h3 id="meTitle" style="font-size:19px">Os meus dados</h3><button class="btn ghost" type="button" id="closeMe">Fechar</button></div>
+   <p class="muted small" style="margin:0">Usados nos guiões e nas cartas. ${syncMode==="db"?"Ficam guardados na ferramenta e aparecem em todos os seus dispositivos.":"Ficam guardados neste navegador."}</p>
+   <div class="fields">${f.map(k=>`<div class="field"><label for="me-${k}">${labels[k]}</label><input id="me-${k}" data-me="${k}" value="${esc(store.me[k]||"")}" autocomplete="off"></div>`).join("")}</div>
+   <div class="actions"><button class="btn primary" type="button" id="saveMe">Guardar</button></div></div></div>`;
+  const close=()=>{$("#overlay").innerHTML="";$("#openMe").focus()};
+  $("#closeMe").onclick=close;
+  $("#saveMe").onclick=()=>{document.querySelectorAll("[data-me]").forEach(i=>store.me[i.dataset.me]=i.value.trim());save();if(window.__savePerfil)window.__savePerfil();close();route();toast("Dados guardados")};
+  $("#me-meuNome").focus();
+}
+$("#openMe").addEventListener("click",openMe);
+
+/* ---------- Textos editáveis ---------- */
+const clone=x=>JSON.parse(JSON.stringify(x));
+const BASE={
+  script:clone(SCRIPTS),
+  obj:clone(OBJ),
+  phase:PHASES.map(p=>({id:p.id,t:p.t,s:p.s,items:p.items.map(i=>({t:i[0],d:i[1]||"",src:i[2]||""}))})),
+  pnl:PNL.map((x,i)=>({id:"pnl"+i,t:x[0],p:x[1],src:x[2]})),
+  princ:PRINCIPLES.map((x,i)=>({id:"pr"+i,t:x[0],p:x[1],src:x[2]})),
+  dont:DONT.concat(DONT_PNL).map((x,i)=>({id:"d"+i,t:x[0],p:x[1]})),
+  quiz:QUIZ.map((x,i)=>Object.assign({id:"q"+i},clone(x)))
+};
+let OV={};          /* {kind:{id:{data,deleted,custom,ts}}} */
+let dbRef=null,userRef=null,canEditTexts=true,syncMode="local";
+try{if(store.ov&&typeof store.ov==="object")OV=store.ov}catch(e){}
+function eff(kind){
+  const o=OV[kind]||{},out=[];
+  BASE[kind].forEach(b=>{const r=o[b.id];if(r&&r.deleted)return;out.push(r&&r.data?Object.assign(clone(r.data),{id:b.id}):clone(b))});
+  Object.keys(o).filter(id=>o[id].custom&&!o[id].deleted&&o[id].data).sort((a,b)=>(o[a].ts||0)-(o[b].ts||0)).forEach(id=>out.push(Object.assign(clone(o[id].data),{id})));
+  return out;
+}
+function rebuild(){
+  SCRIPTS=eff("script");
+  OBJ=eff("obj");
+  PHASES=eff("phase").map(p=>({id:p.id,t:p.t,s:p.s,items:(p.items||[]).map(i=>[i.t,i.d,i.src])}));
+  PNL=eff("pnl").map(x=>[x.t,x.p,x.src||[]]);
+  PRINCIPLES=eff("princ").map(x=>[x.t,x.p,x.src||[]]);
+  DONT=eff("dont").map(x=>[x.t,x.p]);DONT_PNL=[];
+  QUIZ=eff("quiz");
+}
+function findItem(kind,id){return eff(kind).find(x=>x.id===id)}
+function isEdited(kind,id){const r=(OV[kind]||{})[id];return !!(r&&!r.custom&&r.data)}
+function editBtn(kind,id,label){return canEditTexts?`<button class="btn ghost" type="button" data-edit="${kind}:${esc(id)}">${label||"Editar"}</button>`:""}
+function newBtn(kind,label){return canEditTexts?`<button class="btn" type="button" data-new="${kind}">+ ${label}</button>`:""}
+function editedBadge(kind,id){return isEdited(kind,id)?`<span class="badge b-src">Editado</span>`:((OV[kind]||{})[id]&&OV[kind][id].custom?`<span class="badge b-adapt">Texto próprio</span>`:"")}
+
+async function persist(kind,id,rec){
+  OV[kind]=OV[kind]||{};
+  if(rec)OV[kind][id]=rec;else delete OV[kind][id];
+  rebuild();
+  if(dbRef){
+    const ref=dbRef.doc("textos/"+kind+"__"+id);
+    try{
+      if(rec)await ref.set({kind,id,json:JSON.stringify(rec.data||null),deleted:!!rec.deleted,custom:!!rec.custom,ts:rec.ts||Date.now()});
+      else await ref.delete();
+    }catch(e){toast(e&&e.code==="quota_exceeded"?"Espaço de armazenamento cheio":"Não foi possível guardar. Tente de novo.");}
+  }else{store.ov=OV;save()}
+}
+
+/* Esquemas dos formulários */
+const KINDS={
+  script:{label:"guião",fields:[["t","Título","text"],["cat","Categoria (ex.: Telefone, Presencial, Cartas)","text"],["when","Quando usar","area"],["steps","Passos: o que diz e notas","steps"],["letter","Texto de carta (opcional)","area"],["ifno","Se recusar (opcional)","area"],["keys","Pontos-chave (um por linha)","lines"],["warn","Cuidado (opcional)","area"],["alt","Alternativa honesta (opcional)","area"]]},
+  obj:{label:"objeção",fields:[["q","O que o cliente diz","text"],["ctx","Momento","select",["Telefone","Reunião","Comprador"]],["a","Resposta ou primeira pergunta","area"],["steps","Passos seguintes (opcional)","list"],["causes","Caminhos por causa (opcional)","causes"],["why","Porque funciona","area"],["extra","Nota (opcional)","area"],["next","Próximo passo (opcional)","area"],["warn","Cuidado (opcional)","area"]]},
+  phase:{label:"fase da checklist",fields:[["t","Nome da fase","text"],["s","Descrição curta","text"],["items","Itens","items"]]},
+  pnl:{label:"princípio de comunicação",fields:[["t","Título","text"],["p","Texto","area"]]},
+  princ:{label:"princípio",fields:[["t","Título","text"],["p","Texto","area"]]},
+  dont:{label:"ponto a não aplicar",fields:[["t","Título","text"],["p","Texto","area"]]},
+  quiz:{label:"pergunta de treino",fields:[["q","Situação ou pergunta","area"],["o","Opções de resposta","list"],["c","Número da opção certa (1, 2, 3…)","num"],["e","Explicação","area"]]}
+};
+const BLANK={
+  script:{cat:"Os meus guiões",type:"own",src:[],t:"",when:"",steps:[["s",""]],keys:[]},
+  obj:{ctx:"Telefone",type:"own",src:[],q:"",a:"",why:""},
+  phase:{t:"",s:"",items:[{t:"",d:"",src:""}]},
+  pnl:{t:"",p:"",src:[]},princ:{t:"",p:"",src:[]},dont:{t:"",p:""},
+  quiz:{q:"",o:["",""],c:0,e:"",s:""}
+};
+const ta=(v,attr)=>`<textarea ${attr}>${esc(v||"")}</textarea>`;
+const rowCtl=`<span class="ed-ctl"><button type="button" class="btn ghost ed-mini" data-up title="Subir">↑</button><button type="button" class="btn ghost ed-mini" data-del title="Remover">✕</button></span>`;
+const ROW={
+  list:v=>`<div class="ed-row">${ta(v,"data-item rows=\"3\"")}${rowCtl}</div>`,
+  steps:(k,v)=>`<div class="ed-row"><div class="ed-col"><select data-kind><option value="s"${k==="s"?" selected":""}>Diga</option><option value="n"${k==="n"?" selected":""}>Nota</option></select>${ta(v,"data-item rows=\"3\"")}</div>${rowCtl}</div>`,
+  items:(t,d,src)=>`<div class="ed-row" data-src="${esc(src||"")}"><div class="ed-col"><input data-it value="${esc(t||"")}" placeholder="Item">${ta(d,"data-id rows=\"2\" placeholder=\"Detalhe (opcional)\"")}</div>${rowCtl}</div>`,
+  cause:c=>`<div class="ed-cause"><div class="row" style="justify-content:space-between"><input data-ct value="${esc(c.t||"")}" placeholder="Causa (ex.: quer rapidez)" style="flex:1">${rowCtl}</div><div class="ed-list" data-list="cs">${(c.steps||[]).map(ROW.list).join("")}</div><button type="button" class="btn ghost" data-add="list">+ Passo</button>${ta(c.note,"data-cn rows=\"2\" placeholder=\"Nota (opcional)\"")}</div>`
+};
+function fieldHTML(f,item){
+  const [k,label,type,opts]=f,v=item[k];
+  const lab=`<label>${esc(label)}</label>`;
+  if(type==="text")return `<div class="field">${lab}<input data-f="${k}" value="${esc(v||"")}"></div>`;
+  if(type==="num")return `<div class="field">${lab}<input data-f="${k}" type="number" min="1" step="1" value="${(v||0)+1}"></div>`;
+  if(type==="area")return `<div class="field">${lab}${ta(v,`data-f="${k}" rows="4"`)}</div>`;
+  if(type==="lines")return `<div class="field">${lab}${ta((v||[]).join("\n"),`data-f="${k}" data-lines rows="4"`)}</div>`;
+  if(type==="select")return `<div class="field">${lab}<select data-f="${k}">${opts.map(o=>`<option${o===v?" selected":""}>${esc(o)}</option>`).join("")}</select></div>`;
+  if(type==="list")return `<div class="field">${lab}<div class="ed-list" data-list="${k}">${(v||[]).map(ROW.list).join("")}</div><button type="button" class="btn ghost" data-add="list">+ Acrescentar</button></div>`;
+  if(type==="steps")return `<div class="field">${lab}<div class="ed-list" data-list="${k}">${(v||[]).map(s=>ROW.steps(s[0],s[1])).join("")}</div><button type="button" class="btn ghost" data-add="steps">+ Acrescentar passo</button></div>`;
+  if(type==="items")return `<div class="field">${lab}<div class="ed-list" data-list="${k}">${(v||[]).map(i=>ROW.items(i.t,i.d,i.src)).join("")}</div><button type="button" class="btn ghost" data-add="items">+ Acrescentar item</button></div>`;
+  if(type==="causes")return `<div class="field">${lab}<div class="ed-list" data-list="${k}">${(v||[]).map(ROW.cause).join("")}</div><button type="button" class="btn ghost" data-add="cause">+ Acrescentar caminho</button></div>`;
+  return "";
+}
+function collect(kind,box,orig){
+  const out=clone(orig);delete out.id;
+  KINDS[kind].fields.forEach(([k,,type])=>{
+    const clean=s=>(s||"").replace(/\r/g,"").trim();
+    if(["text","area","select"].includes(type)){const v=clean(box.querySelector(`[data-f="${k}"]`).value);if(v||type==="text"||k==="a"||k==="q")out[k]=v;else delete out[k]}
+    else if(type==="num"){out[k]=Math.max(0,(parseInt(box.querySelector(`[data-f="${k}"]`).value,10)||1)-1)}
+    else if(type==="lines"){out[k]=clean(box.querySelector(`[data-f="${k}"]`).value).split("\n").map(s=>s.trim()).filter(Boolean)}
+    else{
+      const list=box.querySelector(`[data-list="${k}"]`);
+      const rows=[...list.children];
+      if(type==="list"){const a=rows.map(r=>clean(r.querySelector("[data-item]").value)).filter(Boolean);if(a.length)out[k]=a;else delete out[k]}
+      if(type==="steps"){out[k]=rows.map(r=>[r.querySelector("[data-kind]").value,clean(r.querySelector("[data-item]").value)]).filter(s=>s[1])}
+      if(type==="items"){out[k]=rows.map(r=>({t:clean(r.querySelector("[data-it]").value),d:clean(r.querySelector("[data-id]").value),src:r.dataset.src||""})).filter(i=>i.t)}
+      if(type==="causes"){const a=rows.map(r=>{const c={t:clean(r.querySelector("[data-ct]").value),steps:[...r.querySelector('[data-list="cs"]').children].map(x=>clean(x.querySelector("[data-item]").value)).filter(Boolean)};const n=clean(r.querySelector("[data-cn]").value);if(n)c.note=n;return c}).filter(c=>c.t||c.steps.length);if(a.length)out[k]=a;else delete out[k]}
+    }
+  });
+  if(kind==="quiz"&&out.o)out.c=Math.min(out.c,out.o.length-1);
+  return out;
+}
+function openEditor(kind,id){
+  const K=KINDS[kind];if(!K)return;
+  const isNew=!id;const base=isNew?null:BASE[kind].find(b=>b.id===id);
+  const rec=isNew?null:(OV[kind]||{})[id];
+  const item=isNew?clone(BLANK[kind]):clone(findItem(kind,id)||{});
+  if(!isNew&&!item)return;
+  const last=document.activeElement;
+  $("#overlay").innerHTML=`<div class="sheet-bg" id="sheetBg"><div class="sheet ed-sheet" role="dialog" aria-modal="true" aria-labelledby="edTitle">
+   <div class="row" style="justify-content:space-between"><h3 id="edTitle" style="font-size:19px">${isNew?"Novo "+K.label:"Editar "+K.label}</h3><button class="btn ghost" type="button" data-close>Fechar</button></div>
+   <p class="muted small" style="margin:0">Pode usar os campos {meuNome}, {agencia}, {ami}, {telefone}, {proprietario}, {tipologia}, {zona}, {urbanizacao}, {preco}, {hora1}, {hora2} e {dia}: são preenchidos com os seus dados.</p>
+   <form id="edForm" class="ed-form">${K.fields.map(f=>fieldHTML(f,item)).join("")}</form>
+   <div class="actions" id="edActions"><button class="btn primary" type="button" data-save>Guardar</button>
+    ${!isNew&&base&&rec&&rec.data?`<button class="btn ghost" type="button" data-reset>Repor original</button>`:""}
+    ${!isNew?`<button class="btn ghost" type="button" data-remove>Apagar</button>`:""}</div>
+   <p class="muted small" style="margin:0">${syncMode==="db"?"As alterações ficam guardadas na ferramenta e aparecem em todos os seus dispositivos.":"Neste momento as alterações ficam guardadas apenas neste navegador."}</p>
+  </div></div>`;
+  const box=$("#edForm"),sheet=$(".ed-sheet");
+  const close=()=>{$("#overlay").innerHTML="";document.removeEventListener("keydown",onKey);if(last&&last.focus)try{last.focus()}catch(e){}};
+  const onKey=e=>{if(e.key==="Escape")close()};
+  sheet.addEventListener("click",async e=>{
+    const t=e.target.closest("button");if(!t)return;
+    if(t.hasAttribute("data-close")){close();return}
+    if(t.dataset.add){const list=t.previousElementSibling;const ty=t.dataset.add;
+      list.insertAdjacentHTML("beforeend",ty==="list"?ROW.list(""):ty==="steps"?ROW.steps("s",""):ty==="items"?ROW.items("","",""):ROW.cause({steps:[""]}));
+      const f=list.lastElementChild.querySelector("textarea,input");if(f)f.focus();return}
+    if(t.hasAttribute("data-del")){(t.closest(".ed-cause")&&!t.closest(".ed-row")?t.closest(".ed-cause"):t.closest(".ed-row")).remove();return}
+    if(t.hasAttribute("data-up")){const r=t.closest(".ed-cause")&&!t.closest(".ed-row")?t.closest(".ed-cause"):t.closest(".ed-row");if(r.previousElementSibling)r.parentNode.insertBefore(r,r.previousElementSibling);return}
+    if(t.hasAttribute("data-save")){
+      const data=collect(kind,box,item);
+      const req=K.fields[0][0];
+      if(!data[req]){toast("Preencha o campo “"+K.fields[0][1]+"”");return}
+      if(kind==="quiz"&&(!data.o||data.o.length<2)){toast("Uma pergunta precisa de pelo menos duas opções");return}
+      const nid=isNew?("c"+Date.now().toString(36)):id;
+      close();
+      await persist(kind,nid,{data,custom:isNew||(!base),deleted:false,ts:isNew?Date.now():((rec&&rec.ts)||Date.now())});
+      route();toast("Guardado");return}
+    if(t.hasAttribute("data-reset")){close();await persist(kind,id,null);route();toast("Texto original reposto");return}
+    if(t.hasAttribute("data-remove")){
+      if(!t.dataset.confirm){t.dataset.confirm="1";t.textContent="Confirmar: apagar";t.classList.add("primary");return}
+      close();
+      if(base)await persist(kind,id,{data:null,deleted:true,custom:false,ts:Date.now()});else await persist(kind,id,null);
+      route();toast("Apagado");return}
+  });
+  const f=box.querySelector("input,textarea");if(f)f.focus();
+}
+document.addEventListener("click",e=>{
+  const ed=e.target.closest("[data-edit]");if(ed){e.preventDefault();e.stopPropagation();const i=ed.dataset.edit.indexOf(":");openEditor(ed.dataset.edit.slice(0,i),ed.dataset.edit.slice(i+1));return}
+  const nw=e.target.closest("[data-new]");if(nw){e.preventDefault();openEditor(nw.dataset.new,null)}
+  const rs=e.target.closest("[data-restore]");if(rs){const [k,id]=rs.dataset.restore.split(":");persist(k,id,null).then(()=>{route();toast("Reposto")})}
+},true);
+function editedListHTML(){
+  const names={script:"Guião",obj:"Objeção",phase:"Fase",pnl:"Princípio",princ:"Princípio",dont:"Ponto",quiz:"Pergunta"};
+  const rows=[];
+  Object.keys(OV).forEach(k=>Object.keys(OV[k]||{}).forEach(id=>{const r=OV[k][id];const b=(BASE[k]||[]).find(x=>x.id===id);if(!b)return;const title=b.t||b.q||id;rows.push(`<li class="check" style="align-items:center"><span style="flex:1;min-width:0"><b>${esc(names[k]||k)}:</b> ${esc(title)} <span class="badge ${r.deleted?"b-warn":"b-src"}">${r.deleted?"Apagado":"Editado"}</span></span><button class="btn ghost" type="button" data-restore="${k}:${esc(id)}">Repor original</button></li>`)}));
+  return rows.length?`<ul class="checks" style="padding:0">${rows.join("")}</ul>`:`<p class="muted" style="margin:0">Ainda não alterou nenhum texto original.</p>`;
+}
+
+/* Ligação ao armazenamento partilhado da ferramenta */
+async function initStore(){
+  let c=window.claude;
+  if(!c||!c.use){await new Promise(r=>setTimeout(r,300));c=window.claude}
+  if(!c||!c.use)return;
+  let db=null;try{db=await c.use("db")}catch(e){db=null}
+  if(!db)return;
+  let user=null;try{user=await c.use("user")}catch(e){}
+  try{canEditTexts=user?((await user.canEdit())??true):true}catch(e){canEditTexts=true}
+  dbRef=db;syncMode="db";
+  /* perfil pessoal sincronizado entre dispositivos */
+  try{
+    const uid=user?await user.id():null;
+    if(uid){
+      const pref=db.doc("data/users/"+uid+"/perfil");
+      const snap=await pref.get();
+      if(snap.exists){const d=snap.data()||{};if(d.me&&typeof d.me==="object"){store.me=Object.assign({},store.me,d.me);save()}}
+      else if(store.me&&store.me.meuNome){try{await pref.set({me:store.me})}catch(e){}}
+      window.__savePerfil=async()=>{try{await pref.set({me:store.me})}catch(e){}};
+    }
+  }catch(e){}
+  let lastKey=null;
+  const localOV=store.ov&&Object.keys(store.ov).length?clone(store.ov):null;
+  db.collection("textos").onSnapshot(qs=>{
+    const o={};
+    qs.docs.forEach(d=>{const x=d.data()||{};if(!x.kind||!x.id)return;let data=null;try{data=x.json?JSON.parse(x.json):null}catch(e){}(o[x.kind]=o[x.kind]||{})[x.id]={data,deleted:!!x.deleted,custom:!!x.custom,ts:x.ts||0}});
+    const key=JSON.stringify(o);if(key===lastKey)return;lastKey=key;
+    OV=o;rebuild();if(!$("#overlay").innerHTML)route();
+  },()=>{});
+  /* Alterações feitas antes neste navegador passam para o armazenamento partilhado */
+  if(localOV&&canEditTexts){for(const k of Object.keys(localOV))for(const id of Object.keys(localOV[k]))await persist(k,id,localOV[k][id]);store.ov={};save()}
+  route();
+}
+rebuild();
+
+buildNav();
+window.addEventListener("hashchange",route);
+route();
+initStore();
+})();
+</script>

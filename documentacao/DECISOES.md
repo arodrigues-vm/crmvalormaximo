@@ -59,3 +59,4 @@ Confirmada pela decisão D-18.
 ## Pendentes do proprietário
 
 - Ficheiro «Tabelas Completo.xlsx» (inventário histórico de campos, Q09) — necessário na F2-06.
+- Decisões D-40 (módulo «Apoio à Angariação»): ver `modulo-angariacao/ESPECIFICACAO.md`, secção 9.
