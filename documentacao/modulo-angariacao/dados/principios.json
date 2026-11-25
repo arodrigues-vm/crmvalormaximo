@@ -1,0 +1,342 @@
+{
+  "versao": 1,
+  "comunicacao_pnl": [
+    {
+      "titulo": "Compreendo, não concordo",
+      "texto": "“Compreendo” põe-no do lado da pessoa sem lhe dar razão. Use-o sempre antes de responder a uma objeção.",
+      "fontes": [
+        "P1.1"
+      ]
+    },
+    {
+      "titulo": "Nunca contra-argumentar",
+      "texto": "Argumentar soa a “o senhor está errado” e põe a pessoa na defensiva. Troque argumentos por perguntas.",
+      "fontes": [
+        "P1.1",
+        "P2.2"
+      ]
+    },
+    {
+      "titulo": "Perguntas poderosas",
+      "texto": "Perguntas cuja resposta leva a pessoa a concluir sozinha (“Se fosse comprador, o que pensaria?”). Foi ela que o disse, por isso convence-se.",
+      "fontes": [
+        "P1.2",
+        "P2.2",
+        "P3.1"
+      ]
+    },
+    {
+      "titulo": "Descobrir a causa primeiro",
+      "texto": "O que a pessoa diz raramente é o problema. Pergunte “o que o preocupa em concreto?” e responda só a essa causa.",
+      "fontes": [
+        "P1.1",
+        "P2.2"
+      ]
+    },
+    {
+      "titulo": "Escutar em silêncio",
+      "texto": "Quando a pessoa reclama, olhe-a nos olhos, não interrompa e não mostre emoção. Só fala quando ela parar.",
+      "fontes": [
+        "P3.1",
+        "P1.2"
+      ]
+    },
+    {
+      "titulo": "Sem pausas no pedido",
+      "texto": "Ao propor uma reunião ou apresentar os honorários, não pare à espera de aprovação. A pergunta é “às 15h ou às 18h?”, nunca “quer?”.",
+      "fontes": [
+        "P1.1",
+        "P3.1"
+      ]
+    },
+    {
+      "titulo": "Pergunta sobre a casa com resposta “sim”",
+      "texto": "Ao telefone, faça uma pergunta sobre o imóvel cuja resposta seja afirmativa (lateralidade). O ideal é a pessoa elogiar a casa.",
+      "fontes": [
+        "P1.1"
+      ]
+    },
+    {
+      "titulo": "Senhor, Senhora Dona",
+      "texto": "Ao telefone, trate sempre por Senhor ou Senhora Dona. Passe ao nome só se a pessoa o pedir.",
+      "fontes": [
+        "P1.2"
+      ]
+    },
+    {
+      "titulo": "“Se lhe parecer bem”",
+      "texto": "Mostra que a decisão é da pessoa. E termine com “O que lhe parece?”.",
+      "fontes": [
+        "P1.1",
+        "P4"
+      ]
+    },
+    {
+      "titulo": "Ajudar, não angariar",
+      "texto": "Diga “ver de que forma o posso ajudar a vender mais depressa e nas melhores condições”: são os dois desejos de quem vende.",
+      "fontes": [
+        "P1.1",
+        "P4"
+      ]
+    },
+    {
+      "titulo": "Quem paga o “grátis”",
+      "texto": "Quando oferece algo gratuito, diga quem o paga (por exemplo, o banco). “Tudo à borla” parece falso.",
+      "fontes": [
+        "P1.1"
+      ]
+    },
+    {
+      "titulo": "Palavras que ajudam",
+      "texto": "“Acolhedora” e “confortável” em vez de “pequena”; “fragilidades” ou “espaço para melhoria” em vez de “defeitos”; “interessante” como elogio diplomático. Sem diminutivos.",
+      "fontes": [
+        "P1.1",
+        "P3.2"
+      ]
+    },
+    {
+      "titulo": "“O nosso acordo”, “apenas a mim”",
+      "texto": "Nunca diga “contrato” nem “exclusivo”. “Vamos então fazer o nosso acordo?” e “Confia apenas a mim a venda do seu imóvel?”.",
+      "fontes": [
+        "P2.1",
+        "P2.2"
+      ]
+    },
+    {
+      "titulo": "Postura",
+      "texto": "Queixo na horizontal, olhar nos olhos, sorriso verdadeiro. Uma pessoa frágil não é escolhida para defender a casa de ninguém.",
+      "fontes": [
+        "P2.1"
+      ]
+    },
+    {
+      "titulo": "Estado inalterado",
+      "texto": "Um “não” não muda o seu dia. Agir em vez de reagir. Sair sempre de cabeça erguida, com ou sem acordo.",
+      "fontes": [
+        "P1.1",
+        "P4"
+      ]
+    },
+    {
+      "titulo": "Obrigação de consciência",
+      "texto": "Ligue a todos os proprietários da sua zona: se não o fizer, podem cair nas mãos de alguém menos correto. Se disserem não, nada perdeu.",
+      "fontes": [
+        "P1.1",
+        "P2.1"
+      ]
+    },
+    {
+      "titulo": "É ecológico?",
+      "texto": "Antes de reagir, pergunte-se: o que ganho e o que perco com isto? Discutir com um cliente nunca compensa.",
+      "fontes": [
+        "P1.1"
+      ]
+    },
+    {
+      "titulo": "Treinar em voz alta",
+      "texto": "Escreva as suas próprias frases, diga-as em voz alta, grave-se no telemóvel e reveja. Ensaie com um colega antes das reuniões.",
+      "fontes": [
+        "P1.2",
+        "P3.1",
+        "P4"
+      ]
+    },
+    {
+      "titulo": "Projetar o futuro",
+      "texto": "Defina onde quer estar daqui a cinco anos e recue ano a ano até saber o que tem de fazer este ano.",
+      "fontes": [
+        "P3.1"
+      ]
+    }
+  ],
+  "prospecao_e_servico": [
+    {
+      "titulo": "Perguntas alternativas",
+      "texto": "Dê sempre duas opções e termine com “O que lhe parece?”. Nunca pergunte se a pessoa quer fazer algo obrigatório: pergunte quando.",
+      "fontes": [
+        "1.1",
+        "2.1"
+      ]
+    },
+    {
+      "titulo": "Sem pausas no fecho da chamada",
+      "texto": "Diga o objetivo e as duas opções de horário de seguida. Só espera depois.",
+      "fontes": [
+        "2.1"
+      ]
+    },
+    {
+      "titulo": "A palavra “ainda”",
+      "texto": "“Ainda não tenho” muda tudo: existe no mercado e vai procurá-lo já.",
+      "fontes": [
+        "1.1"
+      ]
+    },
+    {
+      "titulo": "“Vai compreender já o porquê do meu telefonema”",
+      "texto": "Aumenta a expectativa e a atenção de quem ouve.",
+      "fontes": [
+        "1.1",
+        "2.1"
+      ]
+    },
+    {
+      "titulo": "O seu nome três vezes",
+      "texto": "Nome e agência repetidos ao longo da conversa ficam na memória.",
+      "fontes": [
+        "1.1"
+      ]
+    },
+    {
+      "titulo": "Os dois vetores da visita",
+      "texto": "O proprietário tem de gostar de si e de o achar competente. Sem os dois, não entrega em exclusivo.",
+      "fontes": [
+        "2.1",
+        "2.2"
+      ]
+    },
+    {
+      "titulo": "Decide-se com emoção",
+      "texto": "As pessoas decidem pela emoção e justificam com a razão. Primeiro a relação, depois as razões.",
+      "fontes": [
+        "2.2"
+      ]
+    },
+    {
+      "titulo": "Três imóveis por subsegmento",
+      "texto": "O proprietário pesca “ao anzol”, o consultor “à rede”. Cada angariação pede mais duas no mesmo subsegmento.",
+      "fontes": [
+        "1.2"
+      ]
+    },
+    {
+      "titulo": "Os segmentos de preço",
+      "texto": "Os compradores pesquisam em saltos de 25 mil euros nos valores baixos, 50 mil nos médios e 100 mil nos altos.",
+      "fontes": [
+        "1.2"
+      ]
+    },
+    {
+      "titulo": "Conhecer a zona",
+      "texto": "Uma semana com duas horas por dia a pé: acessos, estacionamento, transportes, comércio, tipo de edificado, valores mínimos e máximos por tipologia.",
+      "fontes": [
+        "1.2"
+      ]
+    },
+    {
+      "titulo": "Angariação reativa em quatro níveis",
+      "texto": "1) colegas da agência; 2) proprietários que disseram não; 3) prospeção e cartas no local; 4) partilha com outras marcas.",
+      "fontes": [
+        "1.1"
+      ]
+    },
+    {
+      "titulo": "Portais três vezes por dia",
+      "texto": "Manhã, antes das 14h30 e à noite. Os particulares carregam anúncios fora de horas; ligue antes de todos.",
+      "fontes": [
+        "1.2"
+      ]
+    },
+    {
+      "titulo": "Rede de contactos",
+      "texto": "Advogados, solicitadores, engenheiros, arquitetos, promotores (mesmo os que já venderam tudo) e os cafés da sua zona.",
+      "fontes": [
+        "1.2"
+      ]
+    },
+    {
+      "titulo": "Anunciar segmentos altos",
+      "texto": "Quem compra uma casa de 500 a 700 mil euros costuma ter de vender a sua: “Este imóvel depende da venda de outro?”",
+      "fontes": [
+        "1.1",
+        "1.2"
+      ]
+    },
+    {
+      "titulo": "Medir os canais",
+      "texto": "Saiba de onde vêm as angariações, os compradores e as vendas fechadas.",
+      "fontes": [
+        "2.1"
+      ]
+    },
+    {
+      "titulo": "Fidelizar desde a escritura",
+      "texto": "Folha de contactos úteis, chamada aos 8 dias, presente aos 30, datas importantes e relatório de avaliação ao fim de alguns anos.",
+      "fontes": [
+        "1.1"
+      ]
+    },
+    {
+      "titulo": "Só prometer o que faz",
+      "texto": "Defina por escrito o seu serviço e explique o benefício de cada parte. O benefício tem de ser maior do que o custo.",
+      "fontes": [
+        "2.2"
+      ]
+    },
+    {
+      "titulo": "Duas horas por dia no terreno",
+      "texto": "Bloqueie duas horas diárias para angariar na sua zona. O formador sugere experimentar durante 30 dias.",
+      "fontes": [
+        "1.2"
+      ]
+    }
+  ],
+  "nao_aplicar": [
+    {
+      "titulo": "Dizer às agências anteriores que o imóvel “já está vendido”",
+      "texto": "Sugerido na gravação 3.1 para rescindir contratos em aberto. É uma declaração falsa. Rescinda com verdade (por exemplo, retirada da venda) ou espere pelo fim dos contratos."
+    },
+    {
+      "titulo": "Pós-datar o contrato de exclusividade",
+      "texto": "Sugerido na mesma gravação. Pode ser visto como má-fé."
+    },
+    {
+      "titulo": "Assinar uma minuta não validada sabendo que é nula e substituí-la depois com a mesma data",
+      "texto": "Use um contrato em texto corrido até ter a validação do IMPIC."
+    },
+    {
+      "titulo": "Ocultar até ao fim da chamada que é de uma imobiliária",
+      "texto": "O próprio formador diz que não recomenda esta variante."
+    },
+    {
+      "titulo": "Invocar compradores, investidores ou visitas que não existem",
+      "texto": "Os guiões de “cliente com visita marcada” só servem quando isso é verdade."
+    },
+    {
+      "titulo": "Entrar em prédios sem autorização",
+      "texto": "Deixe cartas apenas onde alguém o deixou entrar ou onde é permitido."
+    },
+    {
+      "titulo": "Apresentar as estatísticas citadas como garantias",
+      "texto": "85% de sucesso, 72% das objeções, 4,5 meses, 10 a 12%, 93%: são experiências ou estudos citados pelo formador, não verificados."
+    },
+    {
+      "titulo": "Tomar as matérias jurídicas e fiscais como regra atual",
+      "texto": "Lei 15/2013, validação pelo IMPIC, licenças, preferências, IMI e IMT: confirme sempre em fontes oficiais atualizadas."
+    },
+    {
+      "titulo": "Dizer que representa um investidor estrangeiro que não existe",
+      "texto": "Sugerido nas gravações PNL 1.2 e 2.1 para quem escreve “não quero imobiliárias”. O próprio formador chama-lhe “uma pequena mentira”. Só com um mandato real de comprador."
+    },
+    {
+      "titulo": "Manter o proprietário à espera de uma resposta inventada",
+      "texto": "Na mesma abordagem, o formador inventa respostas do “cliente” durante dias. Não aplicar."
+    },
+    {
+      "titulo": "Apresentar um guia como “em validação” ou “à venda em junho” se não for verdade",
+      "texto": "Ofereça o guia, mas diga só o que é real. O mesmo para “ofertas válidas até 31 de março” ou reuniões inventadas no prédio."
+    },
+    {
+      "titulo": "Assinar uma rescisão que só produz efeito seis meses depois, dando a entender o contrário",
+      "texto": "Contado na gravação PNL 2.2. Induz o proprietário em erro."
+    },
+    {
+      "titulo": "Usar uma história pessoal que não é sua",
+      "texto": "O exemplo do computador da filha (PNL 3.1) só funciona com verdade. Inventado, é manipulação."
+    },
+    {
+      "titulo": "Dizer “um amigo mandou-me uma foto da vossa placa”",
+      "texto": "Pretexto falso sugerido por um participante (PNL 4). Use a verdade: viu o anúncio ou passou na rua."
+    }
+  ]
+}

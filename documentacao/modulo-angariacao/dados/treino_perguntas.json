@@ -1,0 +1,330 @@
+{
+  "versao": 1,
+  "perguntas": [
+    {
+      "id": "q1",
+      "situacao": "Ao telefone, o proprietário diz: “Não quero trabalhar com imobiliárias.” O que recomenda o formador?",
+      "opcoes": [
+        "Insistir nas vantagens da exclusividade até ele mudar de ideias.",
+        "Desejar-lhe sucesso, pôr-se ao dispor, dizer o nome e pedir para ligar daqui a 30 dias.",
+        "Desligar educadamente e riscar o contacto.",
+        "Oferecer logo uma comissão mais baixa."
+      ],
+      "resposta_certa_indice": 1,
+      "explicacao": "Psicologia inversa: ele espera uma má reação. Fica a porta aberta e o imóvel registado para quando tiver um comprador.",
+      "fonte": "1.1"
+    },
+    {
+      "id": "q2",
+      "situacao": "No fim do primeiro telefonema, como deve propor a reunião?",
+      "opcoes": [
+        "“Quando é que lhe dá jeito?”",
+        "“Posso passar aí um dia destes?”",
+        "Dar duas opções de horário seguidas, sem fazer pausa antes.",
+        "Pedir o email para enviar informação."
+      ],
+      "resposta_certa_indice": 2,
+      "explicacao": "Quem marca é sempre o consultor. Uma pausa antes das opções convida ao “não”.",
+      "fonte": "2.1"
+    },
+    {
+      "id": "q3",
+      "situacao": "Um casal quer um T3 no centro por 300 mil euros e esse imóvel não existe no mercado. O que faz?",
+      "opcoes": [
+        "Diz-lhes que vão ter de ir para a periferia.",
+        "Valida as razões deles e pergunta se preferem um T2 no centro ou um T3 a dez minutos.",
+        "Diz que liga quando surgir algo.",
+        "Mostra-lhes um T3 de 375 mil euros para os convencer."
+      ],
+      "resposta_certa_indice": 1,
+      "explicacao": "É a técnica das perguntas alternativas: as duas opções são realistas e a escolha é deles. Termine com “O que lhe parece?”.",
+      "fonte": "1.1"
+    },
+    {
+      "id": "q4",
+      "situacao": "Marcou uma visita com um comprador para amanhã e não tem o imóvel. Qual é o primeiro passo?",
+      "opcoes": [
+        "Ligar logo a colegas de outras marcas para partilhar.",
+        "Mensagem “SOS” no grupo dos colegas da própria agência.",
+        "Pôr um anúncio a dizer que procura imóveis.",
+        "Esperar que algum proprietário ligue."
+      ],
+      "resposta_certa_indice": 1,
+      "explicacao": "A ordem é: colegas da agência, proprietários que disseram não, prospeção e cartas no local e, só no fim, partilha com outras marcas (50% da comissão).",
+      "fonte": "1.1"
+    },
+    {
+      "id": "q5",
+      "situacao": "Chega a casa do proprietário e ele convida-o a sentar-se para um café. O que faz?",
+      "opcoes": [
+        "Aceita e começa a explicar as comissões.",
+        "Agradece e propõe ver primeiro a casa; o café fica para depois.",
+        "Recusa sem explicar.",
+        "Abre logo a checklist técnica."
+      ],
+      "resposta_certa_indice": 1,
+      "explicacao": "Sem ter visto a casa, a conversa vai para comissões e exclusividade fora de ordem.",
+      "fonte": "2.2"
+    },
+    {
+      "id": "q6",
+      "situacao": "Durante a visita à casa, qual é a atitude certa?",
+      "opcoes": [
+        "Apontar defeitos para preparar uma descida de preço.",
+        "Ver a casa como a veria um comprador e elogiar o que tem de bom.",
+        "Preencher a grelha técnica com cuidado.",
+        "Falar já da duração do contrato."
+      ],
+      "resposta_certa_indice": 1,
+      "explicacao": "Ninguém entrega em exclusivo a quem não gosta. Apontar defeitos também faz o proprietário querer estar em todas as visitas.",
+      "fonte": "2.1"
+    },
+    {
+      "id": "q7",
+      "situacao": "O que é a análise da concorrência que leva para a reunião?",
+      "opcoes": [
+        "Os preços a que se venderam casas na zona.",
+        "Os imóveis comparáveis que estão à venda hoje.",
+        "Uma avaliação certificada.",
+        "O valor patrimonial tributário."
+      ],
+      "resposta_certa_indice": 1,
+      "explicacao": "Mostra com que imóveis o proprietário vai competir. Não é uma avaliação. Pode oferecê-la logo no início da conversa.",
+      "fonte": "2.2"
+    },
+    {
+      "id": "q8",
+      "situacao": "Como deve apresentar os regimes de contrato?",
+      "opcoes": [
+        "“Eu só trabalho em exclusivo.”",
+        "“Há duas formas de trabalhar com a mediação: uma sem compromisso de parte a parte e um serviço diferente que lhe quero mostrar.”",
+        "Não falar disso até ao fim.",
+        "Propor primeiro o contrato em aberto."
+      ],
+      "resposta_certa_indice": 1,
+      "explicacao": "A escolha fica com o proprietário e ele deixa de estar na defensiva. As palavras “exclusivo” e “não exclusivo” não se usam.",
+      "fonte": "2.2"
+    },
+    {
+      "id": "q9",
+      "situacao": "Qual é a ordem das perguntas de fecho?",
+      "opcoes": [
+        "Confia apenas a mim → gostou → estou à altura → pensa em tudo isto.",
+        "Pensa em tudo isto → acrescentaria algo → estou à altura → confia apenas a mim.",
+        "Estou à altura → confia apenas a mim → assinamos.",
+        "Gostou → assinamos o exclusivo?"
+      ],
+      "resposta_certa_indice": 1,
+      "explicacao": "Primeiro desmontam-se as crenças, depois é o proprietário a dizer que o serviço é excelente, depois a confiança em si e, só no fim, o pedido.",
+      "fonte": "2.2"
+    },
+    {
+      "id": "q10",
+      "situacao": "Quais são as três razões do relatório de avaliação?",
+      "opcoes": [
+        "Para o proprietário, para os compradores e para o próprio consultor.",
+        "Para o banco, para as Finanças e para o notário.",
+        "Só para justificar a comissão.",
+        "Para cumprir a lei."
+      ],
+      "resposta_certa_indice": 0,
+      "explicacao": "O proprietário fica a saber o preço justo, os compradores têm de justificar as propostas baixas e o consultor não aceita imóveis acima do segmento.",
+      "fonte": "2.2"
+    },
+    {
+      "id": "q11",
+      "situacao": "Acabou de angariar um T2 entre 250 e 300 mil euros. Qual é a preocupação seguinte?",
+      "opcoes": [
+        "Só publicitar este imóvel.",
+        "Angariar mais dois imóveis no mesmo subsegmento.",
+        "Baixar o preço para vender depressa.",
+        "Partilhar com todas as agências."
+      ],
+      "resposta_certa_indice": 1,
+      "explicacao": "O consultor pesca “à rede”: quem liga por um imóvel deve ter três para ver. Roda-se a publicidade entre eles.",
+      "fonte": "1.2"
+    },
+    {
+      "id": "q12",
+      "situacao": "Um cliente comprou casa consigo há um mês. O que recomenda o formador?",
+      "opcoes": [
+        "Nada: o negócio está fechado.",
+        "Uma mensagem automática da empresa.",
+        "Ligar, perguntar como está e passar lá com um presente.",
+        "Pedir logo referências."
+      ],
+      "resposta_certa_indice": 2,
+      "explicacao": "No dia da escritura um presente não surpreende. Um mês depois, supera a expectativa.",
+      "fonte": "1.1"
+    },
+    {
+      "id": "q13",
+      "situacao": "Tem uma reunião no sábado às 11h. Quando confirma?",
+      "opcoes": [
+        "No sábado de manhã.",
+        "Na sexta à tarde.",
+        "Não confirma, para não dar hipótese de desmarcar.",
+        "Na quinta-feira."
+      ],
+      "resposta_certa_indice": 1,
+      "explicacao": "Confirme no turno útil anterior e, se houver contratempo, ajuste com simpatia.",
+      "fonte": "2.1"
+    },
+    {
+      "id": "q14",
+      "situacao": "O proprietário tem o imóvel em aberto em duas agências, com contratos válidos, e quer dar-lhe exclusividade. O que deve saber?",
+      "opcoes": [
+        "Pode assinar o exclusivo e os outros deixam de contar.",
+        "O exclusivo só produz efeito depois de rescindidos os contratos em vigor.",
+        "Basta pôr no contrato uma data posterior.",
+        "Deve dizer às agências que o imóvel já está vendido."
+      ],
+      "resposta_certa_indice": 1,
+      "explicacao": "Segundo o formador (que cita o IMPIC), o exclusivo sobre contratos válidos não tem eficácia. A rescisão deve ser feita com verdade.",
+      "fonte": "3.1"
+    },
+    {
+      "id": "q15",
+      "situacao": "O que é obrigatório numa carta deixada debaixo das portas?",
+      "opcoes": [
+        "Apenas o nome do consultor.",
+        "A denominação da empresa e o número da licença AMI.",
+        "Uma fotografia do consultor.",
+        "O preço do imóvel."
+      ],
+      "resposta_certa_indice": 1,
+      "explicacao": "Vale para qualquer comunicação: cartas, emails, placas, envelopes. O formador refere coimas por incumprimento.",
+      "fonte": "1.2"
+    },
+    {
+      "id": "q16",
+      "situacao": "Na reunião, o proprietário diz “isso é exclusividade, não quero”. Qual é o primeiro passo?",
+      "opcoes": [
+        "Explicar porque é que o exclusivo é melhor para ele.",
+        "Dizer que o vosso exclusivo é só de promoção.",
+        "Dizer “compreendo” e perguntar o que o preocupa em concreto no regime de exclusividade.",
+        "Aceitar logo fazer em aberto."
+      ],
+      "resposta_certa_indice": 2,
+      "explicacao": "Por trás do “não quero exclusivo” há uma causa: quer rapidez, quer poder vender ele próprio ou teve uma má experiência. Só depois de a conhecer pode responder ao que interessa.",
+      "fonte": "P2.2"
+    },
+    {
+      "id": "q17",
+      "situacao": "Qual é a diferença entre dizer “compreendo” e dizer “concordo”?",
+      "opcoes": [
+        "Nenhuma, são sinónimos.",
+        "“Compreendo” põe-no do lado da pessoa sem dizer que ela tem razão.",
+        "“Concordo” é mais simpático e por isso é preferível.",
+        "“Compreendo” soa a frio e deve ser evitado."
+      ],
+      "resposta_certa_indice": 1,
+      "explicacao": "Ninguém reage mal a “compreendo”. “Concordo” daria razão à pessoa e tiraria o sentido à sua chamada.",
+      "fonte": "P1.1"
+    },
+    {
+      "id": "q18",
+      "situacao": "Ao apresentar os honorários, o que deve evitar?",
+      "opcoes": [
+        "Dizer a percentagem.",
+        "Fazer uma pausa ou perguntar “parece-lhe bem?” depois do valor.",
+        "Explicar quando é pago.",
+        "Falar do prazo do acordo."
+      ],
+      "resposta_certa_indice": 1,
+      "explicacao": "Apresente com segurança e continue. Uma pausa ou um pedido de aprovação convida a pessoa a discordar.",
+      "fonte": "P3.1"
+    },
+    {
+      "id": "q19",
+      "situacao": "O proprietário diz que 3% é o justo. Qual é a pergunta seguinte que o formador recomenda?",
+      "opcoes": [
+        "“3% é muito pouco para o meu trabalho.”",
+        "“Como chegou a esse valor? Porquê 3% e não 2% ou 4%?”",
+        "“Então faço 4%.”",
+        "“Os outros não fazem nada.”"
+      ],
+      "resposta_certa_indice": 1,
+      "explicacao": "A pergunta leva-o a dizer que é o que outros cobram. A seguir pergunta, um a um, se esses colegas incluíam análise da concorrência, SWOT, relatório e home staging.",
+      "fonte": "P3.1"
+    },
+    {
+      "id": "q20",
+      "situacao": "O proprietário quer pôr a casa 20% acima do valor do segmento. O que leva para a reunião?",
+      "opcoes": [
+        "Só a análise da concorrência do segmento certo.",
+        "A análise do segmento certo e também a do segmento acima, para lhe perguntar se compraria a casa dele em vez das outras.",
+        "Nada: deixa-o pôr o preço que quer.",
+        "Uma lista de defeitos da casa."
+      ],
+      "resposta_certa_indice": 1,
+      "explicacao": "Ao ver o que se vende pelo valor que ele quer (maior, mais novo, com garagem), é o próprio proprietário que conclui.",
+      "fonte": "P3.2"
+    },
+    {
+      "id": "q21",
+      "situacao": "O proprietário teve uma má experiência com um exclusivo. O que propõe o formador?",
+      "opcoes": [
+        "Dizer que você é diferente e pedir que confie.",
+        "Criticar a agência anterior.",
+        "Perguntar se ficaria satisfeito se cumprisse tudo e propor anexar o plano ao acordo, com a possibilidade de o terminar se não cumprir.",
+        "Fazer um contrato de um mês."
+      ],
+      "resposta_certa_indice": 2,
+      "explicacao": "Se dá a sua palavra, o que lhe custa assiná-la? Ele deixa de arriscar.",
+      "fonte": "P2.2"
+    },
+    {
+      "id": "q22",
+      "situacao": "Ao telefone, o proprietário avisa: “exclusividade não dou a ninguém”. O que faz?",
+      "opcoes": [
+        "Explica as vantagens do exclusivo ao telefone.",
+        "Diz que trabalha das duas formas, que ele decide o que acha melhor, e propõe dois horários.",
+        "Desliga, porque só trabalha em exclusivo.",
+        "Diz “depois falamos disso aí”."
+      ],
+      "resposta_certa_indice": 1,
+      "explicacao": "Ao telefone discutir o exclusivo é perder. O objetivo é a reunião. (Só diga que trabalha das duas formas se a sua agência o permitir.)",
+      "fonte": "P1.2"
+    },
+    {
+      "id": "q23",
+      "situacao": "Quais são os rácios mínimos que o formador considera aceitáveis?",
+      "opcoes": [
+        "5% dos contactos dão visita e 10% das visitas dão contrato.",
+        "20% dos contactos dão visita e 30% das visitas dão contrato.",
+        "50% e 50%.",
+        "Não há mínimos."
+      ],
+      "resposta_certa_indice": 1,
+      "explicacao": "Abaixo disso, reveja a forma de abordar. Com 20% e 30%, a conversão global ronda os 6%.",
+      "fonte": "P1.2"
+    },
+    {
+      "id": "q24",
+      "situacao": "A sala é pequena. Como fala dela com o proprietário?",
+      "opcoes": [
+        "“A salinha é um bocadinho pequena.”",
+        "“É um salão!”",
+        "“Não é muito grande, mas é muito acolhedora e permite dois ambientes.”",
+        "Não fala da sala."
+      ],
+      "resposta_certa_indice": 2,
+      "explicacao": "Não mente nem aponta defeitos. Evite diminutivos (“salinha”), que fazem parecer tudo mais pequeno.",
+      "fonte": "P2.1"
+    },
+    {
+      "id": "q25",
+      "situacao": "Quantas etapas são precisas, normalmente, para ultrapassar o “não quero imobiliária”?",
+      "opcoes": [
+        "Uma: insistir até aceitar.",
+        "Duas: primeiro deixar a porta aberta com simpatia e ajuda; depois voltar a ligar quando tiver um comprador real.",
+        "Três: email, carta e visita.",
+        "É impossível ultrapassar."
+      ],
+      "resposta_certa_indice": 1,
+      "explicacao": "É a objeção mais difícil e não se resolve num só contacto.",
+      "fonte": "P1.1"
+    }
+  ]
+}

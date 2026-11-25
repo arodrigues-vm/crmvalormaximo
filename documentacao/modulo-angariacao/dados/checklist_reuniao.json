@@ -1,0 +1,421 @@
+{
+  "versao": 1,
+  "fases": [
+    {
+      "id": "prep",
+      "ordem": 1,
+      "nome": "Preparar",
+      "descricao": "Antes de sair do escritório",
+      "itens": [
+        {
+          "ordem": 1,
+          "texto": "Confirmar a visita no turno anterior",
+          "detalhe": "Telefone e, a seguir, mensagem com nome, contacto e hora.",
+          "fonte": "2.1"
+        },
+        {
+          "ordem": 2,
+          "texto": "Análise da concorrência impressa",
+          "detalhe": "Imóveis comparáveis à venda hoje, com links, área, preço e €/m². Valor médio e desvio-padrão (o formador aceita até cerca de 15%). Em papel timbrado, para oferecer.",
+          "fonte": "2.2"
+        },
+        {
+          "ordem": 3,
+          "texto": "Pasta de angariação",
+          "detalhe": "Apresentação dos serviços, plano de marketing com o nome do proprietário e do imóvel, testemunhos genuínos.",
+          "fonte": "4"
+        },
+        {
+          "ordem": 4,
+          "texto": "Enviar antes a apresentação, se fizer sentido",
+          "detalhe": "Inclua perguntas que o proprietário pode querer fazer: experiência no mercado, como vai vender, como avalia, onde promove, de quanto em quanto tempo dá notícias.",
+          "fonte": "4"
+        },
+        {
+          "ordem": 5,
+          "texto": "Saber exatamente o que vai oferecer",
+          "detalhe": "Liste os serviços que presta mesmo e o benefício de cada um. Nunca prometa o que não faz.",
+          "fonte": "2.2"
+        },
+        {
+          "ordem": 6,
+          "texto": "Contrato de mediação na pasta",
+          "detalhe": "Minuta validada pelo IMPIC, ou contrato em texto corrido. Leve-o sempre na primeira visita.",
+          "fonte": "3.1"
+        },
+        {
+          "ordem": 7,
+          "texto": "Lista dos documentos a pedir",
+          "detalhe": "Use a fase “Documentos e contrato” abaixo.",
+          "fonte": "3.2"
+        },
+        {
+          "ordem": 8,
+          "texto": "Imagem segura e cuidada",
+          "detalhe": "Ir forte, como um bom advogado, e nunca com ar frágil.",
+          "fonte": "2.2"
+        },
+        {
+          "ordem": 9,
+          "texto": "Confirmar quem decide",
+          "detalhe": "Casal: os dois presentes. Pais idosos: convidar o filho que decide, mesmo que não assine. Se alguém estiver longe, videochamada.",
+          "fonte": "P2.1"
+        },
+        {
+          "ordem": 10,
+          "texto": "Preço anunciado alto? Levar também a análise do segmento acima",
+          "detalhe": "Para o proprietário ver o que se compra por esse valor.",
+          "fonte": "P3.2"
+        },
+        {
+          "ordem": 11,
+          "texto": "Ter os seus números reais",
+          "detalhe": "Tempo médio de venda dos seus exclusivos, vendas recentes da zona. Só cite o que tiver registado.",
+          "fonte": "P2.1"
+        },
+        {
+          "ordem": 12,
+          "texto": "Plano de serviço pronto a anexar ao acordo",
+          "detalhe": "Para quem já teve uma má experiência: compromisso assinado por si.",
+          "fonte": "P2.2"
+        }
+      ]
+    },
+    {
+      "id": "chegar",
+      "ordem": 2,
+      "nome": "Chegar",
+      "descricao": "Os primeiros minutos",
+      "itens": [
+        {
+          "ordem": 1,
+          "texto": "Cumprimentar olhos nos olhos, com um sorriso",
+          "detalhe": "Aperto de mão firme, dizer o nome. Não há segunda oportunidade para uma primeira boa impressão.",
+          "fonte": "2.1"
+        },
+        {
+          "ordem": 2,
+          "texto": "“Dá-me licença? Com licença.”",
+          "detalhe": null,
+          "fonte": "2.1"
+        },
+        {
+          "ordem": 3,
+          "texto": "Adiar o café para depois da visita",
+          "detalhe": "“Agradeço imenso. Se lhe parecer bem, começamos por ver o imóvel e depois conversamos.”",
+          "fonte": "2.2"
+        },
+        {
+          "ordem": 4,
+          "texto": "Postura segura",
+          "detalhe": "Queixo na horizontal, olhar nos olhos, sorriso verdadeiro.",
+          "fonte": "P2.1"
+        },
+        {
+          "ordem": 5,
+          "texto": "Começar a visita pela sala",
+          "detalhe": "É onde se recebem as visitas; depois os espaços mais privados.",
+          "fonte": "P2.1"
+        }
+      ]
+    },
+    {
+      "id": "visita",
+      "ordem": 3,
+      "nome": "Percorrer a casa",
+      "descricao": "Criar relação: o proprietário tem de gostar de si",
+      "itens": [
+        {
+          "ordem": 1,
+          "texto": "Falar da casa como falaria a um comprador",
+          "detalhe": "Elogie o que é bom: luz, decoração, orientação. Não aponte defeitos para baixar o preço.",
+          "fonte": "2.1"
+        },
+        {
+          "ordem": 2,
+          "texto": "Sem prancheta nem checklist à vista",
+          "detalhe": "A grelha técnica fica para depois de angariar. Agora o foco é a pessoa.",
+          "fonte": "2.2"
+        },
+        {
+          "ordem": 3,
+          "texto": "Ficar à direita do proprietário",
+          "detalhe": "Técnica de PNL defendida pelo formador: a direita está associada ao futuro. Se a pessoa for “invertida”, fique à esquerda.",
+          "fonte": "2.1"
+        },
+        {
+          "ordem": 4,
+          "texto": "Anotar mentalmente forças e fragilidades",
+          "detalhe": "Para a análise SWOT: o que distingue a casa e o que os compradores vão usar para pedir desconto.",
+          "fonte": "2.2"
+        },
+        {
+          "ordem": 5,
+          "texto": "Perceber a motivação e o preço",
+          "detalhe": "“Como chegou a esse valor? Que ideia tem da venda?” Ajuda a perceber a flexibilidade.",
+          "fonte": "2.1"
+        },
+        {
+          "ordem": 6,
+          "texto": "Casal: o mesmo olhar e interesse para os dois",
+          "detalhe": "Se um deles não gostar de si, não há acordo.",
+          "fonte": "P2.1"
+        },
+        {
+          "ordem": 7,
+          "texto": "Linguagem",
+          "detalhe": "“Acolhedora”, “confortável”, “interessante”. Sem diminutivos. Não mencione defeitos: ficam para a SWOT.",
+          "fonte": "P1.1"
+        }
+      ]
+    },
+    {
+      "id": "reuniao",
+      "ordem": 4,
+      "nome": "Apresentar o serviço",
+      "descricao": "Sentados à mesa: dar razões para o escolherem",
+      "itens": [
+        {
+          "ordem": 1,
+          "texto": "Transição para a mesa",
+          "detalhe": "“A casa é muito interessante, obrigado por me receber. Seria útil conversarmos uns minutos: dava-lhe a minha opinião sobre o que ajudaria a vender mais rápido. Podemos usar a mesa da sala?”",
+          "fonte": "2.2"
+        },
+        {
+          "ordem": 2,
+          "texto": "Oferecer a análise da concorrência",
+          "detalhe": "“É uma oferta minha, independentemente de trabalharmos juntos.” Pergunte se sabia quantos imóveis competem com o dele.",
+          "fonte": "4"
+        },
+        {
+          "ordem": 3,
+          "texto": "Apresentar as duas formas de trabalhar",
+          "detalhe": "Uma sem compromisso de parte a parte, e o serviço diferenciado. Sem dizer “exclusivo”.",
+          "fonte": "2.2"
+        },
+        {
+          "ordem": 4,
+          "texto": "Análise SWOT",
+          "detalhe": "Pontos fortes para a publicidade; fragilidades convertidas em oportunidades (ex.: portas da cozinha).",
+          "fonte": "2.2"
+        },
+        {
+          "ordem": 5,
+          "texto": "Relatório de avaliação, com as três razões",
+          "detalhe": "Para o proprietário (preço justo), para os compradores (justifica o valor) e para si (não aceita imóveis fora do segmento).",
+          "fonte": "2.2"
+        },
+        {
+          "ordem": 6,
+          "texto": "Home staging",
+          "detalhe": "Preparar a casa com o que existe, sem obras.",
+          "fonte": "2.2"
+        },
+        {
+          "ordem": 7,
+          "texto": "Reportagem fotográfica",
+          "detalhe": "Grande angular. O objetivo é prender o comprador até à 5.ª fotografia.",
+          "fonte": "2.2"
+        },
+        {
+          "ordem": 8,
+          "texto": "Vídeo imobiliário",
+          "detalhe": "Percurso como numa visita real, para criar o desejo de visitar.",
+          "fonte": "2.2"
+        },
+        {
+          "ordem": 9,
+          "texto": "Plano de marketing semana a semana",
+          "detalhe": "Inclui a apresentação à equipa, cartas na vizinhança, portais e redes. Relatório de 15 em 15 dias e reunião mensal.",
+          "fonte": "2.2"
+        },
+        {
+          "ordem": 10,
+          "texto": "Apoios incluídos (se os tiver)",
+          "detalhe": "Jurídico (contrato-promessa), fiscal, crédito e acompanhamento até à escritura.",
+          "fonte": "2.2"
+        },
+        {
+          "ordem": 11,
+          "texto": "Honorários sem pausas",
+          "detalhe": "Apresente-os enquanto preenchem o acordo, sem “parece-lhe bem?”. Ver guião “Apresentar os honorários”.",
+          "fonte": "P3.1"
+        }
+      ]
+    },
+    {
+      "id": "fecho",
+      "ordem": 5,
+      "nome": "Fechar",
+      "descricao": "As quatro perguntas, por esta ordem",
+      "itens": [
+        {
+          "ordem": 1,
+          "texto": "1. “Quando pensa na mediação imobiliária, pensa em tudo isto que lhe apresentei?”",
+          "detalhe": "Esperado: não. Quebra a crença de que “são todos iguais”.",
+          "fonte": "2.2"
+        },
+        {
+          "ordem": 2,
+          "texto": "2. “Gostou? Acrescentaria algo mais para que este serviço fosse cinco estrelas para si?”",
+          "detalhe": "Esperado: não. É o proprietário a dizer que o serviço é excelente.",
+          "fonte": "2.2"
+        },
+        {
+          "ordem": 3,
+          "texto": "3. “E quanto a mim, acha que estou à altura para o representar na venda da sua casa?”",
+          "detalhe": "Esperado: sim.",
+          "fonte": "2.2"
+        },
+        {
+          "ordem": 4,
+          "texto": "4. “Fico muito feliz. Gostaria de lhe perguntar se confia apenas a mim a venda do seu imóvel?”",
+          "detalhe": "“Apenas” substitui a palavra “exclusivo”.",
+          "fonte": "2.2"
+        },
+        {
+          "ordem": 5,
+          "texto": "Os quatro critérios",
+          "detalhe": "“Só oferecemos este serviço quando gostamos do imóvel, a documentação está em ordem, o preço está ajustado ao segmento e o proprietário valoriza este tipo de serviço.”",
+          "fonte": "2.2"
+        },
+        {
+          "ordem": 6,
+          "texto": "“Vamos então fazer o nosso acordo?”",
+          "detalhe": "Peça o cartão de cidadão e preencham o contrato em conjunto, lendo-o juntos.",
+          "fonte": "2.2"
+        },
+        {
+          "ordem": 7,
+          "texto": "Se disser “não quero exclusividade”",
+          "detalhe": "Pergunte o que o preocupa em concreto e siga o caminho da causa (separador Objeções).",
+          "fonte": "P2.2"
+        },
+        {
+          "ordem": 8,
+          "texto": "Se reclamar da comissão ou do preço",
+          "detalhe": "Escute em silêncio, diga “compreendo” e continue com perguntas, nunca com argumentos.",
+          "fonte": "P3.1"
+        }
+      ]
+    },
+    {
+      "id": "docs",
+      "ordem": 6,
+      "nome": "Documentos e contrato",
+      "descricao": "Confirme antes de promover",
+      "itens": [
+        {
+          "ordem": 1,
+          "texto": "Caderneta predial (Portal das Finanças)",
+          "detalhe": "Atenção: uma garagem que é fração autónoma tem caderneta própria.",
+          "fonte": "3.1"
+        },
+        {
+          "ordem": 2,
+          "texto": "Certidão permanente do registo predial",
+          "detalhe": "É o documento que confirma os titulares. Veja os ónus: hipoteca, penhoras, usufruto, direito de superfície.",
+          "fonte": "3.2"
+        },
+        {
+          "ordem": 3,
+          "texto": "Certificado energético",
+          "detalhe": "Obrigatório para promover, salvo as isenções previstas.",
+          "fonte": "3.2"
+        },
+        {
+          "ordem": 4,
+          "texto": "Licença de utilização ou documento equivalente",
+          "detalhe": "Prédios anteriores a 7 de agosto de 1951: averbamento ou certidão da Câmara. O formador aconselha manter este cuidado mesmo quando a escritura já não o exige.",
+          "fonte": "3.1"
+        },
+        {
+          "ordem": 5,
+          "texto": "Ficha técnica da habitação",
+          "detalhe": "Quando aplicável.",
+          "fonte": "3.2"
+        },
+        {
+          "ordem": 6,
+          "texto": "Condomínio",
+          "detalhe": "Quotas em dívida e obras ou quotas extra já aprovadas.",
+          "fonte": "3.2"
+        },
+        {
+          "ordem": 7,
+          "texto": "Identificação dos proprietários",
+          "detalhe": "Estado civil (assinatura do cônjuge), herdeiros, menores, procurações. Comprovativo da profissão para a prevenção do branqueamento de capitais.",
+          "fonte": "3.2"
+        },
+        {
+          "ordem": 8,
+          "texto": "Direitos de preferência",
+          "detalhe": "Inquilino, confinantes e outros. Planeie a comunicação.",
+          "fonte": "3.2"
+        },
+        {
+          "ordem": 9,
+          "texto": "Contratos de mediação já em vigor",
+          "detalhe": "Um contrato em exclusivo não produz efeito sobre contratos em aberto ainda válidos.",
+          "fonte": "3.1"
+        },
+        {
+          "ordem": 10,
+          "texto": "Contrato de mediação preenchido",
+          "detalhe": "Regime (exclusivo ou não), prazo, remuneração, ónus e dívida, identificação do imóvel. Assinado pelo representante legal da empresa.",
+          "fonte": "3.2"
+        }
+      ]
+    },
+    {
+      "id": "depois",
+      "ordem": 7,
+      "nome": "Depois da reunião",
+      "descricao": "Nas horas seguintes",
+      "itens": [
+        {
+          "ordem": 1,
+          "texto": "Se angariou: vídeo curto para as redes",
+          "detalhe": "Ver o guião “Vídeo curto ao angariar”.",
+          "fonte": "4"
+        },
+        {
+          "ordem": 2,
+          "texto": "Cartas na vizinhança",
+          "detalhe": "Ver o guião “Acabei de angariar”.",
+          "fonte": "1.2"
+        },
+        {
+          "ordem": 3,
+          "texto": "Marcar home staging, fotografias e vídeo",
+          "detalhe": null,
+          "fonte": "2.2"
+        },
+        {
+          "ordem": 4,
+          "texto": "Procurar mais dois imóveis no mesmo subsegmento",
+          "detalhe": "Para ter sempre três para mostrar a quem ligar.",
+          "fonte": "1.2"
+        },
+        {
+          "ordem": 5,
+          "texto": "Se não angariou: desejar sucesso e marcar o próximo contacto",
+          "detalhe": "Registe o imóvel no CRM para uma futura angariação reativa.",
+          "fonte": "1.1"
+        },
+        {
+          "ordem": 6,
+          "texto": "Enviar o cartão virtual por WhatsApp",
+          "detalhe": null,
+          "fonte": "P1.1"
+        },
+        {
+          "ordem": 7,
+          "texto": "Registar a data do contrato",
+          "detalhe": "Quando vender, registe os dias até à venda e a margem negocial. São os números que vai poder mostrar.",
+          "fonte": "P2.1"
+        }
+      ]
+    }
+  ]
+}

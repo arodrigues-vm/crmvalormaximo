@@ -1,0 +1,1080 @@
+{
+  "versao": 1,
+  "guioes": [
+    {
+      "id": "frio",
+      "categoria": "Telefone",
+      "titulo": "Primeiro contacto com proprietário particular",
+      "quando_usar": "Viu um anúncio de um particular e vai ligar pela primeira vez.",
+      "origem": "formacao",
+      "fontes": [
+        "2.1",
+        "P1.1",
+        "P1.2"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Muito boa tarde, falo com o Senhor {proprietario}? Muito boa tarde, Senhor {proprietario}. O meu nome é {meuNome}, sou consultor imobiliário na {agencia}. Sou especialista aqui na zona de {zona}, por isso, assim que vi o seu anúncio, liguei-lhe de imediato."
+        },
+        {
+          "tipo": "nota",
+          "texto": "Faça uma pergunta sobre a casa. O formador chama-lhe lateralidade: o foco passa de si e da comissão para o imóvel."
+        },
+        {
+          "tipo": "fala",
+          "texto": "Gostaria de lhe colocar só uma questão: o seu imóvel fica na urbanização {urbanizacao}, não fica? Sei que esses apartamentos são conhecidos pela luz natural."
+        },
+        {
+          "tipo": "nota",
+          "texto": "Deixe o proprietário falar e valorizar a casa. Ouça."
+        },
+        {
+          "tipo": "fala",
+          "texto": "Era mesmo o que eu pensava. A razão do meu telefonema é ver de que forma o poderia ajudar numa venda mais rápida e nas melhores condições. Por isso, se lhe parecer bem, propunha reunirmo-nos: terei todo o gosto em visitar o imóvel e, depois de o conhecer, dizer-lhe qual seria para mim a melhor estratégia. Dava-lhe mais jeito hoje às {hora1} ou às {hora2}?"
+        },
+        {
+          "tipo": "nota",
+          "texto": "Na parte final, não faça pausas. Só espera pela resposta depois de dar as duas opções de horário."
+        },
+        {
+          "tipo": "nota",
+          "texto": "Antes de desligar, peça para enviar o seu cartão por WhatsApp (guião “Cartão virtual por WhatsApp”)."
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": "Compreendo perfeitamente, Sr. {proprietario}. Desejo-lhe as maiores felicidades com a venda. Depois registe o imóvel (tipologia, zona, preço), porque pode precisar dele na angariação reativa.",
+      "pontos_chave": [
+        "O objetivo da chamada é reunir e conhecer o imóvel, não “angariar”.",
+        "Nunca diga “gostava de angariar a sua casa”: assim, quem ganha é você.",
+        "Quem marca é sempre você, com duas opções de horário.",
+        "Sorria ao telefone e adapte-se à pessoa. Isto é um modelo, não uma cassete.",
+        "Trate por Senhor ou Senhora Dona até a pessoa pedir outra coisa.",
+        "A pergunta sobre a casa deve ter resposta “sim”; o ideal é a pessoa elogiar a casa.",
+        "Não diga “sem compromisso” à partida: só se a pessoa levantar a objeção."
+      ],
+      "cuidado": null,
+      "alternativa_honesta": null
+    },
+    {
+      "id": "naoquer",
+      "categoria": "Telefone",
+      "titulo": "“Não quero trabalhar com imobiliárias”",
+      "quando_usar": "O proprietário recusa logo no primeiro contacto.",
+      "origem": "formacao",
+      "fontes": [
+        "1.1"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Compreendo perfeitamente o que diz. Com certeza tem a ver com os honorários, compreendo."
+        },
+        {
+          "tipo": "fala",
+          "texto": "Desejo-lhe muito sucesso. A casa parece-me muito interessante, por isso espero que corra tudo bem."
+        },
+        {
+          "tipo": "fala",
+          "texto": "Fico ao seu dispor para qualquer dúvida que surja. O meu nome é {meuNome}, da {agencia}. Basta ligar-me, terei todo o gosto em ajudar."
+        },
+        {
+          "tipo": "nota",
+          "texto": "Só se a sua agência tiver intermediação de crédito registada:"
+        },
+        {
+          "tipo": "fala",
+          "texto": "Aproveito para lhe dizer que muitos proprietários nesta situação julgam que a casa já está vendida e ficam à espera da resposta do crédito do comprador. Para que isso não seja um dissabor: somos intermediários de crédito autorizados pelo Banco de Portugal e o apoio é gratuito para si."
+        },
+        {
+          "tipo": "fala",
+          "texto": "Permite-me que lhe ligue daqui a 30 dias, para saber como está a correr?"
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [
+        "Psicologia inversa: a pessoa espera uma má reação e recebe simpatia.",
+        "Diga o seu nome e o da agência três vezes ao longo da conversa (efeito de repetição).",
+        "Registe sempre o imóvel. É a base do 2.º nível da angariação reativa.",
+        "Agende já a chamada dos 30 dias."
+      ],
+      "cuidado": "Mencione a intermediação de crédito só se a sua empresa a tiver efetivamente registada.",
+      "alternativa_honesta": null
+    },
+    {
+      "id": "segunda",
+      "categoria": "Telefone",
+      "titulo": "Segundo telefonema: tenho um comprador",
+      "quando_usar": "Tem um comprador real, com visita marcada, para um imóvel de alguém que antes recusou.",
+      "origem": "formacao",
+      "fontes": [
+        "1.1",
+        "2.1"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Muito boa tarde, Sr. {proprietario}. Fala {meuNome}, da {agencia}. Peço-lhe desde já desculpa por ligar antes do combinado, porque tínhamos ficado de falar a {dia}. Mas vai compreender já o porquê do meu telefonema."
+        },
+        {
+          "tipo": "fala",
+          "texto": "Ontem estive reunido com um casal com dois filhos pequenos que procura um {tipologia} perto da escola, até {preco}. Lembrei-me logo do seu imóvel, que me pareceu muito interessante no anúncio."
+        },
+        {
+          "tipo": "fala",
+          "texto": "Como sabe, também tratamos do crédito, por isso falta apenas o imóvel. A razão do meu telefonema é saber se quer aproveitar esta oportunidade e fazermos a visita com este casal amanhã às {hora1}. O que lhe parece?"
+        },
+        {
+          "tipo": "nota",
+          "texto": "Se aceitar, siga para o guião “Ir a casa antes da visita”."
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [
+        "“Vai compreender já o porquê do meu telefonema” aumenta a atenção.",
+        "Conte a história do comprador (necessidade, motivo, orçamento) sem o identificar.",
+        "“Aproveitar esta oportunidade”: a escolha fica com o proprietário.",
+        "Pedir desculpa por não cumprir o prazo combinado mostra profissionalismo."
+      ],
+      "cuidado": "Use apenas com um comprador e uma visita que existam de facto. O formador insiste nisto: sem cliente agendado soa a mentira. Os 85% de sucesso que refere são a experiência dele, não uma garantia.",
+      "alternativa_honesta": null
+    },
+    {
+      "id": "docs",
+      "categoria": "Telefone",
+      "titulo": "Ir a casa antes da visita do comprador",
+      "quando_usar": "O proprietário aceitou a visita e diz “traga o cliente e depois logo se vê”.",
+      "origem": "formacao",
+      "fontes": [
+        "1.1"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Combinado, amanhã às {hora1} lá estaremos. Gostaria de lhe perguntar: quanto à documentação do imóvel, tem tudo tratado? Certidão, caderneta, certificado energético? Imagino que, se o cliente gostar mesmo da casa, amanhã aceite assinar o contrato-promessa."
+        },
+        {
+          "tipo": "fala",
+          "texto": "Não se preocupe, estamos cá para facilitar. Sugiro encontrarmo-nos ainda hoje: analisamos o que falta e amanhã de manhã tratamos de o recolher, para não ser impedimento da visita. Dá-lhe mais jeito às 18h00 ou às 19h30?"
+        },
+        {
+          "tipo": "nota",
+          "texto": "Se já tiver tudo:"
+        },
+        {
+          "tipo": "fala",
+          "texto": "Ótimo. Mesmo assim, temos de nos reunir hoje para analisar os documentos e eu conhecer a casa. Assim preparo a apresentação de amanhã a partir do que vir hoje. 18h00 ou 19h30?"
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [
+        "Nunca mostre um imóvel sem o conhecer, sem analisar a documentação e sem contrato escrito.",
+        "Não pergunte se a pessoa quer fazer algo que é obrigatório. Pergunte quando."
+      ],
+      "cuidado": "O contrato de mediação tem de ser escrito. Quando estiver em casa do proprietário, explique-o com transparência antes de o assinarem.",
+      "alternativa_honesta": null
+    },
+    {
+      "id": "confirma",
+      "categoria": "Telefone",
+      "titulo": "Confirmar a visita no turno anterior",
+      "quando_usar": "Tem uma reunião marcada em casa do proprietário.",
+      "origem": "formacao",
+      "fontes": [
+        "2.1"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Boa tarde, falo com o Sr. {proprietario}? Fala {meuNome}. Combinámos amanhã às {hora1} em sua casa. A razão do meu telefonema é apenas confirmar se está tudo certo."
+        },
+        {
+          "tipo": "nota",
+          "texto": "Se houver um contratempo:"
+        },
+        {
+          "tipo": "fala",
+          "texto": "Com certeza, não há problema nenhum. Em vez das {hora1}, fica às {hora2}? Eu ajusto a minha agenda. Fique tranquilo, não tem de se apressar."
+        },
+        {
+          "tipo": "nota",
+          "texto": "Depois envie uma mensagem com o seu nome, contacto e hora confirmada."
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [
+        "Visita sábado de manhã: ligue sexta à tarde. Visita à tarde: ligue nessa manhã.",
+        "Muitos proprietários não guardaram o seu número no primeiro contacto.",
+        "Ajustar com simpatia evita ficar à porta à espera."
+      ],
+      "cuidado": null,
+      "alternativa_honesta": null
+    },
+    {
+      "id": "placa",
+      "categoria": "Telefone",
+      "titulo": "Ligaram pela placa, mas procuram outra tipologia",
+      "quando_usar": "Tem um T1 com placa e quem liga procura um T2 na zona.",
+      "origem": "formacao",
+      "fontes": [
+        "2.1"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Esse imóvel é um T1. Diga-me: procura um {tipologia} nesta zona, até que valor? Neste momento não o tenho na agência, mas estou a tratar de soluções aqui na zona. Caso consiga preparar um imóvel para visitas, teria disponibilidade amanhã ou no sábado, às 11h00 ou às 15h30? O que lhe parece?"
+        },
+        {
+          "tipo": "fala",
+          "texto": "Com quem estou a falar? Muito bem. Deixe-me fazer uns contactos e volto a ligar-lhe para confirmar a visita, ou para nos encontrarmos e lhe apresentar as soluções disponíveis."
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [
+        "Não se despeça de um comprador: fique com o nome e o contacto.",
+        "Com um comprador concreto, lance uma angariação reativa (colegas, CRM, cartas na urbanização)."
+      ],
+      "cuidado": null,
+      "alternativa_honesta": null
+    },
+    {
+      "id": "exclientes",
+      "categoria": "Telefone",
+      "titulo": "Clientes antigos da agência na sua zona",
+      "quando_usar": "Proprietários que compraram ou venderam com a agência e vivem na sua zona.",
+      "origem": "formacao",
+      "fontes": [
+        "1.2"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Muito bom dia, Sr. {proprietario}, como vai? O meu nome é {meuNome} e ligo da {agencia}. Sei que é nosso cliente. Sou o consultor especialista aqui na zona e estou ao seu dispor: qualquer questão sobre o seu imóvel, conte comigo."
+        },
+        {
+          "tipo": "fala",
+          "texto": "Como boas-vindas, tenho ao seu dispor um relatório de avaliação atualizado do seu imóvel. Amanhã tenho uma reunião aí perto às 16h30. Dá-lhe jeito por volta das 15h00, ou prefere às 17h30, no final da reunião? Terei todo o gosto em entregar-lho em mão."
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [
+        "Inclua clientes de consultores que já saíram da agência: muitas vezes ninguém lhes dá seguimento.",
+        "Um contacto destes pode trazer a casa dele ou de um familiar."
+      ],
+      "cuidado": "Use apenas dados que a agência pode tratar para este fim (RGPD).",
+      "alternativa_honesta": null
+    },
+    {
+      "id": "credito",
+      "categoria": "Telefone",
+      "titulo": "Cliente antigo com prestação alta",
+      "quando_usar": "Tem intermediação de crédito e clientes com prestações que subiram.",
+      "origem": "formacao",
+      "fontes": [
+        "1.2"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Olá, D. {proprietario}, como está? Ligo porque é nossa cliente há alguns anos e lembro-me do valor da prestação nessa altura. Imagino que hoje esteja bem mais alta. Queria saber se está confortável com os encargos ou se a podemos ajudar. Temos intermediação de crédito e podemos analisar uma transferência que lhe dê alguma poupança mensal."
+        },
+        {
+          "tipo": "nota",
+          "texto": "Se a transferência não chegar, leve o relatório de avaliação já preparado."
+        },
+        {
+          "tipo": "fala",
+          "texto": "Comprou por 200 mil euros e hoje o imóvel vale cerca de 320 mil. Tem aqui uma mais-valia que lhe dá opções. Se não se sente confortável, podemos ajudá-la a vender e a encontrar outra solução, até porque a vida também mudou nestes anos."
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [
+        "De forma natural, nunca imposta.",
+        "Pode gerar uma angariação e uma nova compra com o mesmo cliente."
+      ],
+      "cuidado": null,
+      "alternativa_honesta": null
+    },
+    {
+      "id": "colega",
+      "categoria": "Telefone",
+      "titulo": "Partilha com colega de outra marca",
+      "quando_usar": "4.º nível da angariação reativa: já tentou tudo o resto.",
+      "origem": "formacao",
+      "fontes": [
+        "1.1"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Olá, colega, como vai? O meu nome é {meuNome} e ligo da {agencia}. Vi que tem um {tipologia} no edifício {urbanizacao}. Tenho um cliente disponível para visitar amanhã às {hora1}. Seria possível fazermos a visita e partilharmos?"
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [
+        "Antes disto: 1) mensagem “SOS” aos colegas da agência; 2) proprietários que disseram não; 3) prospeção e cartas no local.",
+        "Partilhar é bom, mas a partilha dá metade da comissão."
+      ],
+      "cuidado": null,
+      "alternativa_honesta": null
+    },
+    {
+      "id": "rua",
+      "categoria": "Presencial",
+      "titulo": "Abordagem na rua",
+      "quando_usar": "Está na sua zona de prospeção (alternativa a bater às portas).",
+      "origem": "formacao",
+      "fontes": [
+        "1.2",
+        "1.1"
+      ],
+      "passos": [
+        {
+          "tipo": "nota",
+          "texto": "Escolha pessoas tranquilas: à saída do café, a passear o cão. Nunca quem vai a correr."
+        },
+        {
+          "tipo": "fala",
+          "texto": "Peço desculpa de incomodar. Por acaso reside aqui no bairro? Muito bem. O meu nome é {meuNome}, sou consultor imobiliário especialista nesta zona e vim cá especificamente porque procuro um {tipologia}. Conhece algum vizinho que esteja a pensar vender?"
+        },
+        {
+          "tipo": "nota",
+          "texto": "Se a pessoa for simpática, deixe um cartão e peça o contacto. Volte a ligar quando procurar outra tipologia. Com o tempo, passa a ser ela a avisá-lo."
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [
+        "Ninguém se ofende com esta pergunta.",
+        "Crie uma rede de pessoas na zona: donos de cafés, porteiros, vizinhos."
+      ],
+      "cuidado": "Diga “para um cliente com visita marcada” apenas se for verdade.",
+      "alternativa_honesta": null
+    },
+    {
+      "id": "placacolega",
+      "categoria": "Presencial",
+      "titulo": "Imóvel com placa de outro colega",
+      "quando_usar": "Na zona, vê um imóvel com a placa de outra agência e tem um comprador.",
+      "origem": "formacao",
+      "fontes": [
+        "1.1"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Peço imensa desculpa. Ando à procura de um apartamento para um casal com visita marcada amanhã às {hora1}. Este imóvel está à venda? Muito bem. Não sei que tipo de contrato tem com o colega; seja como for, estará bem apoiado. Se for em exclusividade, gostaria muito de falar com o seu consultor. Quer dar-lhe uma palavrinha e perguntar se concorda? Por mim, é com todo o gosto."
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [
+        "Nunca denigra o colega nem tente “passar-lhe a perna”.",
+        "Se o contrato for em aberto, pode fazer também um contrato em aberto."
+      ],
+      "cuidado": null,
+      "alternativa_honesta": null
+    },
+    {
+      "id": "certificado",
+      "categoria": "Presencial",
+      "titulo": "Pedido recente de certificado energético",
+      "quando_usar": "Consultou certificados emitidos recentemente na sua zona.",
+      "origem": "formacao",
+      "fontes": [
+        "1.2"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Muito boa tarde. Fala com o proprietário? Tive conhecimento de que pediu recentemente o certificado energético do seu apartamento. Não sei se já o vendeu ou arrendou, nem qual é a finalidade, mas, como sou consultor especialista nesta urbanização, vim colocar-me ao seu dispor. Se quiser vender, posso ajudá-lo numa venda mais rápida e nas melhores condições."
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [
+        "“Tudo, desde que seja com bons modos e boa intenção.”",
+        "Muitas vezes já têm comprador. Aceite e siga em frente."
+      ],
+      "cuidado": "Confirme com o seu responsável que este uso da informação é admissível à luz do RGPD.",
+      "alternativa_honesta": null
+    },
+    {
+      "id": "c-reativa",
+      "categoria": "Cartas",
+      "titulo": "Carta: procuro para cliente com visita marcada",
+      "quando_usar": "Angariação reativa, 3.º nível: prospeção na urbanização certa.",
+      "origem": "formacao",
+      "fontes": [
+        "1.1"
+      ],
+      "passos": [],
+      "texto_carta": "Caro senhor proprietário,\n\nSe equaciona a possibilidade de vender o seu imóvel, por favor contacte-me com urgência. Procuro um {tipologia} nesta urbanização, até {preco}, para um cliente com visita marcada para amanhã às {hora1}.\n\nAo seu dispor,\n{meuNome} · {telefone}\n{agencia} · Licença AMI {ami}",
+      "se_recusar": null,
+      "pontos_chave": [
+        "Preto e branco, com ar de escrito à pressa. Um flyer bonito parece publicidade.",
+        "Só nos prédios do segmento certo, debaixo da porta.",
+        "Nunca escreva “tenho clientes para esta zona”: soa a bluff."
+      ],
+      "cuidado": "Inclua sempre a denominação da empresa e a licença AMI: é obrigatório em qualquer comunicação. Entre num prédio apenas quando alguém o deixar entrar. A frase “visita marcada” só se for verdade.",
+      "alternativa_honesta": null
+    },
+    {
+      "id": "c-vendido",
+      "categoria": "Cartas",
+      "titulo": "Carta: acabámos de vender na urbanização",
+      "quando_usar": "Um imóvel (seu ou de um colega) foi vendido na zona.",
+      "origem": "formacao",
+      "fontes": [
+        "1.1",
+        "1.2"
+      ],
+      "passos": [],
+      "texto_carta": "Caro senhor proprietário,\n\nEm virtude de termos vendido o imóvel em {urbanizacao}, temos clientes interessados a quem já não o podemos apresentar. Procuramos ativamente soluções alternativas nesta urbanização.\n\nSe equaciona a possibilidade de vender a sua casa, por favor ligue-me com urgência.\n\nAo seu dispor,\n{meuNome} · {telefone}\n{agencia} · Licença AMI {ami}",
+      "se_recusar": null,
+      "pontos_chave": [
+        "Junte uma fotografia da placa “Vendido”.",
+        "O formador recomenda tornar isto obrigatório após cada venda. Conta o caso de uma consultora que angariou 9 imóveis assim."
+      ],
+      "cuidado": "O formador fala em “visitas agendadas que não vamos poder cumprir”. Escreva-o só se for verdade.",
+      "alternativa_honesta": null
+    },
+    {
+      "id": "c-angariado",
+      "categoria": "Cartas",
+      "titulo": "Carta: acabei de angariar (vizinhança)",
+      "quando_usar": "Logo após angariar, na envolvente do imóvel.",
+      "origem": "formacao",
+      "fontes": [
+        "1.2",
+        "2.2"
+      ],
+      "passos": [],
+      "texto_carta": "Caro senhor proprietário,\n\nSe gostaria de trazer para morar junto de si um familiar, um amigo ou um colega de trabalho, temos ao seu dispor um fantástico {tipologia} nesta urbanização: [três pontos fortes da análise SWOT].\n\nNão perca esta oportunidade e partilhe este código QR com quem possa ter interesse.\n\nAo seu dispor,\n{meuNome} · {telefone}\n{agencia} · Licença AMI {ami}",
+      "se_recusar": null,
+      "pontos_chave": [
+        "Muitas vezes quem liga é o próprio vizinho, que quer trocar de casa.",
+        "Gera contactos de compradores e de vendedores."
+      ],
+      "cuidado": null,
+      "alternativa_honesta": null
+    },
+    {
+      "id": "c-tipologia",
+      "categoria": "Cartas",
+      "titulo": "Carta: procuram uma tipologia que não tenho",
+      "quando_usar": "A sua placa atrai pedidos de outra tipologia.",
+      "origem": "formacao",
+      "fontes": [
+        "2.1"
+      ],
+      "passos": [],
+      "texto_carta": "Caro senhor proprietário,\n\nSe equaciona a possibilidade de vender o seu imóvel e se este é de tipologia {tipologia}, agradecia que me contactasse com alguma urgência. Em virtude de termos um imóvel publicitado nesta urbanização ({urbanizacao}), temos clientes que manifestam interesse por esta tipologia. Caso seja essa a sua intenção, contacte-me para agendarmos visitas.\n\nAo seu dispor,\n{meuNome} · {telefone}\n{agencia} · Licença AMI {ami}",
+      "se_recusar": null,
+      "pontos_chave": [
+        "Indique onde está o seu imóvel (bloco, número) para dar um caráter de verdade."
+      ],
+      "cuidado": null,
+      "alternativa_honesta": null
+    },
+    {
+      "id": "video",
+      "categoria": "Redes sociais",
+      "titulo": "Vídeo curto ao angariar (15 a 20 s)",
+      "quando_usar": "Acabou de assinar o contrato. Grave já, com a urbanização atrás.",
+      "origem": "formacao",
+      "fontes": [
+        "1.2",
+        "4"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Olá a todos! Estou muito satisfeito: acabei de angariar um imóvel aqui em {zona}. Tem áreas fabulosas, sobretudo nas zonas sociais, e vistas desafogadas. Fique atento: dentro de quatro ou cinco dias estará disponível para visitas. Até já!"
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [
+        "Não diga o bloco nem a porta.",
+        "Gera chamadas antes de o anúncio sair."
+      ],
+      "cuidado": null,
+      "alternativa_honesta": null
+    },
+    {
+      "id": "zona-rs",
+      "categoria": "Redes sociais",
+      "titulo": "Publicação: “hoje estou na zona”",
+      "quando_usar": "Dias de prospeção no terreno.",
+      "origem": "formacao",
+      "fontes": [
+        "1.2"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Hoje estou na zona de {zona}. Se é um dos meus seguidores e gostaria de conhecer o valor do seu imóvel, ou tirar alguma dúvida, contacte-me hoje mesmo. Terei todo o gosto em falar consigo pessoalmente."
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [
+        "Todos os seus contactos devem saber o que faz.",
+        "Mostre que está sempre em movimento no mercado."
+      ],
+      "cuidado": null,
+      "alternativa_honesta": null
+    },
+    {
+      "id": "f8",
+      "categoria": "Fidelização",
+      "titulo": "Pós-escritura: chamada dos 8 dias",
+      "quando_usar": "Oito dias depois da escritura.",
+      "origem": "formacao",
+      "fontes": [
+        "1.1",
+        "2.1"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Olá, {proprietario}, é o {meuNome}. Como correu a mudança? Correu tudo como esperavam? Chegaram a usar alguma das empresas da lista que vos deixei? Pergunto porque, se alguma falhou, quero retirá-la da lista."
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [
+        "No dia da escritura entregue uma folha de contactos úteis: condomínio, mudanças, eletricidade, gás, água, telecomunicações, canalizador, carpinteiro, pintor.",
+        "Avise que não conhece todos e peça que lhe digam se algum correr mal.",
+        "Uma participante sugere pedir aqui um testemunho escrito."
+      ],
+      "cuidado": null,
+      "alternativa_honesta": null
+    },
+    {
+      "id": "f30",
+      "categoria": "Fidelização",
+      "titulo": "Pós-escritura: 30 dias e um presente",
+      "quando_usar": "Um mês depois da escritura.",
+      "origem": "formacao",
+      "fontes": [
+        "1.1"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Olá, {proprietario}! Está tudo bem convosco? A casa nova está a corresponder ao que esperavam? Sabem que faz hoje um mês que compraram a casa? Gostava muito de vos dar um abraço. Estão em casa hoje? Posso passar aí?"
+        },
+        {
+          "tipo": "nota",
+          "texto": "Leve um presente."
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [
+        "No dia da escritura um presente não surpreende. Um mês depois, já ninguém o espera e supera a expectativa."
+      ],
+      "cuidado": null,
+      "alternativa_honesta": null
+    },
+    {
+      "id": "fano",
+      "categoria": "Fidelização",
+      "titulo": "Datas importantes e relatório anual",
+      "quando_usar": "Ao longo dos anos seguintes.",
+      "origem": "formacao",
+      "fontes": [
+        "1.1",
+        "2.1"
+      ],
+      "passos": [
+        {
+          "tipo": "nota",
+          "texto": "Agende na escritura: “Escritura Sr. X (ano)”, a repetir todos os anos. Junte aniversários, início do ano letivo dos filhos e Natal. Telefone; nunca envie mensagens automáticas da empresa."
+        },
+        {
+          "tipo": "fala",
+          "texto": "Olá, {proprietario}, como estão? E a família? Ligo porque é nosso cliente há alguns anos e temos algo para lhe oferecer: um relatório de avaliação atualizado da sua casa. Quando lhe daria jeito passar pelo escritório?"
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [
+        "Três a cinco contactos por ano, sem interesse.",
+        "Fidelize apenas os clientes de quem gostou.",
+        "Nunca diga “não se esqueça de mim”.",
+        "Responda sempre a dúvidas, mesmo quando não ganha nada com isso."
+      ],
+      "cuidado": null,
+      "alternativa_honesta": null
+    },
+    {
+      "id": "alternativas",
+      "categoria": "Compradores",
+      "titulo": "O comprador pede algo que não existe",
+      "quando_usar": "Os critérios do comprador não existem no mercado.",
+      "origem": "formacao",
+      "fontes": [
+        "1.1"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Compreendo perfeitamente: a zona é importante por causa da escola dos miúdos, e os {preco} são o valor confortável para manterem a vossa qualidade de vida."
+        },
+        {
+          "tipo": "fala",
+          "texto": "Infelizmente, os T3 no centro começam nos 375 mil euros e neste momento não há nenhum abaixo desse valor, em nenhuma agência."
+        },
+        {
+          "tipo": "fala",
+          "texto": "Por isso, gostava de vos perguntar o que será mais confortável: um T2 até {preco} aqui no centro, enquanto os miúdos são pequenos, ou um T3 mais definitivo numa zona a dez minutos de carro, com um quarto para cada um? O que vos parece mais confortável?"
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [
+        "Nunca diga “tem de ir para outra zona” ou “só consegue um T2”: o comprador sente que não foi ouvido.",
+        "Valide tudo antes de dar as alternativas.",
+        "Termine com “O que lhe parece?”."
+      ],
+      "cuidado": null,
+      "alternativa_honesta": null
+    },
+    {
+      "id": "ainda",
+      "categoria": "Compradores",
+      "titulo": "Existe no mercado, mas ainda não o tenho",
+      "quando_usar": "O pedido é realista, mas não tem esse imóvel na carteira.",
+      "origem": "formacao",
+      "fontes": [
+        "1.1",
+        "2.1"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Compreendi perfeitamente o que procura: um {tipologia} até {preco} em {zona}. Hoje não estou em condições de lhe mostrar, mas sugiro reunirmo-nos amanhã aqui no escritório para analisarmos as possibilidades disponíveis. Vemos imagens no computador e seguimos logo para a visita do que lhe interessar. Dá-lhe mais jeito às {hora1} ou às {hora2}? O que lhe parece?"
+        },
+        {
+          "tipo": "nota",
+          "texto": "Depois, por esta ordem: 1) mensagem “SOS” no grupo dos colegas da agência; 2) ligar aos proprietários que disseram não; 3) prospeção e cartas na urbanização; 4) partilha com outras marcas."
+        },
+        {
+          "tipo": "nota",
+          "texto": "Se no fim não houver nada: mostre-lhe na internet que não existe no mercado (não apenas na sua agência) e volte às perguntas alternativas."
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [
+        "A palavra-chave é “ainda”.",
+        "Nunca diga “deixe o contacto que eu ligo quando surgir”: o comprador vai logo a outra agência.",
+        "Não prometa visitas a imóveis que não tem. Marque uma reunião."
+      ],
+      "cuidado": null,
+      "alternativa_honesta": null
+    },
+    {
+      "id": "whats",
+      "categoria": "Mensagens",
+      "titulo": "Cartão virtual por WhatsApp",
+      "quando_usar": "Logo a seguir a qualquer telefonema, mesmo que a pessoa tenha recusado.",
+      "origem": "formacao",
+      "fontes": [
+        "P1.1",
+        "2.1"
+      ],
+      "passos": [
+        {
+          "tipo": "nota",
+          "texto": "Peça autorização antes de desligar: “Posso enviar-lhe já por WhatsApp o meu cartão, para ficar com o contacto?”"
+        },
+        {
+          "tipo": "fala",
+          "texto": "Sr. {proprietario}, agradeço a simpatia com que me atendeu. Aqui fica o meu cartão virtual, para guardar e falar comigo sempre que entender. Fico ao seu dispor.\n{meuNome} · {telefone}\n{agencia} · Licença AMI {ami}"
+        },
+        {
+          "tipo": "nota",
+          "texto": "Depois de uma reunião marcada, envie também a confirmação:"
+        },
+        {
+          "tipo": "fala",
+          "texto": "Sr. {proprietario}, confirmo a nossa reunião amanhã às {hora1}. Qualquer imprevisto, ligue-me para o {telefone}. Até amanhã! {meuNome}"
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [
+        "Quando voltar a ligar, o seu nome já aparece no telemóvel da pessoa.",
+        "A licença AMI é obrigatória em qualquer comunicação."
+      ],
+      "cuidado": null,
+      "alternativa_honesta": null
+    },
+    {
+      "id": "decisores",
+      "categoria": "Telefone",
+      "titulo": "Garantir que estão todos os que decidem",
+      "quando_usar": "Ao marcar a reunião, quando ainda não sabe se a casa é de mais alguém.",
+      "origem": "formacao",
+      "fontes": [
+        "P2.1"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Peço desculpa, nem lhe perguntei: a casa é só da senhora ou de mais alguém? Muito bem. Seria interessante estarmos os três. Qual é o horário mais conveniente para os dois: às {hora1} ou às {hora2}?"
+        },
+        {
+          "tipo": "nota",
+          "texto": "Se um dos proprietários estiver longe, proponha que se junte por videochamada. Se quem decide for um filho (por exemplo, com pais idosos), convide-o também, mesmo que não assine."
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [
+        "Quem não ouviu a apresentação não vai sentir o mesmo quando lha contarem.",
+        "Sem todos os que assinam, o contrato fica para depois, e depois muitos desistem."
+      ],
+      "cuidado": null,
+      "alternativa_honesta": null
+    },
+    {
+      "id": "comprador-primeiro",
+      "categoria": "Telefone",
+      "titulo": "Confirmar com o comprador antes de ligar ao proprietário",
+      "quando_usar": "Um proprietário recusou, mas tem no CRM um comprador compatível.",
+      "origem": "formacao",
+      "fontes": [
+        "P1.2"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Olá, está tudo bem? Ligo-lhe com uma possibilidade. Não lhe posso garantir nada ainda, mas é possível que consiga um {tipologia} até {preco} em {zona}. Se tratarmos da documentação, teria disponibilidade para visitar no sábado, às 11h00, ou ao fim da tarde, às 15h30?"
+        },
+        {
+          "tipo": "nota",
+          "texto": "Com a visita do comprador confirmada, faça o “Segundo telefonema” ao proprietário."
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [
+        "Com um comprador real e agendado, o segundo telefonema tem verdade.",
+        "Diga ao comprador exatamente o que sabe e o que ainda não sabe."
+      ],
+      "cuidado": null,
+      "alternativa_honesta": null
+    },
+    {
+      "id": "guia-vende-sozinho",
+      "categoria": "Telefone",
+      "titulo": "Oferecer um guia a quem vende sozinho",
+      "quando_usar": "Proprietário que quer mesmo vender sem imobiliária. Só se tiver o guia feito.",
+      "origem": "adaptacao",
+      "fontes": [
+        "P1.2",
+        "P2.1"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Sr. {proprietario}, compreendo perfeitamente que queira vender sozinho. Preparámos um guia para quem vende sem imobiliária: documentação necessária, cuidados a ter ao receber desconhecidos em casa, como definir o preço. Posso enviar-lho sem custo? Gostava apenas de saber depois se lhe foi útil e o que acrescentaria."
+        },
+        {
+          "tipo": "nota",
+          "texto": "Daqui a dois dias:"
+        },
+        {
+          "tipo": "fala",
+          "texto": "Teve oportunidade de ver o guia? O que lhe pareceu útil? Sentiu falta de alguma informação? O que mais conta para vender bem é o preço: como chegou ao seu valor? Se quiser, posso preparar-lhe uma análise do que está à venda na sua zona."
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [
+        "É um pretexto honesto para voltar a falar e mostrar que sabe do assunto.",
+        "Aproveite as respostas para melhorar o guia."
+      ],
+      "cuidado": "O formador apresenta o guia como “em fase de validação” e “à venda a partir de junho”. Diga apenas o que for verdade.",
+      "alternativa_honesta": null
+    },
+    {
+      "id": "honorarios",
+      "categoria": "Presencial",
+      "titulo": "Apresentar os honorários",
+      "quando_usar": "No fecho, enquanto preenchem o acordo juntos.",
+      "origem": "formacao",
+      "fontes": [
+        "P3.1",
+        "P1.2"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Chegamos aos honorários, uma parte importante para si e para nós. Praticamos 5% mais IVA sobre o valor pelo qual o imóvel vier a ser vendido: se baixar o preço, é sobre o valor da venda. São pagos no contrato-promessa se o sinal for superior a 10%; se for inferior, só na escritura. Incluem o tratamento de toda a documentação, sua e do comprador, e o acompanhamento até à escritura. Propomos um acordo de seis meses, o normal para este tipo de imóvel. O tempo médio de venda dos imóveis que trabalhamos assim tem sido de [o seu número real] dias."
+        },
+        {
+          "tipo": "nota",
+          "texto": "Continue a preencher. Não faça pausa nem pergunte “parece-lhe bem?”."
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [
+        "Apresente com segurança, a olhar nos olhos e a sorrir.",
+        "Uma pausa depois do valor convida a pessoa a discordar.",
+        "Não justifique com os seus custos, nem deixe a comissão “para falarmos no fim”."
+      ],
+      "cuidado": "Adapte a percentagem, o momento do pagamento e o prazo às condições reais do seu contrato.",
+      "alternativa_honesta": null
+    },
+    {
+      "id": "preco-telefone",
+      "categoria": "Telefone",
+      "titulo": "Proprietário que quer o preço “limpo”",
+      "quando_usar": "Ao telefone, pede que a comissão fique por cima do preço que quer.",
+      "origem": "formacao",
+      "fontes": [
+        "P3.2"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Compreendo: quer {preco} limpos e que os honorários fiquem por cima. Sem conhecer o imóvel não me é fácil comentar. Proponho encontrarmo-nos em sua casa: conheço o imóvel e ofereço-lhe um relatório de avaliação; basta ter a caderneta predial, que se tira online. Depois falamos: se o valor de mercado o permitir, com todo o gosto, e se sobrar mais, melhor para si. Se não for possível, digo-lhe logo as possibilidades e o senhor decide. Às {hora1} ou às {hora2}?"
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [
+        "Não prometa nem recuse ao telefone.",
+        "Leve duas análises da concorrência: a do segmento certo e a do segmento onde ele quer pôr a casa."
+      ],
+      "cuidado": null,
+      "alternativa_honesta": null
+    },
+    {
+      "id": "r-investidor",
+      "categoria": "Consultar com cuidado",
+      "titulo": "“Represento um investidor estrangeiro”",
+      "quando_usar": "Sugerido pelo formador para quem escreve no anúncio que não quer imobiliárias.",
+      "origem": "nao_recomendado",
+      "fontes": [
+        "P1.2",
+        "P2.1"
+      ],
+      "passos": [
+        {
+          "tipo": "nota",
+          "texto": "O que o formador sugere: deixar a pessoa desabafar, dizer que não está a ligar para angariar e apresentar-se como representante de um comprador."
+        },
+        {
+          "tipo": "fala",
+          "texto": "Com certeza, li o anúncio, e de modo algum estou a ligar para angariar a sua casa. Represento um cliente que está fora do país e já fez vários investimentos connosco; pediu-me soluções para um novo investimento e o seu imóvel pareceu-me interessante. A lei não permite dupla remuneração: quem me paga é ele, o senhor não paga nada. Dava-lhe mais jeito às {hora1} ou às {hora2}?"
+        },
+        {
+          "tipo": "nota",
+          "texto": "Depois, o formador mantém a pessoa à espera de uma “decisão do cliente” durante dias e, por fim, diz que o cliente escolheu outro imóvel, oferecendo então os seus serviços ao proprietário."
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [],
+      "cuidado": "Se o cliente não existir, é uma declaração falsa a um consumidor: pode constituir prática comercial enganosa, pôr em causa a sua licença e destruir a confiança quando for descoberto. O próprio formador chama-lhe “uma pequena mentira”. Só é válido com um mandato real de comprador (contrato de mediação com o comprador).",
+      "alternativa_honesta": "a resposta da objeção “O anúncio diz que não quer ser contactado por imobiliárias” (oferecer ajuda real com o crédito) ou a mensagem sobre um imóvel exclusivo na mesma zona."
+    },
+    {
+      "id": "r-guia-validacao",
+      "categoria": "Consultar com cuidado",
+      "titulo": "Guia “em validação” e oferta com prazo",
+      "quando_usar": "Sugerido pelo formador para quem vende sozinho.",
+      "origem": "nao_recomendado",
+      "fontes": [
+        "P1.2"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Desenvolvemos um dossiê para proprietários que vendem sem imobiliária, que vai ser comercializado a partir de junho. Nesta fase estamos a validá-lo e oferecemo-lo em troca do seu feedback."
+        },
+        {
+          "tipo": "fala",
+          "texto": "Estamos a oferecer relatórios de avaliação gratuitos até 31 de março. Amanhã tenho uma reunião às 16h00 aí na sua urbanização; dá-lhe jeito às 15h00 ou às 17h30?"
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [],
+      "cuidado": "Prazos, fases de validação e reuniões “aí perto” inventados criam uma urgência falsa. Se forem verdade, pode usá-los; se não, não.",
+      "alternativa_honesta": "o guião “Oferecer um guia a quem vende sozinho”."
+    },
+    {
+      "id": "r-ja-vendido",
+      "categoria": "Consultar com cuidado",
+      "titulo": "Carta “o imóvel já está vendido” para rescindir",
+      "quando_usar": "Sugerido pelo formador quando o proprietário tem contratos em aberto e quer dar-lhe exclusividade.",
+      "origem": "nao_recomendado",
+      "fontes": [
+        "3.1"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Venho por este meio pedir a rescisão do contrato de mediação n.º [n.º], em virtude de já ter prometido vender o imóvel, pelo que agradeço que o retirem de imediato de publicidade."
+        },
+        {
+          "tipo": "nota",
+          "texto": "O formador sugere ainda dizer, se as agências ligarem, que a venda anterior falhou por causa do crédito."
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [],
+      "cuidado": "É uma declaração falsa assinada pelo proprietário. As agências podem pedir prova ou reclamar comissão, e o proprietário fica exposto. Lembre-se de que um exclusivo sobre contratos ainda em vigor não produz efeito.",
+      "alternativa_honesta": "o proprietário denuncia os contratos nos termos e prazos que eles preveem, dizendo apenas que decidiu deixar de trabalhar com essa agência. Até lá, faça um contrato em aberto ou espere."
+    },
+    {
+      "id": "r-pos-datar",
+      "categoria": "Consultar com cuidado",
+      "titulo": "Pós-datar o contrato de exclusividade",
+      "quando_usar": "Sugerido pelo formador em conjunto com a carta anterior.",
+      "origem": "nao_recomendado",
+      "fontes": [
+        "3.1"
+      ],
+      "passos": [
+        {
+          "tipo": "nota",
+          "texto": "O que o formador sugere: assinar hoje o contrato de exclusividade com uma data alguns dias à frente, para ficar posterior às rescisões."
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [],
+      "cuidado": "Um contrato com data falsa pode ser visto como má-fé num litígio e pôr em causa a comissão.",
+      "alternativa_honesta": "assinar o exclusivo apenas depois de as rescisões produzirem efeito, com a data verdadeira."
+    },
+    {
+      "id": "r-minuta-nula",
+      "categoria": "Consultar com cuidado",
+      "titulo": "Assinar uma minuta não validada e substituí-la depois",
+      "quando_usar": "Sugerido pelo formador enquanto a minuta da agência não está validada pelo IMPIC.",
+      "origem": "nao_recomendado",
+      "fontes": [
+        "3.1"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Temos aqui o contrato que assinámos na semana passada, mas estava escrito à mão. É rigorosamente igual, apenas passámos tudo a computador. Confirme comigo e assine este, por favor."
+        },
+        {
+          "tipo": "nota",
+          "texto": "O formador sugere pôr no novo contrato a data do primeiro."
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [],
+      "cuidado": "Pedir ao proprietário que assine um documento com data anterior, escondendo o motivo, é enganoso.",
+      "alternativa_honesta": "usar desde o início um contrato em texto corrido, sem escolhas múltiplas, que não depende da validação da minuta."
+    },
+    {
+      "id": "r-rescisao-diferida",
+      "categoria": "Consultar com cuidado",
+      "titulo": "Rescisão que só produz efeito meses depois",
+      "quando_usar": "Contado pelo formador para um proprietário que diz já não querer vender.",
+      "origem": "nao_recomendado",
+      "fontes": [
+        "P2.2"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Não se preocupe, retiramos já a publicidade e ninguém mostra mais a sua casa. (O termo de rescisão assinado só produz efeito no fim dos seis meses.)"
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [],
+      "cuidado": "O proprietário assina julgando que fica livre. Se vier a vender diretamente, a cobrança da comissão pode ser contestada e a sua reputação sofre.",
+      "alternativa_honesta": "se suspeitar de uma venda direta, fale abertamente da cláusula de comissão do contrato e do que acontece se vender a quem conheceu através do seu trabalho."
+    },
+    {
+      "id": "r-historia-pessoal",
+      "categoria": "Consultar com cuidado",
+      "titulo": "História pessoal para defender a comissão",
+      "quando_usar": "Usado pelo formador como último recurso quando o proprietário não aceita os honorários.",
+      "origem": "nao_recomendado",
+      "fontes": [
+        "P3.1"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "A minha filha está a estudar e prometi-lhe um computador se passasse a todas as cadeiras. Trabalho todos os dias para cumprir essa promessa. O que lhe devo dizer em junho? Que não lhe posso dar o computador porque o ofereci no desconto da comissão?"
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [],
+      "cuidado": "Se a história não for sua, é manipulação. Mesmo verdadeira, pode soar a pressão emocional.",
+      "alternativa_honesta": "a sequência de perguntas da objeção “Não pago 5% de comissão”."
+    },
+    {
+      "id": "r-apresentar-fim",
+      "categoria": "Consultar com cuidado",
+      "titulo": "Só dizer que é de uma imobiliária no fim da chamada",
+      "quando_usar": "Variante relatada por uma rede que diz marcar mais visitas assim. O formador rejeita-a.",
+      "origem": "nao_recomendado",
+      "fontes": [
+        "2.1",
+        "P1.1"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Boa tarde, vi o seu anúncio. Era possível ver a casa hoje, às {hora1} ou às {hora2}? (…) Ah, já agora, o meu nome é {meuNome}, da {agencia}."
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [],
+      "cuidado": "A pessoa sente-se enganada logo no início e a relação começa mal. Nunca chegue a casa de alguém sem ter dito que é de uma imobiliária: também por segurança.",
+      "alternativa_honesta": "o guião “Primeiro contacto com proprietário particular”."
+    },
+    {
+      "id": "r-foto-placa",
+      "categoria": "Consultar com cuidado",
+      "titulo": "“Um amigo mandou-me uma foto da vossa placa”",
+      "quando_usar": "Pretexto partilhado por um participante.",
+      "origem": "nao_recomendado",
+      "fontes": [
+        "P4"
+      ],
+      "passos": [
+        {
+          "tipo": "fala",
+          "texto": "Boa tarde, peço desculpa por ligar, mas um amigo mandou-me uma fotografia da vossa placa. Isto fica perto da churrasqueira?"
+        }
+      ],
+      "texto_carta": null,
+      "se_recusar": null,
+      "pontos_chave": [],
+      "cuidado": "É um pretexto falso, ainda que pequeno. Se a pessoa perceber, perde credibilidade.",
+      "alternativa_honesta": "“Passei na zona e vi a sua placa. Isto fica perto da churrasqueira?”"
+    }
+  ]
+}

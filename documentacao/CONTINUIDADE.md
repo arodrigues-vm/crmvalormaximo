@@ -38,3 +38,8 @@ Estes estados não são equivalentes.
 | F3-03 Visitas e interesses | Implementado, testado | D-36. Visitas (VIS-: imóvel, cliente, acompanhantes, data/horas, estado, avaliação da ficha de visita), Interesses (INT-: um por cliente/imóvel, automáticos a partir das visitas e manuais, grau, estado, acompanhamentos), secções nas fichas do imóvel e da entidade, permissões por registo. Integração com a Agenda fica para F4-02 (mostrar a mesma visita, sem cópia). |
 | F2-05 Agentes e Agências (parte) | Implementado, testado | D-37. Agências (AGC-) e Agentes (AGT-) com tipos/status configuráveis, contactos validados, morada CAOP, pesquisa por agência, ligação opcional a utilizador. Visitas: imóvel não registado, agentes obrigatórios. **Falta da F2-05:** Equipa e Glossário. |
 | F3-04 Propostas | Implementado, testado | D-39. Propostas (PRP-) com rondas de negociação, participantes em fotografia, Gerar Proposta a partir de visita (prévia sem gravar, sem duplicados), imóveis não registados, uma aceite por imóvel. AT-08 testado. **Próximo:** F3-05 Gerar Transação a partir de proposta aceite. |
+
+## Propostas em análise
+| Proposta | Estado | Notas |
+|----------|--------|-------|
+| Módulo «Apoio à Angariação» | Documentado, por aprovar | Pacote em `documentacao/modulo-angariacao/` (especificação, conteúdo em JSON, protótipo, notas das formações). Não implementado. Antes de começar: decisões D-40 (secção 9 da especificação). |

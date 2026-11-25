@@ -1,0 +1,96 @@
+{
+  "versao": 1,
+  "fontes": [
+    {
+      "chave": "4",
+      "nome": "Gravação 4",
+      "formacao": "Angariação imobiliária"
+    },
+    {
+      "chave": "1.1",
+      "nome": "Gravação 1.1",
+      "formacao": "Angariação imobiliária"
+    },
+    {
+      "chave": "1.2",
+      "nome": "Gravação 1.2",
+      "formacao": "Angariação imobiliária"
+    },
+    {
+      "chave": "2.1",
+      "nome": "Gravação 2.1",
+      "formacao": "Angariação imobiliária"
+    },
+    {
+      "chave": "2.2",
+      "nome": "Gravação 2.2",
+      "formacao": "Angariação imobiliária"
+    },
+    {
+      "chave": "3.1",
+      "nome": "Gravação 3.1",
+      "formacao": "Angariação imobiliária"
+    },
+    {
+      "chave": "3.2",
+      "nome": "Gravação 3.2",
+      "formacao": "Angariação imobiliária"
+    },
+    {
+      "chave": "P1.1",
+      "nome": "PNL 1.1",
+      "formacao": "Ultrapassar objeções com PNL"
+    },
+    {
+      "chave": "P1.2",
+      "nome": "PNL 1.2",
+      "formacao": "Ultrapassar objeções com PNL"
+    },
+    {
+      "chave": "P2.1",
+      "nome": "PNL 2.1",
+      "formacao": "Ultrapassar objeções com PNL"
+    },
+    {
+      "chave": "P2.2",
+      "nome": "PNL 2.2",
+      "formacao": "Ultrapassar objeções com PNL"
+    },
+    {
+      "chave": "P3.1",
+      "nome": "PNL 3.1",
+      "formacao": "Ultrapassar objeções com PNL"
+    },
+    {
+      "chave": "P3.2",
+      "nome": "PNL 3.2",
+      "formacao": "Ultrapassar objeções com PNL"
+    },
+    {
+      "chave": "P4",
+      "nome": "PNL 4",
+      "formacao": "Ultrapassar objeções com PNL"
+    }
+  ],
+  "origens": {
+    "formacao": "Formação",
+    "adaptacao": "Adaptação",
+    "proposta_complementar": "Proposta complementar",
+    "nao_recomendado": "Não recomendado",
+    "texto_proprio": "Texto próprio"
+  },
+  "campos_variaveis": {
+    "meuNome": "o seu nome",
+    "agencia": "agência",
+    "ami": "n.º licença AMI",
+    "telefone": "o seu telefone",
+    "zona": "zona",
+    "proprietario": "nome do proprietário",
+    "tipologia": "tipologia",
+    "urbanizacao": "urbanização / edifício",
+    "preco": "preço",
+    "hora1": "hora 1",
+    "hora2": "hora 2",
+    "dia": "data combinada"
+  }
+}
