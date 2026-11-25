@@ -3,11 +3,11 @@ import { useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { ErroApi } from '../../api/cliente'
-import { Bloco } from '../../componentes/Bloco'
+import { BlocosConfiguraveis, Largo } from '../../componentes/BlocosConfiguraveis'
 import { CampoAreaTexto, CampoCaixa, CampoMultiplo, CampoSelecao, CampoTexto } from '../../componentes/campos'
 import { qualificacaoParaApi, valoresQualificacao, type Opcoes } from '../../componentes/camposQualificacao'
 import { CabecalhoRegisto } from '../../componentes/Ficha'
-import { EditarQualificacao } from '../../componentes/Qualificacao'
+import { EditarCampoQ } from '../../componentes/Qualificacao'
 import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
 import { useGuardaSaida } from '../../componentes/useGuardaSaida'
 import { entidadesApi } from '../entidades/api'
@@ -21,6 +21,7 @@ import {
   type Importancia,
   type Procura,
 } from './api'
+import { ECRA_PROCURA } from './disposicao'
 
 type Imp = Importancia
 interface Valores {
@@ -246,7 +247,308 @@ function Formulario({ p, entidadeInicial = null }: { p?: Procura; entidadeInicia
     }
   }
 
-  const temErro = (cs: string[]) => cs.some((c) => erros[c])
+  const ctxQ = {
+    nomesAtuais: p?.nomes,
+    todos: CAMPOS_Q,
+    valores: v.qualificacao,
+    aoMudar: mudarQ,
+    opcoes: opcoesQ,
+    erros,
+  }
+  function desenharCampo(c: string): ReactNode {
+    const q = CAMPOS_Q.find((x) => x.campo === c)
+    if (q) return <EditarCampoQ c={q} ctx={ctxQ} />
+    switch (c) {
+      case 'entidade':
+        return (
+          <SeletorPesquisavel
+            rotulo="Comprador / arrendatário"
+            chave="entidades"
+            procurar={entidadesApi.procurar}
+            valor={v.entidade}
+            aoMudar={(x) => mudar('entidade', x)}
+            erro={erros.entidade?.join(' ')}
+          />
+        )
+      case 'pretende':
+        return (
+          <CampoSelecao
+            rotulo="O cliente pretende"
+            required
+            value={v.pretende}
+            onChange={(e) => mudar('pretende', e.target.value)}
+            opcoes={o?.pretende ?? []}
+            erro={erros.pretende}
+          />
+        )
+      case 'estado':
+        return (
+          <CampoSelecao
+            rotulo="Estado"
+            vazio={p ? undefined : 'Por omissão: Ativa'}
+            value={v.estado}
+            onChange={(e) => mudar('estado', e.target.value)}
+            opcoes={lista(o?.estados)}
+          />
+        )
+      case 'urgencia':
+        return (
+          <CampoSelecao
+            rotulo="Urgência"
+            vazio="—"
+            value={v.urgencia}
+            onChange={(e) => mudar('urgencia', e.target.value)}
+            opcoes={lista(o?.urgencias)}
+          />
+        )
+      case 'orcamento_max':
+        return (
+          <CampoTexto
+            rotulo="Valor de aquisição previsto (€)"
+            inputMode="decimal"
+            value={v.orcamento_max}
+            onChange={(e) => mudar('orcamento_max', e.target.value)}
+            erro={erros.orcamento_max}
+          />
+        )
+      case 'tolerancia_pct':
+        return (
+          <>
+            <CampoTexto
+              rotulo="Tolerância (%)"
+              inputMode="decimal"
+              value={v.tolerancia_pct}
+              onChange={(e) => mudar('tolerancia_pct', e.target.value)}
+              erro={erros.tolerancia_pct}
+              ajuda="De 0% a 20%. Imóveis acima deste valor + tolerância nunca aparecem nas correspondências."
+            />
+            {teto !== null && (
+              <p className="ajuda largo">
+                Preço máximo aceite: <strong>{teto.toLocaleString('pt-PT', { maximumFractionDigits: 0 })} €</strong>
+              </p>
+            )}
+          </>
+        )
+      case 'explicacao_criterios':
+        return (
+          <p className="ajuda largo">
+            <strong>Obrigatório</strong>: imóveis que não cumprem ficam de fora. <strong>Preferencial</strong>: só ajuda
+            a ordenar. Critérios deixados em branco não contam.
+          </p>
+        )
+      case 'nota_informativos':
+        return <h4 className="subtitulo-bloco largo">Outras preferências (não entram nas correspondências)</h4>
+      case 'crit_tipos':
+        return (
+          <Largo>
+            <Criterio titulo="Tipo de imóvel" imp={v.imp_tipos} aoMudarImp={(i) => mudar('imp_tipos', i)}>
+              <CampoMultiplo
+                rotulo="Tipos aceites"
+                opcoes={o?.tipos_imovel ?? []}
+                valores={v.tipos}
+                aoMudar={(x) => mudar('tipos', x)}
+              />
+            </Criterio>
+          </Largo>
+        )
+      case 'crit_tipologias':
+        return (
+          <Largo>
+            <Criterio titulo="Tipologia" imp={v.imp_tipologias} aoMudarImp={(i) => mudar('imp_tipologias', i)}>
+              <CampoMultiplo
+                rotulo="Tipologias pretendidas"
+                opcoes={o?.tipologias ?? []}
+                valores={v.tipologias}
+                aoMudar={(x) => mudar('tipologias', x)}
+              />
+            </Criterio>
+          </Largo>
+        )
+      case 'crit_localizacao':
+        return (
+          <Largo>
+            <Criterio
+              titulo="Localização"
+              ajuda="Basta cumprir uma: um concelho inteiro, uma freguesia específica ou uma zona comercial."
+              imp={v.imp_localizacao}
+              aoMudarImp={(i) => mudar('imp_localizacao', i)}
+            >
+              <div className="campo">
+                <SeletorPesquisavel
+                  rotulo="Concelhos"
+                  chave="concelhos"
+                  procurar={procurarConcelhos}
+                  valor={novoConcelho}
+                  excluir={v.concelhos.map((c) => c.id)}
+                  aoMudar={(c) => {
+                    if (c) {
+                      mudar('concelhos', [...v.concelhos, c])
+                      setNovoConcelho(null)
+                    }
+                  }}
+                />
+                <Escolhidos
+                  itens={v.concelhos}
+                  aoRemover={(id) =>
+                    mudar(
+                      'concelhos',
+                      v.concelhos.filter((c) => c.id !== id),
+                    )
+                  }
+                />
+              </div>
+              <div className="campo">
+                <SeletorPesquisavel
+                  rotulo="Freguesias"
+                  chave="freguesias"
+                  procurar={procurarFreguesias}
+                  valor={novaFreguesia}
+                  excluir={v.freguesias.map((f) => f.id)}
+                  aoMudar={(f) => {
+                    if (f) {
+                      mudar('freguesias', [...v.freguesias, f])
+                      setNovaFreguesia(null)
+                    }
+                  }}
+                />
+                <Escolhidos
+                  itens={v.freguesias}
+                  aoRemover={(id) =>
+                    mudar(
+                      'freguesias',
+                      v.freguesias.filter((f) => f.id !== id),
+                    )
+                  }
+                />
+              </div>
+              <CampoMultiplo
+                rotulo="Zonas"
+                opcoes={o?.zonas_comerciais ?? []}
+                valores={v.zonas_comerciais}
+                aoMudar={(x) => mudar('zonas_comerciais', x)}
+              />
+            </Criterio>
+          </Largo>
+        )
+      case 'crit_area':
+        return (
+          <Largo>
+            <Criterio
+              titulo="Área bruta privativa"
+              ajuda="Compara com a área bruta privativa (ou a útil, se aquela faltar)."
+              imp={v.imp_area}
+              aoMudarImp={(i) => mudar('imp_area', i)}
+            >
+              <CampoTexto
+                rotulo="Mínimo (m²)"
+                inputMode="decimal"
+                value={v.area_min}
+                onChange={(e) => mudar('area_min', e.target.value)}
+                erro={erros.area_min}
+              />
+            </Criterio>
+          </Largo>
+        )
+      case 'crit_quartos':
+        return (
+          <Largo>
+            <Criterio titulo="Quartos" imp={v.imp_quartos} aoMudarImp={(i) => mudar('imp_quartos', i)}>
+              <CampoTexto
+                rotulo="Mínimo de quartos"
+                inputMode="numeric"
+                value={v.quartos_min}
+                onChange={(e) => mudar('quartos_min', e.target.value)}
+                erro={erros.quartos_min}
+              />
+            </Criterio>
+          </Largo>
+        )
+      case 'crit_wcs':
+        return (
+          <Largo>
+            <Criterio titulo="Casas de banho" imp={v.imp_wcs} aoMudarImp={(i) => mudar('imp_wcs', i)}>
+              <CampoTexto
+                rotulo="Mínimo de casas de banho"
+                inputMode="numeric"
+                value={v.wcs_min}
+                onChange={(e) => mudar('wcs_min', e.target.value)}
+                erro={erros.wcs_min}
+              />
+            </Criterio>
+          </Largo>
+        )
+      case 'crit_elevador':
+        return (
+          <Largo>
+            <Criterio titulo="Elevador" imp={v.imp_elevador} aoMudarImp={(i) => mudar('imp_elevador', i)}>
+              <CampoCaixa
+                rotulo="Precisa de elevador"
+                checked={v.exige_elevador}
+                onChange={(e) => mudar('exige_elevador', e.target.checked)}
+              />
+            </Criterio>
+          </Largo>
+        )
+      case 'crit_estacionamento':
+        return (
+          <Largo>
+            <Criterio
+              titulo="Estacionamento"
+              imp={v.imp_estacionamento}
+              aoMudarImp={(i) => mudar('imp_estacionamento', i)}
+            >
+              <CampoTexto
+                rotulo="Mínimo de lugares"
+                inputMode="numeric"
+                value={v.estacionamento_min}
+                onChange={(e) => mudar('estacionamento_min', e.target.value)}
+                erro={erros.estacionamento_min}
+              />
+            </Criterio>
+          </Largo>
+        )
+      case 'crit_zonas_exteriores':
+        return (
+          <Largo>
+            <Criterio
+              titulo="Zonas exteriores"
+              ajuda="O imóvel tem de ter todas as escolhidas."
+              imp={v.imp_zonas_exteriores}
+              aoMudarImp={(i) => mudar('imp_zonas_exteriores', i)}
+            >
+              <CampoMultiplo
+                rotulo="Zonas exteriores"
+                opcoes={o?.zonas_exteriores ?? []}
+                valores={v.zonas_exteriores}
+                aoMudar={(x) => mudar('zonas_exteriores', x)}
+              />
+            </Criterio>
+          </Largo>
+        )
+      case 'crit_condicoes':
+        return (
+          <Largo>
+            <Criterio titulo="Condição física" imp={v.imp_condicoes} aoMudarImp={(i) => mudar('imp_condicoes', i)}>
+              <CampoMultiplo
+                rotulo="Condições aceites"
+                opcoes={o?.condicoes_fisicas ?? []}
+                valores={v.condicoes_fisicas}
+                aoMudar={(x) => mudar('condicoes_fisicas', x)}
+              />
+            </Criterio>
+          </Largo>
+        )
+      case 'observacoes':
+        return (
+          <CampoAreaTexto
+            rotulo="Observações"
+            value={v.observacoes}
+            onChange={(e) => mudar('observacoes', e.target.value)}
+          />
+        )
+    }
+    return null
+  }
 
   return (
     <form className="ficha ficha-edicao" onSubmit={submeter} noValidate>
@@ -262,257 +564,13 @@ function Formulario({ p, entidadeInicial = null }: { p?: Procura; entidadeInicia
         </p>
       )}
 
-      <Bloco titulo="Prospect" forcarAberto={temErro(['entidade', 'pretende', 'estado'])}>
-        <div className="grelha-campos">
-          <SeletorPesquisavel
-            rotulo="Comprador / arrendatário"
-            chave="entidades"
-            procurar={entidadesApi.procurar}
-            valor={v.entidade}
-            aoMudar={(x) => mudar('entidade', x)}
-            erro={erros.entidade?.join(' ')}
-          />
-          <CampoSelecao
-            rotulo="O cliente pretende"
-            required
-            value={v.pretende}
-            onChange={(e) => mudar('pretende', e.target.value)}
-            opcoes={o?.pretende ?? []}
-            erro={erros.pretende}
-          />
-          <CampoSelecao
-            rotulo="Estado"
-            vazio={p ? undefined : 'Por omissão: Ativa'}
-            value={v.estado}
-            onChange={(e) => mudar('estado', e.target.value)}
-            opcoes={lista(o?.estados)}
-          />
-          <CampoSelecao
-            rotulo="Urgência"
-            vazio="—"
-            value={v.urgencia}
-            onChange={(e) => mudar('urgencia', e.target.value)}
-            opcoes={lista(o?.urgencias)}
-          />
-        </div>
-      </Bloco>
-
-      <Bloco titulo="Qualificação do comprador" forcarAberto={temErro(QUALIFICACAO_COMPRADOR.map((c) => c.campo))}>
-        <EditarQualificacao
-          nomesAtuais={p?.nomes}
-          campos={QUALIFICACAO_COMPRADOR}
-          valores={v.qualificacao}
-          aoMudar={mudarQ}
-          opcoes={opcoesQ}
-          erros={erros}
-        />
-      </Bloco>
-
-      <Bloco
-        titulo="Pré-qualificação financeira"
-        forcarAberto={temErro(['orcamento_max', 'tolerancia_pct', ...PRE_QUALIFICACAO_FINANCEIRA.map((c) => c.campo)])}
-      >
-        <div className="grelha-campos">
-          <CampoTexto
-            rotulo="Valor de aquisição previsto (€)"
-            inputMode="decimal"
-            value={v.orcamento_max}
-            onChange={(e) => mudar('orcamento_max', e.target.value)}
-            erro={erros.orcamento_max}
-          />
-          <CampoTexto
-            rotulo="Tolerância (%)"
-            inputMode="decimal"
-            value={v.tolerancia_pct}
-            onChange={(e) => mudar('tolerancia_pct', e.target.value)}
-            erro={erros.tolerancia_pct}
-            ajuda="De 0% a 20%. Imóveis acima deste valor + tolerância nunca aparecem nas correspondências."
-          />
-          {teto !== null && (
-            <p className="ajuda largo">
-              Preço máximo aceite: <strong>{teto.toLocaleString('pt-PT', { maximumFractionDigits: 0 })} €</strong>
-            </p>
-          )}
-        </div>
-        <EditarQualificacao
-          nomesAtuais={p?.nomes}
-          campos={PRE_QUALIFICACAO_FINANCEIRA}
-          valores={v.qualificacao}
-          aoMudar={mudarQ}
-          opcoes={opcoesQ}
-          erros={erros}
-        />
-      </Bloco>
-
-      <Bloco titulo="Critérios do imóvel">
-        <p className="ajuda">
-          <strong>Obrigatório</strong>: imóveis que não cumprem ficam de fora. <strong>Preferencial</strong>: só ajuda a
-          ordenar. Critérios deixados em branco não contam.
-        </p>
-        <Criterio titulo="Tipo de imóvel" imp={v.imp_tipos} aoMudarImp={(i) => mudar('imp_tipos', i)}>
-          <CampoMultiplo
-            rotulo="Tipos aceites"
-            opcoes={o?.tipos_imovel ?? []}
-            valores={v.tipos}
-            aoMudar={(x) => mudar('tipos', x)}
-          />
-        </Criterio>
-        <Criterio titulo="Tipologia" imp={v.imp_tipologias} aoMudarImp={(i) => mudar('imp_tipologias', i)}>
-          <CampoMultiplo
-            rotulo="Tipologias pretendidas"
-            opcoes={o?.tipologias ?? []}
-            valores={v.tipologias}
-            aoMudar={(x) => mudar('tipologias', x)}
-          />
-        </Criterio>
-        <Criterio
-          titulo="Localização"
-          ajuda="Basta cumprir uma: um concelho inteiro, uma freguesia específica ou uma zona comercial."
-          imp={v.imp_localizacao}
-          aoMudarImp={(i) => mudar('imp_localizacao', i)}
-        >
-          <div className="campo">
-            <SeletorPesquisavel
-              rotulo="Concelhos"
-              chave="concelhos"
-              procurar={procurarConcelhos}
-              valor={novoConcelho}
-              excluir={v.concelhos.map((c) => c.id)}
-              aoMudar={(c) => {
-                if (c) {
-                  mudar('concelhos', [...v.concelhos, c])
-                  setNovoConcelho(null)
-                }
-              }}
-            />
-            <Escolhidos
-              itens={v.concelhos}
-              aoRemover={(id) =>
-                mudar(
-                  'concelhos',
-                  v.concelhos.filter((c) => c.id !== id),
-                )
-              }
-            />
-          </div>
-          <div className="campo">
-            <SeletorPesquisavel
-              rotulo="Freguesias"
-              chave="freguesias"
-              procurar={procurarFreguesias}
-              valor={novaFreguesia}
-              excluir={v.freguesias.map((f) => f.id)}
-              aoMudar={(f) => {
-                if (f) {
-                  mudar('freguesias', [...v.freguesias, f])
-                  setNovaFreguesia(null)
-                }
-              }}
-            />
-            <Escolhidos
-              itens={v.freguesias}
-              aoRemover={(id) =>
-                mudar(
-                  'freguesias',
-                  v.freguesias.filter((f) => f.id !== id),
-                )
-              }
-            />
-          </div>
-          <CampoMultiplo
-            rotulo="Zonas"
-            opcoes={o?.zonas_comerciais ?? []}
-            valores={v.zonas_comerciais}
-            aoMudar={(x) => mudar('zonas_comerciais', x)}
-          />
-        </Criterio>
-        <Criterio
-          titulo="Área bruta privativa"
-          ajuda="Compara com a área bruta privativa (ou a útil, se aquela faltar)."
-          imp={v.imp_area}
-          aoMudarImp={(i) => mudar('imp_area', i)}
-        >
-          <CampoTexto
-            rotulo="Mínimo (m²)"
-            inputMode="decimal"
-            value={v.area_min}
-            onChange={(e) => mudar('area_min', e.target.value)}
-            erro={erros.area_min}
-          />
-        </Criterio>
-        <Criterio titulo="Quartos" imp={v.imp_quartos} aoMudarImp={(i) => mudar('imp_quartos', i)}>
-          <CampoTexto
-            rotulo="Mínimo de quartos"
-            inputMode="numeric"
-            value={v.quartos_min}
-            onChange={(e) => mudar('quartos_min', e.target.value)}
-            erro={erros.quartos_min}
-          />
-        </Criterio>
-        <Criterio titulo="Casas de banho" imp={v.imp_wcs} aoMudarImp={(i) => mudar('imp_wcs', i)}>
-          <CampoTexto
-            rotulo="Mínimo de casas de banho"
-            inputMode="numeric"
-            value={v.wcs_min}
-            onChange={(e) => mudar('wcs_min', e.target.value)}
-            erro={erros.wcs_min}
-          />
-        </Criterio>
-        <Criterio titulo="Elevador" imp={v.imp_elevador} aoMudarImp={(i) => mudar('imp_elevador', i)}>
-          <CampoCaixa
-            rotulo="Precisa de elevador"
-            checked={v.exige_elevador}
-            onChange={(e) => mudar('exige_elevador', e.target.checked)}
-          />
-        </Criterio>
-        <Criterio titulo="Estacionamento" imp={v.imp_estacionamento} aoMudarImp={(i) => mudar('imp_estacionamento', i)}>
-          <CampoTexto
-            rotulo="Mínimo de lugares"
-            inputMode="numeric"
-            value={v.estacionamento_min}
-            onChange={(e) => mudar('estacionamento_min', e.target.value)}
-            erro={erros.estacionamento_min}
-          />
-        </Criterio>
-        <Criterio
-          titulo="Zonas exteriores"
-          ajuda="O imóvel tem de ter todas as escolhidas."
-          imp={v.imp_zonas_exteriores}
-          aoMudarImp={(i) => mudar('imp_zonas_exteriores', i)}
-        >
-          <CampoMultiplo
-            rotulo="Zonas exteriores"
-            opcoes={o?.zonas_exteriores ?? []}
-            valores={v.zonas_exteriores}
-            aoMudar={(x) => mudar('zonas_exteriores', x)}
-          />
-        </Criterio>
-        <Criterio titulo="Condição física" imp={v.imp_condicoes} aoMudarImp={(i) => mudar('imp_condicoes', i)}>
-          <CampoMultiplo
-            rotulo="Condições aceites"
-            opcoes={o?.condicoes_fisicas ?? []}
-            valores={v.condicoes_fisicas}
-            aoMudar={(x) => mudar('condicoes_fisicas', x)}
-          />
-        </Criterio>
-        <h4 className="subtitulo-bloco">Outras preferências (não entram nas correspondências)</h4>
-        <EditarQualificacao
-          nomesAtuais={p?.nomes}
-          campos={CRITERIOS_INFORMATIVOS}
-          valores={v.qualificacao}
-          aoMudar={mudarQ}
-          opcoes={opcoesQ}
-          erros={erros}
-        />
-      </Bloco>
-
-      <Bloco titulo="Observações" abertoInicial={!!v.observacoes}>
-        <CampoAreaTexto
-          rotulo="Observações"
-          value={v.observacoes}
-          onChange={(e) => mudar('observacoes', e.target.value)}
-        />
-      </Bloco>
+      <BlocosConfiguraveis
+        def={ECRA_PROCURA}
+        modo="editar"
+        campo={desenharCampo}
+        erros={erros}
+        abertoInicial={(b) => (b.chave === 'observacoes' ? !!v.observacoes : true)}
+      />
 
       <div className="barra-gravar">
         <button

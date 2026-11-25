@@ -1,18 +1,19 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useMemo, useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { ErroApi } from '../../api/cliente'
-import { Bloco } from '../../componentes/Bloco'
+import { BlocosConfiguraveis, Largo } from '../../componentes/BlocosConfiguraveis'
 import { CampoAreaTexto, CampoSelecao, CampoTexto } from '../../componentes/campos'
 import { CabecalhoRegisto } from '../../componentes/Ficha'
-import { EditarQualificacao } from '../../componentes/Qualificacao'
+import { EditarCampoQ } from '../../componentes/Qualificacao'
 import { qualificacaoParaApi, valoresQualificacao } from '../../componentes/camposQualificacao'
 import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
 import { useGuardaSaida } from '../../componentes/useGuardaSaida'
 import { entidadesApi } from '../entidades/api'
 import { procurarImoveis } from '../imoveis/api'
 import { oportunidadesApi, QUALIFICACAO_NEGOCIO, QUALIFICACAO_PROPRIETARIO, type Oportunidade } from './api'
+import { ECRA_OPORTUNIDADE } from './disposicao'
 
 interface Valores {
   entidade: OpcaoPesquisa | null
@@ -90,9 +91,153 @@ function Formulario({ o, entidadeInicial = null }: { o?: Oportunidade; entidadeI
   const op = opcoes.data
   const mudar = <K extends keyof Valores>(c: K, valor: Valores[K]) => setV((a) => ({ ...a, [c]: valor }))
   const lista = (x?: { id: number; nome: string }[]) => (x ?? []).map((i) => ({ valor: i.id, nome: i.nome }))
-  const temErro = (cs: string[]) => cs.some((c) => erros[c])
   const mudarQ = (c: string, x: string) => setV((a) => ({ ...a, qualificacao: { ...a.qualificacao, [c]: x } }))
   const opcoesQ = op as unknown as Record<string, { id: number; nome: string }[]> | undefined
+
+  const ctxQ = {
+    nomesAtuais: o?.nomes,
+    todos: CAMPOS_Q,
+    valores: v.qualificacao,
+    aoMudar: mudarQ,
+    opcoes: opcoesQ,
+    erros,
+  }
+  function desenharCampo(c: string): ReactNode {
+    const q = CAMPOS_Q.find((x) => x.campo === c)
+    if (q) return <EditarCampoQ c={q} ctx={ctxQ} />
+    if (v.imovel && ['tipo_imovel', 'tipologia', 'localidade', 'descricao_imovel'].includes(c)) return null
+    switch (c) {
+      case 'entidade':
+        return (
+          <SeletorPesquisavel
+            rotulo="Proprietário"
+            chave="entidades"
+            procurar={entidadesApi.procurar}
+            valor={v.entidade}
+            aoMudar={(x) => mudar('entidade', x)}
+            erro={erros.entidade?.join(' ')}
+          />
+        )
+      case 'operacao':
+        return (
+          <CampoSelecao
+            rotulo="Operação pretendida"
+            vazio="—"
+            value={v.operacao}
+            onChange={(e) => mudar('operacao', e.target.value)}
+            opcoes={lista(op?.operacoes)}
+            erro={erros.operacao}
+          />
+        )
+      case 'estado':
+        return (
+          <CampoSelecao
+            rotulo="Estado"
+            vazio={o ? undefined : 'Por omissão: o primeiro «em curso»'}
+            value={v.estado}
+            onChange={(e) => mudar('estado', e.target.value)}
+            opcoes={lista(op?.estados)}
+            erro={erros.estado}
+          />
+        )
+      case 'origem':
+        return (
+          <CampoSelecao
+            rotulo="Origem do contacto"
+            vazio="—"
+            value={v.origem}
+            onChange={(e) => mudar('origem', e.target.value)}
+            opcoes={lista(op?.origens)}
+          />
+        )
+      case 'preco_pretendido':
+        return (
+          <CampoTexto
+            rotulo="Valor pretendido pelo imóvel (€)"
+            inputMode="decimal"
+            value={v.preco_pretendido}
+            onChange={(e) => mudar('preco_pretendido', e.target.value)}
+            erro={erros.preco_pretendido}
+          />
+        )
+      case 'imovel':
+        return (
+          <Largo>
+            <p className="ajuda">
+              Se o imóvel já estiver registado no CRM, escolha-o. Caso contrário, descreva-o: poderá criá-lo mais tarde
+              com «Criar imóvel».
+            </p>
+            <div className="grelha-campos">
+              <SeletorPesquisavel
+                rotulo="Imóvel já registado"
+                chave="imoveis"
+                procurar={procurarImoveis}
+                valor={v.imovel}
+                aoMudar={(x) => mudar('imovel', x)}
+                erro={erros.imovel?.join(' ')}
+                placeholder="Referência, morada…"
+              />
+            </div>
+          </Largo>
+        )
+      case 'tipo_imovel':
+        return (
+          <CampoSelecao
+            rotulo="Tipo de imóvel"
+            vazio="—"
+            value={v.tipo_imovel}
+            onChange={(e) => mudar('tipo_imovel', e.target.value)}
+            opcoes={lista(op?.tipos_imovel)}
+          />
+        )
+      case 'tipologia':
+        return (
+          <CampoSelecao
+            rotulo="Tipologia"
+            vazio="—"
+            value={v.tipologia}
+            onChange={(e) => mudar('tipologia', e.target.value)}
+            opcoes={lista(op?.tipologias)}
+          />
+        )
+      case 'localidade':
+        return (
+          <CampoTexto rotulo="Localidade" value={v.localidade} onChange={(e) => mudar('localidade', e.target.value)} />
+        )
+      case 'descricao_imovel':
+        return (
+          <CampoTexto
+            rotulo="Descrição do imóvel"
+            largo
+            value={v.descricao_imovel}
+            onChange={(e) => mudar('descricao_imovel', e.target.value)}
+            placeholder="Ex.: moradia junto à escola"
+          />
+        )
+      case 'url_anuncio':
+        return (
+          <CampoTexto
+            rotulo="Anúncio (site)"
+            type="url"
+            largo
+            value={v.url_anuncio}
+            onChange={(e) => mudar('url_anuncio', e.target.value)}
+            erro={erros.url_anuncio}
+            placeholder="https://…"
+            ajuda="Endereço do anúncio, se o imóvel já estiver anunciado noutro site."
+          />
+        )
+      case 'observacoes':
+        return (
+          <CampoAreaTexto
+            rotulo="Observações"
+            value={v.observacoes}
+            onChange={(e) => mudar('observacoes', e.target.value)}
+          />
+        )
+    }
+    return null
+  }
 
   async function submeter(e: FormEvent) {
     e.preventDefault()
@@ -146,142 +291,13 @@ function Formulario({ o, entidadeInicial = null }: { o?: Oportunidade; entidadeI
         </p>
       )}
 
-      <Bloco titulo="Oportunidade" forcarAberto={temErro(['entidade', 'operacao', 'estado', 'preco_pretendido'])}>
-        <div className="grelha-campos">
-          <SeletorPesquisavel
-            rotulo="Proprietário"
-            chave="entidades"
-            procurar={entidadesApi.procurar}
-            valor={v.entidade}
-            aoMudar={(x) => mudar('entidade', x)}
-            erro={erros.entidade?.join(' ')}
-          />
-          <CampoSelecao
-            rotulo="Operação pretendida"
-            vazio="—"
-            value={v.operacao}
-            onChange={(e) => mudar('operacao', e.target.value)}
-            opcoes={lista(op?.operacoes)}
-            erro={erros.operacao}
-          />
-          <CampoSelecao
-            rotulo="Estado"
-            vazio={o ? undefined : 'Por omissão: o primeiro «em curso»'}
-            value={v.estado}
-            onChange={(e) => mudar('estado', e.target.value)}
-            opcoes={lista(op?.estados)}
-            erro={erros.estado}
-          />
-          <CampoSelecao
-            rotulo="Origem do contacto"
-            vazio="—"
-            value={v.origem}
-            onChange={(e) => mudar('origem', e.target.value)}
-            opcoes={lista(op?.origens)}
-          />
-          <CampoTexto
-            rotulo="Valor pretendido pelo imóvel (€)"
-            inputMode="decimal"
-            value={v.preco_pretendido}
-            onChange={(e) => mudar('preco_pretendido', e.target.value)}
-            erro={erros.preco_pretendido}
-          />
-        </div>
-      </Bloco>
-
-      <Bloco
-        titulo="Qualificação do proprietário"
-        forcarAberto={temErro(QUALIFICACAO_PROPRIETARIO.map((c) => c.campo))}
-      >
-        <EditarQualificacao
-          nomesAtuais={o?.nomes}
-          campos={QUALIFICACAO_PROPRIETARIO}
-          valores={v.qualificacao}
-          aoMudar={mudarQ}
-          opcoes={opcoesQ}
-          erros={erros}
-        />
-      </Bloco>
-
-      <Bloco
-        titulo="Imóvel"
-        forcarAberto={temErro(['imovel', 'tipo_imovel', 'tipologia', 'localidade', 'url_anuncio'])}
-      >
-        <p className="ajuda">
-          Se o imóvel já estiver registado no CRM, escolha-o. Caso contrário, descreva-o: poderá criá-lo mais tarde com
-          «Converter em imóvel / CMI».
-        </p>
-        <div className="grelha-campos">
-          <SeletorPesquisavel
-            rotulo="Imóvel já registado"
-            chave="imoveis"
-            procurar={procurarImoveis}
-            valor={v.imovel}
-            aoMudar={(x) => mudar('imovel', x)}
-            erro={erros.imovel?.join(' ')}
-            placeholder="Referência, morada…"
-          />
-          {!v.imovel && (
-            <>
-              <CampoSelecao
-                rotulo="Tipo de imóvel"
-                vazio="—"
-                value={v.tipo_imovel}
-                onChange={(e) => mudar('tipo_imovel', e.target.value)}
-                opcoes={lista(op?.tipos_imovel)}
-              />
-              <CampoSelecao
-                rotulo="Tipologia"
-                vazio="—"
-                value={v.tipologia}
-                onChange={(e) => mudar('tipologia', e.target.value)}
-                opcoes={lista(op?.tipologias)}
-              />
-              <CampoTexto
-                rotulo="Localidade"
-                value={v.localidade}
-                onChange={(e) => mudar('localidade', e.target.value)}
-              />
-              <CampoTexto
-                rotulo="Descrição do imóvel"
-                largo
-                value={v.descricao_imovel}
-                onChange={(e) => mudar('descricao_imovel', e.target.value)}
-                placeholder="Ex.: moradia junto à escola"
-              />
-            </>
-          )}
-          <CampoTexto
-            rotulo="Anúncio (site)"
-            type="url"
-            largo
-            value={v.url_anuncio}
-            onChange={(e) => mudar('url_anuncio', e.target.value)}
-            erro={erros.url_anuncio}
-            placeholder="https://…"
-            ajuda="Endereço do anúncio, se o imóvel já estiver anunciado noutro site."
-          />
-        </div>
-      </Bloco>
-
-      <Bloco titulo="Negócio" forcarAberto={temErro(QUALIFICACAO_NEGOCIO.map((c) => c.campo))} abertoInicial={!!o}>
-        <EditarQualificacao
-          nomesAtuais={o?.nomes}
-          campos={QUALIFICACAO_NEGOCIO}
-          valores={v.qualificacao}
-          aoMudar={mudarQ}
-          opcoes={opcoesQ}
-          erros={erros}
-        />
-      </Bloco>
-
-      <Bloco titulo="Observações" abertoInicial={!!v.observacoes}>
-        <CampoAreaTexto
-          rotulo="Observações"
-          value={v.observacoes}
-          onChange={(e) => mudar('observacoes', e.target.value)}
-        />
-      </Bloco>
+      <BlocosConfiguraveis
+        def={ECRA_OPORTUNIDADE}
+        modo="editar"
+        campo={desenharCampo}
+        erros={erros}
+        abertoInicial={(b) => (b.chave === 'negocio' ? !!o : b.chave === 'observacoes' ? !!v.observacoes : true)}
+      />
 
       <div className="barra-gravar">
         <button

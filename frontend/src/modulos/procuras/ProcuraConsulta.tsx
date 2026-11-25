@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { ErroApi } from '../../api/cliente'
@@ -10,7 +10,8 @@ import { CabecalhoRegisto, HistoricoRegisto } from '../../componentes/Ficha'
 import { formatarEuros, momentoPt } from '../../componentes/formatar'
 import type { Registo } from '../../componentes/camposQualificacao'
 import { Interacoes } from '../../componentes/Interacoes'
-import { VerQualificacao } from '../../componentes/Qualificacao'
+import { VerCampoQ } from '../../componentes/Qualificacao'
+import { BlocosConfiguraveis } from '../../componentes/BlocosConfiguraveis'
 import { ETIQUETA_CATEGORIA } from '../oportunidades/api'
 import {
   NOMES_CAMPOS_PROCURA,
@@ -21,6 +22,7 @@ import {
   type Importancia,
 } from './api'
 import { CorrespondenciasProcura } from './Correspondencias'
+import { ECRA_PROCURA } from './disposicao'
 
 const IMP: Record<Importancia, string> = { obrigatorio: 'obrigatório', preferencial: 'preferencial' }
 
@@ -61,6 +63,73 @@ export function ProcuraConsulta() {
     ...n.zonas_comerciais,
   ].join(', ')
 
+  const pr = p
+  const CAMPOS_Q = [...QUALIFICACAO_COMPRADOR, ...PRE_QUALIFICACAO_FINANCEIRA, ...CRITERIOS_INFORMATIVOS]
+  function desenharCampo(c: string): ReactNode {
+    const q = CAMPOS_Q.find((x) => x.campo === c)
+    if (q) return <VerCampoQ c={q} registo={pr as unknown as Registo} />
+    switch (c) {
+      case 'entidade':
+        return (
+          <Dado rotulo="Comprador / arrendatário">
+            {pr.entidade_nome ? (
+              <Link to={`/entidades/${pr.entidade}`}>{pr.entidade_nome}</Link>
+            ) : (
+              'Entidade a que não tem acesso'
+            )}
+          </Dado>
+        )
+      case 'pretende':
+        return <Dado rotulo="O cliente pretende">{n.pretende}</Dado>
+      case 'estado':
+        return <Dado rotulo="Estado">{n.estado}</Dado>
+      case 'urgencia':
+        return <Dado rotulo="Urgência">{n.urgencia}</Dado>
+      case 'responsavel':
+        return <Dado rotulo="Responsável">{pr.responsavel_nome}</Dado>
+      case 'orcamento_max':
+        return <Dado rotulo="Valor de aquisição previsto">{formatarEuros(pr.orcamento_max)}</Dado>
+      case 'tolerancia_pct':
+        return (
+          <>
+            <Dado rotulo="Tolerância">{`${Number(pr.tolerancia_pct)} %`}</Dado>
+            <Dado rotulo="Preço máximo aceite">{formatarEuros(pr.teto)}</Dado>
+          </>
+        )
+      case 'crit_tipos':
+        return crit('Tipo', n.tipos.join(', '), pr.imp_tipos)
+      case 'crit_tipologias':
+        return crit('Tipologia', n.tipologias.join(', '), pr.imp_tipologias)
+      case 'crit_localizacao':
+        return crit('Localização', localizacao, pr.imp_localizacao)
+      case 'crit_area':
+        return crit('Área bruta privativa', pr.area_min !== null && `${Number(pr.area_min)} m² ou mais`, pr.imp_area)
+      case 'crit_quartos':
+        return crit('Quartos', pr.quartos_min !== null && `${pr.quartos_min} ou mais`, pr.imp_quartos)
+      case 'crit_wcs':
+        return crit('Casas de banho', pr.wcs_min !== null && `${pr.wcs_min} ou mais`, pr.imp_wcs)
+      case 'crit_elevador':
+        return crit('Elevador', pr.exige_elevador && 'Sim', pr.imp_elevador)
+      case 'crit_estacionamento':
+        return crit(
+          'Estacionamento',
+          pr.estacionamento_min !== null && `${pr.estacionamento_min} lugar(es) ou mais`,
+          pr.imp_estacionamento,
+        )
+      case 'crit_zonas_exteriores':
+        return crit('Zonas exteriores', n.zonas_exteriores.join(', '), pr.imp_zonas_exteriores)
+      case 'crit_condicoes':
+        return crit('Condição física', n.condicoes_fisicas.join(', '), pr.imp_condicoes)
+      case 'observacoes':
+        return (
+          <Dado rotulo="Observações" largo>
+            {pr.observacoes && <span className="texto-livre">{pr.observacoes}</span>}
+          </Dado>
+        )
+    }
+    return null
+  }
+
   return (
     <div className="ficha">
       <CabecalhoRegisto
@@ -87,53 +156,12 @@ export function ProcuraConsulta() {
         }
       />
 
-      <Bloco titulo="Prospect">
-        <dl className="grelha-dados">
-          <Dado rotulo="Comprador / arrendatário">
-            {p.entidade_nome ? (
-              <Link to={`/entidades/${p.entidade}`}>{p.entidade_nome}</Link>
-            ) : (
-              'Entidade a que não tem acesso'
-            )}
-          </Dado>
-          <Dado rotulo="O cliente pretende">{n.pretende}</Dado>
-          <Dado rotulo="Urgência">{n.urgencia}</Dado>
-          <Dado rotulo="Responsável">{p.responsavel_nome}</Dado>
-        </dl>
-      </Bloco>
-
-      <Bloco titulo="Qualificação do comprador">
-        <VerQualificacao campos={QUALIFICACAO_COMPRADOR} registo={p as unknown as Registo} />
-      </Bloco>
-
-      <Bloco titulo="Pré-qualificação financeira">
-        <dl className="grelha-dados">
-          <Dado rotulo="Valor de aquisição previsto">{formatarEuros(p.orcamento_max)}</Dado>
-          <Dado rotulo="Tolerância">{Number(p.tolerancia_pct) > 0 ? `${Number(p.tolerancia_pct)} %` : '0 %'}</Dado>
-          <Dado rotulo="Preço máximo aceite">{formatarEuros(p.teto)}</Dado>
-        </dl>
-        <VerQualificacao campos={PRE_QUALIFICACAO_FINANCEIRA} registo={p as unknown as Registo} />
-      </Bloco>
-
-      <Bloco titulo="Critérios do imóvel">
-        <dl className="grelha-dados">
-          {crit('Tipo', n.tipos.join(', '), p.imp_tipos)}
-          {crit('Tipologia', n.tipologias.join(', '), p.imp_tipologias)}
-          {crit('Localização', localizacao, p.imp_localizacao)}
-          {crit('Área bruta privativa', p.area_min !== null && `${Number(p.area_min)} m² ou mais`, p.imp_area)}
-          {crit('Quartos', p.quartos_min !== null && `${p.quartos_min} ou mais`, p.imp_quartos)}
-          {crit('Casas de banho', p.wcs_min !== null && `${p.wcs_min} ou mais`, p.imp_wcs)}
-          {crit('Elevador', p.exige_elevador && 'Sim', p.imp_elevador)}
-          {crit(
-            'Estacionamento',
-            p.estacionamento_min !== null && `${p.estacionamento_min} lugar(es) ou mais`,
-            p.imp_estacionamento,
-          )}
-          {crit('Zonas exteriores', n.zonas_exteriores.join(', '), p.imp_zonas_exteriores)}
-          {crit('Condição física', n.condicoes_fisicas.join(', '), p.imp_condicoes)}
-        </dl>
-        <VerQualificacao campos={CRITERIOS_INFORMATIVOS} registo={p as unknown as Registo} />
-      </Bloco>
+      <BlocosConfiguraveis
+        def={ECRA_PROCURA}
+        modo="ver"
+        campo={desenharCampo}
+        abertoInicial={(b) => (b.chave === 'observacoes' ? !!p.observacoes : true)}
+      />
 
       <Bloco titulo="Imóveis compatíveis" resumo={corresp.data ? `${corresp.data.resultados.length}` : undefined}>
         {p.estado_categoria === 'inativa' && (
@@ -152,10 +180,6 @@ export function ProcuraConsulta() {
           podeEditar={p.acoes.editar}
           tipos={opcoes.data?.tipos_interacao ?? []}
         />
-      </Bloco>
-
-      <Bloco titulo="Observações" abertoInicial={!!p.observacoes}>
-        <p className="texto-livre">{p.observacoes || <span className="vazio">—</span>}</p>
       </Bloco>
 
       <Bloco titulo="Histórico" abertoInicial={false}>

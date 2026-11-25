@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { ErroApi } from '../../api/cliente'
@@ -10,7 +10,8 @@ import { Dialogo } from '../../componentes/Dialogo'
 import { CabecalhoRegisto, HistoricoRegisto } from '../../componentes/Ficha'
 import { formatarEuros, momentoPt } from '../../componentes/formatar'
 import { Interacoes } from '../../componentes/Interacoes'
-import { VerQualificacao } from '../../componentes/Qualificacao'
+import { VerCampoQ } from '../../componentes/Qualificacao'
+import { BlocosConfiguraveis } from '../../componentes/BlocosConfiguraveis'
 import {
   ETIQUETA_CATEGORIA,
   NOMES_CAMPOS_OPORTUNIDADE,
@@ -18,6 +19,7 @@ import {
   QUALIFICACAO_NEGOCIO,
   QUALIFICACAO_PROPRIETARIO,
 } from './api'
+import { ECRA_OPORTUNIDADE } from './disposicao'
 
 export function OportunidadeConsulta() {
   const { id = '' } = useParams()
@@ -68,6 +70,71 @@ export function OportunidadeConsulta() {
   const registo = o as unknown as Record<string, unknown>
   const podeCriarImovel = o.acoes.editar && o.imovel === null && pode('imoveis', 'criar')
 
+  const CAMPOS_Q = [...QUALIFICACAO_PROPRIETARIO, ...QUALIFICACAO_NEGOCIO]
+  const op = o
+  function desenharCampo(c: string): ReactNode {
+    const q = CAMPOS_Q.find((x) => x.campo === c)
+    if (q) return <VerCampoQ c={q} registo={registo} />
+    if (op.imovel && ['tipo_imovel', 'tipologia', 'localidade', 'descricao_imovel'].includes(c)) return null
+    switch (c) {
+      case 'entidade':
+        return (
+          <Dado rotulo="Proprietário">
+            {op.entidade_nome ? (
+              <Link to={`/entidades/${op.entidade}`}>{op.entidade_nome}</Link>
+            ) : (
+              'Entidade a que não tem acesso'
+            )}
+          </Dado>
+        )
+      case 'operacao':
+        return <Dado rotulo="Operação pretendida">{n.operacao}</Dado>
+      case 'estado':
+        return <Dado rotulo="Estado">{n.estado}</Dado>
+      case 'origem':
+        return <Dado rotulo="Origem">{n.origem}</Dado>
+      case 'preco_pretendido':
+        return <Dado rotulo="Valor pretendido">{formatarEuros(op.preco_pretendido)}</Dado>
+      case 'responsavel':
+        return <Dado rotulo="Responsável">{op.responsavel_nome}</Dado>
+      case 'imovel':
+        return (
+          <Dado rotulo="Imóvel registado">
+            {op.imovel && <Link to={`/imoveis/${op.imovel}`}>{op.imovel_descricao}</Link>}
+          </Dado>
+        )
+      case 'tipo_imovel':
+        return <Dado rotulo="Tipo">{n.tipo_imovel}</Dado>
+      case 'tipologia':
+        return <Dado rotulo="Tipologia">{n.tipologia}</Dado>
+      case 'localidade':
+        return <Dado rotulo="Localidade">{op.localidade}</Dado>
+      case 'descricao_imovel':
+        return (
+          <Dado rotulo="Descrição" largo>
+            {op.descricao_imovel}
+          </Dado>
+        )
+      case 'url_anuncio':
+        return (
+          <Dado rotulo="Anúncio" largo>
+            {op.url_anuncio && (
+              <a href={op.url_anuncio} target="_blank" rel="noopener noreferrer">
+                {op.url_anuncio}
+              </a>
+            )}
+          </Dado>
+        )
+      case 'observacoes':
+        return (
+          <Dado rotulo="Observações" largo>
+            {op.observacoes && <span className="texto-livre">{op.observacoes}</span>}
+          </Dado>
+        )
+    }
+    return null
+  }
+
   return (
     <div className="ficha">
       <CabecalhoRegisto
@@ -85,6 +152,16 @@ export function OportunidadeConsulta() {
                 Eliminar
               </button>
             )}
+            {podeCriarImovel && (
+              <button className="botao-secundario" onClick={() => setDialogo('converter')}>
+                Criar imóvel
+              </button>
+            )}
+            {o.imovel !== null && (
+              <Link to={`/imoveis/${o.imovel}`} className="botao-secundario">
+                Abrir imóvel (atualizar e criar o CMI)
+              </Link>
+            )}
             {o.acoes.editar && (
               <Link to={`/oportunidades/${o.id}/editar`} className="botao-principal">
                 Editar
@@ -101,69 +178,12 @@ export function OportunidadeConsulta() {
         </p>
       )}
 
-      <Bloco titulo="Oportunidade">
-        <dl className="grelha-dados">
-          <Dado rotulo="Proprietário">
-            {o.entidade_nome ? (
-              <Link to={`/entidades/${o.entidade}`}>{o.entidade_nome}</Link>
-            ) : (
-              'Entidade a que não tem acesso'
-            )}
-          </Dado>
-          <Dado rotulo="Operação pretendida">{n.operacao}</Dado>
-          <Dado rotulo="Estado">{n.estado}</Dado>
-          <Dado rotulo="Origem">{n.origem}</Dado>
-          <Dado rotulo="Valor pretendido">{formatarEuros(o.preco_pretendido)}</Dado>
-          <Dado rotulo="Responsável">{o.responsavel_nome}</Dado>
-        </dl>
-        {podeCriarImovel && (
-          <div className="acoes-bloco">
-            <button className="botao-principal" onClick={() => setDialogo('converter')}>
-              Criar imóvel
-            </button>
-          </div>
-        )}
-        {o.imovel !== null && (
-          <div className="acoes-bloco">
-            <Link to={`/imoveis/${o.imovel}`} className="botao-principal">
-              Abrir imóvel (atualizar e criar o CMI)
-            </Link>
-          </div>
-        )}
-      </Bloco>
-
-      <Bloco titulo="Qualificação do proprietário">
-        <VerQualificacao campos={QUALIFICACAO_PROPRIETARIO} registo={registo} />
-      </Bloco>
-
-      <Bloco titulo="Imóvel">
-        {o.imovel ? (
-          <p>
-            <Link to={`/imoveis/${o.imovel}`}>{o.imovel_descricao}</Link>
-          </p>
-        ) : (
-          <dl className="grelha-dados">
-            <Dado rotulo="Tipo">{n.tipo_imovel}</Dado>
-            <Dado rotulo="Tipologia">{n.tipologia}</Dado>
-            <Dado rotulo="Localidade">{o.localidade}</Dado>
-            <Dado rotulo="Descrição" largo>
-              {o.descricao_imovel}
-            </Dado>
-          </dl>
-        )}
-        {o.url_anuncio && (
-          <p>
-            Anúncio:{' '}
-            <a href={o.url_anuncio} target="_blank" rel="noopener noreferrer">
-              {o.url_anuncio}
-            </a>
-          </p>
-        )}
-      </Bloco>
-
-      <Bloco titulo="Negócio">
-        <VerQualificacao campos={QUALIFICACAO_NEGOCIO} registo={registo} />
-      </Bloco>
+      <BlocosConfiguraveis
+        def={ECRA_OPORTUNIDADE}
+        modo="ver"
+        campo={desenharCampo}
+        abertoInicial={(b) => (b.chave === 'observacoes' ? !!o.observacoes : true)}
+      />
 
       <Bloco titulo="Contactos registados">
         <Interacoes
@@ -171,10 +191,6 @@ export function OportunidadeConsulta() {
           podeEditar={o.acoes.editar}
           tipos={opcoes.data?.tipos_interacao ?? []}
         />
-      </Bloco>
-
-      <Bloco titulo="Observações" abertoInicial={!!o.observacoes}>
-        <p className="texto-livre">{o.observacoes || <span className="vazio">—</span>}</p>
       </Bloco>
 
       <Bloco titulo="Histórico" abertoInicial={false}>
