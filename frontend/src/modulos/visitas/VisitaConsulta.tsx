@@ -1,15 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { ErroApi } from '../../api/cliente'
 import { useSessao } from '../../app/sessao'
 import { Bloco } from '../../componentes/Bloco'
+import { BlocosConfiguraveis } from '../../componentes/BlocosConfiguraveis'
 import { Dado } from '../../componentes/campos'
 import { Dialogo } from '../../componentes/Dialogo'
 import { CabecalhoRegisto, HistoricoRegisto } from '../../componentes/Ficha'
 import { dataPt, momentoPt } from '../../componentes/formatar'
 import { ETIQUETA_VISITA, hora, NOMES_CAMPOS_VISITA, visitasApi } from './api'
+import { CRITERIOS_VISITA, ECRA_VISITA } from './disposicao'
 
 export function VisitaConsulta() {
   const { id = '' } = useParams()
@@ -33,6 +35,79 @@ export function VisitaConsulta() {
   if (!x) return <p className="erro">Não foi possível carregar a visita.</p>
   const n = x.nomes
   const horario = [hora(x.hora_entrada), hora(x.hora_saida)].filter(Boolean).join(' – ')
+
+  const vis = x
+  function desenharCampo(c: string): ReactNode {
+    if (c in CRITERIOS_VISITA)
+      return <Dado rotulo={opcoes.data?.criterios.find((y) => y.campo === c)?.nome ?? CRITERIOS_VISITA[c]}>{n[c]}</Dado>
+    switch (c) {
+      case 'imovel':
+        return (
+          <Dado rotulo="Imóvel">
+            {vis.imovel ? (
+              <Link to={`/imoveis/${vis.imovel}`}>{vis.imovel_descricao}</Link>
+            ) : (
+              <>
+                {vis.imovel_descricao} <small className="ajuda">(não registado no CRM)</small>
+              </>
+            )}
+          </Dado>
+        )
+      case 'agente_comprador':
+        return <Dado rotulo="Agente responsável pelo comprador">{vis.agente_comprador_nome}</Dado>
+      case 'agente_imovel':
+        return <Dado rotulo="Agente responsável pelo imóvel">{vis.agente_imovel_nome}</Dado>
+      case 'entidade':
+        return (
+          <Dado rotulo="Cliente">
+            {vis.entidade_nome ? (
+              <Link to={`/entidades/${vis.entidade}`}>{vis.entidade_nome}</Link>
+            ) : (
+              'Entidade a que não tem acesso'
+            )}
+          </Dado>
+        )
+      case 'data':
+        return <Dado rotulo="Data">{dataPt(vis.data)}</Dado>
+      case 'hora_entrada':
+        return <Dado rotulo="Hora de entrada">{hora(vis.hora_entrada)}</Dado>
+      case 'hora_saida':
+        return <Dado rotulo="Hora de saída">{hora(vis.hora_saida)}</Dado>
+      case 'estado':
+        return <Dado rotulo="Estado">{vis.estado_nome}</Dado>
+      case 'responsavel':
+        return <Dado rotulo="Consultor">{vis.responsavel_nome}</Dado>
+      case 'acompanhantes':
+        return (
+          <Dado rotulo="Acompanhantes" largo>
+            {vis.acompanhantes_detalhe.map((a) => a.nome).join(', ')}
+          </Dado>
+        )
+      case 'mais_gostou':
+        return (
+          <Dado rotulo="O que mais gostou?" largo>
+            {vis.mais_gostou && <span className="texto-livre">{vis.mais_gostou}</span>}
+          </Dado>
+        )
+      case 'menos_gostou':
+        return (
+          <Dado rotulo="O que menos gostou?" largo>
+            {vis.menos_gostou && <span className="texto-livre">{vis.menos_gostou}</span>}
+          </Dado>
+        )
+      case 'compraria':
+        return <Dado rotulo="Compraria este imóvel?">{n.compraria}</Dado>
+      case 'imovel_localizacao':
+        return vis.imovel ? null : <Dado rotulo="Localização">{vis.imovel_localizacao}</Dado>
+      case 'observacoes':
+        return (
+          <Dado rotulo="Observações" largo>
+            {vis.observacoes && <span className="texto-livre">{vis.observacoes}</span>}
+          </Dado>
+        )
+    }
+    return null
+  }
 
   return (
     <div className="ficha">
@@ -67,57 +142,12 @@ export function VisitaConsulta() {
         }
       />
 
-      <Bloco titulo="Visita">
-        <dl className="grelha-dados">
-          <Dado rotulo="Imóvel">
-            {x.imovel ? (
-              <Link to={`/imoveis/${x.imovel}`}>{x.imovel_descricao}</Link>
-            ) : (
-              <>
-                {x.imovel_descricao} <small className="ajuda">(não registado no CRM)</small>
-              </>
-            )}
-          </Dado>
-          <Dado rotulo="Agente responsável pelo comprador">{x.agente_comprador_nome}</Dado>
-          <Dado rotulo="Agente responsável pelo imóvel">{x.agente_imovel_nome}</Dado>
-          <Dado rotulo="Cliente">
-            {x.entidade_nome ? (
-              <Link to={`/entidades/${x.entidade}`}>{x.entidade_nome}</Link>
-            ) : (
-              'Entidade a que não tem acesso'
-            )}
-          </Dado>
-          <Dado rotulo="Data">{dataPt(x.data)}</Dado>
-          <Dado rotulo="Hora de entrada">{hora(x.hora_entrada)}</Dado>
-          <Dado rotulo="Hora de saída">{hora(x.hora_saida)}</Dado>
-          <Dado rotulo="Estado">{x.estado_nome}</Dado>
-          <Dado rotulo="Consultor">{x.responsavel_nome}</Dado>
-          <Dado rotulo="Acompanhantes" largo>
-            {x.acompanhantes_detalhe.map((a) => a.nome).join(', ')}
-          </Dado>
-        </dl>
-      </Bloco>
-
-      <Bloco titulo="Avaliação do cliente">
-        <dl className="grelha-dados">
-          {(opcoes.data?.criterios ?? []).map((c) => (
-            <Dado key={c.campo} rotulo={c.nome}>
-              {n[c.campo]}
-            </Dado>
-          ))}
-          <Dado rotulo="O que mais gostou?" largo>
-            {x.mais_gostou && <span className="texto-livre">{x.mais_gostou}</span>}
-          </Dado>
-          <Dado rotulo="O que menos gostou?" largo>
-            {x.menos_gostou && <span className="texto-livre">{x.menos_gostou}</span>}
-          </Dado>
-          <Dado rotulo="Compraria este imóvel?">{n.compraria}</Dado>
-        </dl>
-      </Bloco>
-
-      <Bloco titulo="Observações" abertoInicial={!!x.observacoes}>
-        <p className="texto-livre">{x.observacoes || <span className="vazio">—</span>}</p>
-      </Bloco>
+      <BlocosConfiguraveis
+        def={ECRA_VISITA}
+        modo="ver"
+        campo={desenharCampo}
+        abertoInicial={(b) => (b.chave === 'observacoes' ? !!x.observacoes : true)}
+      />
 
       <Bloco titulo="Histórico" abertoInicial={false}>
         {() => (

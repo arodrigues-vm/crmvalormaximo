@@ -1,15 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { ErroApi } from '../../api/cliente'
 import { Bloco } from '../../componentes/Bloco'
 import { Dado } from '../../componentes/campos'
+import { BlocosConfiguraveis } from '../../componentes/BlocosConfiguraveis'
 import { Dialogo } from '../../componentes/Dialogo'
 import { CabecalhoRegisto, HistoricoRegisto } from '../../componentes/Ficha'
 import { dataPt, momentoPt } from '../../componentes/formatar'
 import { Interacoes } from '../../componentes/Interacoes'
 import { ETIQUETA_VISITA, hora, interessesApi, NOMES_CAMPOS_INTERESSE, visitasApi } from './api'
+import { ECRA_INTERESSE } from './disposicao'
 
 export function InteresseConsulta() {
   const { id = '' } = useParams()
@@ -39,6 +41,45 @@ export function InteresseConsulta() {
   if (error instanceof ErroApi && error.estado === 404)
     return <p className="aviso">Interesse não encontrado ou sem acesso.</p>
   if (!x) return <p className="erro">Não foi possível carregar o interesse.</p>
+
+  const int = x
+  function desenharCampo(c: string): ReactNode {
+    switch (c) {
+      case 'entidade':
+        return (
+          <Dado rotulo="Cliente">
+            {int.entidade_nome ? (
+              <Link to={`/entidades/${int.entidade}`}>{int.entidade_nome}</Link>
+            ) : (
+              'Entidade a que não tem acesso'
+            )}
+          </Dado>
+        )
+      case 'imovel':
+        return (
+          <Dado rotulo="Imóvel">
+            <Link to={`/imoveis/${int.imovel}`}>{int.imovel_descricao}</Link>
+          </Dado>
+        )
+      case 'origem':
+        return <Dado rotulo="Origem">{int.origem_nome}</Dado>
+      case 'grau':
+        return <Dado rotulo="Grau de interesse">{int.grau_nome}</Dado>
+      case 'estado':
+        return <Dado rotulo="Estado">{int.estado_nome}</Dado>
+      case 'ultima_visita':
+        return <Dado rotulo="Última visita">{dataPt(int.ultima_visita)}</Dado>
+      case 'responsavel':
+        return <Dado rotulo="Responsável">{int.responsavel_nome}</Dado>
+      case 'observacoes':
+        return (
+          <Dado rotulo="Observações" largo>
+            {int.observacoes && <span className="texto-livre">{int.observacoes}</span>}
+          </Dado>
+        )
+    }
+    return null
+  }
 
   return (
     <div className="ficha">
@@ -71,28 +112,7 @@ export function InteresseConsulta() {
         }
       />
 
-      <Bloco titulo="Interesse">
-        <dl className="grelha-dados">
-          <Dado rotulo="Cliente">
-            {x.entidade_nome ? (
-              <Link to={`/entidades/${x.entidade}`}>{x.entidade_nome}</Link>
-            ) : (
-              'Entidade a que não tem acesso'
-            )}
-          </Dado>
-          <Dado rotulo="Imóvel">
-            <Link to={`/imoveis/${x.imovel}`}>{x.imovel_descricao}</Link>
-          </Dado>
-          <Dado rotulo="Origem">{x.origem_nome}</Dado>
-          <Dado rotulo="Grau de interesse">{x.grau_nome}</Dado>
-          <Dado rotulo="Estado">{x.estado_nome}</Dado>
-          <Dado rotulo="Última visita">{dataPt(x.ultima_visita)}</Dado>
-          <Dado rotulo="Responsável">{x.responsavel_nome}</Dado>
-          <Dado rotulo="Observações" largo>
-            {x.observacoes && <span className="texto-livre">{x.observacoes}</span>}
-          </Dado>
-        </dl>
-      </Bloco>
+      <BlocosConfiguraveis def={ECRA_INTERESSE} modo="ver" campo={desenharCampo} />
 
       <Bloco titulo="Visitas" resumo={visitas.data ? String(visitas.data.count) : undefined}>
         {visitas.data?.count === 0 && <p className="ajuda">Ainda sem visitas a este imóvel.</p>}

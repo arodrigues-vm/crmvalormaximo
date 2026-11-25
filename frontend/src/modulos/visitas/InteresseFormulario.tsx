@@ -1,9 +1,9 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useMemo, useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { ErroApi } from '../../api/cliente'
-import { Bloco } from '../../componentes/Bloco'
+import { BlocosConfiguraveis } from '../../componentes/BlocosConfiguraveis'
 import { CampoAreaTexto, CampoSelecao } from '../../componentes/campos'
 import { CabecalhoRegisto } from '../../componentes/Ficha'
 import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
@@ -11,6 +11,7 @@ import { useGuardaSaida } from '../../componentes/useGuardaSaida'
 import { entidadesApi } from '../entidades/api'
 import { imoveisApi, procurarImoveis } from '../imoveis/api'
 import { interessesApi, type Interesse } from './api'
+import { ECRA_INTERESSE } from './disposicao'
 
 const t = (v: number | null | undefined) => (v === null || v === undefined ? '' : String(v))
 const id = (v: string) => (v ? Number(v) : null)
@@ -115,6 +116,73 @@ function Formulario({
     }
   }
 
+  function desenharCampo(c: string): ReactNode {
+    switch (c) {
+      case 'entidade':
+        return (
+          <SeletorPesquisavel
+            rotulo="Cliente"
+            chave="entidades"
+            procurar={entidadesApi.procurar}
+            valor={v.entidade}
+            aoMudar={(x) => mudar('entidade', x)}
+            erro={erros.entidade?.join(' ')}
+          />
+        )
+      case 'imovel':
+        return (
+          <SeletorPesquisavel
+            rotulo="Imóvel"
+            chave="imoveis"
+            procurar={procurarImoveis}
+            valor={v.imovel}
+            aoMudar={(x) => mudar('imovel', x)}
+            erro={erros.imovel?.join(' ')}
+            placeholder="Ex.: 10 T3 Maia"
+          />
+        )
+      case 'origem':
+        return (
+          <CampoSelecao
+            rotulo="Origem"
+            vazio="—"
+            value={v.origem}
+            onChange={(e) => mudar('origem', e.target.value)}
+            opcoes={lista(o?.origens)}
+          />
+        )
+      case 'grau':
+        return (
+          <CampoSelecao
+            rotulo="Grau de interesse"
+            vazio="—"
+            value={v.grau}
+            onChange={(e) => mudar('grau', e.target.value)}
+            opcoes={lista(o?.graus)}
+          />
+        )
+      case 'estado':
+        return (
+          <CampoSelecao
+            rotulo="Estado"
+            vazio={interesse ? undefined : 'Por omissão: Ativo'}
+            value={v.estado}
+            onChange={(e) => mudar('estado', e.target.value)}
+            opcoes={lista(o?.estados)}
+          />
+        )
+      case 'observacoes':
+        return (
+          <CampoAreaTexto
+            rotulo="Observações"
+            value={v.observacoes}
+            onChange={(e) => mudar('observacoes', e.target.value)}
+          />
+        )
+    }
+    return null
+  }
+
   return (
     <form className="ficha ficha-edicao" onSubmit={submeter} noValidate>
       <CabecalhoRegisto
@@ -128,53 +196,8 @@ function Formulario({
           {erroGeral}
         </p>
       )}
-      <Bloco titulo="Interesse">
-        <div className="grelha-campos">
-          <SeletorPesquisavel
-            rotulo="Cliente"
-            chave="entidades"
-            procurar={entidadesApi.procurar}
-            valor={v.entidade}
-            aoMudar={(x) => mudar('entidade', x)}
-            erro={erros.entidade?.join(' ')}
-          />
-          <SeletorPesquisavel
-            rotulo="Imóvel"
-            chave="imoveis"
-            procurar={procurarImoveis}
-            valor={v.imovel}
-            aoMudar={(x) => mudar('imovel', x)}
-            erro={erros.imovel?.join(' ')}
-            placeholder="Ex.: 10 T3 Maia"
-          />
-          <CampoSelecao
-            rotulo="Origem"
-            vazio="—"
-            value={v.origem}
-            onChange={(e) => mudar('origem', e.target.value)}
-            opcoes={lista(o?.origens)}
-          />
-          <CampoSelecao
-            rotulo="Grau de interesse"
-            vazio="—"
-            value={v.grau}
-            onChange={(e) => mudar('grau', e.target.value)}
-            opcoes={lista(o?.graus)}
-          />
-          <CampoSelecao
-            rotulo="Estado"
-            vazio={interesse ? undefined : 'Por omissão: Ativo'}
-            value={v.estado}
-            onChange={(e) => mudar('estado', e.target.value)}
-            opcoes={lista(o?.estados)}
-          />
-        </div>
-        <CampoAreaTexto
-          rotulo="Observações"
-          value={v.observacoes}
-          onChange={(e) => mudar('observacoes', e.target.value)}
-        />
-      </Bloco>
+      <BlocosConfiguraveis def={ECRA_INTERESSE} modo="editar" campo={desenharCampo} erros={erros} />
+
       <div className="barra-gravar">
         <button
           type="button"
