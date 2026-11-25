@@ -1,9 +1,11 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useMemo, useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { ErroApi } from '../../api/cliente'
 import { Bloco } from '../../componentes/Bloco'
+import { BlocosConfiguraveis, Largo } from '../../componentes/BlocosConfiguraveis'
+import type { DefinicaoEcra } from '../../componentes/disposicao'
 import {
   qualificacaoParaApi,
   valoresQualificacao,
@@ -16,7 +18,7 @@ import { Dialogo } from '../../componentes/Dialogo'
 import { CabecalhoRegisto, HistoricoRegisto } from '../../componentes/Ficha'
 import { formatarTelefone, momentoPt } from '../../componentes/formatar'
 import { Paginacao } from '../../componentes/Paginacao'
-import { EditarQualificacao, VerQualificacao } from '../../componentes/Qualificacao'
+import { EditarCampoQ, VerCampoQ } from '../../componentes/Qualificacao'
 import { SeletorLocalizacao } from '../../componentes/SeletorLocalizacao'
 import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
 import { useGuardaSaida } from '../../componentes/useGuardaSaida'
@@ -30,6 +32,7 @@ import {
   OBSERVACOES,
   type RegistoAgente,
 } from './api'
+import { ECRA_AGENCIA, ECRA_AGENTE } from './disposicao'
 
 /** Agentes e Agências partilham as mesmas páginas (D-37), com configurações diferentes. */
 interface Config {
@@ -42,6 +45,7 @@ interface Config {
   api: typeof agentesApi
   campos: CampoQualificacao[]
   morada: boolean
+  ecra: DefinicaoEcra
 }
 
 const AGENTES: Config = {
@@ -54,6 +58,7 @@ const AGENTES: Config = {
   api: agentesApi,
   campos: CAMPOS_AGENTE,
   morada: false,
+  ecra: ECRA_AGENTE,
 }
 const AGENCIAS: Config = {
   chave: 'agencias',
@@ -65,6 +70,7 @@ const AGENCIAS: Config = {
   api: agenciasApi,
   campos: CAMPOS_AGENCIA,
   morada: true,
+  ecra: ECRA_AGENCIA,
 }
 
 const comNomes = (r: RegistoAgente): Registo => ({
@@ -198,6 +204,24 @@ function Consulta({ c }: { c: Config }) {
     return <p className="aviso">Registo não encontrado ou sem acesso.</p>
   if (!r) return <p className="erro">Não foi possível carregar o registo.</p>
   const registo = comNomes(r)
+  const reg = r
+  const todos = [...c.campos, ...MORADA_AGENCIA, ...OBSERVACOES]
+  function desenharCampo(k: string): ReactNode {
+    const q = todos.find((x) => x.campo === k)
+    if (q) return <VerCampoQ c={q} registo={registo} />
+    if (k === 'agencia')
+      return (
+        <Dado rotulo="Agência">{reg.agencia && <Link to={`/agencias/${reg.agencia}`}>{reg.agencia_nome}</Link>}</Dado>
+      )
+    if (k === 'freguesia')
+      return (
+        <Dado rotulo="Distrito, concelho e freguesia" largo>
+          {reg.localizacao &&
+            `${reg.localizacao.distrito} › ${reg.localizacao.concelho} › ${reg.localizacao.freguesia}`}
+        </Dado>
+      )
+    return null
+  }
   return (
     <div className="ficha">
       <CabecalhoRegisto
@@ -225,40 +249,25 @@ function Consulta({ c }: { c: Config }) {
           </>
         }
       />
-      <Bloco titulo="Dados">
-        <VerQualificacao campos={c.campos} registo={registo} />
-        {!c.morada && (
-          <dl className="grelha-dados">
-            <Dado rotulo="Agência">{r.agencia && <Link to={`/agencias/${r.agencia}`}>{r.agencia_nome}</Link>}</Dado>
-          </dl>
-        )}
-      </Bloco>
+      <BlocosConfiguraveis
+        def={c.ecra}
+        modo="ver"
+        campo={desenharCampo}
+        abertoInicial={(b) => (b.chave === 'observacoes' ? !!r.observacoes : true)}
+      />
       {c.morada && (
-        <>
-          <Bloco titulo="Morada">
-            <VerQualificacao campos={MORADA_AGENCIA} registo={registo} />
-            <dl className="grelha-dados">
-              <Dado rotulo="Distrito, concelho e freguesia" largo>
-                {r.localizacao && `${r.localizacao.distrito} › ${r.localizacao.concelho} › ${r.localizacao.freguesia}`}
-              </Dado>
-            </dl>
-          </Bloco>
-          <Bloco titulo="Agentes" resumo={agentes.data ? String(agentes.data.count) : undefined}>
-            {agentes.data?.count === 0 && <p className="ajuda">Sem agentes registados nesta agência.</p>}
-            <ul className="lista-relacoes">
-              {agentes.data?.results.map((a) => (
-                <li key={a.id}>
-                  <Link to={`/agentes/${a.id}`}>{a.nome}</Link>
-                  <span className="ajuda">{a.tipo_nome}</span>
-                </li>
-              ))}
-            </ul>
-          </Bloco>
-        </>
+        <Bloco titulo="Agentes" resumo={agentes.data ? String(agentes.data.count) : undefined}>
+          {agentes.data?.count === 0 && <p className="ajuda">Sem agentes registados nesta agência.</p>}
+          <ul className="lista-relacoes">
+            {agentes.data?.results.map((a) => (
+              <li key={a.id}>
+                <Link to={`/agentes/${a.id}`}>{a.nome}</Link>
+                <span className="ajuda">{a.tipo_nome}</span>
+              </li>
+            ))}
+          </ul>
+        </Bloco>
       )}
-      <Bloco titulo="Observações" abertoInicial={!!r.observacoes}>
-        <VerQualificacao campos={OBSERVACOES} registo={registo} />
-      </Bloco>
       <Bloco titulo="Histórico" abertoInicial={false}>
         {() => (
           <>
@@ -311,16 +320,42 @@ function Formulario({ c, r }: { c: Config; r?: RegistoAgente }) {
   const [erroGeral, setErroGeral] = useState<string | null>(null)
   const [aGravar, setAGravar] = useState(false)
   const guarda = useGuardaSaida(JSON.stringify(v) !== JSON.stringify(inicial))
-  const editar = (lista: CampoQualificacao[]) => (
-    <EditarQualificacao
-      campos={lista}
-      valores={v.extra}
-      aoMudar={(k, x) => setV((a) => ({ ...a, extra: { ...a.extra, [k]: x } }))}
-      opcoes={opcoes.data as unknown as Opcoes | undefined}
-      erros={erros}
-      nomesAtuais={r ? comNomes(r).nomes : undefined}
-    />
-  )
+  const ctxQ = {
+    todos: campos,
+    valores: v.extra,
+    aoMudar: (k: string, x: string) => setV((a) => ({ ...a, extra: { ...a.extra, [k]: x } })),
+    opcoes: opcoes.data as unknown as Opcoes | undefined,
+    erros,
+    nomesAtuais: r ? comNomes(r).nomes : undefined,
+  }
+  function desenharCampo(k: string): ReactNode {
+    const q = campos.find((x) => x.campo === k)
+    if (q) return <EditarCampoQ c={q} ctx={ctxQ} />
+    if (k === 'agencia' && !c.morada)
+      return (
+        <SeletorPesquisavel
+          rotulo="Agência"
+          chave="agencias"
+          procurar={agenciasApi.procurar}
+          valor={v.agencia}
+          aoMudar={(x) => setV((a) => ({ ...a, agencia: x }))}
+          erro={erros.agencia?.join(' ')}
+        />
+      )
+    if (k === 'freguesia' && c.morada)
+      return (
+        <Largo>
+          <div className="grelha-campos">
+            <SeletorLocalizacao
+              freguesia={v.freguesia}
+              atual={r?.freguesia === v.freguesia ? (r?.localizacao ?? null) : null}
+              aoMudar={(f) => setV((a) => ({ ...a, freguesia: f }))}
+            />
+          </div>
+        </Largo>
+      )
+    return null
+  }
 
   async function submeter(e: FormEvent) {
     e.preventDefault()
@@ -359,36 +394,13 @@ function Formulario({ c, r }: { c: Config; r?: RegistoAgente }) {
           {erroGeral}
         </p>
       )}
-      <Bloco titulo="Dados">
-        {editar(c.campos)}
-        {!c.morada && (
-          <div className="grelha-campos">
-            <SeletorPesquisavel
-              rotulo="Agência"
-              chave="agencias"
-              procurar={agenciasApi.procurar}
-              valor={v.agencia}
-              aoMudar={(x) => setV((a) => ({ ...a, agencia: x }))}
-              erro={erros.agencia?.join(' ')}
-            />
-          </div>
-        )}
-      </Bloco>
-      {c.morada && (
-        <Bloco titulo="Morada">
-          {editar(MORADA_AGENCIA)}
-          <div className="grelha-campos">
-            <SeletorLocalizacao
-              freguesia={v.freguesia}
-              atual={r?.freguesia === v.freguesia ? (r?.localizacao ?? null) : null}
-              aoMudar={(f) => setV((a) => ({ ...a, freguesia: f }))}
-            />
-          </div>
-        </Bloco>
-      )}
-      <Bloco titulo="Observações" abertoInicial={!!r?.observacoes}>
-        {editar(OBSERVACOES)}
-      </Bloco>
+      <BlocosConfiguraveis
+        def={c.ecra}
+        modo="editar"
+        campo={desenharCampo}
+        erros={erros}
+        abertoInicial={(b) => (b.chave === 'observacoes' ? !!r?.observacoes : true)}
+      />
       <div className="barra-gravar">
         <button
           type="button"

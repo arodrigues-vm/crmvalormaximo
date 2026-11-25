@@ -1,6 +1,8 @@
 import type { DefinicaoEcra } from '../../componentes/disposicao'
+import { ECRA_AGENCIA, ECRA_AGENTE } from '../agentes/disposicao'
 import { ECRA_ANGARIACAO } from '../angariacoes/disposicao'
 import { ECRA_ENTIDADE } from '../entidades/disposicao'
+import { ECRA_MEMBRO } from '../equipa/disposicao'
 import { ECRA_IMOVEL } from '../imoveis/disposicao'
 import { ECRA_OPORTUNIDADE } from '../oportunidades/disposicao'
 import { ECRA_PROCURA } from '../procuras/disposicao'
@@ -17,4 +19,7 @@ export const ECRAS: DefinicaoEcra[] = [
   ECRA_VISITA,
   ECRA_INTERESSE,
   ECRA_PROPOSTA,
+  ECRA_AGENTE,
+  ECRA_AGENCIA,
+  ECRA_MEMBRO,
 ]

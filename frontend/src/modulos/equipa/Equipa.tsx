@@ -1,9 +1,9 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useMemo, useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { ErroApi } from '../../api/cliente'
-import { Bloco } from '../../componentes/Bloco'
+import { BlocosConfiguraveis } from '../../componentes/BlocosConfiguraveis'
 import { CampoSelecao, CampoTexto, Dado } from '../../componentes/campos'
 import { Dialogo } from '../../componentes/Dialogo'
 import { CabecalhoRegisto } from '../../componentes/Ficha'
@@ -12,6 +12,7 @@ import { Paginacao } from '../../componentes/Paginacao'
 import { useGuardaSaida } from '../../componentes/useGuardaSaida'
 import { useListaFiltrada } from '../../componentes/useListaFiltrada'
 import { equipaApi, type Membro } from './api'
+import { ECRA_MEMBRO } from './disposicao'
 
 function Navegacao({ atual }: { atual: 'membros' | 'equipas' }) {
   return (
@@ -146,6 +147,37 @@ export function MembroConsulta() {
   if (isLoading) return <p className="a-carregar">A carregar…</p>
   if (!m) return <p className="aviso">Membro não encontrado.</p>
   const gerir = opcoes.data?.pode_gerir
+  const mb = m
+  function desenharCampo(c: string): ReactNode {
+    switch (c) {
+      case 'email':
+        return <Dado rotulo="Email (para entrar)">{mb.email}</Dado>
+      case 'perfil':
+        return <Dado rotulo="Perfil">{mb.perfil_nome}</Dado>
+      case 'equipa':
+        return <Dado rotulo="Equipa">{mb.equipa_nome}</Dado>
+      case 'funcao_comercial':
+        return <Dado rotulo="Função">{mb.funcao_comercial}</Dado>
+      case 'identificacao_profissional':
+        return <Dado rotulo="Identificação profissional">{mb.identificacao_profissional}</Dado>
+      case 'nif':
+        return <Dado rotulo="NIF">{mb.nif}</Dado>
+      case 'telefone':
+        return <Dado rotulo="Telefone">{mb.telefone_e164 && formatarTelefone(mb.telefone_e164)}</Dado>
+      case 'ativo':
+        return <Dado rotulo="Pode entrar no CRM">{mb.ativo ? 'Sim' : 'Não (desativado)'}</Dado>
+      case 'mfa':
+        return <Dado rotulo="Início de sessão em dois passos">{mb.mfa_ativa ? 'Ativo' : 'Desligado'}</Dado>
+      case 'ultimo_acesso':
+        return <Dado rotulo="Último acesso">{mb.ultimo_acesso && momentoPt(mb.ultimo_acesso)}</Dado>
+      case 'membro_desde':
+        return <Dado rotulo="Membro desde">{momentoPt(mb.date_joined)}</Dado>
+      case 'nome':
+        return <Dado rotulo="Nome">{mb.nome}</Dado>
+    }
+    return null
+  }
+
   return (
     <div className="ficha">
       <CabecalhoRegisto
@@ -169,25 +201,7 @@ export function MembroConsulta() {
           )
         }
       />
-      <Bloco titulo="Dados profissionais">
-        <dl className="grelha-dados">
-          <Dado rotulo="Email (para entrar)">{m.email}</Dado>
-          <Dado rotulo="Perfil">{m.perfil_nome}</Dado>
-          <Dado rotulo="Equipa">{m.equipa_nome}</Dado>
-          <Dado rotulo="Função">{m.funcao_comercial}</Dado>
-          <Dado rotulo="Identificação profissional">{m.identificacao_profissional}</Dado>
-          <Dado rotulo="NIF">{m.nif}</Dado>
-          <Dado rotulo="Telefone">{m.telefone_e164 && formatarTelefone(m.telefone_e164)}</Dado>
-        </dl>
-      </Bloco>
-      <Bloco titulo="Acesso">
-        <dl className="grelha-dados">
-          <Dado rotulo="Pode entrar no CRM">{m.ativo ? 'Sim' : 'Não (desativado)'}</Dado>
-          <Dado rotulo="Início de sessão em dois passos">{m.mfa_ativa ? 'Ativo' : 'Desligado'}</Dado>
-          <Dado rotulo="Último acesso">{m.ultimo_acesso && momentoPt(m.ultimo_acesso)}</Dado>
-          <Dado rotulo="Membro desde">{momentoPt(m.date_joined)}</Dado>
-        </dl>
-      </Bloco>
+      <BlocosConfiguraveis def={ECRA_MEMBRO} modo="ver" campo={desenharCampo} />
       <Dialogo
         titulo="Repor início de sessão em dois passos"
         aberto={reporAberto}
@@ -283,6 +297,94 @@ function FormularioMembro({ membro }: { membro?: Membro }) {
     }
   }
 
+  function desenharCampo(c: string): ReactNode {
+    switch (c) {
+      case 'nome':
+        return <CampoTexto rotulo="Nome" required value={v.nome} onChange={m('nome')} erro={erros.nome} />
+      case 'funcao_comercial':
+        return (
+          <CampoTexto
+            rotulo="Função"
+            value={v.funcao_comercial}
+            onChange={m('funcao_comercial')}
+            placeholder="Ex.: Consultor imobiliário"
+          />
+        )
+      case 'identificacao_profissional':
+        return (
+          <CampoTexto
+            rotulo="Identificação profissional"
+            value={v.identificacao_profissional}
+            onChange={m('identificacao_profissional')}
+          />
+        )
+      case 'nif':
+        return <CampoTexto rotulo="NIF" value={v.nif} onChange={m('nif')} erro={erros.nif} />
+      case 'telefone':
+        return <CampoTexto rotulo="Telefone" value={v.telefone} onChange={m('telefone')} erro={erros.telefone} />
+      case 'equipa':
+        return (
+          <CampoSelecao
+            rotulo="Equipa"
+            vazio="—"
+            value={v.equipa}
+            onChange={m('equipa')}
+            opcoes={(opcoes.data?.equipas ?? []).map((x) => ({ valor: x.id, nome: x.nome }))}
+          />
+        )
+      case 'email':
+        return (
+          <CampoTexto
+            rotulo="Email (para entrar)"
+            type="email"
+            required
+            value={v.email}
+            onChange={m('email')}
+            erro={erros.email}
+          />
+        )
+      case 'perfil':
+        return (
+          <CampoSelecao
+            rotulo="Perfil"
+            value={v.perfil}
+            onChange={m('perfil')}
+            opcoes={opcoes.data?.perfis ?? []}
+            erro={erros.perfil}
+          />
+        )
+      case 'ativo':
+        return (
+          <CampoSelecao
+            rotulo="Pode entrar no CRM"
+            value={v.ativo}
+            onChange={m('ativo')}
+            opcoes={[
+              { valor: 'sim', nome: 'Sim' },
+              { valor: 'nao', nome: 'Não (desativado)' },
+            ]}
+            erro={erros.ativo}
+          />
+        )
+      case 'password':
+        return (
+          <CampoTexto
+            rotulo={membro ? 'Nova palavra-passe' : 'Palavra-passe inicial'}
+            type="password"
+            autoComplete="new-password"
+            required={!membro}
+            value={v.password}
+            onChange={m('password')}
+            erro={erros.password}
+            ajuda={
+              membro ? 'Deixe vazio para não mudar.' : 'Mínimo 12 caracteres. Entregue-a à pessoa de forma segura.'
+            }
+          />
+        )
+    }
+    return null
+  }
+
   return (
     <form className="ficha ficha-edicao" onSubmit={submeter} noValidate>
       <CabecalhoRegisto
@@ -296,72 +398,7 @@ function FormularioMembro({ membro }: { membro?: Membro }) {
           {erroGeral}
         </p>
       )}
-      <Bloco titulo="Dados profissionais">
-        <div className="grelha-campos">
-          <CampoTexto rotulo="Nome" required value={v.nome} onChange={m('nome')} erro={erros.nome} />
-          <CampoTexto
-            rotulo="Função"
-            value={v.funcao_comercial}
-            onChange={m('funcao_comercial')}
-            placeholder="Ex.: Consultor imobiliário"
-          />
-          <CampoTexto
-            rotulo="Identificação profissional"
-            value={v.identificacao_profissional}
-            onChange={m('identificacao_profissional')}
-          />
-          <CampoTexto rotulo="NIF" value={v.nif} onChange={m('nif')} erro={erros.nif} />
-          <CampoTexto rotulo="Telefone" value={v.telefone} onChange={m('telefone')} erro={erros.telefone} />
-          <CampoSelecao
-            rotulo="Equipa"
-            vazio="—"
-            value={v.equipa}
-            onChange={m('equipa')}
-            opcoes={(opcoes.data?.equipas ?? []).map((x) => ({ valor: x.id, nome: x.nome }))}
-          />
-        </div>
-      </Bloco>
-      <Bloco titulo="Acesso ao CRM">
-        <div className="grelha-campos">
-          <CampoTexto
-            rotulo="Email (para entrar)"
-            type="email"
-            required
-            value={v.email}
-            onChange={m('email')}
-            erro={erros.email}
-          />
-          <CampoSelecao
-            rotulo="Perfil"
-            value={v.perfil}
-            onChange={m('perfil')}
-            opcoes={opcoes.data?.perfis ?? []}
-            erro={erros.perfil}
-          />
-          <CampoSelecao
-            rotulo="Pode entrar no CRM"
-            value={v.ativo}
-            onChange={m('ativo')}
-            opcoes={[
-              { valor: 'sim', nome: 'Sim' },
-              { valor: 'nao', nome: 'Não (desativado)' },
-            ]}
-            erro={erros.ativo}
-          />
-          <CampoTexto
-            rotulo={membro ? 'Nova palavra-passe' : 'Palavra-passe inicial'}
-            type="password"
-            autoComplete="new-password"
-            required={!membro}
-            value={v.password}
-            onChange={m('password')}
-            erro={erros.password}
-            ajuda={
-              membro ? 'Deixe vazio para não mudar.' : 'Mínimo 12 caracteres. Entregue-a à pessoa de forma segura.'
-            }
-          />
-        </div>
-      </Bloco>
+      <BlocosConfiguraveis def={ECRA_MEMBRO} modo="editar" campo={desenharCampo} erros={erros} />
       <div className="barra-gravar">
         <button
           type="button"
