@@ -82,7 +82,7 @@ export function render(el) {
       onclick: () => { separador = k; gravarLocal("orc_config_sep", k); emitir() },
     }, t))),
   )
-  if (separador === "perfil") return el.append(perfil(), seccaoPasskeys())
+  if (separador === "perfil") return el.append(perfil(), seccaoPrivacidade(), seccaoPasskeys())
 
   const t = TABELAS[separador]
   const podeCriar = admin || (t.qualquer || []).includes("create")
@@ -232,4 +232,22 @@ function perfil() {
   return h("section", { class: "cartao" },
     h("header", { class: "cartao-topo" }, h("div", {}, h("h3", {}, "O meu perfil"),
       h("p", { class: "sub" }, `Papel: ${rotulo(u?.papel)} · Versão da app: ${VERSAO_APP}`))), form)
+}
+
+// Privacidade: página mostrada ao abrir/voltar à app neste aparelho.
+function seccaoPrivacidade() {
+  const atual = lerLocal("orc_abertura", "inicio")
+  const opcoes = [
+    ["inicio", "Início, sem valores (recomendado)", "Ao abrir a app ou ao voltar a ela, aparece sempre a página de Início, que não mostra montantes nem registos."],
+    ["ultima", "A última página que estava a ver", "A app retoma onde ficou (pode mostrar valores a quem estiver ao lado)."],
+  ]
+  return h("section", { class: "cartao" },
+    h("header", { class: "cartao-topo" }, h("div", {},
+      h("h3", {}, "Privacidade ao abrir"),
+      h("p", { class: "sub" }, "Escolha o que aparece quando abre a app neste aparelho."))),
+    h("div", { class: "form form-estreito", role: "radiogroup", "aria-label": "Página ao abrir" },
+      opcoes.map(([v, t, d]) => h("label", { class: "campo-radio" },
+        h("input", { type: "radio", name: "orc_abertura", value: v, checked: atual === v,
+          onchange: () => { gravarLocal("orc_abertura", v); aviso("Preferência guardada neste aparelho.", "ok") } }),
+        h("span", {}, h("strong", {}, t), h("small", {}, d))))))
 }

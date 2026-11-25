@@ -2,7 +2,7 @@
 import PocketBase from "../vendor/pocketbase.es.mjs"
 
 // Versão da app: atualizar aqui E em /versao.json a cada alteração publicada.
-export const VERSAO_APP = "1.6"
+export const VERSAO_APP = "1.7"
 
 export const pb = new PocketBase(location.origin)
 pb.autoCancellation(false)
@@ -202,6 +202,7 @@ export function confirmar(texto, { sim = "Confirmar" } = {}) {
 // ------------------------------------------------------------------ ícones (SVG inline)
 const svg = (p) => `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`
 export const ICONES = {
+  inicio: svg('<path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/>'),
   painel: svg('<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>'),
   movimentos: svg('<path d="M4 7h16M4 12h16M4 17h10"/>'),
   analise: svg('<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'),

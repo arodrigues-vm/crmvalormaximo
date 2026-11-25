@@ -359,3 +359,42 @@ body.offline .sem-rede { display: inline-flex; }
 @keyframes modal-aviso { 0%, 100% { transform: scale(1); } 40% { transform: scale(1.015); } }
 .modal-aviso { animation: modal-aviso .22s ease-out; }
 @media (prefers-reduced-motion: reduce) { .modal-aviso { animation: none; } }
+
+/* ---------------- página de Início (sem valores) */
+.topo-marca { color: inherit; text-decoration: none; }
+/* no telemóvel o Início não ocupa lugar no menu de baixo: abre-se pelo logótipo do topo */
+@media (max-width: 899px) { .nav-item[data-rota="inicio"] { display: none; } .nav-texto { white-space: nowrap; } }
+.inicio-boasvindas { padding: 8px 0 18px; }
+.inicio-boasvindas h1 { font-size: 1.75rem; margin: 2px 0 4px; }
+.inicio-data { margin: 0; color: var(--texto-3); font-size: .9rem; }
+.inicio-acoes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 22px; }
+.inicio-acao {
+  display: flex; align-items: center; gap: 14px; text-align: left; cursor: pointer;
+  padding: 18px; border-radius: var(--raio); border: 1px solid var(--borda); background: var(--superficie);
+  box-shadow: var(--sombra); color: var(--texto-1); min-height: 84px;
+}
+.inicio-acao:hover { background: var(--superficie-2); }
+.inicio-acao strong { display: block; font-size: 1.02rem; }
+.inicio-acao small { color: var(--texto-2); font-size: .82rem; }
+.inicio-acao-icone { flex: none; width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; color: #fff; }
+.inicio-acao.despesa .inicio-acao-icone { background: var(--serie-despesa); }
+.inicio-acao.receita .inicio-acao-icone { background: var(--serie-receita); }
+.inicio-atalhos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.inicio-atalho {
+  display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: var(--raio);
+  border: 1px solid var(--borda); background: var(--superficie); color: var(--texto-1); text-decoration: none; min-width: 0;
+}
+.inicio-atalho:hover { background: var(--superficie-2); }
+.inicio-atalho strong { display: block; }
+.inicio-atalho small { color: var(--texto-2); font-size: .8rem; }
+.inicio-atalho-icone { flex: none; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--primaria-suave); color: var(--primaria); }
+.inicio-nota { margin: 22px 0 0; color: var(--texto-3); font-size: .82rem; text-align: center; }
+@media (max-width: 720px) {
+  .inicio-acoes { grid-template-columns: 1fr; }
+  .inicio-atalhos { grid-template-columns: 1fr 1fr; }
+  .inicio-atalho { flex-direction: column; align-items: flex-start; gap: 8px; }
+}
+.campo-radio { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; padding: 6px 0; }
+.campo-radio input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--primaria); flex: none; }
+.campo-radio strong { display: block; }
+.campo-radio small { color: var(--texto-2); font-size: .82rem; }

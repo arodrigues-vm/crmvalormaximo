@@ -4,6 +4,7 @@ import {
   setAmbito, def, isAdmin, enviarPendentes, VERSAO_APP,
 } from "./core.js"
 import { destruirGraficos } from "./graficos.js"
+import * as inicio from "./views/inicio.js"
 import * as painel from "./views/painel.js"
 import * as movimentos from "./views/movimentos.js"
 import * as analise from "./views/analise.js"
@@ -13,6 +14,7 @@ import * as config from "./views/config.js"
 import { passkeyDisponivel, entrarComPasskey, proporAtivacao, bloqueioAtivo, textoErroPasskey } from "./passkey.js"
 
 const ROTAS = [
+  { id: "inicio", titulo: "Início", icone: ICONES.inicio, vista: inicio },
   { id: "painel", titulo: "Painel", icone: ICONES.painel, vista: painel },
   { id: "movimentos", titulo: "Movimentos", icone: ICONES.movimentos, vista: movimentos },
   { id: "analise", titulo: "Análise", icone: ICONES.analise, vista: analise },
@@ -77,6 +79,7 @@ async function abrirApp() {
     return
   }
   montarEstrutura()
+  if (inicio.paginaAbertura() === "inicio") history.replaceState(null, "", "#inicio")
   window.addEventListener("hashchange", desenhar)
   window.addEventListener("orc:dados", agendarDesenho)
   window.addEventListener("orc:modal-fechado", () => { if (pendente) desenhar() })
@@ -202,7 +205,7 @@ function montarEstrutura() {
   conteudo = h("main", { class: "conteudo", id: "conteudo" })
   raiz.append(
     h("header", { class: "topo" },
-      h("div", { class: "topo-marca" },
+      h("a", { class: "topo-marca", href: "#inicio", title: "Início" },
         h("img", { src: "/icons/icon.svg", alt: "", width: 28, height: 28 }),
         h("strong", {}, def("nome_app", "Orçamento"))),
       ambito,
@@ -223,7 +226,7 @@ function agendarDesenho() {
 
 function desenhar() {
   pendente = false
-  const id = (location.hash.replace(/^#\/?/, "").split("?")[0]) || "painel"
+  const id = (location.hash.replace(/^#\/?/, "").split("?")[0]) || "inicio"
   const rota = ROTAS.find((r) => r.id === id) || ROTAS[0]
   navLinks.forEach((a) => a.classList.toggle("ativo", a.dataset.rota === rota.id))
   document.title = `${rota.titulo} · ${def("nome_app", "Orçamento")}`
@@ -242,6 +245,15 @@ function desenhar() {
 let estadoUltimaRota = null
 
 window.addEventListener("focus", () => enviarPendentes())
+
+// Privacidade: ao passar para outra app ou bloquear o ecrã, volta ao Início (sem valores).
+// Assim a miniatura das "apps recentes" e o regresso à app não mostram montantes.
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "hidden" || !conteudo || haModalAberto()) return
+  if (inicio.paginaAbertura() !== "inicio" || location.hash === "#inicio") return
+  history.replaceState(null, "", "#inicio")
+  desenhar()
+})
 export { isAdmin }
 
 arrancar()

@@ -36,11 +36,11 @@ export async function resolverFornecedor(nome, categoriaId) {
   return novo.id
 }
 
-export function abrirFormMovimento(mov = null, { duplicar = false } = {}) {
+export function abrirFormMovimento(mov = null, { duplicar = false, tipo: tipoInicial = "saida" } = {}) {
   const editar = !!mov && !duplicar
   const ultimo = lerLocal("orc_ultimos", {})
   const m = mov || {
-    tipo: "saida", data: paraPB(hojeISO()), pago: true,
+    tipo: tipoInicial, data: paraPB(hojeISO()), pago: true,
     ambito: state.ambito === "todos" ? "" : state.ambito,
     metodo_pagamento: ultimo.metodo || "", responsavel: ultimo.responsavel || "",
   }

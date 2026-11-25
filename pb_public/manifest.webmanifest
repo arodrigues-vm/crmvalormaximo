@@ -3,7 +3,7 @@
   "short_name": "Orçamento",
   "description": "Orçamento pessoal e profissional",
   "lang": "pt-PT",
-  "start_url": "/#painel",
+  "start_url": "/#inicio",
   "scope": "/",
   "display": "standalone",
   "background_color": "#f9f9f7",
