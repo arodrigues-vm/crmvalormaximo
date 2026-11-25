@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { ErroApi } from '../../api/cliente'
 import { Bloco } from '../../componentes/Bloco'
+import { BlocosConfiguraveis, Largo } from '../../componentes/BlocosConfiguraveis'
 import { Dado } from '../../componentes/campos'
 import { Dialogo } from '../../componentes/Dialogo'
 import { CabecalhoRegisto, HistoricoRegisto } from '../../componentes/Ficha'
@@ -11,6 +12,7 @@ import { dataPt, formatarEuros, formatarPercentagem, momentoPt } from '../../com
 import { ETIQUETA_PROPOSTA, NOMES_CAMPOS_PROPOSTA, propostasApi, type Ronda } from './api'
 import { CamposRonda } from './CamposRonda'
 import { RONDA_VAZIA, rondaParaApi } from './ronda'
+import { ECRA_PROPOSTA } from './disposicao'
 
 function sinal(r: Ronda) {
   if (r.sinal_valor === null) return null
@@ -98,6 +100,86 @@ export function PropostaConsulta() {
     setDialogo('ronda')
   }
 
+  const pr = p
+  function desenharCampo(c: string): ReactNode {
+    switch (c) {
+      case 'valor_atual':
+        return (
+          <Dado rotulo="Valor atual">
+            {pr.valor_atual && (
+              <>
+                <strong>{formatarEuros(pr.valor_atual)}</strong>{' '}
+                {pr.ultima_ronda_autor && (
+                  <small className="ajuda">(última oferta: {pr.ultima_ronda_autor.toLowerCase()})</small>
+                )}
+              </>
+            )}
+          </Dado>
+        )
+      case 'estado':
+        return <Dado rotulo="Estado">{pr.estado_nome}</Dado>
+      case 'imovel':
+        return (
+          <Dado rotulo="Imóvel">
+            {pr.imovel ? (
+              <Link to={`/imoveis/${pr.imovel}`}>{pr.imovel_descricao_completa}</Link>
+            ) : (
+              pr.imovel_descricao_completa
+            )}
+          </Dado>
+        )
+      case 'entidade':
+        return (
+          <Dado rotulo="Comprador">
+            {pr.entidade_nome ? (
+              <Link to={`/entidades/${pr.entidade}`}>{pr.entidade_nome}</Link>
+            ) : (
+              'Entidade a que não tem acesso'
+            )}
+          </Dado>
+        )
+      case 'agente_comprador':
+        return <Dado rotulo="Agente responsável pelo comprador">{pr.agente_comprador_nome}</Dado>
+      case 'agente_imovel':
+        return <Dado rotulo="Agente responsável pelo imóvel">{pr.agente_imovel_nome}</Dado>
+      case 'visita':
+        return (
+          <Dado rotulo="Visita de origem">
+            {pr.visita && <Link to={`/visitas/${pr.visita}`}>{pr.visita_referencia}</Link>}
+          </Dado>
+        )
+      case 'responsavel':
+        return <Dado rotulo="Responsável">{pr.responsavel_nome}</Dado>
+      case 'participantes':
+        return (
+          <Largo>
+            <ul className="lista-relacoes">
+              {pr.participantes_detalhe.map((x) => (
+                <li key={x.entidade}>
+                  {x.acessivel ? (
+                    <Link to={`/entidades/${x.entidade}`}>{x.nome}</Link>
+                  ) : (
+                    <span className="vazio">{x.nome}</span>
+                  )}
+                  <span className="relacao-tipo">
+                    {x.papel_nome ?? 'Papel não indicado'}
+                    {x.quota && ` · ${formatarPercentagem(x.quota)}`}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </Largo>
+        )
+      case 'observacoes':
+        return (
+          <Dado rotulo="Observações" largo>
+            {pr.observacoes && <span className="texto-livre">{pr.observacoes}</span>}
+          </Dado>
+        )
+    }
+    return null
+  }
+
   return (
     <div className="ficha">
       <CabecalhoRegisto
@@ -131,59 +213,12 @@ export function PropostaConsulta() {
         }
       />
 
-      <Bloco titulo="Proposta">
-        <dl className="grelha-dados">
-          <Dado rotulo="Valor atual">
-            {p.valor_atual && (
-              <>
-                <strong>{formatarEuros(p.valor_atual)}</strong>{' '}
-                {p.ultima_ronda_autor && (
-                  <small className="ajuda">(última oferta: {p.ultima_ronda_autor.toLowerCase()})</small>
-                )}
-              </>
-            )}
-          </Dado>
-          <Dado rotulo="Estado">{p.estado_nome}</Dado>
-          <Dado rotulo="Imóvel">
-            {p.imovel ? (
-              <Link to={`/imoveis/${p.imovel}`}>{p.imovel_descricao_completa}</Link>
-            ) : (
-              p.imovel_descricao_completa
-            )}
-          </Dado>
-          <Dado rotulo="Comprador">
-            {p.entidade_nome ? (
-              <Link to={`/entidades/${p.entidade}`}>{p.entidade_nome}</Link>
-            ) : (
-              'Entidade a que não tem acesso'
-            )}
-          </Dado>
-          <Dado rotulo="Agente responsável pelo comprador">{p.agente_comprador_nome}</Dado>
-          <Dado rotulo="Agente responsável pelo imóvel">{p.agente_imovel_nome}</Dado>
-          <Dado rotulo="Visita de origem">
-            {p.visita && <Link to={`/visitas/${p.visita}`}>{p.visita_referencia}</Link>}
-          </Dado>
-          <Dado rotulo="Responsável">{p.responsavel_nome}</Dado>
-        </dl>
-      </Bloco>
-
-      <Bloco titulo="Participantes">
-        <ul className="lista-relacoes">
-          {p.participantes_detalhe.map((x) => (
-            <li key={x.entidade}>
-              {x.acessivel ? (
-                <Link to={`/entidades/${x.entidade}`}>{x.nome}</Link>
-              ) : (
-                <span className="vazio">{x.nome}</span>
-              )}
-              <span className="relacao-tipo">
-                {x.papel_nome ?? 'Papel não indicado'}
-                {x.quota && ` · ${formatarPercentagem(x.quota)}`}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </Bloco>
+      <BlocosConfiguraveis
+        def={ECRA_PROPOSTA}
+        modo="ver"
+        campo={desenharCampo}
+        abertoInicial={(b) => (b.chave === 'observacoes' ? !!p.observacoes : true)}
+      />
 
       <Bloco titulo="Negociação" resumo={`${p.rondas.length}`}>
         <ol className="rondas">
@@ -222,10 +257,6 @@ export function PropostaConsulta() {
           ))}
         </ol>
         {!emNegociacao && <p className="ajuda">A proposta já não está em negociação: não se acrescentam rondas.</p>}
-      </Bloco>
-
-      <Bloco titulo="Observações" abertoInicial={!!p.observacoes}>
-        <p className="texto-livre">{p.observacoes || <span className="vazio">—</span>}</p>
       </Bloco>
 
       <Bloco titulo="Histórico" abertoInicial={false}>

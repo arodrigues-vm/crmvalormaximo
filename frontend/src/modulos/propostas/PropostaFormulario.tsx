@@ -1,9 +1,9 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useMemo, useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import { ErroApi } from '../../api/cliente'
-import { Bloco } from '../../componentes/Bloco'
+import { BlocosConfiguraveis, Largo } from '../../componentes/BlocosConfiguraveis'
 import { CampoAreaTexto, CampoSelecao, CampoTexto } from '../../componentes/campos'
 import { CabecalhoRegisto } from '../../componentes/Ficha'
 import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
@@ -14,6 +14,7 @@ import { procurarImoveis } from '../imoveis/api'
 import { propostasApi, type Previa, type Proposta } from './api'
 import { CamposRonda } from './CamposRonda'
 import { RONDA_VAZIA, rondaParaApi, type ValoresRonda } from './ronda'
+import { ECRA_PROPOSTA } from './disposicao'
 
 interface Parte {
   entidade: OpcaoPesquisa
@@ -188,6 +189,189 @@ function Formulario({ proposta, previa }: { proposta?: Proposta; previa?: Previa
     }
   }
 
+  function desenharCampo(c: string): ReactNode {
+    switch (c) {
+      case 'imovel_registado':
+        return daVisita ? null : (
+          <CampoSelecao
+            rotulo="O imóvel está registado no CRM?"
+            value={v.imovelRegistado ? 'sim' : 'nao'}
+            onChange={(e) => mudar('imovelRegistado', e.target.value === 'sim')}
+            opcoes={[
+              { valor: 'sim', nome: 'Sim' },
+              { valor: 'nao', nome: 'Não (imóvel de agente externo ou da rede)' },
+            ]}
+          />
+        )
+      case 'imovel':
+        return v.imovelRegistado ? (
+          <SeletorPesquisavel
+            rotulo="Imóvel"
+            chave="imoveis"
+            procurar={procurarImoveis}
+            valor={v.imovel}
+            aoMudar={(x) => !daVisita && mudar('imovel', x)}
+            erro={erro('imovel')?.join(' ')}
+            placeholder="Ex.: 10 T3 Maia"
+          />
+        ) : (
+          <CampoTexto
+            rotulo="Descrição do imóvel"
+            value={v.imovel_descricao}
+            disabled={daVisita}
+            onChange={(e) => mudar('imovel_descricao', e.target.value)}
+            erro={erro('imovel')}
+          />
+        )
+      case 'imovel_localizacao':
+        return v.imovelRegistado ? null : (
+          <CampoTexto
+            rotulo="Localização (breve)"
+            value={v.imovel_localizacao}
+            disabled={daVisita}
+            onChange={(e) => mudar('imovel_localizacao', e.target.value)}
+          />
+        )
+      case 'entidade':
+        return (
+          <SeletorPesquisavel
+            rotulo="Comprador"
+            chave="entidades"
+            procurar={entidadesApi.procurar}
+            valor={v.entidade}
+            aoMudar={(x) => !daVisita && mudar('entidade', x)}
+            erro={erro('entidade')?.join(' ')}
+          />
+        )
+      case 'agente_comprador':
+        return (
+          <SeletorPesquisavel
+            rotulo="Agente responsável pelo comprador"
+            chave="agentes"
+            procurar={agentesApi.procurar}
+            valor={v.agente_comprador}
+            aoMudar={(x) => mudar('agente_comprador', x)}
+            erro={erro('agente_comprador')?.join(' ')}
+          />
+        )
+      case 'agente_imovel':
+        return (
+          <SeletorPesquisavel
+            rotulo="Agente responsável pelo imóvel"
+            chave="agentes"
+            procurar={agentesApi.procurar}
+            valor={v.agente_imovel}
+            aoMudar={(x) => mudar('agente_imovel', x)}
+            erro={erro('agente_imovel')?.join(' ')}
+          />
+        )
+      case 'estado':
+        return (
+          <CampoSelecao
+            rotulo="Estado"
+            vazio={proposta ? undefined : 'Por omissão: Em negociação'}
+            value={v.estado}
+            onChange={(e) => mudar('estado', e.target.value)}
+            opcoes={lista(o?.estados)}
+            erro={erro('estado')}
+          />
+        )
+      case 'participantes':
+        return (
+          <Largo>
+            <p className="ajuda">
+              Compradores, proprietários e representantes desta negociação, com os papéis e as quotas confirmados. Ficam
+              guardados na proposta: alterações posteriores aos proprietários do imóvel não os mudam.
+            </p>
+            <ul className="lista-proprietarios">
+              {v.participantes.map((p, i) => (
+                <li key={p.entidade.id}>
+                  <span className="proprietario-nome">
+                    <strong>{p.entidade.titulo}</strong>
+                  </span>
+                  <select
+                    aria-label={`Papel de ${p.entidade.titulo}`}
+                    value={p.papel}
+                    onChange={(e) =>
+                      mudar(
+                        'participantes',
+                        v.participantes.map((x, j) => (j === i ? { ...x, papel: e.target.value } : x)),
+                      )
+                    }
+                  >
+                    <option value="">Papel…</option>
+                    {o?.papeis.map((x) => (
+                      <option key={x.id} value={x.id}>
+                        {x.nome}
+                      </option>
+                    ))}
+                  </select>
+                  <label className="quota">
+                    Quota (%)
+                    <input
+                      inputMode="decimal"
+                      value={p.quota}
+                      onChange={(e) =>
+                        mudar(
+                          'participantes',
+                          v.participantes.map((x, j) => (j === i ? { ...x, quota: e.target.value } : x)),
+                        )
+                      }
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    className="botao-icone"
+                    aria-label={`Remover ${p.entidade.titulo}`}
+                    onClick={() =>
+                      mudar(
+                        'participantes',
+                        v.participantes.filter((_, j) => j !== i),
+                      )
+                    }
+                  >
+                    ✕
+                  </button>
+                </li>
+              ))}
+            </ul>
+            {erro('participantes') && <p className="campo-erro">{erro('participantes')!.join(' ')}</p>}
+            <div className="novo-proprietario">
+              <SeletorPesquisavel
+                rotulo="Acrescentar participante"
+                chave="entidades"
+                procurar={entidadesApi.procurar}
+                valor={novaParte}
+                aoMudar={(x) => {
+                  if (x) {
+                    mudar('participantes', [...v.participantes, { entidade: x, papel: '', quota: '' }])
+                    setNovaParte(null)
+                  }
+                }}
+                excluir={v.participantes.map((p) => p.entidade.id)}
+              />
+            </div>
+          </Largo>
+        )
+      case 'ronda_inicial':
+        return proposta ? null : (
+          <Largo>
+            {Array.isArray(erros.ronda_inicial) && <p className="campo-erro">{erros.ronda_inicial.join(' ')}</p>}
+            <CamposRonda v={v.ronda} aoMudar={(r) => mudar('ronda', r)} opcoes={o} erros={errosRonda} />
+          </Largo>
+        )
+      case 'observacoes':
+        return (
+          <CampoAreaTexto
+            rotulo="Observações"
+            value={v.observacoes}
+            onChange={(e) => mudar('observacoes', e.target.value)}
+          />
+        )
+    }
+    return null
+  }
+
   return (
     <form className="ficha ficha-edicao" onSubmit={submeter} noValidate>
       <CabecalhoRegisto
@@ -214,176 +398,14 @@ function Formulario({ proposta, previa }: { proposta?: Proposta; previa?: Previa
         </p>
       )}
 
-      <Bloco
-        titulo="Proposta"
-        forcarAberto={['imovel', 'entidade', 'agente_comprador', 'agente_imovel', 'estado', 'visita'].some(
-          (c) => erros[c],
-        )}
-      >
-        {erro('visita') && <p className="campo-erro">{erro('visita')!.join(' ')}</p>}
-        <div className="grelha-campos">
-          {!daVisita && (
-            <CampoSelecao
-              rotulo="O imóvel está registado no CRM?"
-              value={v.imovelRegistado ? 'sim' : 'nao'}
-              onChange={(e) => mudar('imovelRegistado', e.target.value === 'sim')}
-              opcoes={[
-                { valor: 'sim', nome: 'Sim' },
-                { valor: 'nao', nome: 'Não (imóvel de agente externo ou da rede)' },
-              ]}
-            />
-          )}
-          {v.imovelRegistado ? (
-            <SeletorPesquisavel
-              rotulo="Imóvel"
-              chave="imoveis"
-              procurar={procurarImoveis}
-              valor={v.imovel}
-              aoMudar={(x) => !daVisita && mudar('imovel', x)}
-              erro={erro('imovel')?.join(' ')}
-              placeholder="Ex.: 10 T3 Maia"
-            />
-          ) : (
-            <>
-              <CampoTexto
-                rotulo="Descrição do imóvel"
-                value={v.imovel_descricao}
-                disabled={daVisita}
-                onChange={(e) => mudar('imovel_descricao', e.target.value)}
-                erro={erro('imovel')}
-              />
-              <CampoTexto
-                rotulo="Localização (breve)"
-                value={v.imovel_localizacao}
-                disabled={daVisita}
-                onChange={(e) => mudar('imovel_localizacao', e.target.value)}
-              />
-            </>
-          )}
-          <SeletorPesquisavel
-            rotulo="Comprador"
-            chave="entidades"
-            procurar={entidadesApi.procurar}
-            valor={v.entidade}
-            aoMudar={(x) => !daVisita && mudar('entidade', x)}
-            erro={erro('entidade')?.join(' ')}
-          />
-          <SeletorPesquisavel
-            rotulo="Agente responsável pelo comprador"
-            chave="agentes"
-            procurar={agentesApi.procurar}
-            valor={v.agente_comprador}
-            aoMudar={(x) => mudar('agente_comprador', x)}
-            erro={erro('agente_comprador')?.join(' ')}
-          />
-          <SeletorPesquisavel
-            rotulo="Agente responsável pelo imóvel"
-            chave="agentes"
-            procurar={agentesApi.procurar}
-            valor={v.agente_imovel}
-            aoMudar={(x) => mudar('agente_imovel', x)}
-            erro={erro('agente_imovel')?.join(' ')}
-          />
-          <CampoSelecao
-            rotulo="Estado"
-            vazio={proposta ? undefined : 'Por omissão: Em negociação'}
-            value={v.estado}
-            onChange={(e) => mudar('estado', e.target.value)}
-            opcoes={lista(o?.estados)}
-            erro={erro('estado')}
-          />
-        </div>
-      </Bloco>
-
-      <Bloco titulo="Participantes" forcarAberto={!!erros.participantes}>
-        <p className="ajuda">
-          Compradores, proprietários e representantes desta negociação, com os papéis e as quotas confirmados. Ficam
-          guardados na proposta: alterações posteriores aos proprietários do imóvel não os mudam.
-        </p>
-        <ul className="lista-proprietarios">
-          {v.participantes.map((p, i) => (
-            <li key={p.entidade.id}>
-              <span className="proprietario-nome">
-                <strong>{p.entidade.titulo}</strong>
-              </span>
-              <select
-                aria-label={`Papel de ${p.entidade.titulo}`}
-                value={p.papel}
-                onChange={(e) =>
-                  mudar(
-                    'participantes',
-                    v.participantes.map((x, j) => (j === i ? { ...x, papel: e.target.value } : x)),
-                  )
-                }
-              >
-                <option value="">Papel…</option>
-                {o?.papeis.map((x) => (
-                  <option key={x.id} value={x.id}>
-                    {x.nome}
-                  </option>
-                ))}
-              </select>
-              <label className="quota">
-                Quota (%)
-                <input
-                  inputMode="decimal"
-                  value={p.quota}
-                  onChange={(e) =>
-                    mudar(
-                      'participantes',
-                      v.participantes.map((x, j) => (j === i ? { ...x, quota: e.target.value } : x)),
-                    )
-                  }
-                />
-              </label>
-              <button
-                type="button"
-                className="botao-icone"
-                aria-label={`Remover ${p.entidade.titulo}`}
-                onClick={() =>
-                  mudar(
-                    'participantes',
-                    v.participantes.filter((_, j) => j !== i),
-                  )
-                }
-              >
-                ✕
-              </button>
-            </li>
-          ))}
-        </ul>
-        {erro('participantes') && <p className="campo-erro">{erro('participantes')!.join(' ')}</p>}
-        <div className="novo-proprietario">
-          <SeletorPesquisavel
-            rotulo="Acrescentar participante"
-            chave="entidades"
-            procurar={entidadesApi.procurar}
-            valor={novaParte}
-            aoMudar={(x) => {
-              if (x) {
-                mudar('participantes', [...v.participantes, { entidade: x, papel: '', quota: '' }])
-                setNovaParte(null)
-              }
-            }}
-            excluir={v.participantes.map((p) => p.entidade.id)}
-          />
-        </div>
-      </Bloco>
-
-      {!proposta && (
-        <Bloco titulo="Valor e condições" forcarAberto={!!erros.ronda_inicial}>
-          {Array.isArray(erros.ronda_inicial) && <p className="campo-erro">{erros.ronda_inicial.join(' ')}</p>}
-          <CamposRonda v={v.ronda} aoMudar={(r) => mudar('ronda', r)} opcoes={o} erros={errosRonda} />
-        </Bloco>
-      )}
-
-      <Bloco titulo="Observações" abertoInicial={!!v.observacoes}>
-        <CampoAreaTexto
-          rotulo="Observações"
-          value={v.observacoes}
-          onChange={(e) => mudar('observacoes', e.target.value)}
-        />
-      </Bloco>
+      {erro('visita') && <p className="campo-erro">{erro('visita')!.join(' ')}</p>}
+      <BlocosConfiguraveis
+        def={ECRA_PROPOSTA}
+        modo="editar"
+        campo={desenharCampo}
+        erros={erros}
+        abertoInicial={(b) => (b.chave === 'observacoes' ? !!v.observacoes : true)}
+      />
 
       <div className="barra-gravar">
         <button
