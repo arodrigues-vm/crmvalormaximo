@@ -4,6 +4,7 @@ import type { DefinicaoEcra } from '../../componentes/disposicao'
 export const ECRA_MEMBRO: DefinicaoEcra = {
   modulo: 'equipa',
   nome: 'Equipa (membros)',
+  semPersonalizados: true,
   padrao: [
     {
       chave: 'profissionais',

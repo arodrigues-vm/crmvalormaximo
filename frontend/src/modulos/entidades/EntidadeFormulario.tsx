@@ -10,6 +10,7 @@ import { CampoAreaTexto, CampoCaixa, CampoMultiplo, CampoSelecao, CampoTexto } f
 import { Dialogo } from '../../componentes/Dialogo'
 import { SeletorLocalizacao } from '../../componentes/SeletorLocalizacao'
 import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
+import { comoRegistoCp, usePersonalizados } from '../../componentes/personalizados'
 import { useGuardaSaida } from '../../componentes/useGuardaSaida'
 import { procurarImoveis } from '../imoveis/api'
 import { entidadesApi, MOTIVOS, type Candidato, type Entidade, type RegistoLigado } from './api'
@@ -194,7 +195,8 @@ function Formulario({ entidade }: { entidade?: Entidade }) {
   const opcoes = useQuery({ queryKey: ['entidades', 'opcoes'], queryFn: entidadesApi.opcoes, staleTime: 60_000 })
 
   const alterado = JSON.stringify(v) !== JSON.stringify(inicial)
-  const guarda = useGuardaSaida(alterado)
+  const cp = usePersonalizados(ECRA_ENTIDADE, comoRegistoCp(entidade))
+  const guarda = useGuardaSaida(alterado || cp.alterado)
 
   const [sugestoes, setSugestoes] = useState<Candidato[]>([])
   // Verificação prévia de possíveis duplicados (só em criação), enquanto se preenche.
@@ -227,8 +229,12 @@ function Formulario({ entidade }: { entidade?: Entidade }) {
     try {
       const corpo = { ...paraApi(v), confirmar_duplicado: confirmarDuplicado }
       const r = entidade
-        ? await entidadesApi.atualizar(entidade.id, { ...corpo, versao: entidade.versao })
-        : await entidadesApi.criar(corpo)
+        ? await entidadesApi.atualizar(entidade.id, {
+            ...corpo,
+            campos_personalizados: cp.paraApi(),
+            versao: entidade.versao,
+          })
+        : await entidadesApi.criar({ ...corpo, campos_personalizados: cp.paraApi() })
       guarda.libertar()
       setDuplicados(null)
       qc.invalidateQueries({ queryKey: ['entidades'] })
@@ -581,6 +587,7 @@ function Formulario({ entidade }: { entidade?: Entidade }) {
       <BlocosConfiguraveis
         def={ECRA_ENTIDADE}
         modo="editar"
+        personalizados={cp}
         campo={desenharCampo}
         erros={erros}
         depoisDoPrimeiro={avisoDuplicados}

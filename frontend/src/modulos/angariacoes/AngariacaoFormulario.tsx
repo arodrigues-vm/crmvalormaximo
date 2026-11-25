@@ -14,6 +14,7 @@ import {
 import { EditarCampoQ } from '../../componentes/Qualificacao'
 import { CabecalhoRegisto } from '../../componentes/Ficha'
 import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
+import { comoRegistoCp, usePersonalizados } from '../../componentes/personalizados'
 import { useGuardaSaida } from '../../componentes/useGuardaSaida'
 import { entidadesApi } from '../entidades/api'
 import { imoveisApi, procurarImoveis } from '../imoveis/api'
@@ -210,7 +211,8 @@ function Formulario({ cmi, imovelInicial = null }: { cmi?: Angariacao; imovelIni
   const [aGravar, setAGravar] = useState(false)
   const [novaParte, setNovaParte] = useState<OpcaoPesquisa | null>(null)
   const opcoes = useQuery({ queryKey: ['angariacoes', 'opcoes'], queryFn: cmiApi.opcoes, staleTime: 60_000 })
-  const guarda = useGuardaSaida(JSON.stringify(v) !== JSON.stringify(inicial))
+  const cp = usePersonalizados(ECRA_ANGARIACAO, comoRegistoCp(cmi))
+  const guarda = useGuardaSaida(JSON.stringify(v) !== JSON.stringify(inicial) || cp.alterado)
   const o = opcoes.data
   const assinado = !!cmi?.assinado
 
@@ -237,7 +239,9 @@ function Formulario({ cmi, imovelInicial = null }: { cmi?: Angariacao; imovelIni
     setErroGeral(null)
     try {
       const corpo = paraApi(v, assinado)
-      const r = cmi ? await cmiApi.atualizar(cmi.id, { ...corpo, versao: cmi.versao }) : await cmiApi.criar(corpo)
+      const r = cmi
+        ? await cmiApi.atualizar(cmi.id, { ...corpo, campos_personalizados: cp.paraApi(), versao: cmi.versao })
+        : await cmiApi.criar({ ...corpo, campos_personalizados: cp.paraApi() })
       guarda.libertar()
       qc.invalidateQueries({ queryKey: ['angariacoes'] })
       qc.invalidateQueries({ queryKey: ['imoveis'] })
@@ -596,6 +600,7 @@ function Formulario({ cmi, imovelInicial = null }: { cmi?: Angariacao; imovelIni
       <BlocosConfiguraveis
         def={ECRA_ANGARIACAO}
         modo="editar"
+        personalizados={cp}
         campo={desenharCampo}
         erros={erros}
         abertoInicial={(b) =>

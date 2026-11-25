@@ -16,6 +16,7 @@ import { EditarCampoQ } from '../../componentes/Qualificacao'
 import { BlocosConfiguraveis, Largo } from '../../componentes/BlocosConfiguraveis'
 import { SeletorLocalizacao } from '../../componentes/SeletorLocalizacao'
 import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
+import { comoRegistoCp, usePersonalizados } from '../../componentes/personalizados'
 import { useGuardaSaida } from '../../componentes/useGuardaSaida'
 import { entidadesApi } from '../entidades/api'
 import { CAMPOS_IMOVEL, etiquetaStatus, imoveisApi, tituloImovel, type Imovel } from './api'
@@ -116,7 +117,8 @@ function Formulario({ imovel }: { imovel?: Imovel }) {
   const [aGravar, setAGravar] = useState(false)
   const [novoProprietario, setNovoProprietario] = useState<OpcaoPesquisa | null>(null)
   const opcoes = useQuery({ queryKey: ['imoveis', 'opcoes'], queryFn: imoveisApi.opcoes, staleTime: 60_000 })
-  const guarda = useGuardaSaida(JSON.stringify(v) !== JSON.stringify(inicial))
+  const cp = usePersonalizados(ECRA_IMOVEL, comoRegistoCp(imovel))
+  const guarda = useGuardaSaida(JSON.stringify(v) !== JSON.stringify(inicial) || cp.alterado)
   const o = opcoes.data
 
   const mudar = <K extends keyof Valores>(campo: K, valor: Valores[K]) => setV((a) => ({ ...a, [campo]: valor }))
@@ -145,8 +147,12 @@ function Formulario({ imovel }: { imovel?: Imovel }) {
     try {
       const corpo = paraApi(v)
       const r = imovel
-        ? await imoveisApi.atualizar(imovel.id, { ...corpo, versao: imovel.versao })
-        : await imoveisApi.criar(corpo)
+        ? await imoveisApi.atualizar(imovel.id, {
+            ...corpo,
+            campos_personalizados: cp.paraApi(),
+            versao: imovel.versao,
+          })
+        : await imoveisApi.criar({ ...corpo, campos_personalizados: cp.paraApi() })
       guarda.libertar()
       qc.invalidateQueries({ queryKey: ['imoveis'] })
       qc.invalidateQueries({ queryKey: ['entidades'] })
@@ -341,6 +347,7 @@ function Formulario({ imovel }: { imovel?: Imovel }) {
       <BlocosConfiguraveis
         def={ECRA_IMOVEL}
         modo="editar"
+        personalizados={cp}
         campo={desenharCampo}
         erros={erros}
         abertoInicial={(b) => !imovel || !IMOVEL_SECUNDARIOS.has(b.chave) || b.campos.some((c) => v.extra[c])}

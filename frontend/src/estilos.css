@@ -1690,3 +1690,13 @@ a.utilizador-nome:hover {
 .disposicao-campos select {
   max-width: 45%;
 }
+input.disposicao-campo-nome {
+  font: inherit;
+  padding: 6px 10px;
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  background: #fff;
+}
+input.disposicao-campo-nome:not(:placeholder-shown) {
+  border-color: var(--dourado, #b8912f);
+}

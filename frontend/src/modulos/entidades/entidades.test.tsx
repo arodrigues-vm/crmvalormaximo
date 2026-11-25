@@ -254,6 +254,54 @@ describe('Entidades', () => {
     expect(screen.getByRole('heading', { name: /Contactos/ })).toBeInTheDocument()
   })
 
+  it('campos acrescentados e nomes alterados pelo Administrador (D-44)', async () => {
+    const campo = {
+      id: 1,
+      ecra: 'entidades',
+      chave: 'cp_clube',
+      nome: 'Clube',
+      tipo: 'lista',
+      tipo_nome: 'Lista suspensa (uma opção)',
+      obrigatorio: false,
+      ajuda: '',
+      ativo: true,
+      lista: 'entidades-cp_clube',
+      opcoes: [
+        { id: 70, nome: 'Clube Ensaio', ativo: true },
+        { id: 71, nome: 'Outro Clube', ativo: true },
+      ],
+      modulo_relacao: '',
+    }
+    const pedidos = simularApi({
+      ...base,
+      'GET /api/entidades/7/': () =>
+        json({
+          ...ENTIDADE,
+          campos_personalizados: { cp_clube: 70 },
+          campos_personalizados_nomes: { cp_clube: [{ id: 70, titulo: 'Clube Ensaio', acessivel: true }] },
+        }),
+      'PATCH /api/entidades/7/': () => json({ ...ENTIDADE, versao: ENTIDADE.versao + 1 }),
+      'GET /api/campos-personalizados/': () => json({ campos: [campo], tipos: [], modulos: [] }),
+      'GET /api/disposicoes/entidades/': () =>
+        json({ modulo: 'entidades', blocos: null, rotulos: { email: 'Correio' } }),
+    })
+    desenhar('/entidades/7')
+    expect(await screen.findByText('Clube Ensaio')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /Campos adicionais/ })).toBeInTheDocument()
+    expect(await screen.findByText('Correio')).toBeInTheDocument()
+    desenhar('/entidades/7/editar')
+    const clube = await screen.findByLabelText('Clube')
+    expect(await screen.findByLabelText('Correio')).toBeInTheDocument()
+    fireEvent.change(clube, { target: { value: '71' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar' }))
+    await waitFor(() => expect(pedidos.some((p) => p.metodo === 'PATCH')).toBe(true))
+    expect((pedidos.find((p) => p.metodo === 'PATCH')!.corpo as Record<string, unknown>).campos_personalizados).toEqual(
+      {
+        cp_clube: 71,
+      },
+    )
+  })
+
   it('relações: mostra sem revelar entidades sem acesso e adiciona no sentido inverso', async () => {
     const pedidos = simularApi({
       ...base,

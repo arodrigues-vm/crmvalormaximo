@@ -55,6 +55,11 @@ def _modelo_tem_campo(modelo, nome):
 
 def titulo_registo(obj) -> str:
     texto = str(obj)
+    # Imóveis: a referência sozinha diz pouco; junta-se o tipo, a tipologia e a localidade.
+    if hasattr(obj, "tipologia_id") and hasattr(obj, "localidade"):
+        partes = [getattr(obj.tipo, "nome", None), getattr(obj.tipologia, "nome", None), obj.localidade]
+        detalhe = " ".join(p for p in partes[:2] if p)
+        texto = " · ".join(p for p in [detalhe, obj.localidade] if p) or texto
     ref = getattr(obj, "referencia", None)
     return texto if not ref or texto == ref else f"{ref} · {texto}"
 

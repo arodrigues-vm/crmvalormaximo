@@ -85,3 +85,49 @@ As secções que mostram registos ligados (por exemplo *Angariações*, *Visitas
 são campos: aparecem sempre no fim da ficha.
 
 ![Disposição dos ecrãs](imagens/47-disposicao-ecras.png)
+
+### Mudar o nome de um campo
+
+1. Em **Configurações → Disposição dos ecrãs**, escolha o módulo.
+2. Cada campo tem uma caixa com o nome de origem em cinzento. Escreva lá o nome que prefere
+   (por exemplo, *Correio eletrónico* em vez de *Email*).
+3. Carregue em **Guardar**. O novo nome aparece na edição e na ficha de consulta, para todos.
+
+Para voltar ao nome de origem, apague o texto da caixa e guarde. Mudar o nome **não mexe nos dados**: só muda o
+que se lê no ecrã. Nos campos compostos (por exemplo, *Proprietários* ou *Partes*), o nome novo aparece como
+título por cima da lista.
+
+## A.4 Acrescentar campos
+
+O Administrador pode acrescentar campos novos a qualquer módulo, sem mexer no programa.
+
+1. Em **Configurações → Disposição dos ecrãs**, escolha o módulo.
+2. Se tiver alterações por guardar, carregue primeiro em **Guardar**.
+3. Carregue em **Acrescentar campo**.
+4. Escreva o **Nome do campo** (por exemplo, *Clube de futebol*).
+5. Escolha o **Tipo de campo**:
+   - *Texto*, *Texto longo*, *Número inteiro*, *Número decimal*, *Valor em euros*, *Data*, *Email*,
+     *Link (endereço de site)*, *Telefone*, *Sim / Não*;
+   - *Lista suspensa (uma opção)* ou *(várias opções)*: as opções acrescentam-se depois em
+     **Listas de valores**, numa lista com o mesmo nome do campo;
+   - *Ligação a um registo de outro módulo* (ou *a vários registos*): escolha em **Liga a registos de** o
+     módulo (por exemplo, *Imóveis*). Na ficha aparece a ligação para abrir esse registo. Cada pessoa só vê e
+     só pode escolher os registos a que tem acesso.
+6. Escolha o **Separador** onde o campo fica. Depois pode mudá-lo de sítio como os outros campos.
+7. Diga se o **preenchimento é obrigatório** e, se quiser, escreva um **texto de ajuda**.
+8. Carregue em **Criar campo**.
+
+![Campos acrescentados](imagens/48-campos-acrescentados.png)
+
+Para alterar um campo acrescentado, carregue em **Editar campo** ao lado dele. Pode mudar o nome, o
+preenchimento obrigatório e a ajuda. O **tipo não muda** depois de criado, para não estragar os valores já
+gravados. Se precisar de outro tipo, crie um campo novo.
+
+**Desativar e remover (para nunca perder dados):**
+
+- **Desativar** esconde o campo de todos os ecrãs, mas os valores já gravados ficam guardados. Os campos
+  desativados aparecem em *Campos desativados*, onde pode **Reativar** um campo, e os valores voltam a aparecer.
+- **Remover** só é possível enquanto nenhum registo tiver um valor nesse campo.
+
+As alterações aos campos ficam registadas na auditoria. Os valores dos campos ficam no histórico de cada
+registo, como os outros campos.

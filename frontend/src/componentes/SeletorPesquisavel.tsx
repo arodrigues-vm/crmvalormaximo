@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
 
+import { useRotulo } from './rotulo'
+
 export interface OpcaoPesquisa {
   id: number
   titulo: string
@@ -33,6 +35,7 @@ export function SeletorPesquisavel({
   erro,
   placeholder,
 }: Props) {
+  rotulo = useRotulo(rotulo)
   const id = useId()
   const [termo, setTermo] = useState('')
   const [atrasado, setAtrasado] = useState('')

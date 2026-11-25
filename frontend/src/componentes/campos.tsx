@@ -8,6 +8,8 @@ import {
   type SelectHTMLAttributes,
 } from 'react'
 
+import { useRotulo } from './rotulo'
+
 interface Base {
   rotulo: string
   erro?: string[] | string
@@ -31,6 +33,7 @@ function Mensagens({ id, erro, ajuda }: { id: string; erro?: string[] | string; 
 
 export function CampoTexto({ rotulo, erro, ajuda, largo, ...props }: Base & InputHTMLAttributes<HTMLInputElement>) {
   const id = useId()
+  rotulo = useRotulo(rotulo)
   return (
     <div className={`campo ${largo ? 'largo' : ''} ${erro ? 'com-erro' : ''}`}>
       <label htmlFor={id}>
@@ -50,6 +53,7 @@ export function CampoAreaTexto({
   ...props
 }: Base & React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
   const id = useId()
+  rotulo = useRotulo(rotulo)
   return (
     <div className={`campo largo ${erro ? 'com-erro' : ''}`}>
       <label htmlFor={id}>{rotulo}</label>
@@ -70,6 +74,7 @@ export function CampoSelecao({
 }: Base &
   SelectHTMLAttributes<HTMLSelectElement> & { opcoes: { valor: string | number; nome: string }[]; vazio?: string }) {
   const id = useId()
+  rotulo = useRotulo(rotulo)
   return (
     <div className={`campo ${largo ? 'largo' : ''} ${erro ? 'com-erro' : ''}`}>
       <label htmlFor={id}>
@@ -95,6 +100,7 @@ export function CampoCaixa({
   ...props
 }: { rotulo: string; ajuda?: ReactNode } & InputHTMLAttributes<HTMLInputElement>) {
   const id = useId()
+  rotulo = useRotulo(rotulo)
   return (
     <div className="campo campo-caixa">
       <input id={id} type="checkbox" {...props} />
@@ -117,6 +123,7 @@ export function CampoMultiplo({
   ajuda,
 }: Base & { opcoes: { id: number; nome: string }[]; valores: number[]; aoMudar: (v: number[]) => void }) {
   const id = useId()
+  rotulo = useRotulo(rotulo)
   const [aberto, setAberto] = useState(false)
   const caixa = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -177,6 +184,7 @@ export function CampoMultiplo({
 
 /** Par rótulo/valor para fichas de consulta. Valores vazios mostram «—». */
 export function Dado({ rotulo, children, largo }: { rotulo: string; children?: ReactNode; largo?: boolean }) {
+  rotulo = useRotulo(rotulo)
   const vazio = children === null || children === undefined || children === '' || children === false
   return (
     <div className={`dado ${largo ? 'largo' : ''}`}>

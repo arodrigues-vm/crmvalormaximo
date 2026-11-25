@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
 
 import { pedido } from '../api/cliente'
+import { useRotulo } from './rotulo'
 
 export interface TelefoneEditavel {
   id?: number
@@ -61,9 +62,10 @@ export function CampoTelefones({ valores, aoMudar, tipos, erros }: Props) {
     )
   }
 
+  const legenda = useRotulo('Telefones')
   return (
     <fieldset className="campo largo telefones">
-      <legend>Telefones</legend>
+      <legend>{legenda}</legend>
       {valores.length === 0 && <p className="ajuda">Sem telefones.</p>}
       {valores.map((t, i) => (
         <div key={t.id ?? `novo-${i}`} className="telefone-linha">

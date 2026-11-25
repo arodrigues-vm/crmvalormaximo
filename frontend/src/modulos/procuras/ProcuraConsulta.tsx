@@ -11,7 +11,8 @@ import { formatarEuros, momentoPt } from '../../componentes/formatar'
 import type { Registo } from '../../componentes/camposQualificacao'
 import { Interacoes } from '../../componentes/Interacoes'
 import { VerCampoQ } from '../../componentes/Qualificacao'
-import { BlocosConfiguraveis } from '../../componentes/BlocosConfiguraveis'
+import { comoRegistoCp } from '../../componentes/personalizados'
+import { BlocosConfiguraveis, SemRotulo } from '../../componentes/BlocosConfiguraveis'
 import { ETIQUETA_CATEGORIA } from '../oportunidades/api'
 import {
   NOMES_CAMPOS_PROCURA,
@@ -93,7 +94,9 @@ export function ProcuraConsulta() {
         return (
           <>
             <Dado rotulo="Tolerância">{`${Number(pr.tolerancia_pct)} %`}</Dado>
-            <Dado rotulo="Preço máximo aceite">{formatarEuros(pr.teto)}</Dado>
+            <SemRotulo>
+              <Dado rotulo="Preço máximo aceite">{formatarEuros(pr.teto)}</Dado>
+            </SemRotulo>
           </>
         )
       case 'crit_tipos':
@@ -159,6 +162,7 @@ export function ProcuraConsulta() {
       <BlocosConfiguraveis
         def={ECRA_PROCURA}
         modo="ver"
+        registo={comoRegistoCp(p)}
         campo={desenharCampo}
         abertoInicial={(b) => (b.chave === 'observacoes' ? !!p.observacoes : true)}
       />

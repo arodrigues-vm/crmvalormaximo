@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { ErroApi } from '../../api/cliente'
 import { Bloco } from '../../componentes/Bloco'
+import { comoRegistoCp } from '../../componentes/personalizados'
 import { BlocosConfiguraveis, Largo } from '../../componentes/BlocosConfiguraveis'
 import { Dado } from '../../componentes/campos'
 import { Dialogo } from '../../componentes/Dialogo'
@@ -216,6 +217,7 @@ export function PropostaConsulta() {
       <BlocosConfiguraveis
         def={ECRA_PROPOSTA}
         modo="ver"
+        registo={comoRegistoCp(p)}
         campo={desenharCampo}
         abertoInicial={(b) => (b.chave === 'observacoes' ? !!p.observacoes : true)}
       />

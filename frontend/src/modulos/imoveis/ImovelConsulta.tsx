@@ -10,6 +10,7 @@ import { CabecalhoRegisto, HistoricoRegisto } from '../../componentes/Ficha'
 import { formatarPercentagem, momentoPt } from '../../componentes/formatar'
 import type { Registo } from '../../componentes/camposQualificacao'
 import { VerCampoQ } from '../../componentes/Qualificacao'
+import { comoRegistoCp } from '../../componentes/personalizados'
 import { BlocosConfiguraveis, Largo } from '../../componentes/BlocosConfiguraveis'
 import { LigacoesExternas } from '../../componentes/LigacoesExternas'
 import { pedido } from '../../api/cliente'
@@ -163,6 +164,7 @@ export function ImovelConsulta() {
       <BlocosConfiguraveis
         def={ECRA_IMOVEL}
         modo="ver"
+        registo={comoRegistoCp(i)}
         campo={desenharCampo}
         aoLadoDoPrimeiro={<FotografiaImovel imovel={i} />}
         abertoInicial={(b) => !IMOVEL_SECUNDARIOS.has(b.chave) || b.campos.some((c) => preenchido(registo[c]))}

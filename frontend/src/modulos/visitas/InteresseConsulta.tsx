@@ -5,6 +5,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ErroApi } from '../../api/cliente'
 import { Bloco } from '../../componentes/Bloco'
 import { Dado } from '../../componentes/campos'
+import { comoRegistoCp } from '../../componentes/personalizados'
 import { BlocosConfiguraveis } from '../../componentes/BlocosConfiguraveis'
 import { Dialogo } from '../../componentes/Dialogo'
 import { CabecalhoRegisto, HistoricoRegisto } from '../../componentes/Ficha'
@@ -112,7 +113,7 @@ export function InteresseConsulta() {
         }
       />
 
-      <BlocosConfiguraveis def={ECRA_INTERESSE} modo="ver" campo={desenharCampo} />
+      <BlocosConfiguraveis def={ECRA_INTERESSE} modo="ver" registo={comoRegistoCp(x)} campo={desenharCampo} />
 
       <Bloco titulo="Visitas" resumo={visitas.data ? String(visitas.data.count) : undefined}>
         {visitas.data?.count === 0 && <p className="ajuda">Ainda sem visitas a este imóvel.</p>}

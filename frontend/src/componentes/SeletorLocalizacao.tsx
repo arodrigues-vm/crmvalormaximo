@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 
 import { pedido } from '../api/cliente'
+import { RotuloCtx, useRotulo } from './rotulo'
 
 interface Item {
   id: number
@@ -22,7 +23,17 @@ interface Props {
 }
 
 /** Distrito/Região Autónoma → Concelho → Freguesia (CAOP), com seletores dependentes. */
-export function SeletorLocalizacao({ freguesia, atual, aoMudar }: Props) {
+export function SeletorLocalizacao(props: Props) {
+  // O nome alterado (D-44) aplica-se ao título; os seletores Distrito/Concelho/Freguesia mantêm os seus.
+  const titulo = useRotulo('Localização administrativa')
+  return (
+    <RotuloCtx.Provider value={null}>
+      <Seletor {...props} titulo={titulo} />
+    </RotuloCtx.Provider>
+  )
+}
+
+function Seletor({ freguesia, atual, aoMudar, titulo }: Props & { titulo: string }) {
   const [distrito, setDistrito] = useState<number | ''>('')
   const [concelho, setConcelho] = useState<number | ''>('')
   const [aAlterar, setAAlterar] = useState(!freguesia)
@@ -60,7 +71,7 @@ export function SeletorLocalizacao({ freguesia, atual, aoMudar }: Props) {
   if (freguesia && atual && !aAlterar) {
     return (
       <div className="campo largo">
-        <span className="rotulo-falso">Localização administrativa</span>
+        <span className="rotulo-falso">{titulo}</span>
         <div className="localizacao-atual">
           <span>
             {atual.freguesia}, {atual.concelho}, {atual.distrito}

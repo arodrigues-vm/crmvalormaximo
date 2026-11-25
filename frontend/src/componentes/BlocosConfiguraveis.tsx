@@ -1,7 +1,10 @@
 import { Fragment, type ReactNode } from 'react'
 
 import { Bloco } from './Bloco'
+import { EditarCampoPersonalizado, VerCampoPersonalizado } from './CampoPersonalizado'
 import { useDisposicao, type BlocoDisposicao, type DefinicaoEcra } from './disposicao'
+import type { EstadoPersonalizados, RegistoCp } from './personalizados'
+import { RotuloCtx, useRotulo } from './rotulo'
 
 interface Props {
   def: DefinicaoEcra
@@ -17,6 +20,10 @@ interface Props {
   depoisDoPrimeiro?: ReactNode
   /** Resumo mostrado no título quando o separador está recolhido. */
   resumo?: (b: BlocoDisposicao) => ReactNode
+  /** Campos acrescentados pelo Administrador (D-44): estado do formulário (edição)… */
+  personalizados?: EstadoPersonalizados
+  /** …ou o registo (consulta). */
+  registo?: RegistoCp
 }
 
 /** Desenha os separadores e os campos pela disposição em vigor. */
@@ -29,10 +36,27 @@ export function BlocosConfiguraveis({
   aoLadoDoPrimeiro,
   depoisDoPrimeiro,
   resumo,
+  personalizados,
+  registo,
 }: Props) {
-  const blocos = useDisposicao(def)
+  const { blocos, rotulos, campos } = useDisposicao(def)
+  const desenharCampo = (c: string): ReactNode => {
+    const cp = campos.find((x) => x.chave === c)
+    if (cp) {
+      if (modo === 'editar')
+        return personalizados ? (
+          <EditarCampoPersonalizado c={cp} estado={personalizados} erro={erros[c] as string[] | undefined} />
+        ) : null
+      return <VerCampoPersonalizado c={cp} registo={registo ?? {}} />
+    }
+    const no = campo(c)
+    // O nome escolhido pelo Administrador chega ao campo pelo contexto (D-44).
+    return no === null || no === undefined ? null : (
+      <RotuloCtx.Provider value={rotulos[c] ?? null}>{no}</RotuloCtx.Provider>
+    )
+  }
   const desenhar = (b: BlocoDisposicao) => {
-    const itens = b.campos.map((c) => ({ c, no: campo(c) })).filter((x) => x.no !== null && x.no !== undefined)
+    const itens = b.campos.map((c) => ({ c, no: desenharCampo(c) })).filter((x) => x.no !== null)
     // Um separador sem nenhum campo aplicável (ex.: dados pessoais de uma empresa) não aparece.
     if (itens.length === 0) return null
     return (
@@ -76,7 +100,19 @@ export function BlocosConfiguraveis({
   )
 }
 
-/** Envolve um campo composto (lista, seletor em cascata…) para ocupar a largura toda do separador. */
+/** Envolve um campo composto (lista, seletor em cascata…) para ocupar a largura toda do separador.
+ * Se o Administrador lhe deu outro nome, mostra-o como título; os campos interiores mantêm os seus nomes. */
 export function Largo({ children }: { children: ReactNode }) {
-  return <div className="largo">{children}</div>
+  const nome = useRotulo('')
+  return (
+    <div className="largo">
+      {nome && <h4 className="subtitulo-bloco">{nome}</h4>}
+      <RotuloCtx.Provider value={null}>{children}</RotuloCtx.Provider>
+    </div>
+  )
+}
+
+/** Desenha o conteúdo sem aplicar o nome alterado (ex.: segundo dado de um campo que mostra dois). */
+export function SemRotulo({ children }: { children: ReactNode }) {
+  return <RotuloCtx.Provider value={null}>{children}</RotuloCtx.Provider>
 }

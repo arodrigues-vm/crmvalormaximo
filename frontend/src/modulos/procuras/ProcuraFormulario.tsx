@@ -9,6 +9,7 @@ import { qualificacaoParaApi, valoresQualificacao, type Opcoes } from '../../com
 import { CabecalhoRegisto } from '../../componentes/Ficha'
 import { EditarCampoQ } from '../../componentes/Qualificacao'
 import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
+import { comoRegistoCp, usePersonalizados } from '../../componentes/personalizados'
 import { useGuardaSaida } from '../../componentes/useGuardaSaida'
 import { entidadesApi } from '../entidades/api'
 import {
@@ -183,7 +184,8 @@ function Formulario({ p, entidadeInicial = null }: { p?: Procura; entidadeInicia
   const [novoConcelho, setNovoConcelho] = useState<OpcaoPesquisa | null>(null)
   const [novaFreguesia, setNovaFreguesia] = useState<OpcaoPesquisa | null>(null)
   const opcoes = useQuery({ queryKey: ['procuras', 'opcoes'], queryFn: procurasApi.opcoes, staleTime: 60_000 })
-  const guarda = useGuardaSaida(JSON.stringify(v) !== JSON.stringify(inicial))
+  const cp = usePersonalizados(ECRA_PROCURA, comoRegistoCp(p))
+  const guarda = useGuardaSaida(JSON.stringify(v) !== JSON.stringify(inicial) || cp.alterado)
   const o = opcoes.data
   const mudar = <K extends keyof Valores>(c: K, valor: Valores[K]) => setV((a) => ({ ...a, [c]: valor }))
   const lista = (x?: { id: number; nome: string }[]) => (x ?? []).map((i) => ({ valor: i.id, nome: i.nome }))
@@ -232,7 +234,9 @@ function Formulario({ p, entidadeInicial = null }: { p?: Procura; entidadeInicia
       observacoes: v.observacoes,
     }
     try {
-      const r = p ? await procurasApi.atualizar(p.id, { ...corpo, versao: p.versao }) : await procurasApi.criar(corpo)
+      const r = p
+        ? await procurasApi.atualizar(p.id, { ...corpo, campos_personalizados: cp.paraApi(), versao: p.versao })
+        : await procurasApi.criar({ ...corpo, campos_personalizados: cp.paraApi() })
       guarda.libertar()
       qc.invalidateQueries({ queryKey: ['procuras'] })
       qc.setQueryData(['procuras', String(r.id)], r)
@@ -567,6 +571,7 @@ function Formulario({ p, entidadeInicial = null }: { p?: Procura; entidadeInicia
       <BlocosConfiguraveis
         def={ECRA_PROCURA}
         modo="editar"
+        personalizados={cp}
         campo={desenharCampo}
         erros={erros}
         abertoInicial={(b) => (b.chave === 'observacoes' ? !!v.observacoes : true)}

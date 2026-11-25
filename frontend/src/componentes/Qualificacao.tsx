@@ -1,6 +1,7 @@
 import { CampoAreaTexto, CampoSelecao, CampoTexto, Dado } from './campos'
 import type { CampoQualificacao, Opcoes, Registo } from './camposQualificacao'
 import { formatarArea, formatarEuros } from './formatar'
+import { RotuloCtx, useRotulo } from './rotulo'
 
 function visivel(c: CampoQualificacao, nomeEscolhido: (campo: string) => string | null | undefined) {
   return !c.mostrarSe || nomeEscolhido(c.mostrarSe.campo) === c.mostrarSe.nome
@@ -19,12 +20,19 @@ interface ContextoEdicao {
 
 /** Um campo, pronto a colocar em qualquer separador (D-43). Devolve null se estiver escondido. */
 export function EditarCampoQ({ c, ctx }: { c: CampoQualificacao; ctx: ContextoEdicao }) {
-  const { valores, aoMudar, opcoes, erros, nomesAtuais, todos = [c] } = ctx
+  const { valores, opcoes, todos = [c] } = ctx
   const nomeEscolhido = (campo: string) => {
     const x = todos.find((y) => y.campo === campo)
     return opcoes?.[x?.lista ?? '']?.find((o) => String(o.id) === valores[campo])?.nome
   }
+  // Nome escolhido pelo Administrador (D-44); as unidades (€, m²) acrescentam-se a seguir.
+  const nome = useRotulo(c.rotulo)
   if (!visivel(c, nomeEscolhido)) return null
+  return <RotuloCtx.Provider value={null}>{desenharEdicao({ ...c, rotulo: nome }, ctx)}</RotuloCtx.Provider>
+}
+
+function desenharEdicao(c: CampoQualificacao, ctx: ContextoEdicao) {
+  const { valores, aoMudar, opcoes, erros, nomesAtuais } = ctx
   if (c.tipo === 'longo')
     return (
       <CampoAreaTexto

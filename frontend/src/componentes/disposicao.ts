@@ -22,6 +22,51 @@ export interface DefinicaoEcra {
   padrao: BlocoDisposicao[]
   /** Nome de cada campo, para o ecrã de Configurações. */
   rotulos: Record<string, string>
+  /** Ecrãs sem campos personalizados (ex.: Equipa, que não é um registo de negócio). */
+  semPersonalizados?: boolean
+}
+
+/** Campo acrescentado pelo Administrador (D-44). A chave começa sempre por «cp_». */
+export interface CampoPersonalizadoDef {
+  id: number
+  ecra: string
+  chave: string
+  nome: string
+  tipo: string
+  tipo_nome: string
+  obrigatorio: boolean
+  ajuda: string
+  ativo: boolean
+  lista: string | null
+  opcoes: { id: number; nome: string; ativo: boolean }[]
+  modulo_relacao: string
+  em_uso?: number
+}
+
+export interface RespostaCampos {
+  campos: CampoPersonalizadoDef[]
+  tipos: { valor: string; nome: string }[]
+  modulos: { valor: string; nome: string }[]
+}
+
+export const BLOCO_PERSONALIZADOS = { chave: 'personalizados', titulo: 'Campos adicionais' }
+
+export const obterCampos = (ecra: string) =>
+  pedido<RespostaCampos>(`/api/campos-personalizados/?ecra=${encodeURIComponent(ecra)}`)
+
+export function useCamposPersonalizados(def: DefinicaoEcra) {
+  return useQuery({
+    queryKey: ['campos-personalizados', def.modulo],
+    queryFn: () => obterCampos(def.modulo),
+    staleTime: 5 * 60_000,
+    enabled: !def.semPersonalizados,
+  })
+}
+
+/** Disposição de origem com os campos personalizados ativos num separador próprio, no fim. */
+export function padraoCom(def: DefinicaoEcra, campos: CampoPersonalizadoDef[]) {
+  const extra = campos.filter((c) => c.ativo).map((c) => c.chave)
+  return extra.length ? [...def.padrao, { ...BLOCO_PERSONALIZADOS, campos: extra }] : def.padrao
 }
 
 /** Junta a disposição guardada com a de origem: mantém a ordem guardada, ignora campos que já não existem e
@@ -44,15 +89,22 @@ export function combinar(padrao: BlocoDisposicao[], guardada: BlocoDisposicao[] 
   return blocos
 }
 
-export const obterDisposicao = (modulo: string) =>
-  pedido<{ modulo: string; blocos: BlocoDisposicao[] | null }>(`/api/disposicoes/${modulo}/`)
+export interface RespostaDisposicao {
+  modulo: string
+  blocos: BlocoDisposicao[] | null
+  rotulos?: Record<string, string>
+}
 
-/** Disposição em vigor para um ecrã. Enquanto carrega (ou se falhar), usa a de origem. */
+export const obterDisposicao = (modulo: string) => pedido<RespostaDisposicao>(`/api/disposicoes/${modulo}/`)
+
+/** Disposição em vigor para um ecrã (separadores, nomes alterados e campos personalizados ativos).
+ * Enquanto carrega (ou se falhar), usa a de origem. */
 export function useDisposicao(def: DefinicaoEcra) {
   const { data } = useQuery({
     queryKey: ['disposicoes', def.modulo],
     queryFn: () => obterDisposicao(def.modulo),
     staleTime: 5 * 60_000,
   })
-  return combinar(def.padrao, data?.blocos)
+  const campos = (useCamposPersonalizados(def).data?.campos ?? []).filter((c) => c.ativo)
+  return { blocos: combinar(padraoCom(def, campos), data?.blocos), rotulos: data?.rotulos ?? {}, campos }
 }

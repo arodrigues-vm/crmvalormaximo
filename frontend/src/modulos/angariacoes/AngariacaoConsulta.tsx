@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { ErroApi, pedido } from '../../api/cliente'
 import { Bloco } from '../../componentes/Bloco'
+import { comoRegistoCp } from '../../componentes/personalizados'
 import { BlocosConfiguraveis, Largo } from '../../componentes/BlocosConfiguraveis'
 import { CampoAreaTexto, CampoSelecao, CampoTexto, Dado } from '../../componentes/campos'
 import { Dialogo } from '../../componentes/Dialogo'
@@ -285,6 +286,7 @@ export function AngariacaoConsulta() {
       <BlocosConfiguraveis
         def={ECRA_ANGARIACAO}
         modo="ver"
+        registo={comoRegistoCp(a)}
         campo={desenharCampo}
         aoLadoDoPrimeiro={
           <Link

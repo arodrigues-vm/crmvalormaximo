@@ -5,6 +5,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ErroApi } from '../../api/cliente'
 import { useSessao } from '../../app/sessao'
 import { Bloco } from '../../componentes/Bloco'
+import { comoRegistoCp } from '../../componentes/personalizados'
 import { BlocosConfiguraveis } from '../../componentes/BlocosConfiguraveis'
 import { Dado } from '../../componentes/campos'
 import { Dialogo } from '../../componentes/Dialogo'
@@ -145,6 +146,7 @@ export function VisitaConsulta() {
       <BlocosConfiguraveis
         def={ECRA_VISITA}
         modo="ver"
+        registo={comoRegistoCp(x)}
         campo={desenharCampo}
         abertoInicial={(b) => (b.chave === 'observacoes' ? !!x.observacoes : true)}
       />

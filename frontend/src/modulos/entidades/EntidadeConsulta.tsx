@@ -6,6 +6,7 @@ import { ErroApi } from '../../api/cliente'
 import { AcaoEmail, AcoesTelefone } from '../../componentes/AcoesContacto'
 import { formatarTelefone } from '../../componentes/formatar'
 import { Bloco } from '../../componentes/Bloco'
+import { comoRegistoCp } from '../../componentes/personalizados'
 import { BlocosConfiguraveis } from '../../componentes/BlocosConfiguraveis'
 import { Dado } from '../../componentes/campos'
 import { Dialogo } from '../../componentes/Dialogo'
@@ -241,6 +242,7 @@ export function EntidadeConsulta() {
       <BlocosConfiguraveis
         def={ECRA_ENTIDADE}
         modo="ver"
+        registo={comoRegistoCp(e)}
         campo={desenharCampo}
         abertoInicial={(b) => (b.chave === 'dados' ? false : b.chave === 'observacoes' ? !!e.observacoes : true)}
         resumo={(b) => (b.chave === 'dados' ? CONSENT[e.consentimento_marketing] : null)}

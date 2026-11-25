@@ -11,6 +11,7 @@ import { CabecalhoRegisto, HistoricoRegisto } from '../../componentes/Ficha'
 import { formatarEuros, momentoPt } from '../../componentes/formatar'
 import { Interacoes } from '../../componentes/Interacoes'
 import { VerCampoQ } from '../../componentes/Qualificacao'
+import { comoRegistoCp } from '../../componentes/personalizados'
 import { BlocosConfiguraveis } from '../../componentes/BlocosConfiguraveis'
 import {
   ETIQUETA_CATEGORIA,
@@ -181,6 +182,7 @@ export function OportunidadeConsulta() {
       <BlocosConfiguraveis
         def={ECRA_OPORTUNIDADE}
         modo="ver"
+        registo={comoRegistoCp(o)}
         campo={desenharCampo}
         abertoInicial={(b) => (b.chave === 'observacoes' ? !!o.observacoes : true)}
       />

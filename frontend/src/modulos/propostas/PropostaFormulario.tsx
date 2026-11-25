@@ -7,6 +7,7 @@ import { BlocosConfiguraveis, Largo } from '../../componentes/BlocosConfiguravei
 import { CampoAreaTexto, CampoSelecao, CampoTexto } from '../../componentes/campos'
 import { CabecalhoRegisto } from '../../componentes/Ficha'
 import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
+import { comoRegistoCp, usePersonalizados } from '../../componentes/personalizados'
 import { useGuardaSaida } from '../../componentes/useGuardaSaida'
 import { agentesApi } from '../agentes/api'
 import { entidadesApi } from '../entidades/api'
@@ -140,7 +141,8 @@ function Formulario({ proposta, previa }: { proposta?: Proposta; previa?: Previa
   const [erroGeral, setErroGeral] = useState<string | null>(null)
   const [aGravar, setAGravar] = useState(false)
   const [novaParte, setNovaParte] = useState<OpcaoPesquisa | null>(null)
-  const guarda = useGuardaSaida(JSON.stringify(v) !== JSON.stringify(inicial))
+  const cp = usePersonalizados(ECRA_PROPOSTA, comoRegistoCp(proposta))
+  const guarda = useGuardaSaida(JSON.stringify(v) !== JSON.stringify(inicial) || cp.alterado)
   const mudar = <K extends keyof Valores>(c: K, x: Valores[K]) => setV((a) => ({ ...a, [c]: x }))
   const erro = (c: string) => erros[c] as string[] | undefined
   const lista = (x?: { id: number; nome: string }[]) => (x ?? []).map((i) => ({ valor: i.id, nome: i.nome }))
@@ -173,8 +175,12 @@ function Formulario({ proposta, previa }: { proposta?: Proposta; previa?: Previa
     }
     try {
       const r = proposta
-        ? await propostasApi.atualizar(proposta.id, { ...corpo, versao: proposta.versao })
-        : await propostasApi.criar(corpo)
+        ? await propostasApi.atualizar(proposta.id, {
+            ...corpo,
+            campos_personalizados: cp.paraApi(),
+            versao: proposta.versao,
+          })
+        : await propostasApi.criar({ ...corpo, campos_personalizados: cp.paraApi() })
       guarda.libertar()
       qc.invalidateQueries({ queryKey: ['propostas'] })
       qc.setQueryData(['propostas', String(r.id)], r)
@@ -402,6 +408,7 @@ function Formulario({ proposta, previa }: { proposta?: Proposta; previa?: Previa
       <BlocosConfiguraveis
         def={ECRA_PROPOSTA}
         modo="editar"
+        personalizados={cp}
         campo={desenharCampo}
         erros={erros}
         abertoInicial={(b) => (b.chave === 'observacoes' ? !!v.observacoes : true)}

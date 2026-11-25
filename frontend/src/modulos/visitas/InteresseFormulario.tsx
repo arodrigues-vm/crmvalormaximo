@@ -7,6 +7,7 @@ import { BlocosConfiguraveis } from '../../componentes/BlocosConfiguraveis'
 import { CampoAreaTexto, CampoSelecao } from '../../componentes/campos'
 import { CabecalhoRegisto } from '../../componentes/Ficha'
 import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
+import { comoRegistoCp, usePersonalizados } from '../../componentes/personalizados'
 import { useGuardaSaida } from '../../componentes/useGuardaSaida'
 import { entidadesApi } from '../entidades/api'
 import { imoveisApi, procurarImoveis } from '../imoveis/api'
@@ -81,7 +82,8 @@ function Formulario({
   const [erros, setErros] = useState<Record<string, string[]>>({})
   const [erroGeral, setErroGeral] = useState<string | null>(null)
   const [aGravar, setAGravar] = useState(false)
-  const guarda = useGuardaSaida(JSON.stringify(v) !== JSON.stringify(inicial))
+  const cp = usePersonalizados(ECRA_INTERESSE, comoRegistoCp(interesse))
+  const guarda = useGuardaSaida(JSON.stringify(v) !== JSON.stringify(inicial) || cp.alterado)
   const mudar = <K extends keyof typeof v>(c: K, x: (typeof v)[K]) => setV((a) => ({ ...a, [c]: x }))
   const lista = (x?: { id: number; nome: string }[]) => (x ?? []).map((i) => ({ valor: i.id, nome: i.nome }))
 
@@ -100,8 +102,12 @@ function Formulario({
     }
     try {
       const r = interesse
-        ? await interessesApi.atualizar(interesse.id, { ...corpo, versao: interesse.versao })
-        : await interessesApi.criar(corpo)
+        ? await interessesApi.atualizar(interesse.id, {
+            ...corpo,
+            campos_personalizados: cp.paraApi(),
+            versao: interesse.versao,
+          })
+        : await interessesApi.criar({ ...corpo, campos_personalizados: cp.paraApi() })
       guarda.libertar()
       qc.invalidateQueries({ queryKey: ['interesses'] })
       qc.setQueryData(['interesses', String(r.id)], r)
@@ -196,7 +202,7 @@ function Formulario({
           {erroGeral}
         </p>
       )}
-      <BlocosConfiguraveis def={ECRA_INTERESSE} modo="editar" campo={desenharCampo} erros={erros} />
+      <BlocosConfiguraveis def={ECRA_INTERESSE} modo="editar" personalizados={cp} campo={desenharCampo} erros={erros} />
 
       <div className="barra-gravar">
         <button

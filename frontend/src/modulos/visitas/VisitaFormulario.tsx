@@ -7,6 +7,7 @@ import { BlocosConfiguraveis, Largo } from '../../componentes/BlocosConfiguravei
 import { CampoAreaTexto, CampoSelecao, CampoTexto } from '../../componentes/campos'
 import { CabecalhoRegisto } from '../../componentes/Ficha'
 import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
+import { comoRegistoCp, usePersonalizados } from '../../componentes/personalizados'
 import { useGuardaSaida } from '../../componentes/useGuardaSaida'
 import { agentesApi } from '../agentes/api'
 import { entidadesApi } from '../entidades/api'
@@ -122,7 +123,8 @@ function Formulario({
   const [erroGeral, setErroGeral] = useState<string | null>(null)
   const [aGravar, setAGravar] = useState(false)
   const [novoAcompanhante, setNovoAcompanhante] = useState<OpcaoPesquisa | null>(null)
-  const guarda = useGuardaSaida(JSON.stringify(v) !== JSON.stringify(inicial))
+  const cp = usePersonalizados(ECRA_VISITA, comoRegistoCp(visita))
+  const guarda = useGuardaSaida(JSON.stringify(v) !== JSON.stringify(inicial) || cp.alterado)
   const mudar = <K extends keyof Valores>(c: K, x: Valores[K]) => setV((a) => ({ ...a, [c]: x }))
   const lista = (x?: { id: number; nome: string }[]) => (x ?? []).map((i) => ({ valor: i.id, nome: i.nome }))
   const criterios = o?.criterios ?? []
@@ -152,8 +154,12 @@ function Formulario({
     }
     try {
       const r = visita
-        ? await visitasApi.atualizar(visita.id, { ...corpo, versao: visita.versao })
-        : await visitasApi.criar(corpo)
+        ? await visitasApi.atualizar(visita.id, {
+            ...corpo,
+            campos_personalizados: cp.paraApi(),
+            versao: visita.versao,
+          })
+        : await visitasApi.criar({ ...corpo, campos_personalizados: cp.paraApi() })
       guarda.libertar()
       qc.invalidateQueries({ queryKey: ['visitas'] })
       qc.invalidateQueries({ queryKey: ['interesses'] })
@@ -399,6 +405,7 @@ function Formulario({
       <BlocosConfiguraveis
         def={ECRA_VISITA}
         modo="editar"
+        personalizados={cp}
         campo={desenharCampo}
         erros={erros}
         abertoInicial={(b) => (b.chave === 'avaliacao' ? !!visita : b.chave === 'observacoes' ? !!v.observacoes : true)}

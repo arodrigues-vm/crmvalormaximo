@@ -21,6 +21,7 @@ import { Paginacao } from '../../componentes/Paginacao'
 import { EditarCampoQ, VerCampoQ } from '../../componentes/Qualificacao'
 import { SeletorLocalizacao } from '../../componentes/SeletorLocalizacao'
 import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
+import { comoRegistoCp, usePersonalizados } from '../../componentes/personalizados'
 import { useGuardaSaida } from '../../componentes/useGuardaSaida'
 import { useListaFiltrada } from '../../componentes/useListaFiltrada'
 import {
@@ -252,6 +253,7 @@ function Consulta({ c }: { c: Config }) {
       <BlocosConfiguraveis
         def={c.ecra}
         modo="ver"
+        registo={comoRegistoCp(r)}
         campo={desenharCampo}
         abertoInicial={(b) => (b.chave === 'observacoes' ? !!r.observacoes : true)}
       />
@@ -319,7 +321,8 @@ function Formulario({ c, r }: { c: Config; r?: RegistoAgente }) {
   const [erros, setErros] = useState<Record<string, string[]>>({})
   const [erroGeral, setErroGeral] = useState<string | null>(null)
   const [aGravar, setAGravar] = useState(false)
-  const guarda = useGuardaSaida(JSON.stringify(v) !== JSON.stringify(inicial))
+  const cp = usePersonalizados(c.ecra, comoRegistoCp(r))
+  const guarda = useGuardaSaida(JSON.stringify(v) !== JSON.stringify(inicial) || cp.alterado)
   const ctxQ = {
     todos: campos,
     valores: v.extra,
@@ -366,7 +369,9 @@ function Formulario({ c, r }: { c: Config; r?: RegistoAgente }) {
     if (c.morada) corpo.freguesia = v.freguesia
     else corpo.agencia = v.agencia?.id ?? null
     try {
-      const novo = r ? await c.api.atualizar(r.id, { ...corpo, versao: r.versao }) : await c.api.criar(corpo)
+      const novo = r
+        ? await c.api.atualizar(r.id, { ...corpo, campos_personalizados: cp.paraApi(), versao: r.versao })
+        : await c.api.criar({ ...corpo, campos_personalizados: cp.paraApi() })
       guarda.libertar()
       qc.invalidateQueries({ queryKey: [c.chave] })
       qc.setQueryData([c.chave, String(novo.id)], novo)
@@ -397,6 +402,7 @@ function Formulario({ c, r }: { c: Config; r?: RegistoAgente }) {
       <BlocosConfiguraveis
         def={c.ecra}
         modo="editar"
+        personalizados={cp}
         campo={desenharCampo}
         erros={erros}
         abertoInicial={(b) => (b.chave === 'observacoes' ? !!r?.observacoes : true)}
