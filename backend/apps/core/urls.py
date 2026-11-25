@@ -20,5 +20,6 @@ urlpatterns = [
     path("localizacao/", include("apps.localizacao.urls")),
     path("listas/", include("apps.configuracao.urls")),
     path("parametros/", configuracao_views.parametros, name="parametros"),
+    path("disposicoes/<slug:modulo>/", configuracao_views.disposicao, name="disposicao"),
     path("parametros/<slug:chave>/", configuracao_views.alterar_parametro, name="parametro"),
 ]

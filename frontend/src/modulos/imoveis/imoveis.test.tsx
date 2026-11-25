@@ -145,4 +145,25 @@ describe('Imóveis', () => {
       { entidade: 9, quota: '50' },
     ])
   })
+
+  it('a ficha e a edição seguem a disposição definida pelo Administrador (D-43)', async () => {
+    const disposicao = {
+      modulo: 'imoveis',
+      blocos: [
+        { chave: 'principal', titulo: 'O essencial', campos: ['preco', 'tipologia'] },
+        { chave: 'comercializacao', titulo: 'Comercialização', campos: ['operacao'] },
+      ],
+    }
+    simularApi({ ...base, 'GET /api/disposicoes/imoveis/': () => json(disposicao) })
+    desenhar('/imoveis/5')
+    const titulos = () =>
+      [...document.querySelectorAll('.bloco-titulo')].map((h) => h.textContent?.replace('▸', '').trim())
+    await waitFor(() => expect(titulos()[0]).toBe('O essencial'))
+    const t = titulos()
+    expect(t.indexOf('O essencial')).toBeLessThan(t.indexOf('Comercialização'))
+    // Campos não colocados voltam ao separador de origem, depois dos do Administrador.
+    expect(t.indexOf('Comercialização')).toBeLessThan(t.indexOf('Identificação'))
+    const essencial = screen.getByRole('heading', { name: /O essencial/ }).closest('section')!
+    expect(essencial).toHaveTextContent(/Valor.*Tipologia/)
+  })
 })

@@ -1648,3 +1648,45 @@ a.utilizador-nome {
 a.utilizador-nome:hover {
   text-decoration: underline;
 }
+
+/* Disposição dos ecrãs (D-43) */
+.disposicao-blocos {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+  display: grid;
+  gap: 12px;
+}
+.disposicao-bloco {
+  border: 1px solid var(--borda, #e4e7ec);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+.disposicao-cabeca {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+}
+.disposicao-cabeca .campo {
+  flex: 1;
+  max-width: 420px;
+}
+.disposicao-campos {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0;
+}
+.disposicao-campos li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  border-top: 1px solid var(--borda, #e4e7ec);
+}
+.disposicao-campo-nome {
+  flex: 1;
+  min-width: 0;
+}
+.disposicao-campos select {
+  max-width: 45%;
+}

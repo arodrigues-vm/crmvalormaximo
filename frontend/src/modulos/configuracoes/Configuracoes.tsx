@@ -10,6 +10,9 @@ export function Configuracoes() {
         <NavLink to="/configuracoes/parametros" role="tab">
           Parâmetros
         </NavLink>
+        <NavLink to="/configuracoes/disposicao" role="tab">
+          Disposição dos ecrãs
+        </NavLink>
       </div>
       <Outlet />
     </div>

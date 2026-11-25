@@ -10,6 +10,7 @@ import { AngariacaoConsulta } from '../modulos/angariacoes/AngariacaoConsulta'
 import { AngariacaoEditar, AngariacaoNova } from '../modulos/angariacoes/AngariacaoFormulario'
 import { AngariacoesLista } from '../modulos/angariacoes/AngariacoesLista'
 import { Configuracoes } from '../modulos/configuracoes/Configuracoes'
+import { Disposicoes } from '../modulos/configuracoes/Disposicoes'
 import { ListasValores } from '../modulos/configuracoes/ListasValores'
 import { Parametros } from '../modulos/configuracoes/Parametros'
 import { ImoveisLista } from '../modulos/imoveis/ImoveisLista'
@@ -193,6 +194,7 @@ export const rotas: RouteObject[] = [
               { index: true, element: <Navigate to="listas" replace /> },
               { path: 'listas', element: <ListasValores /> },
               { path: 'parametros', element: <Parametros /> },
+              { path: 'disposicao', element: <Disposicoes /> },
             ],
           },
         ],

@@ -6,6 +6,7 @@ os usam (Especificação §37: personalização sem comprometer regras de negóc
 """
 
 from django.db import models
+from simple_history.models import HistoricalRecords
 
 
 class Lista(models.Model):
@@ -59,6 +60,30 @@ def campo_lista(chave: str, **kwargs):
 def campo_lista_multipla(chave: str, **kwargs):
     kwargs.setdefault("blank", True)
     return models.ManyToManyField(ValorLista, related_name="+", limit_choices_to={"lista__chave": chave}, **kwargs)
+
+
+class Disposicao(models.Model):
+    """Disposição dos ecrãs de um módulo (D-43): ordem dos separadores, campos de cada separador e a sua
+    ordem. Igual para todos os utilizadores; só o Administrador altera. Sem registo = disposição de origem.
+
+    `blocos` = [{"chave": "comercializacao", "titulo": "Comercialização", "campos": ["operacao", ...]}, ...]
+    """
+
+    modulo = models.SlugField(max_length=40, unique=True)
+    blocos = models.JSONField(default=list)
+    atualizado_em = models.DateTimeField(auto_now=True)
+    atualizado_por = models.ForeignKey(
+        "contas.Utilizador", null=True, blank=True, on_delete=models.PROTECT, related_name="+"
+    )
+
+    historico = HistoricalRecords()
+
+    class Meta:
+        verbose_name = "disposição de ecrã"
+        verbose_name_plural = "disposições de ecrã"
+
+    def __str__(self):
+        return self.modulo
 
 
 class Parametro(models.Model):

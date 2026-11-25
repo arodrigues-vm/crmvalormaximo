@@ -42,6 +42,10 @@ Não inventar regras de negócio, fiscais ou prazos legais. Em ambiguidade, apre
   sub-registo (linhas, rondas, renovações, contactos, ligações, nomes de equipas, valores de listas…) tem forma
   de ser corrigido no ecrã. A edição guarda sempre o valor anterior (histórico ou auditoria) e respeita as
   regras de negócio e as permissões. Exceção: os próprios registos de auditoria/histórico, que não se alteram.
+- **Disposição configurável (D-43):** em todos os módulos, existentes e futuros, os campos dos formulários e das
+  fichas são desenhados pela disposição configurável (`BlocosConfiguraveis` + `DefinicaoEcra` do módulo, registada
+  em `modulos/configuracoes/ecras.ts`), para o Administrador poder mudar a ordem dos separadores, o separador de
+  cada campo e a sua posição. A consulta segue a mesma disposição da edição.
 - Identidade visual: usar apenas o logótipo aprovado (`documentacao/marca/`); nunca o redesenhar.
 
 ## Comandos

@@ -9,30 +9,19 @@ import { Dialogo } from '../../componentes/Dialogo'
 import { CabecalhoRegisto, HistoricoRegisto } from '../../componentes/Ficha'
 import { formatarPercentagem, momentoPt } from '../../componentes/formatar'
 import type { Registo } from '../../componentes/camposQualificacao'
-import { VerQualificacao } from '../../componentes/Qualificacao'
+import { VerCampoQ } from '../../componentes/Qualificacao'
+import { BlocosConfiguraveis, Largo } from '../../componentes/BlocosConfiguraveis'
 import { LigacoesExternas } from '../../componentes/LigacoesExternas'
 import { pedido } from '../../api/cliente'
-import {
-  etiquetaStatus,
-  IMOVEL_AREAS,
-  IMOVEL_CARACTERIZACAO,
-  IMOVEL_COMERCIALIZACAO,
-  IMOVEL_DIVISOES,
-  IMOVEL_EQUIPAMENTOS,
-  IMOVEL_IDENTIFICACAO,
-  IMOVEL_MORADA,
-  IMOVEL_REGISTAL,
-  IMOVEL_TEXTOS,
-  IMOVEL_ZONA,
-  imoveisApi,
-  NOMES_CAMPOS_IMOVEL,
-  tituloImovel,
-} from './api'
+import { CAMPOS_IMOVEL, etiquetaStatus, imoveisApi, NOMES_CAMPOS_IMOVEL, tituloImovel } from './api'
 import { AngariacoesDoImovel } from './AngariacoesDoImovel'
 import { ProcurasCompativeis } from './ProcurasCompativeis'
+import { ECRA_IMOVEL, IMOVEL_SECUNDARIOS } from './disposicao'
 import { FotografiaImovel } from './FotografiaImovel'
 import { VisitasDoRegisto } from '../visitas/VisitasDoRegisto'
 import { useSessao } from '../../app/sessao'
+
+const preenchido = (x: unknown) => x !== null && x !== undefined && x !== ''
 
 export function ImovelConsulta() {
   const { id = '' } = useParams()
@@ -77,6 +66,64 @@ export function ImovelConsulta() {
   const somaQuotas = i.proprietarios_detalhe.reduce((s, p) => s + (p.quota ? Number(p.quota) : 0), 0)
   const todasQuotas = i.proprietarios_detalhe.length > 0 && i.proprietarios_detalhe.every((p) => p.quota !== null)
 
+  const proprietarios = (
+    <>
+      {i.proprietarios_detalhe.length === 0 ? (
+        <p className="ajuda">Sem proprietários registados.</p>
+      ) : (
+        <>
+          <ul className="lista-relacoes">
+            {i.proprietarios_detalhe.map((p) => (
+              <li key={p.entidade}>
+                {p.acessivel ? (
+                  <Link to={`/entidades/${p.entidade}`}>
+                    {p.nome_completo} <small className="ajuda">{p.referencia}</small>
+                  </Link>
+                ) : (
+                  <span className="vazio">Entidade a que não tem acesso</span>
+                )}
+                <span className="relacao-tipo">{formatarPercentagem(p.quota) ?? 'Quota não indicada'}</span>
+              </li>
+            ))}
+          </ul>
+          {todasQuotas && Math.abs(somaQuotas - 100) > 0.0001 && (
+            <p className="aviso-duplicados">A soma das quotas é {formatarPercentagem(String(somaQuotas))}.</p>
+          )}
+        </>
+      )}
+    </>
+  )
+
+  function desenharCampo(c: string) {
+    const q = CAMPOS_IMOVEL.find((x) => x.campo === c)
+    if (q) return <VerCampoQ c={q} registo={registo} />
+    switch (c) {
+      case 'operacao':
+        return <Dado rotulo="Operação">{n.operacao}</Dado>
+      case 'estado_comercializacao':
+        return <Dado rotulo="Estado de comercialização">{n.estado_comercializacao}</Dado>
+      case 'status':
+        return <Dado rotulo="Status">{n.status}</Dado>
+      case 'responsavel':
+        return <Dado rotulo="Responsável">{i!.responsavel_nome}</Dado>
+      case 'zonas_exteriores':
+        return (
+          <Dado rotulo="Zonas exteriores" largo>
+            {n.zonas_exteriores.join(', ')}
+          </Dado>
+        )
+      case 'freguesia':
+        return (
+          <Dado rotulo="Distrito, concelho e freguesia" largo>
+            {i!.localizacao && `${i!.localizacao.distrito} › ${i!.localizacao.concelho} › ${i!.localizacao.freguesia}`}
+          </Dado>
+        )
+      case 'proprietarios':
+        return <Largo>{proprietarios}</Largo>
+    }
+    return null
+  }
+
   return (
     <div className="ficha">
       <CabecalhoRegisto
@@ -113,90 +160,16 @@ export function ImovelConsulta() {
         </p>
       )}
 
-      <div className="ficha-topo">
-        <FotografiaImovel imovel={i} />
-        <Bloco titulo="Comercialização">
-          <dl className="grelha-dados">
-            <Dado rotulo="Operação">{n.operacao}</Dado>
-            <Dado rotulo="Estado de comercialização">{n.estado_comercializacao}</Dado>
-            <Dado rotulo="Status">{n.status}</Dado>
-            <Dado rotulo="Responsável">{i.responsavel_nome}</Dado>
-          </dl>
-          <VerQualificacao campos={IMOVEL_COMERCIALIZACAO} registo={registo} />
-        </Bloco>
-      </div>
-
-      <Bloco titulo="Identificação">
-        <VerQualificacao campos={IMOVEL_IDENTIFICACAO} registo={registo} />
-      </Bloco>
-
-      <Bloco titulo="Proprietários">
-        {i.proprietarios_detalhe.length === 0 ? (
-          <p className="ajuda">Sem proprietários registados.</p>
-        ) : (
-          <>
-            <ul className="lista-relacoes">
-              {i.proprietarios_detalhe.map((p) => (
-                <li key={p.entidade}>
-                  {p.acessivel ? (
-                    <Link to={`/entidades/${p.entidade}`}>
-                      {p.nome_completo} <small className="ajuda">{p.referencia}</small>
-                    </Link>
-                  ) : (
-                    <span className="vazio">Entidade a que não tem acesso</span>
-                  )}
-                  <span className="relacao-tipo">{formatarPercentagem(p.quota) ?? 'Quota não indicada'}</span>
-                </li>
-              ))}
-            </ul>
-            {todasQuotas && Math.abs(somaQuotas - 100) > 0.0001 && (
-              <p className="aviso-duplicados">A soma das quotas é {formatarPercentagem(String(somaQuotas))}.</p>
-            )}
-          </>
-        )}
-      </Bloco>
+      <BlocosConfiguraveis
+        def={ECRA_IMOVEL}
+        modo="ver"
+        campo={desenharCampo}
+        aoLadoDoPrimeiro={<FotografiaImovel imovel={i} />}
+        abertoInicial={(b) => !IMOVEL_SECUNDARIOS.has(b.chave) || b.campos.some((c) => preenchido(registo[c]))}
+      />
 
       <Bloco titulo="Angariações (CMI)">
         <AngariacoesDoImovel imovelId={i.id} podeCriar={pode('angariacoes', 'criar')} />
-      </Bloco>
-
-      <Bloco titulo="Caracterização">
-        <VerQualificacao campos={IMOVEL_CARACTERIZACAO} registo={registo} />
-        <dl className="grelha-dados">
-          <Dado rotulo="Zonas exteriores" largo>
-            {n.zonas_exteriores.join(', ')}
-          </Dado>
-        </dl>
-      </Bloco>
-
-      <Bloco titulo="Divisões">
-        <VerQualificacao campos={IMOVEL_DIVISOES} registo={registo} />
-      </Bloco>
-
-      <Bloco titulo="Equipamentos e conforto">
-        <VerQualificacao campos={IMOVEL_EQUIPAMENTOS} registo={registo} />
-      </Bloco>
-
-      <Bloco titulo="Áreas (m²)">
-        <VerQualificacao campos={IMOVEL_AREAS} registo={registo} />
-      </Bloco>
-
-      <Bloco titulo="Informação registal">
-        <VerQualificacao campos={IMOVEL_REGISTAL} registo={registo} />
-      </Bloco>
-
-      <Bloco titulo="Localização">
-        <VerQualificacao campos={IMOVEL_MORADA} registo={registo} />
-        <dl className="grelha-dados">
-          <Dado rotulo="Distrito, concelho e freguesia" largo>
-            {i.localizacao && `${i.localizacao.distrito} › ${i.localizacao.concelho} › ${i.localizacao.freguesia}`}
-          </Dado>
-        </dl>
-        <VerQualificacao campos={IMOVEL_ZONA} registo={registo} />
-      </Bloco>
-
-      <Bloco titulo="Descrição e observações" abertoInicial={!!(i.descricao || i.observacoes)}>
-        <VerQualificacao campos={IMOVEL_TEXTOS} registo={registo} />
       </Bloco>
 
       <Bloco titulo="Fotografias, documentos e outras ligações">

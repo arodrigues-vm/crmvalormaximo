@@ -208,3 +208,61 @@ def alterar_parametro(request, chave):
     p.save()
     registar("parametro.alterado", modulo=MODULO, objeto=p, request=request, dados={"antes": antes, "depois": novo})
     return Response({"chave": p.chave, "nome": p.nome, "descricao": p.descricao, "modulo": p.modulo, "valor": p.valor})
+
+
+# Disposição dos ecrãs (D-43) ----------------------------------------------------------------------
+
+
+def _validar_blocos(blocos):
+    if not isinstance(blocos, list) or not blocos or len(blocos) > 40:
+        raise serializers.ValidationError("Indique entre 1 e 40 separadores.")
+    chaves, campos = set(), set()
+    limpos = []
+    for b in blocos:
+        if not isinstance(b, dict):
+            raise serializers.ValidationError("Separador inválido.")
+        chave = str(b.get("chave", "")).strip()
+        titulo = str(b.get("titulo", "")).strip()
+        lista = b.get("campos", [])
+        if not chave or len(chave) > 60 or chave in chaves:
+            raise serializers.ValidationError("Cada separador precisa de uma chave única.")
+        if not titulo or len(titulo) > 80:
+            raise serializers.ValidationError("Cada separador precisa de um nome (até 80 caracteres).")
+        if not isinstance(lista, list) or any(not isinstance(c, str) or not c or len(c) > 60 for c in lista):
+            raise serializers.ValidationError(f"Campos inválidos no separador «{titulo}».")
+        repetidos = campos.intersection(lista)
+        if repetidos or len(set(lista)) != len(lista):
+            raise serializers.ValidationError("Cada campo só pode estar num separador.")
+        chaves.add(chave)
+        campos.update(lista)
+        limpos.append({"chave": chave, "titulo": titulo, "campos": lista})
+    return limpos
+
+
+@extend_schema(summary="Disposição dos ecrãs de um módulo")
+@api_view(["GET", "PUT", "DELETE"])
+@permission_classes([IsAuthenticated])
+def disposicao(request, modulo):
+    """GET: disposição guardada (ou `blocos: null` = de origem). PUT: guardar (Administrador). DELETE: voltar à
+    disposição de origem (Administrador). Tudo auditado."""
+    from .models import Disposicao
+
+    d = Disposicao.objects.filter(modulo=modulo).first()
+    if request.method == "GET":
+        return Response({"modulo": modulo, "blocos": d.blocos if d else None})
+    _exigir_administrar(request)
+    if request.method == "DELETE":
+        if d:
+            registar("disposicao.reposta", modulo=MODULO, objeto=d, request=request, dados={"antes": d.blocos})
+            d.delete()
+        return Response({"modulo": modulo, "blocos": None})
+    try:
+        blocos = _validar_blocos(request.data.get("blocos"))
+    except serializers.ValidationError as e:
+        raise serializers.ValidationError({"blocos": e.detail}) from e
+    antes = d.blocos if d else None
+    d, _ = Disposicao.objects.update_or_create(
+        modulo=modulo, defaults={"blocos": blocos, "atualizado_por": request.user}
+    )
+    registar("disposicao.alterada", modulo=MODULO, objeto=d, request=request, dados={"antes": antes, "depois": blocos})
+    return Response({"modulo": modulo, "blocos": d.blocos})

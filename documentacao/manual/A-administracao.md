@@ -59,3 +59,25 @@ Em **Configurações → Parâmetros** alteram-se parâmetros de funcionamento:
 
 As listas **Regimes de contrato (CMI)** (categorias Exclusivo / Não exclusivo) e **Papéis de interveniente
 (CMI)** editam-se em *Listas de valores*.
+
+## A.3 Disposição dos ecrãs
+
+Em **Configurações → Disposição dos ecrãs** o Administrador escolhe como os campos aparecem em cada módulo.
+A disposição vale **para todos os utilizadores**, tanto no ecrã de edição como na ficha de consulta.
+
+1. Em **Módulo**, escolha o módulo (por exemplo, *Imóveis*).
+2. Para mudar a **ordem dos separadores**, use as setas **↑** e **↓** ao lado do nome do separador.
+3. Para mudar o **nome** de um separador, escreva o novo nome na caixa do separador.
+4. Para mudar a **posição de um campo** dentro do separador, use as setas **↑** e **↓** ao lado do campo.
+5. Para passar um campo para **outro separador**, escolha o separador na lista à direita do campo. O campo
+   fica no fim desse separador; depois pode subi-lo com **↑**.
+6. Para criar um separador novo, carregue em **Acrescentar separador** e mova campos para ele. Um separador
+   vazio pode ser removido com **✕**.
+7. Carregue em **Guardar**. A alteração fica registada na auditoria.
+
+Para voltar à disposição original do CRM, carregue em **Restaurar disposição de origem**.
+
+As secções que mostram registos ligados (por exemplo *Angariações*, *Visitas*, *Ligações* e *Histórico*) não
+são campos: aparecem sempre no fim da ficha.
+
+![Disposição dos ecrãs](imagens/27-disposicao-ecras.png)

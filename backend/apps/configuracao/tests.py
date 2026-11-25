@@ -135,3 +135,30 @@ def test_parametros_editaveis_so_pelo_administrador(api, criar_utilizador):
     for invalido in ([], [0], ["x"], [1, 2, 3, 4, 5, 6], "120"):
         assert api.patch(url, {"valor": invalido}, format="json").status_code == 400, invalido
     assert RegistoAuditoria.objects.filter(acao="parametro.alterado").exists()
+
+
+def test_disposicao_guardar_e_repor(api, criar_utilizador):
+    """D-43: o Administrador muda a disposição dos ecrãs; todos a leem; pode voltar à de origem."""
+    adm = criar_utilizador(Perfil.ADMINISTRADOR)
+    cons = criar_utilizador(Perfil.CONSULTOR)
+    url = reverse("disposicao", args=["imoveis"])
+    api.force_authenticate(cons)
+    assert api.get(url).json()["blocos"] is None
+    blocos = [
+        {"chave": "comercializacao", "titulo": "Venda", "campos": ["preco", "operacao"]},
+        {"chave": "novo_1", "titulo": "Outros", "campos": ["piso"]},
+    ]
+    assert api.put(url, {"blocos": blocos}, format="json").status_code == 403
+    api.force_authenticate(adm)
+    r = api.put(url, {"blocos": blocos}, format="json")
+    assert r.status_code == 200 and r.json()["blocos"][0]["titulo"] == "Venda"
+    api.force_authenticate(cons)
+    assert api.get(url).json()["blocos"][1]["campos"] == ["piso"]
+    assert RegistoAuditoria.objects.filter(acao="disposicao.alterada").exists()
+    api.force_authenticate(adm)
+    # Um campo não pode estar em dois separadores; os nomes são obrigatórios.
+    mau = [{"chave": "a", "titulo": "A", "campos": ["x"]}, {"chave": "b", "titulo": "B", "campos": ["x"]}]
+    assert api.put(url, {"blocos": mau}, format="json").status_code == 400
+    assert api.put(url, {"blocos": [{"chave": "a", "titulo": "", "campos": []}]}, format="json").status_code == 400
+    assert api.delete(url).json()["blocos"] is None
+    assert api.get(url).json()["blocos"] is None

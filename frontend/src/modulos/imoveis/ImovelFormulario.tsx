@@ -3,39 +3,23 @@ import { useMemo, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { ErroApi } from '../../api/cliente'
-import { Bloco } from '../../componentes/Bloco'
 import { CampoMultiplo, CampoSelecao } from '../../componentes/campos'
 import {
   qualificacaoParaApi,
   valoresQualificacao,
-  type CampoQualificacao,
   type Opcoes,
   type Registo,
 } from '../../componentes/camposQualificacao'
 import { CampoResponsavel } from '../../componentes/CampoResponsavel'
 import { CabecalhoRegisto } from '../../componentes/Ficha'
-import { EditarQualificacao } from '../../componentes/Qualificacao'
+import { EditarCampoQ } from '../../componentes/Qualificacao'
+import { BlocosConfiguraveis, Largo } from '../../componentes/BlocosConfiguraveis'
 import { SeletorLocalizacao } from '../../componentes/SeletorLocalizacao'
 import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
 import { useGuardaSaida } from '../../componentes/useGuardaSaida'
 import { entidadesApi } from '../entidades/api'
-import {
-  CAMPOS_IMOVEL,
-  etiquetaStatus,
-  IMOVEL_AREAS,
-  IMOVEL_CARACTERIZACAO,
-  IMOVEL_COMERCIALIZACAO,
-  IMOVEL_DIVISOES,
-  IMOVEL_EQUIPAMENTOS,
-  IMOVEL_IDENTIFICACAO,
-  IMOVEL_MORADA,
-  IMOVEL_REGISTAL,
-  IMOVEL_TEXTOS,
-  IMOVEL_ZONA,
-  imoveisApi,
-  tituloImovel,
-  type Imovel,
-} from './api'
+import { CAMPOS_IMOVEL, etiquetaStatus, imoveisApi, tituloImovel, type Imovel } from './api'
+import { ECRA_IMOVEL, IMOVEL_SECUNDARIOS } from './disposicao'
 
 interface ProprietarioEditavel {
   entidade: OpcaoPesquisa
@@ -107,20 +91,6 @@ function paraApi(v: Valores) {
   }
 }
 
-const campos = (lista: CampoQualificacao[]) => lista.map((c) => c.campo)
-const BLOCOS: Record<string, string[]> = {
-  comercializacao: ['operacao', 'estado_comercializacao', 'status', 'responsavel', ...campos(IMOVEL_COMERCIALIZACAO)],
-  identificacao: campos(IMOVEL_IDENTIFICACAO),
-  proprietarios: ['proprietarios'],
-  caracterizacao: [...campos(IMOVEL_CARACTERIZACAO), 'zonas_exteriores'],
-  divisoes: campos(IMOVEL_DIVISOES),
-  equipamentos: campos(IMOVEL_EQUIPAMENTOS),
-  areas: campos(IMOVEL_AREAS),
-  registal: campos(IMOVEL_REGISTAL),
-  localizacao: [...campos(IMOVEL_MORADA), 'freguesia', ...campos(IMOVEL_ZONA)],
-  textos: campos(IMOVEL_TEXTOS),
-}
-
 export function ImovelNovo() {
   return <Formulario />
 }
@@ -152,17 +122,14 @@ function Formulario({ imovel }: { imovel?: Imovel }) {
   const mudar = <K extends keyof Valores>(campo: K, valor: Valores[K]) => setV((a) => ({ ...a, [campo]: valor }))
   const erro = (c: string) => erros[c] as string[] | undefined
   const mudarExtra = (c: string, x: string) => setV((a) => ({ ...a, extra: { ...a.extra, [c]: x } }))
-  const extras = (campos: CampoQualificacao[]) => (
-    <EditarQualificacao
-      nomesAtuais={imovel?.nomes}
-      campos={campos}
-      valores={v.extra}
-      aoMudar={mudarExtra}
-      opcoes={o as unknown as Opcoes | undefined}
-      erros={erros as Record<string, string[] | undefined>}
-    />
-  )
-  const temErros = (b: string) => BLOCOS[b].some((c) => erros[c])
+  const ctx = {
+    nomesAtuais: imovel?.nomes,
+    todos: CAMPOS_IMOVEL,
+    valores: v.extra,
+    aoMudar: mudarExtra,
+    opcoes: o as unknown as Opcoes | undefined,
+    erros: erros as Record<string, string[] | undefined>,
+  }
   const lista = (itens?: { id: number; nome: string }[]) => (itens ?? []).map((x) => ({ valor: x.id, nome: x.nome }))
   // Valores desativados que o imóvel já tem continuam a aparecer na lista.
   const comAtual = (itens: { valor: number | string; nome: string }[], atual: string, nome: string | null) =>
@@ -200,7 +167,158 @@ function Formulario({ imovel }: { imovel?: Imovel }) {
   }
 
   const n = imovel?.nomes
-  const preenchido = (lista: CampoQualificacao[]) => lista.some((c) => v.extra[c.campo])
+  const proprietarios = (
+    <>
+      {v.proprietarios.length === 0 && <p className="ajuda">Sem proprietários.</p>}
+      <ul className="lista-proprietarios">
+        {v.proprietarios.map((p, i) => (
+          <li key={p.entidade.id}>
+            <span className="proprietario-nome">
+              {p.acessivel ? <strong>{p.entidade.titulo}</strong> : <span className="vazio">{p.entidade.titulo}</span>}
+              {p.entidade.detalhe && <small className="ajuda"> {p.entidade.detalhe}</small>}
+            </span>
+            <label className="quota">
+              Quota (%)
+              <input
+                inputMode="decimal"
+                value={p.quota}
+                disabled={!p.acessivel}
+                onChange={(e) =>
+                  mudar(
+                    'proprietarios',
+                    v.proprietarios.map((x, j) => (j === i ? { ...x, quota: e.target.value } : x)),
+                  )
+                }
+              />
+            </label>
+            {p.acessivel && (
+              <button
+                type="button"
+                className="botao-icone"
+                aria-label={`Remover ${p.entidade.titulo}`}
+                onClick={() =>
+                  mudar(
+                    'proprietarios',
+                    v.proprietarios.filter((_, j) => j !== i),
+                  )
+                }
+              >
+                ✕
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
+      {v.proprietarios.length > 0 && (
+        <p className={somaQuotas > 100 ? 'campo-erro' : 'ajuda'}>
+          Soma das quotas indicadas: {somaQuotas.toLocaleString('pt-PT')} %{somaQuotas > 100 && ' (máximo 100 %)'}
+        </p>
+      )}
+      {erro('proprietarios') && (
+        <p className="campo-erro" role="alert">
+          {erro('proprietarios')!.join(' ')}
+        </p>
+      )}
+      <div className="novo-proprietario">
+        <SeletorPesquisavel
+          rotulo="Acrescentar proprietário"
+          chave="entidades"
+          procurar={entidadesApi.procurar}
+          valor={novoProprietario}
+          aoMudar={(e) => {
+            if (e) {
+              mudar('proprietarios', [...v.proprietarios, { entidade: e, acessivel: true, quota: '' }])
+              setNovoProprietario(null)
+            }
+          }}
+          excluir={v.proprietarios.map((p) => p.entidade.id)}
+          placeholder="Nome, NIF ou referência da entidade…"
+        />
+        <Link to="/entidades/nova" target="_blank" className="ligacao-secundaria">
+          Criar nova entidade
+        </Link>
+      </div>
+    </>
+  )
+  function desenharCampo(c: string) {
+    const q = CAMPOS_IMOVEL.find((x) => x.campo === c)
+    if (q) return <EditarCampoQ c={q} ctx={ctx} />
+    switch (c) {
+      case 'operacao':
+        return (
+          <CampoSelecao
+            rotulo="Operação"
+            required
+            value={v.operacao}
+            onChange={(e) => mudar('operacao', e.target.value)}
+            vazio="—"
+            opcoes={comAtual(lista(o?.operacoes), v.operacao, n?.operacao ?? null)}
+            erro={erro('operacao')}
+          />
+        )
+      case 'estado_comercializacao':
+        return (
+          <CampoSelecao
+            rotulo="Estado de comercialização"
+            vazio="—"
+            value={v.estado_comercializacao}
+            onChange={(e) => mudar('estado_comercializacao', e.target.value)}
+            opcoes={comAtual(
+              lista(o?.estados_comercializacao),
+              v.estado_comercializacao,
+              n?.estado_comercializacao ?? null,
+            )}
+            erro={erro('estado_comercializacao')}
+          />
+        )
+      case 'status':
+        return (
+          <CampoSelecao
+            rotulo="Status"
+            value={v.status}
+            onChange={(e) => mudar('status', e.target.value)}
+            vazio={imovel ? undefined : 'Por omissão: ativo'}
+            opcoes={comAtual(lista(o?.status), v.status, n?.status ?? null)}
+            erro={erro('status')}
+          />
+        )
+      case 'responsavel':
+        return (
+          <CampoResponsavel
+            modulo="imoveis"
+            valor={v.responsavel}
+            atual={imovel ? { id: imovel.responsavel, nome: imovel.responsavel_nome } : null}
+            aoMudar={(x) => mudar('responsavel', x)}
+            erro={erro('responsavel')}
+          />
+        )
+      case 'zonas_exteriores':
+        return (
+          <CampoMultiplo
+            rotulo="Zonas exteriores"
+            opcoes={o?.zonas_exteriores ?? []}
+            valores={v.zonas_exteriores}
+            aoMudar={(z) => mudar('zonas_exteriores', z)}
+            erro={erro('zonas_exteriores')}
+          />
+        )
+      case 'freguesia':
+        return (
+          <Largo>
+            <div className="grelha-campos">
+              <SeletorLocalizacao
+                freguesia={v.freguesia}
+                atual={imovel?.freguesia === v.freguesia ? imovel?.localizacao : null}
+                aoMudar={(f) => mudar('freguesia', f)}
+              />
+            </div>
+          </Largo>
+        )
+      case 'proprietarios':
+        return <Largo>{proprietarios}</Largo>
+    }
+    return null
+  }
   return (
     <form className="ficha ficha-edicao" onSubmit={submeter} noValidate>
       {imovel ? (
@@ -220,184 +338,13 @@ function Formulario({ imovel }: { imovel?: Imovel }) {
         </p>
       )}
 
-      <Bloco titulo="Comercialização" forcarAberto={temErros('comercializacao')}>
-        <div className="grelha-campos">
-          <CampoSelecao
-            rotulo="Operação"
-            required
-            value={v.operacao}
-            onChange={(e) => mudar('operacao', e.target.value)}
-            vazio="—"
-            opcoes={comAtual(lista(o?.operacoes), v.operacao, n?.operacao ?? null)}
-            erro={erro('operacao')}
-          />
-          <CampoSelecao
-            rotulo="Estado de comercialização"
-            vazio="—"
-            value={v.estado_comercializacao}
-            onChange={(e) => mudar('estado_comercializacao', e.target.value)}
-            opcoes={comAtual(
-              lista(o?.estados_comercializacao),
-              v.estado_comercializacao,
-              n?.estado_comercializacao ?? null,
-            )}
-            erro={erro('estado_comercializacao')}
-          />
-          <CampoSelecao
-            rotulo="Status"
-            value={v.status}
-            onChange={(e) => mudar('status', e.target.value)}
-            vazio={imovel ? undefined : 'Por omissão: ativo'}
-            opcoes={comAtual(lista(o?.status), v.status, n?.status ?? null)}
-            erro={erro('status')}
-          />
-          <CampoResponsavel
-            modulo="imoveis"
-            valor={v.responsavel}
-            atual={imovel ? { id: imovel.responsavel, nome: imovel.responsavel_nome } : null}
-            aoMudar={(x) => mudar('responsavel', x)}
-            erro={erro('responsavel')}
-          />
-        </div>
-        {extras(IMOVEL_COMERCIALIZACAO)}
-      </Bloco>
-
-      <Bloco titulo="Identificação" forcarAberto={temErros('identificacao')}>
-        {extras(IMOVEL_IDENTIFICACAO)}
-      </Bloco>
-
-      <Bloco titulo="Proprietários" forcarAberto={temErros('proprietarios')}>
-        {v.proprietarios.length === 0 && <p className="ajuda">Sem proprietários.</p>}
-        <ul className="lista-proprietarios">
-          {v.proprietarios.map((p, i) => (
-            <li key={p.entidade.id}>
-              <span className="proprietario-nome">
-                {p.acessivel ? (
-                  <strong>{p.entidade.titulo}</strong>
-                ) : (
-                  <span className="vazio">{p.entidade.titulo}</span>
-                )}
-                {p.entidade.detalhe && <small className="ajuda"> {p.entidade.detalhe}</small>}
-              </span>
-              <label className="quota">
-                Quota (%)
-                <input
-                  inputMode="decimal"
-                  value={p.quota}
-                  disabled={!p.acessivel}
-                  onChange={(e) =>
-                    mudar(
-                      'proprietarios',
-                      v.proprietarios.map((x, j) => (j === i ? { ...x, quota: e.target.value } : x)),
-                    )
-                  }
-                />
-              </label>
-              {p.acessivel && (
-                <button
-                  type="button"
-                  className="botao-icone"
-                  aria-label={`Remover ${p.entidade.titulo}`}
-                  onClick={() =>
-                    mudar(
-                      'proprietarios',
-                      v.proprietarios.filter((_, j) => j !== i),
-                    )
-                  }
-                >
-                  ✕
-                </button>
-              )}
-            </li>
-          ))}
-        </ul>
-        {v.proprietarios.length > 0 && (
-          <p className={somaQuotas > 100 ? 'campo-erro' : 'ajuda'}>
-            Soma das quotas indicadas: {somaQuotas.toLocaleString('pt-PT')} %{somaQuotas > 100 && ' (máximo 100 %)'}
-          </p>
-        )}
-        {erro('proprietarios') && (
-          <p className="campo-erro" role="alert">
-            {erro('proprietarios')!.join(' ')}
-          </p>
-        )}
-        <div className="novo-proprietario">
-          <SeletorPesquisavel
-            rotulo="Acrescentar proprietário"
-            chave="entidades"
-            procurar={entidadesApi.procurar}
-            valor={novoProprietario}
-            aoMudar={(e) => {
-              if (e) {
-                mudar('proprietarios', [...v.proprietarios, { entidade: e, acessivel: true, quota: '' }])
-                setNovoProprietario(null)
-              }
-            }}
-            excluir={v.proprietarios.map((p) => p.entidade.id)}
-            placeholder="Nome, NIF ou referência da entidade…"
-          />
-          <Link to="/entidades/nova" target="_blank" className="ligacao-secundaria">
-            Criar nova entidade
-          </Link>
-        </div>
-      </Bloco>
-
-      <Bloco titulo="Caracterização" forcarAberto={temErros('caracterizacao')}>
-        {extras(IMOVEL_CARACTERIZACAO)}
-        <div className="grelha-campos">
-          <CampoMultiplo
-            rotulo="Zonas exteriores"
-            opcoes={o?.zonas_exteriores ?? []}
-            valores={v.zonas_exteriores}
-            aoMudar={(z) => mudar('zonas_exteriores', z)}
-            erro={erro('zonas_exteriores')}
-          />
-        </div>
-      </Bloco>
-
-      <Bloco titulo="Divisões" forcarAberto={temErros('divisoes')}>
-        {extras(IMOVEL_DIVISOES)}
-      </Bloco>
-
-      <Bloco
-        titulo="Equipamentos e conforto"
-        forcarAberto={temErros('equipamentos')}
-        abertoInicial={!imovel || preenchido(IMOVEL_EQUIPAMENTOS)}
-      >
-        {extras(IMOVEL_EQUIPAMENTOS)}
-      </Bloco>
-
-      <Bloco titulo="Áreas (m²)" forcarAberto={temErros('areas')}>
-        {extras(IMOVEL_AREAS)}
-      </Bloco>
-
-      <Bloco
-        titulo="Informação registal"
-        forcarAberto={temErros('registal')}
-        abertoInicial={!imovel || preenchido(IMOVEL_REGISTAL)}
-      >
-        {extras(IMOVEL_REGISTAL)}
-      </Bloco>
-
-      <Bloco titulo="Localização" forcarAberto={temErros('localizacao')}>
-        {extras(IMOVEL_MORADA)}
-        <div className="grelha-campos">
-          <SeletorLocalizacao
-            freguesia={v.freguesia}
-            atual={imovel?.freguesia === v.freguesia ? imovel?.localizacao : null}
-            aoMudar={(f) => mudar('freguesia', f)}
-          />
-        </div>
-        {extras(IMOVEL_ZONA)}
-      </Bloco>
-
-      <Bloco
-        titulo="Descrição e observações"
-        abertoInicial={!imovel || preenchido(IMOVEL_TEXTOS)}
-        forcarAberto={temErros('textos')}
-      >
-        {extras(IMOVEL_TEXTOS)}
-      </Bloco>
+      <BlocosConfiguraveis
+        def={ECRA_IMOVEL}
+        modo="editar"
+        campo={desenharCampo}
+        erros={erros}
+        abertoInicial={(b) => !imovel || !IMOVEL_SECUNDARIOS.has(b.chave) || b.campos.some((c) => v.extra[c])}
+      />
 
       <div className="barra-gravar">
         <button
