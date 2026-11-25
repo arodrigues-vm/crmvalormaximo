@@ -30,7 +30,7 @@ ECRAS = {
     ),
     "procuras": ("procuras.Procura", "procuras", "Procuras e Qualificação", ["referencia"]),
     "visitas": ("visitas.Visita", "visitas", "Visitas", ["referencia", "imovel_descricao_livre"]),
-    "interesses": ("visitas.Interesse", "visitas", "Interesses", ["referencia"]),
+    "interesses": ("visitas.Interesse", "visitas", "Seguimento Compradores", ["referencia"]),
     "propostas": ("propostas.Proposta", "propostas", "Propostas", ["referencia", "imovel_descricao_livre"]),
     "agentes": ("agentes.Agente", "agentes", "Agentes", ["referencia", "nome"]),
     "agencias": ("agentes.Agencia", "agencias", "Agências", ["referencia", "nome"]),

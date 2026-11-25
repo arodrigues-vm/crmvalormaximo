@@ -4,22 +4,26 @@ import { Link, NavLink, useLocation } from 'react-router-dom'
 import { GRUPOS } from './modulos'
 import { useSessao } from './sessao'
 
-function nomeModuloAtual(caminho: string): string {
+/** Módulo da página atual: o de caminho mais comprido que corresponde (ex.: /visitas/interesses é o
+ * Seguimento Compradores, não as Visitas). */
+function moduloAtual(caminho: string) {
+  let melhor: (typeof GRUPOS)[number]['modulos'][number] | null = null
   for (const grupo of GRUPOS) {
     for (const modulo of grupo.modulos) {
-      if (modulo.caminho === caminho || (modulo.caminho !== '/' && caminho.startsWith(modulo.caminho))) {
-        return modulo.nome
-      }
+      const corresponde =
+        modulo.caminho === caminho || (modulo.caminho !== '/' && caminho.startsWith(`${modulo.caminho}/`))
+      if (corresponde && (!melhor || modulo.caminho.length > melhor.caminho.length)) melhor = modulo
     }
   }
-  return 'CRM Valor Máximo'
+  return melhor
 }
 
 export function Layout({ children }: { children: ReactNode }) {
   const [menuAberto, setMenuAberto] = useState(false)
   const { pathname } = useLocation()
+  const atual = moduloAtual(pathname)
   const { utilizador, sair, pode } = useSessao()
-  const grupos = GRUPOS.map((g) => ({ ...g, modulos: g.modulos.filter((m) => pode(m.chave)) })).filter(
+  const grupos = GRUPOS.map((g) => ({ ...g, modulos: g.modulos.filter((m) => pode(m.permissao ?? m.chave)) })).filter(
     (g) => g.modulos.length > 0,
   )
 
@@ -37,7 +41,11 @@ export function Layout({ children }: { children: ReactNode }) {
                 {grupo.modulos.map((modulo) => (
                   <li key={modulo.chave}>
                     {modulo.disponivel ? (
-                      <NavLink to={modulo.caminho} end={modulo.caminho === '/'} onClick={() => setMenuAberto(false)}>
+                      <NavLink
+                        to={modulo.caminho}
+                        className={() => (atual?.chave === modulo.chave ? 'active' : '')}
+                        onClick={() => setMenuAberto(false)}
+                      >
                         {modulo.nome}
                       </NavLink>
                     ) : (
@@ -63,7 +71,7 @@ export function Layout({ children }: { children: ReactNode }) {
           >
             ☰
           </button>
-          <h1>{nomeModuloAtual(pathname)}</h1>
+          <h1>{atual?.nome ?? 'CRM Valor Máximo'}</h1>
           {utilizador && (
             <div className="utilizador">
               <Link to="/conta" className="utilizador-nome" title="A minha conta">

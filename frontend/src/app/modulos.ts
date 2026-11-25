@@ -5,6 +5,8 @@ export interface Modulo {
   nome: string
   caminho: string
   disponivel: boolean
+  /** Módulo de permissões, quando é diferente da chave (ex.: Seguimento Compradores usa as de Visitas). */
+  permissao?: string
 }
 
 export interface GrupoModulos {
@@ -30,6 +32,14 @@ export const GRUPOS: GrupoModulos[] = [
       m('oportunidades', 'Oportunidades de Angariação', true),
       m('procuras', 'Procuras e Qualificação', true),
       m('visitas', 'Visitas', true),
+      // Interesses dos compradores (D-36), com nome escolhido pelo proprietário (D-45).
+      {
+        chave: 'seguimento',
+        nome: 'Seguimento Compradores',
+        caminho: '/visitas/interesses',
+        disponivel: true,
+        permissao: 'visitas',
+      },
       m('propostas', 'Propostas', true),
       m('transacoes', 'Transações'),
       m('pos-venda', 'Pós-Venda'),

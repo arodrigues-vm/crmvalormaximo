@@ -5,7 +5,6 @@ import { dataPt } from '../../componentes/formatar'
 import { Paginacao } from '../../componentes/Paginacao'
 import { useListaFiltrada } from '../../componentes/useListaFiltrada'
 import { ETIQUETA_VISITA, interessesApi } from './api'
-import { NavegacaoVisitas } from './VisitasLista'
 
 const SEPARADORES: [string, string][] = [
   ['ativo', 'Em acompanhamento'],
@@ -28,7 +27,6 @@ export function InteressesLista() {
 
   return (
     <div className="pagina-lista">
-      <NavegacaoVisitas atual="interesses" />
       <div className="separadores" role="tablist">
         {SEPARADORES.map(([v, n]) => (
           <button

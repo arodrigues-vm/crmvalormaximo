@@ -85,7 +85,7 @@ export function InteresseConsulta() {
   return (
     <div className="ficha">
       <CabecalhoRegisto
-        modulo="Interesses"
+        modulo="Seguimento Compradores"
         caminho="/visitas/interesses"
         referencia={x.referencia}
         titulo={`${x.entidade_nome ?? 'Cliente'} · ${x.imovel_descricao}`}

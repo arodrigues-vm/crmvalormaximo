@@ -1,4 +1,4 @@
-# 8. Visitas e Interesses
+# 8. Visitas e Seguimento Compradores
 
 As **visitas** registam quando um cliente vai ver um imóvel e o que achou. Os **interesses** registam que um
 cliente está interessado num imóvel, mesmo sem o ter visitado, e guardam o acompanhamento até ele decidir.
@@ -6,7 +6,8 @@ Referências: VIS-000001 (visitas) e INT-000001 (interesses).
 
 ## 8.1 Lista de visitas
 
-Abra **Visitas** no menu. No topo pode escolher entre **Visitas** e **Interesses**.
+Abra **Visitas** no menu da esquerda. Os interesses dos compradores estão na entrada seguinte do menu,
+**Seguimento Compradores**.
 
 - **Próximas:** visitas de hoje em diante, da mais próxima para a mais distante.
 - **Realizadas** e **Todas:** da mais recente para a mais antiga.
@@ -47,7 +48,13 @@ Depois da visita, edite-a, mude o estado para **Realizada** e preencha a secçã
 2. Escreva **o que mais gostou** e **o que menos gostou** e, no fim, indique se **compraria este imóvel**.
 3. Carregue em **Guardar**.
 
-## 8.5 Interesses
+## 8.5 Seguimento Compradores (interesses)
+
+Cada interesse diz que um comprador está interessado num imóvel: um só registo por comprador e imóvel, com o
+grau de interesse, o estado, a data da última visita e os contactos feitos. Serve para saber a quem voltar a
+ligar depois das visitas e, na ficha do imóvel, quem está interessado nele. Abra **Seguimento Compradores** no
+menu da esquerda.
+
 
 Quando agenda uma visita a um **imóvel registado** com um cliente **acompanhado pela nossa agência** (o agente
 do comprador é um utilizador do CRM ou pertence a uma agência do tipo *Própria*), o CRM cria automaticamente o
@@ -56,7 +63,7 @@ registados ou com clientes de agentes externos/da rede não criam interesses. H�
 interesse mostra a data da **última visita**. Visitas canceladas ou faltas não criam interesse.
 
 Também pode registar um interesse à mão — por exemplo, quando um cliente telefona a perguntar por um imóvel —
-em **Visitas → Interesses → + Novo interesse**, ou na ficha do imóvel ou da entidade.
+em **Seguimento Compradores → + Novo interesse**, ou na ficha do imóvel ou da entidade.
 
 Na ficha do interesse:
 - indique a **origem**, o **grau de interesse** (*Muito baixo* a *Muito alto*) e o **estado** (*Ativo*, *Em

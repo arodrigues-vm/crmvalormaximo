@@ -15,23 +15,6 @@ const SEPARADORES: [string, string][] = [
   ['todas', 'Todas'],
 ]
 
-export function NavegacaoVisitas({ atual }: { atual: 'visitas' | 'interesses' }) {
-  return (
-    <nav className="separadores" aria-label="Visitas e interesses">
-      <Link to="/visitas" className={atual === 'visitas' ? 'ativo' : ''} aria-current={atual === 'visitas'}>
-        Visitas
-      </Link>
-      <Link
-        to="/visitas/interesses"
-        className={atual === 'interesses' ? 'ativo' : ''}
-        aria-current={atual === 'interesses'}
-      >
-        Interesses
-      </Link>
-    </nav>
-  )
-}
-
 export function VisitasLista() {
   const { params, mudar, termo, setTermo, pagina, consulta } = useListaFiltrada()
   const navegar = useNavigate()
@@ -49,7 +32,6 @@ export function VisitasLista() {
 
   return (
     <div className="pagina-lista">
-      <NavegacaoVisitas atual="visitas" />
       <div className="separadores" role="tablist">
         {SEPARADORES.map(([v, n]) => (
           <button

@@ -192,7 +192,7 @@ function Formulario({
   return (
     <form className="ficha ficha-edicao" onSubmit={submeter} noValidate>
       <CabecalhoRegisto
-        modulo="Interesses"
+        modulo="Seguimento Compradores"
         caminho="/visitas/interesses"
         referencia={interesse?.referencia ?? 'Novo'}
         titulo={interesse ? 'Editar interesse' : 'Novo interesse'}

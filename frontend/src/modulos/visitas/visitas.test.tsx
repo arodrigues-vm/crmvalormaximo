@@ -121,4 +121,17 @@ describe('Visitas', () => {
     expect(lista.url.searchParams.get('ordem')).toBe('proximas')
     expect(lista.url.searchParams.get('desde')).toMatch(/^\d{4}-\d{2}-\d{2}$/)
   })
+
+  it('os interesses estão no menu como «Seguimento Compradores» (D-45)', async () => {
+    simularApi({
+      '/api/auth/eu/': () => json(UTIL),
+      '/api/interesses/': () => json({ count: 0, results: [] }),
+    })
+    desenhar('/visitas/interesses')
+    const ligacao = await screen.findByRole('link', { name: 'Seguimento Compradores' })
+    expect(ligacao).toHaveAttribute('href', '/visitas/interesses')
+    expect(ligacao).toHaveClass('active')
+    expect(screen.getByRole('link', { name: 'Visitas' })).not.toHaveClass('active')
+    expect(screen.getByRole('heading', { level: 1, name: 'Seguimento Compradores' })).toBeInTheDocument()
+  })
 })

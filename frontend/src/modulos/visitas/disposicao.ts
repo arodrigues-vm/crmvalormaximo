@@ -68,7 +68,7 @@ export const ECRA_VISITA: DefinicaoEcra = {
 /** Disposição de origem do interesse; o Administrador pode alterá-la (D-43). */
 export const ECRA_INTERESSE: DefinicaoEcra = {
   modulo: 'interesses',
-  nome: 'Interesses',
+  nome: 'Seguimento Compradores',
   padrao: [
     {
       chave: 'interesse',
