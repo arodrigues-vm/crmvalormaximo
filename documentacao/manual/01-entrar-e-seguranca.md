@@ -77,6 +77,22 @@ A verificação em dois passos protege a conta mesmo que alguém descubra a pala
 - Se não tiver códigos, peça a outro Administrador para **repor a verificação em dois passos** da sua conta.
   Na entrada seguinte terá de a ativar de novo.
 
+### Desligar a verificação em dois passos
+
+Por omissão é **obrigatória para os Administradores**. O Administrador pode torná-la opcional em
+**Configurações → Parâmetros** → *Exigir início de sessão em dois passos aos Administradores* → **Não**
+(anexo A). Recomendamos mantê-la ligada.
+
+Quando não é obrigatória para o seu perfil, pode desligá-la:
+
+1. Carregue no seu **nome**, no canto superior direito. Abre **A minha conta**.
+2. Em **Início de sessão em dois passos**, escreva a sua **palavra-passe** e um **código** atual da aplicação do
+   telemóvel (ou um código de recuperação).
+3. Carregue em **Desligar o início de sessão em dois passos**.
+
+Da próxima vez entra só com email e palavra-passe. Se o Administrador voltar a pôr o parâmetro em **Sim**, na
+entrada seguinte é pedido para ativar de novo.
+
 ## 1.6 No telemóvel
 
 A aplicação adapta-se ao ecrã do telemóvel e pode ser **instalada no ecrã inicial**, como uma aplicação:

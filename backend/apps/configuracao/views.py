@@ -149,7 +149,16 @@ def ordenar(request, chave):
 VALIDADORES_PARAMETROS = {
     # chave: função que valida e normaliza o valor (levanta ValidationError)
     "cmi_alertas_dias": lambda v: _lista_dias(v),
+    "mfa_obrigatoria": lambda v: _sim_nao(v),
 }
+
+
+def _sim_nao(v):
+    if isinstance(v, bool):
+        return v
+    if isinstance(v, str) and v.lower() in ("true", "false", "sim", "não", "nao"):
+        return v.lower() in ("true", "sim")
+    raise serializers.ValidationError("Escolha Sim ou Não.")
 
 
 def _lista_dias(v):

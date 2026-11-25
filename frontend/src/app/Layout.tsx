@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 
 import { GRUPOS } from './modulos'
 import { useSessao } from './sessao'
@@ -66,10 +66,10 @@ export function Layout({ children }: { children: ReactNode }) {
           <h1>{nomeModuloAtual(pathname)}</h1>
           {utilizador && (
             <div className="utilizador">
-              <span className="utilizador-nome">
+              <Link to="/conta" className="utilizador-nome" title="A minha conta">
                 {utilizador.nome}
                 <small>{utilizador.perfil_nome}</small>
-              </span>
+              </Link>
               <button className="botao-secundario" onClick={() => void sair()}>
                 Sair
               </button>

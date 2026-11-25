@@ -56,6 +56,7 @@ export const UTILIZADOR_CONSULTOR = {
   equipa_nome: null,
   mfa_ativa: false,
   mfa_configuracao_pendente: false,
+  mfa_obrigatoria: false,
   permissoes: { dashboard: todas('atribuidos'), entidades: todas('atribuidos') },
 }
 

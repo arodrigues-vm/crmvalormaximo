@@ -133,3 +133,42 @@ class TestEntradaComMfa:
         r = api.post(reverse("auth-mfa-verificar"), {"codigo": codigo(segredo, 1)}, format="json")
         assert r.status_code == 400
         assert "expirou" in r.json()["detail"]
+
+
+class TestDesativar:
+    """D-40: o Administrador pode tornar a MFA opcional; cada utilizador pode então desligá-la."""
+
+    def _admin_com_mfa(self, api, admin):
+        entrar(api, admin.email)
+        segredo, _ = configurar(api)
+        return segredo
+
+    def test_obrigatoria_nao_deixa_desativar(self, api, admin):
+        segredo = self._admin_com_mfa(api, admin)
+        r = api.post(reverse("auth-mfa-desativar"), {"password": PASSWORD, "codigo": codigo(segredo, 1)}, format="json")
+        assert r.status_code == 400 and "obrigatório" in r.json()["detail"]
+        assert api.get(reverse("auth-eu")).json()["mfa_obrigatoria"] is True
+
+    def test_parametro_torna_opcional_e_desativa_com_password_e_codigo(self, api, admin):
+        segredo = self._admin_com_mfa(api, admin)
+        r = api.patch(reverse("parametro", args=["mfa_obrigatoria"]), {"valor": False}, format="json")
+        assert r.status_code == 200 and r.json()["valor"] is False
+        assert api.get(reverse("auth-eu")).json()["mfa_obrigatoria"] is False
+        url = reverse("auth-mfa-desativar")
+        assert api.post(url, {"password": "errada", "codigo": codigo(segredo, 1)}, format="json").status_code == 400
+        assert api.post(url, {"password": PASSWORD, "codigo": "000000"}, format="json").status_code == 400
+        r = api.post(url, {"password": PASSWORD, "codigo": codigo(segredo, 1)}, format="json")
+        assert r.status_code == 200, r.content
+        assert not ConfiguracaoMFA.objects.filter(utilizador=admin).exists()
+        assert RegistoAuditoria.objects.filter(acao="sessao.mfa_desativada").exists()
+        # Na entrada seguinte já não é pedido código.
+        api.post(reverse("auth-sair"))
+        r = entrar(api, admin.email)
+        assert r.status_code == 200 and "mfa_necessaria" not in r.json()
+        assert api.get(reverse("auth-eu")).json()["mfa_configuracao_pendente"] is False
+
+    def test_so_administrador_altera_o_parametro(self, api, criar_utilizador):
+        resp = criar_utilizador(Perfil.RESPONSAVEL)
+        api.force_authenticate(resp)
+        r = api.patch(reverse("parametro", args=["mfa_obrigatoria"]), {"valor": False}, format="json")
+        assert r.status_code == 403

@@ -49,10 +49,13 @@ para pastas do OneDrive ou de outros serviços.
 
 ## A.2 Parâmetros
 
-Em **Configurações → Parâmetros** alteram-se parâmetros de funcionamento. Por agora:
+Em **Configurações → Parâmetros** alteram-se parâmetros de funcionamento:
 
 - **Avisos de expiração do CMI:** dias antes do fim em que aparecem avisos (por omissão 120, 60 e 30).
   Escreva os valores separados por vírgulas e carregue em **Guardar**.
+- **Exigir início de sessão em dois passos aos Administradores:** *Sim* (por omissão e recomendado) ou *Não*.
+  Com *Não*, os Administradores deixam de ser obrigados a usar o código do telemóvel e podem desligá-lo em
+  **A minha conta** (capítulo 1). A alteração grava-se logo ao escolher e fica na auditoria.
 
 As listas **Regimes de contrato (CMI)** (categorias Exclusivo / Não exclusivo) e **Papéis de interveniente
 (CMI)** editam-se em *Listas de valores*.

@@ -8,6 +8,7 @@ urlpatterns = [
     path("mfa/verificar/", views.MfaVerificarView.as_view(), name="auth-mfa-verificar"),
     path("mfa/configurar/", views.MfaConfigurarView.as_view(), name="auth-mfa-configurar"),
     path("mfa/ativar/", views.MfaAtivarView.as_view(), name="auth-mfa-ativar"),
+    path("mfa/desativar/", views.MfaDesativarView.as_view(), name="auth-mfa-desativar"),
     path("sair/", views.SairView.as_view(), name="auth-sair"),
     path("eu/", views.EuView.as_view(), name="auth-eu"),
     path("recuperar/", views.RecuperarView.as_view(), name="auth-recuperar"),

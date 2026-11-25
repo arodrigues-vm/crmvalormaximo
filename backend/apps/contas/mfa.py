@@ -40,6 +40,12 @@ def decifrar(texto: str) -> str:
 
 
 def mfa_obrigatoria(utilizador) -> bool:
+    """Perfis obrigados à MFA (configuração do servidor), salvo se o Administrador a tornou opcional
+    no parâmetro «mfa_obrigatoria» (D-40)."""
+    from apps.configuracao.models import parametro
+
+    if not parametro("mfa_obrigatoria"):
+        return False
     return utilizador.perfil in settings.CRM_MFA_PERFIS_OBRIGATORIOS or utilizador.is_superuser
 
 
@@ -128,3 +134,12 @@ def verificar(utilizador, codigo: str) -> str | None:
 def impressao_digital(segredo: str) -> str:
     """Identificador curto (não secreto) para registos de auditoria."""
     return hashlib.sha256(segredo.encode()).hexdigest()[:8]
+
+
+@transaction.atomic
+def desativar(utilizador) -> None:
+    """Remove a configuração MFA e os códigos de recuperação do utilizador."""
+    from .models import CodigoRecuperacaoMFA, ConfiguracaoMFA
+
+    ConfiguracaoMFA.objects.filter(utilizador=utilizador).delete()
+    CodigoRecuperacaoMFA.objects.filter(utilizador=utilizador).delete()

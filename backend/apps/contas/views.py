@@ -4,12 +4,13 @@ from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
 from django.contrib.auth.tokens import default_token_generator
+from django.db import transaction
 from django.utils.decorators import method_decorator
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from drf_spectacular.utils import extend_schema
-from rest_framework import status
+from rest_framework import serializers, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -118,6 +119,41 @@ class MfaAtivarView(APIView):
             return Response({"detail": "Código inválido. Verifique a hora do telemóvel e tente de novo."}, status=400)
         registar("sessao.mfa_ativada", modulo="sessao", request=request)
         return Response({"codigos_recuperacao": codigos})
+
+
+class DesativarMfaSerializer(serializers.Serializer):
+    password = serializers.CharField()
+    codigo = serializers.CharField()
+
+
+class MfaDesativarView(APIView):
+    """O próprio utilizador desliga a MFA, confirmando a palavra-passe e um código (D-40).
+    Não é possível enquanto a MFA for obrigatória para o seu perfil."""
+
+    permission_classes = [IsAuthenticated]
+    throttle_scope = "mfa"
+
+    @extend_schema(summary="Desativar a autenticação em dois passos", request=DesativarMfaSerializer)
+    def post(self, request):
+        u = request.user
+        if mfa.mfa_obrigatoria(u):
+            return Response(
+                {"detail": "O início de sessão em dois passos é obrigatório para o seu perfil. O Administrador pode "
+                 "torná-lo opcional em Configurações → Parâmetros."},
+                status=400,
+            )  # fmt: skip
+        if not mfa.mfa_ativa(u):
+            return Response({"detail": "O início de sessão em dois passos não está ativo."}, status=400)
+        dados = DesativarMfaSerializer(data=request.data)
+        dados.is_valid(raise_exception=True)
+        if not u.check_password(dados.validated_data["password"]):
+            return Response({"password": ["Palavra-passe incorreta."]}, status=400)
+        with transaction.atomic():
+            if mfa.verificar(u, dados.validated_data["codigo"]) is None:
+                return Response({"codigo": ["Código inválido."]}, status=400)
+            mfa.desativar(u)
+        registar("sessao.mfa_desativada", modulo="sessao", request=request)
+        return Response({"mfa_ativa": False})
 
 
 class SairView(APIView):

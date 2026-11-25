@@ -1640,3 +1640,11 @@ p.ajuda + .grelha-campos {
   font-size: 18px;
   color: var(--azul-marinho);
 }
+
+a.utilizador-nome {
+  color: inherit;
+  text-decoration: none;
+}
+a.utilizador-nome:hover {
+  text-decoration: underline;
+}

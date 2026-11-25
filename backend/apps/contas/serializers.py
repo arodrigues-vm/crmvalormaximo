@@ -19,11 +19,15 @@ class UtilizadorAtualSerializer(serializers.ModelSerializer):
         model = Utilizador
         fields = [
             "id", "email", "nome", "perfil", "perfil_nome", "equipa", "equipa_nome",
-            "permissoes", "mfa_ativa", "mfa_configuracao_pendente",
+            "permissoes", "mfa_ativa", "mfa_configuracao_pendente", "mfa_obrigatoria",
         ]  # fmt: skip
 
     mfa_ativa = serializers.SerializerMethodField()
     mfa_configuracao_pendente = serializers.SerializerMethodField()
+    mfa_obrigatoria = serializers.SerializerMethodField()
+
+    def get_mfa_obrigatoria(self, obj) -> bool:
+        return mfa.mfa_obrigatoria(obj)
 
     def get_mfa_ativa(self, obj) -> bool:
         return mfa.mfa_ativa(obj)

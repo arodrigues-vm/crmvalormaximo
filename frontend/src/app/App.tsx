@@ -41,6 +41,7 @@ import { ProcuraConsulta } from '../modulos/procuras/ProcuraConsulta'
 import { ProcuraEditar, ProcuraNova } from '../modulos/procuras/ProcuraFormulario'
 import { ProcurasLista } from '../modulos/procuras/ProcurasLista'
 import { ConfigurarMfa } from '../paginas/ConfigurarMfa'
+import { Conta } from '../paginas/Conta'
 import { Dashboard } from '../paginas/Dashboard'
 import { Entrar } from '../paginas/Entrar'
 import { DefinirPassword, PedirRecuperacao } from '../paginas/Recuperar'
@@ -135,6 +136,7 @@ export const rotas: RouteObject[] = [
           { path: ':id/editar', element: <PropostaEditar /> },
         ],
       },
+      { path: 'conta', element: <Conta /> },
       {
         path: 'visitas',
         element: <ExigeModulo modulo="visitas" />,

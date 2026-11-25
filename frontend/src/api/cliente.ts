@@ -88,6 +88,7 @@ export interface UtilizadorAtual {
   permissoes: Record<string, Record<Operacao, Ambito>>
   mfa_ativa: boolean
   mfa_configuracao_pendente: boolean
+  mfa_obrigatoria: boolean
 }
 
 export type RespostaEntrar = UtilizadorAtual | { mfa_necessaria: true }

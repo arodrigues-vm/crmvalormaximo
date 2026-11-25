@@ -87,6 +87,13 @@ PARAMETROS = {
         "Limiares de aviso; aprovados inicialmente: 120, 60 e 30 dias.",
         [120, 60, 30],
     ),
+    "mfa_obrigatoria": (
+        "Exigir início de sessão em dois passos aos Administradores",
+        "contas",
+        "Se escolher «Não», os Administradores deixam de ser obrigados a usar o código do telemóvel e podem "
+        "desligá-lo na sua conta. Recomendado: «Sim».",
+        True,
+    ),
 }
 
 
