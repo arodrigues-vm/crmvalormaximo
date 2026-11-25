@@ -101,6 +101,9 @@ com a referência do outro contrato. Contratos não exclusivos podem coexistir.
 ![Registar renovação](imagens/32-cmi-renovar.png)
 
 A renovação **não altera** a data de início original do contrato nem os ciclos anteriores: cria um novo ciclo.
+Se se enganou numa renovação, carregue em **Editar** junto dela, em **Ciclos de vigência**: as mesmas regras
+continuam a aplicar-se (começa depois do ciclo anterior, não se sobrepõe ao seguinte nem a contratos exclusivos)
+e a data fim de contrato é recalculada.
 
 ![Ciclos de vigência](imagens/33-cmi-ciclos.png)
 

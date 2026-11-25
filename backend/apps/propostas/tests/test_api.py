@@ -137,3 +137,16 @@ def test_sem_acesso(api, u, cenario, criar_utilizador):
     outro = criar_utilizador(Perfil.CONSULTOR)
     api.force_authenticate(outro)
     assert api.get(reverse("proposta-previa"), {"visita": cenario.visita.pk}).status_code == 404
+
+
+def test_editar_ronda(api, u, cenario):
+    """D-42: uma ronda registada pode ser corrigida; os valores anteriores ficam na auditoria."""
+    api.force_authenticate(u)
+    p = api.post(reverse("proposta-list"), corpo(cenario), format="json").json()
+    ronda = p["rondas"][0]
+    r = api.patch(reverse("proposta-editar-ronda", args=[p["id"], ronda["id"]]), {"valor": "232000"}, format="json")
+    assert r.status_code == 200, r.content
+    d = r.json()
+    assert d["valor_atual"] == "232000.00" and d["rondas"][0]["data"] == ronda["data"]
+    aud = RegistoAuditoria.objects.get(acao="proposta.ronda_alterada")
+    assert aud.dados["antes"] == {"valor": "230000.00"}

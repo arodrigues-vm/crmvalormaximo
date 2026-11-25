@@ -13,17 +13,20 @@ interface Interacao {
   resumo: string
   criado_por: string
   anulada: boolean
+  editada_em: string | null
+  editada_por: string | null
 }
 
-const agoraLocal = () => {
-  const d = new Date()
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset())
-  return d.toISOString().slice(0, 16)
+const paraLocal = (d: Date) => {
+  const x = new Date(d)
+  x.setMinutes(x.getMinutes() - x.getTimezoneOffset())
+  return x.toISOString().slice(0, 16)
 }
+const agoraLocal = () => paraLocal(new Date())
 
 /**
- * Diário de contactos (chamadas, reuniões…). Não se edita nem apaga: um registo errado é
- * «anulado» (fica riscado e auditado).
+ * Diário de contactos (chamadas, reuniões…). Pode corrigir-se (D-42) — o texto anterior fica na auditoria —
+ * ou anular-se (fica riscado). Não se apaga.
  */
 export function Interacoes({
   base,
@@ -38,19 +41,23 @@ export function Interacoes({
   const chave = ['interacoes', base]
   const { data = [], isLoading } = useQuery({ queryKey: chave, queryFn: () => pedido<Interacao[]>(base) })
   const [aAdicionar, setAAdicionar] = useState(false)
+  const [aEditar, setAEditar] = useState<number | null>(null)
   const [tipo, setTipo] = useState('')
   const [momento, setMomento] = useState(agoraLocal())
   const [resumo, setResumo] = useState('')
   const [erros, setErros] = useState<Record<string, string[]>>({})
 
   const criar = useMutation({
-    mutationFn: () =>
-      pedido<Interacao[]>(base, {
-        json: { tipo: Number(tipo), momento: new Date(momento).toISOString(), resumo },
-      }),
+    mutationFn: () => {
+      const corpo = { tipo: Number(tipo), momento: new Date(momento).toISOString(), resumo }
+      return aEditar
+        ? pedido<Interacao[]>(`${base}${aEditar}/`, { method: 'PATCH', json: corpo })
+        : pedido<Interacao[]>(base, { json: corpo })
+    },
     onSuccess: (l) => {
       qc.setQueryData(chave, l)
       setAAdicionar(false)
+      setAEditar(null)
       setTipo('')
       setResumo('')
       setMomento(agoraLocal())
@@ -108,11 +115,21 @@ export function Interacoes({
             placeholder="O que foi falado, combinado ou decidido."
           />
           <div className="acoes-formulario largo">
-            <button type="button" className="botao-secundario" onClick={() => setAAdicionar(false)}>
+            <button
+              type="button"
+              className="botao-secundario"
+              onClick={() => {
+                setAAdicionar(false)
+                setAEditar(null)
+                setTipo('')
+                setResumo('')
+                setMomento(agoraLocal())
+              }}
+            >
               Cancelar
             </button>
             <button type="submit" className="botao-principal" disabled={criar.isPending}>
-              Registar
+              {aEditar ? 'Guardar' : 'Registar'}
             </button>
           </div>
         </form>
@@ -125,6 +142,28 @@ export function Interacoes({
               <div className="historico-cabecalho">
                 <strong>{i.tipo_nome}</strong> · {momentoPt(i.momento)} · {i.criado_por}
                 {i.anulada && <span className="etiqueta etiqueta-neutra">Anulado</span>}
+                {i.editada_em && (
+                  <small className="ajuda">
+                    {' '}
+                    (corrigido por {i.editada_por} em {momentoPt(i.editada_em)})
+                  </small>
+                )}
+                {podeEditar && (
+                  <button
+                    type="button"
+                    className="ligacao-botao"
+                    onClick={() => {
+                      setTipo(String(i.tipo))
+                      setMomento(paraLocal(new Date(i.momento)))
+                      setResumo(i.resumo)
+                      setErros({})
+                      setAEditar(i.id)
+                      setAAdicionar(true)
+                    }}
+                  >
+                    Editar
+                  </button>
+                )}
                 {podeEditar && !i.anulada && (
                   <button
                     type="button"

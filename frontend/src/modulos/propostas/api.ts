@@ -107,6 +107,8 @@ export const propostasApi = {
   historico: (id: number) => pedido<EntradaHistorico[]>(`${BASE}${id}/historico/`),
   previa: (visita: string | number) => pedido<Previa>(`${BASE}previa/?visita=${visita}`),
   novaRonda: (id: number, dados: unknown) => pedido<Proposta>(`${BASE}${id}/rondas/`, { json: dados }),
+  editarRonda: (id: number, ronda: number, dados: unknown) =>
+    pedido<Proposta>(`${BASE}${id}/rondas/${ronda}/`, { method: 'PATCH', json: dados }),
 }
 
 export const ETIQUETA_PROPOSTA: Record<string, 'sucesso' | 'aviso' | 'neutra' | 'perigo'> = {

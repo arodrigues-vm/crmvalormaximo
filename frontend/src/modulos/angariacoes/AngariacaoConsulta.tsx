@@ -20,6 +20,7 @@ import {
   textoAlerta,
   textoTempo,
   type Angariacao,
+  type Renovacao,
 } from './api'
 
 function remuneracao(a: Angariacao): string | null {
@@ -56,6 +57,7 @@ export function AngariacaoConsulta() {
   const [dialogo, setDialogo] = useState<
     null | 'renovar' | 'corrigir' | 'concluir' | 'cancelar' | 'reabrir' | 'eliminar'
   >(null)
+  const [renovacaoEditar, setRenovacaoEditar] = useState<Renovacao | null>(null)
   const { data: a, error, isLoading } = useQuery({ queryKey: ['angariacoes', id], queryFn: () => cmiApi.obter(id) })
   const opcoes = useQuery({ queryKey: ['angariacoes', 'opcoes'], queryFn: cmiApi.opcoes, staleTime: 60_000 })
   const tiposLigacao = useQuery({
@@ -214,6 +216,11 @@ export function AngariacaoConsulta() {
                   {dataPt(r.data_inicio)} – {dataPt(r.data_fim)} ({r.prazo_meses} meses) · {r.forma_nome}
                 </span>
                 {r.observacoes && <small className="ajuda">{r.observacoes}</small>}
+                {a.acoes.editar && (
+                  <button type="button" className="ligacao-botao" onClick={() => setRenovacaoEditar(r)}>
+                    Editar
+                  </button>
+                )}
               </li>
             ))}
           </ol>
@@ -328,6 +335,18 @@ export function AngariacaoConsulta() {
           aoFechar={() => setDialogo(null)}
         />
       )}
+      {renovacaoEditar && (
+        <DialogoRenovar
+          a={a}
+          renovacao={renovacaoEditar}
+          formas={opcoes.data?.formas_renovacao ?? []}
+          aoGravar={(n) => {
+            setRenovacaoEditar(null)
+            atualizar(n)
+          }}
+          aoFechar={() => setRenovacaoEditar(null)}
+        />
+      )}
       {dialogo === 'corrigir' && <DialogoCorrigir a={a} aoGravar={atualizar} aoFechar={() => setDialogo(null)} />}
       {(dialogo === 'concluir' || dialogo === 'cancelar' || dialogo === 'reabrir') && (
         <DialogoSituacao
@@ -425,30 +444,35 @@ function DialogoBase({
 
 function DialogoRenovar({
   a,
+  renovacao,
   formas,
   aoGravar,
   aoFechar,
 }: {
   a: Angariacao
+  /** Quando indicada, corrige esta renovação (D-42) em vez de registar uma nova. */
+  renovacao?: Renovacao
   formas: { valor: string; nome: string }[]
   aoGravar: (a: Angariacao) => void
   aoFechar: () => void
 }) {
-  const [forma, setForma] = useState('')
-  const [inicio, setInicio] = useState(a.data_fim_vigente ? proximoDia(a.data_fim_vigente) : '')
-  const [prazo, setPrazo] = useState(String(a.prazo_meses ?? ''))
-  const [observacoes, setObservacoes] = useState('')
-  const { m, erros } = useAcao(
-    () => cmiApi.renovar(a.id, { forma, data_inicio: inicio, prazo_meses: Number(prazo), observacoes }),
-    aoGravar,
+  const [forma, setForma] = useState(renovacao?.forma ?? '')
+  const [inicio, setInicio] = useState(
+    renovacao?.data_inicio ?? (a.data_fim_vigente ? proximoDia(a.data_fim_vigente) : ''),
   )
+  const [prazo, setPrazo] = useState(String(renovacao?.prazo_meses ?? a.prazo_meses ?? ''))
+  const [observacoes, setObservacoes] = useState(renovacao?.observacoes ?? '')
+  const { m, erros } = useAcao(() => {
+    const corpo = { forma, data_inicio: inicio, prazo_meses: Number(prazo), observacoes }
+    return renovacao ? cmiApi.editarRenovacao(a.id, renovacao.id, corpo) : cmiApi.renovar(a.id, corpo)
+  }, aoGravar)
   return (
     <DialogoBase
-      titulo="Registar renovação"
+      titulo={renovacao ? `Editar renovação (ciclo ${renovacao.ciclo})` : 'Registar renovação'}
       aoFechar={aoFechar}
       aoConfirmar={() => m.mutate()}
       pendente={m.isPending}
-      confirmar="Registar renovação"
+      confirmar={renovacao ? 'Guardar' : 'Registar renovação'}
     >
       <p className="ajuda">
         A renovação cria um novo ciclo com data de início própria. A data de início original do contrato e os ciclos

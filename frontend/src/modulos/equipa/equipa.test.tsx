@@ -75,4 +75,19 @@ describe('Equipa', () => {
       'Rita Ensaio (Equipa Norte)',
     ])
   })
+
+  it('o nome de uma equipa pode ser corrigido', async () => {
+    const pedidos = simularApi({
+      '/api/auth/eu/': () => json(ADMIN),
+      '/api/equipa/membros/opcoes/': () => json(OPCOES),
+      'GET /api/equipa/equipas/': () => json([{ id: 3, nome: 'Valor Maxmo', ativa: true, n_membros: 0 }]),
+      'PATCH /api/equipa/equipas/3/': () => json({ id: 3, nome: 'Valor Máximo', ativa: true, n_membros: 0 }),
+    })
+    desenhar('/equipa/equipas')
+    fireEvent.click(await screen.findByRole('button', { name: 'Mudar nome' }))
+    fireEvent.change(screen.getByLabelText('Novo nome de Valor Maxmo'), { target: { value: 'Valor Máximo' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar' }))
+    await waitFor(() => expect(pedidos.some((p) => p.metodo === 'PATCH')).toBe(true))
+    expect(pedidos.find((p) => p.metodo === 'PATCH')!.corpo).toEqual({ nome: 'Valor Máximo' })
+  })
 })

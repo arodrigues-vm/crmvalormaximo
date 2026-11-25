@@ -2,10 +2,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 
-import { ErroApi } from '../../api/cliente'
+import { ErroApi, pedido } from '../../api/cliente'
 import { CampoTexto } from '../../componentes/campos'
 import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
-import { entidadesApi, type Opcoes } from './api'
+import { entidadesApi, type Opcoes, type Relacao } from './api'
 
 /** «15 de março» — o aniversário não precisa do ano. */
 function aniversarioPt(data: string) {
@@ -78,6 +78,28 @@ export function RelacoesEntidade({ entidadeId, podeEditar, tipos }: Props) {
     },
   })
 
+  // Edição de uma relação existente (D-42): tipo/sentido e observações.
+  const [aEditar, setAEditar] = useState<{ id: number; tipoSentido: string; observacoes: string } | null>(null)
+  const editar = useMutation({
+    mutationFn: (x: { id: number; tipoSentido: string; observacoes: string }) => {
+      const [tipo, sentido] = x.tipoSentido.split(':')
+      return pedido<Relacao[]>(`/api/entidades/${entidadeId}/relacoes/${x.id}/`, {
+        method: 'PATCH',
+        json: { tipo: Number(tipo), sentido, observacoes: x.observacoes },
+      })
+    },
+    onSuccess: (lista) => {
+      qc.setQueryData(chave, lista)
+      setAEditar(null)
+      setErro(null)
+    },
+    onError: (e) => setErro(e instanceof ErroApi ? Object.values(e.campos).flat().join(' ') || e.message : 'Falhou.'),
+  })
+  const sentidoAtual = (r: Relacao) => {
+    const t = tipos.find((x) => x.id === r.tipo)
+    return `${r.tipo}:${!t || t.simetrica || r.rotulo === t.nome ? 'direto' : 'inverso'}`
+  }
+
   const remover = useMutation({
     mutationFn: (id: number) => entidadesApi.removerRelacao(entidadeId, id),
     onSuccess: () => qc.invalidateQueries({ queryKey: chave }),
@@ -113,6 +135,53 @@ export function RelacoesEntidade({ entidadeId, podeEditar, tipos }: Props) {
                 <small className="ajuda">Aniversário: {aniversarioPt(r.entidade.data_nascimento)}</small>
               )}
               {r.observacoes && <small className="ajuda">{r.observacoes}</small>}
+              {podeEditar && r.acessivel && (
+                <button
+                  type="button"
+                  className="ligacao-botao"
+                  aria-label={`Editar relação ${r.rotulo}`}
+                  onClick={() => setAEditar({ id: r.id, tipoSentido: sentidoAtual(r), observacoes: r.observacoes })}
+                >
+                  Editar
+                </button>
+              )}
+              {aEditar?.id === r.id && (
+                <form
+                  className="nova-relacao largo"
+                  onSubmit={(ev) => {
+                    ev.preventDefault()
+                    editar.mutate(aEditar)
+                  }}
+                >
+                  <div className="campo">
+                    <label htmlFor={`relacao-editar-${r.id}`}>Esta entidade é…</label>
+                    <select
+                      id={`relacao-editar-${r.id}`}
+                      value={aEditar.tipoSentido}
+                      onChange={(e) => setAEditar({ ...aEditar, tipoSentido: e.target.value })}
+                    >
+                      {opcoes.map((o) => (
+                        <option key={o.valor} value={o.valor}>
+                          {o.nome}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <CampoTexto
+                    rotulo="Observações"
+                    value={aEditar.observacoes}
+                    onChange={(e) => setAEditar({ ...aEditar, observacoes: e.target.value })}
+                  />
+                  <div className="acoes-formulario largo">
+                    <button type="button" className="botao-secundario" onClick={() => setAEditar(null)}>
+                      Cancelar
+                    </button>
+                    <button type="submit" className="botao-principal" disabled={editar.isPending}>
+                      Guardar
+                    </button>
+                  </div>
+                </form>
+              )}
               {podeEditar && (
                 <button
                   type="button"

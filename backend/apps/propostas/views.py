@@ -31,7 +31,12 @@ class PropostaViewSet(RegistoViewSet):
     modulo = "propostas"
     modelo = Proposta
     nome_registo = "proposta"
-    operacoes_extra = {**RegistoViewSet.operacoes_extra, "rondas": Operacao.EDITAR, "previa": Operacao.CONSULTAR}
+    operacoes_extra = {
+        **RegistoViewSet.operacoes_extra,
+        "rondas": Operacao.EDITAR,
+        "editar_ronda": Operacao.EDITAR,
+        "previa": Operacao.CONSULTAR,
+    }
     campos_auditados = [
         "visita_id", "imovel_id", "imovel_descricao", "imovel_localizacao", "entidade_id", "agente_comprador_id",
         "agente_imovel_id", "estado_id", "responsavel_id", "observacoes",
@@ -185,3 +190,30 @@ class PropostaViewSet(RegistoViewSet):
                 dados={"ronda": numero, "autor": r.autor, "valor": str(r.valor)},
             )  # fmt: skip
         return Response(self.get_serializer(self.recarregar(p)).data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(request=RondaSerializer)
+    @action(detail=True, methods=["patch"], url_path=r"rondas/(?P<ronda_id>\d+)")
+    def editar_ronda(self, request, pk=None, ronda_id=None):
+        """Corrige uma ronda já registada (D-42); os valores anteriores ficam na auditoria."""
+        with transaction.atomic():
+            p = Proposta.objects.select_for_update().get(pk=self.get_object().pk)
+            if not pode_no_registo(request.user, self.modulo, Operacao.EDITAR, p, campo_partilhas="partilhada_com"):
+                raise PermissionDenied("Não tem permissão para alterar esta proposta.")
+            r = p.rondas.filter(pk=ronda_id).first()
+            if r is None:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+            campos = ["autor", "data", "valor", "sinal_valor", "sinal_unidade", "data_cpcv", "data_escritura",
+                      "validade", "condicoes", "modo_pagamento_id", "financiamento_id"]  # fmt: skip
+            antes = {c: str(getattr(r, c)) for c in campos}
+            s = RondaSerializer(r, data=request.data, partial=True)
+            s.is_valid(raise_exception=True)
+            r = s.save()
+            depois = {c: str(getattr(r, c)) for c in campos}
+            p.atualizado_por = request.user
+            p.save()
+            registar(
+                "proposta.ronda_alterada", modulo=self.modulo, objeto=p, request=request,
+                dados={"ronda": r.numero, "antes": {c: v for c, v in antes.items() if v != depois[c]},
+                       "depois": {c: v for c, v in depois.items() if v != antes[c]}},
+            )  # fmt: skip
+        return Response(self.get_serializer(self.recarregar(p)).data)

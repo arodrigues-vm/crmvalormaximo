@@ -48,8 +48,9 @@ reunião, email…), quando foi e um resumo.
 
 ![Ficha da oportunidade](imagens/41-oportunidade-consulta.png)
 
-Os contactos não se editam nem apagam: se registou algo errado, carregue em **Anular** (fica riscado, mas
-guardado).
+Se registou algo errado num contacto, carregue em **Editar** para o corrigir (o texto anterior fica guardado na
+auditoria e o contacto mostra «corrigido por… em…»), ou em **Anular** (fica riscado, mas guardado). Os contactos
+não se apagam.
 
 ## 6.4 Criar o imóvel e, depois, o CMI
 

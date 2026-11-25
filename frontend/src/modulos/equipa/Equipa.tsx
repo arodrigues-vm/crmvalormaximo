@@ -395,6 +395,16 @@ export function EquipasLista() {
     },
     onError: (e) => setErro(e instanceof ErroApi ? Object.values(e.campos).flat().join(' ') || e.message : 'Falhou.'),
   })
+  const [aRenomear, setARenomear] = useState<{ id: number; nome: string } | null>(null)
+  const renomear = useMutation({
+    mutationFn: (e: { id: number; nome: string }) => equipaApi.atualizarEquipa(e.id, { nome: e.nome.trim() }),
+    onSuccess: () => {
+      setARenomear(null)
+      setErro(null)
+      atualizar()
+    },
+    onError: (e) => setErro(e instanceof ErroApi ? Object.values(e.campos).flat().join(' ') || e.message : 'Falhou.'),
+  })
   const alternar = useMutation({
     mutationFn: (e: { id: number; ativa: boolean }) => equipaApi.atualizarEquipa(e.id, { ativa: !e.ativa }),
     onSuccess: atualizar,
@@ -409,11 +419,43 @@ export function EquipasLista() {
       <ul className="lista-relacoes">
         {data.map((e) => (
           <li key={e.id}>
-            <strong>{e.nome}</strong>
+            {aRenomear?.id === e.id ? (
+              <form
+                className="valor-novo"
+                onSubmit={(ev) => {
+                  ev.preventDefault()
+                  if (aRenomear.nome.trim()) renomear.mutate(aRenomear)
+                }}
+              >
+                <input
+                  aria-label={`Novo nome de ${e.nome}`}
+                  value={aRenomear.nome}
+                  autoFocus
+                  onChange={(ev) => setARenomear({ id: e.id, nome: ev.target.value })}
+                />
+                <button type="submit" className="botao-principal" disabled={renomear.isPending}>
+                  Guardar
+                </button>
+                <button type="button" className="botao-secundario" onClick={() => setARenomear(null)}>
+                  Cancelar
+                </button>
+              </form>
+            ) : (
+              <strong>{e.nome}</strong>
+            )}
             <span className="ajuda">
               {e.n_membros} membro{e.n_membros === 1 ? '' : 's'} ativo{e.n_membros === 1 ? '' : 's'}
             </span>
             {!e.ativa && <span className="etiqueta etiqueta-neutra">Inativa</span>}
+            {gerir && aRenomear?.id !== e.id && (
+              <button
+                type="button"
+                className="botao-secundario"
+                onClick={() => setARenomear({ id: e.id, nome: e.nome })}
+              >
+                Mudar nome
+              </button>
+            )}
             {gerir && (
               <button type="button" className="botao-secundario" onClick={() => alternar.mutate(e)}>
                 {e.ativa ? 'Desativar' : 'Reativar'}

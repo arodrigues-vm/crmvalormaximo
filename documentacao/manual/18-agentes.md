@@ -32,7 +32,8 @@ administradores). Cada membro tem uma conta individual para entrar. Abra **Equip
 
 ### Equipas
 
-No separador **Equipas** cria e desativa as equipas (por exemplo, *Equipa Norte*). O Responsável de Equipa vê e
+No separador **Equipas** cria, corrige o nome (**Mudar nome**) e desativa as equipas (por exemplo, *Equipa
+Norte*). O Responsável de Equipa vê e
 gere os registos dos membros da sua equipa.
 
 ### Responsável de cada registo

@@ -29,16 +29,24 @@ export function LigacoesExternas({ base, podeEditar, tipos }: Props) {
   const chave = ['ligacoes', base]
   const { data: ligacoes = [], isLoading } = useQuery({ queryKey: chave, queryFn: () => pedido<Ligacao[]>(base) })
   const [aAdicionar, setAAdicionar] = useState(false)
+  // Edição (D-42): reaproveita o mesmo formulário.
+  const [aEditar, setAEditar] = useState<number | null>(null)
   const [tipo, setTipo] = useState('')
   const [titulo, setTitulo] = useState('')
   const [url, setUrl] = useState('')
   const [erros, setErros] = useState<Record<string, string[]>>({})
 
   const criar = useMutation({
-    mutationFn: () => pedido<Ligacao[]>(base, { json: { tipo: Number(tipo), titulo, url: url.trim() } }),
+    mutationFn: () => {
+      const corpo = { tipo: Number(tipo), titulo, url: url.trim() }
+      return aEditar
+        ? pedido<Ligacao[]>(`${base}${aEditar}/`, { method: 'PATCH', json: corpo })
+        : pedido<Ligacao[]>(base, { json: corpo })
+    },
     onSuccess: (l) => {
       qc.setQueryData(chave, l)
       setAAdicionar(false)
+      setAEditar(null)
       setTipo('')
       setTitulo('')
       setUrl('')
@@ -76,6 +84,23 @@ export function LigacoesExternas({ base, podeEditar, tipos }: Props) {
               <a href={l.url} target="_blank" rel="noopener noreferrer">
                 {l.titulo} ↗
               </a>
+              {podeEditar && (
+                <button
+                  type="button"
+                  className="ligacao-botao"
+                  aria-label={`Editar ligação ${l.titulo}`}
+                  onClick={() => {
+                    setTipo(String(l.tipo))
+                    setTitulo(l.titulo)
+                    setUrl(l.url)
+                    setErros({})
+                    setAEditar(l.id)
+                    setAAdicionar(true)
+                  }}
+                >
+                  Editar
+                </button>
+              )}
               {podeEditar && (
                 <button
                   type="button"
@@ -125,11 +150,21 @@ export function LigacoesExternas({ base, podeEditar, tipos }: Props) {
             ajuda="Copie o link de partilha da pasta no OneDrive (ou outro serviço) e cole-o aqui."
           />
           <div className="acoes-formulario largo">
-            <button type="button" className="botao-secundario" onClick={() => setAAdicionar(false)}>
+            <button
+              type="button"
+              className="botao-secundario"
+              onClick={() => {
+                setAAdicionar(false)
+                setAEditar(null)
+                setTipo('')
+                setTitulo('')
+                setUrl('')
+              }}
+            >
               Cancelar
             </button>
             <button type="submit" className="botao-principal" disabled={criar.isPending}>
-              Adicionar
+              {aEditar ? 'Guardar' : 'Adicionar'}
             </button>
           </div>
         </form>

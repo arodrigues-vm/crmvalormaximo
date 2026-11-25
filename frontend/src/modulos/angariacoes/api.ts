@@ -165,6 +165,8 @@ export const cmiApi = {
   opcoes: () => pedido<OpcoesCmi>(`${BASE}opcoes/`),
   historico: (id: number) => pedido<EntradaHistorico[]>(`${BASE}${id}/historico/`),
   renovar: (id: number, dados: unknown) => pedido<Angariacao>(`${BASE}${id}/renovar/`, { json: dados }),
+  editarRenovacao: (id: number, renovacao: number, dados: unknown) =>
+    pedido<Angariacao>(`${BASE}${id}/renovacoes/${renovacao}/`, { method: 'PATCH', json: dados }),
   corrigir: (id: number, dados: unknown) => pedido<Angariacao>(`${BASE}${id}/corrigir/`, { json: dados }),
   situacao: (id: number, dados: unknown) => pedido<Angariacao>(`${BASE}${id}/situacao/`, { json: dados }),
   doImovel: (imovel: number) =>

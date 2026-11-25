@@ -60,7 +60,8 @@ class RondaSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"sinal_valor": "A percentagem não pode passar de 100%."})
         if d.get("data_cpcv") and d.get("data_escritura") and d["data_escritura"] < d["data_cpcv"]:
             raise serializers.ValidationError({"data_escritura": "A escritura não pode ser antes do CPCV."})
-        d.setdefault("data", timezone.localdate())
+        if self.instance is None:
+            d.setdefault("data", timezone.localdate())
         return d
 
 

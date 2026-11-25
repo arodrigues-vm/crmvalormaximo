@@ -20,6 +20,7 @@ from .serializers import (
     DuplicadosPedidoSerializer,
     EntidadeListaSerializer,
     EntidadeSerializer,
+    RelacaoEdicaoSerializer,
     RelacaoPedidoSerializer,
 )
 from .servicos import existem_outros_fortes, procurar_duplicados, tem_duplicado_forte
@@ -431,12 +432,37 @@ class EntidadeViewSet(
         )
         return Response(self._listar_relacoes(e), status=status.HTTP_201_CREATED)
 
-    @action(detail=True, methods=["delete"], url_path=r"relacoes/(?P<relacao_id>\d+)")
+    @extend_schema(request=RelacaoEdicaoSerializer)
+    @action(detail=True, methods=["patch", "delete"], url_path=r"relacoes/(?P<relacao_id>\d+)")
     def remover_relacao(self, request, pk=None, relacao_id=None):
+        """PATCH corrige o tipo/sentido ou as observações da relação; DELETE remove-a (D-42)."""
         e = self.get_object()
         r = RelacaoEntidade.objects.filter(Q(origem=e) | Q(destino=e), pk=relacao_id).select_related("tipo").first()
         if r is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
+        if request.method == "PATCH":
+            s = RelacaoEdicaoSerializer(data=request.data, partial=True)
+            s.is_valid(raise_exception=True)
+            d = s.validated_data
+            antes = {"tipo": r.tipo.nome, "origem": r.origem_id, "destino": r.destino_id, "observacoes": r.observacoes}
+            outra = r.destino if r.origem_id == e.pk else r.origem
+            if "tipo" in d:
+                tipo = TipoRelacao.objects.filter(pk=d["tipo"], ativo=True).first()
+                if tipo is None:
+                    raise serializers.ValidationError({"tipo": "Tipo de relação inválido."})
+                r.tipo = tipo
+                inverso = d.get("sentido") == "inverso" and not tipo.simetrica
+                r.origem, r.destino = (outra, e) if inverso else (e, outra)
+            if "observacoes" in d:
+                r.observacoes = d["observacoes"]
+            duplicada = RelacaoEntidade.objects.filter(tipo=r.tipo, origem=r.origem, destino=r.destino).exclude(pk=r.pk)
+            if duplicada.exists():
+                raise serializers.ValidationError({"tipo": "Esta relação já existe."})
+            r.save()
+            depois = {"tipo": r.tipo.nome, "origem": r.origem_id, "destino": r.destino_id, "observacoes": r.observacoes}
+            registar("entidade.relacao_alterada", modulo=MODULO, objeto=e, request=request,
+                     dados={"relacao": r.pk, "antes": antes, "depois": depois})  # fmt: skip
+            return Response(self._listar_relacoes(e))
         dados = {"relacao": r.pk, "tipo": r.tipo.nome, "origem": r.origem_id, "destino": r.destino_id}
         r.delete()
         registar("entidade.relacao_removida", modulo=MODULO, objeto=e, request=request, dados=dados)

@@ -38,6 +38,10 @@ Não inventar regras de negócio, fiscais ou prazos legais. Em ambiguidade, apre
 - **Campos de escolha (D-34):** sempre **listas suspensas** (também as de escolha múltipla, com o componente
   `CampoMultiplo`), e as opções vêm **sempre de listas configuráveis** (`campo_lista`/`ValorLista`), nunca
   fixas no código — em todos os módulos, existentes e futuros.
+- **Tudo o que se cria pode ser editado (D-42):** em todos os módulos, existentes e futuros, cada registo e
+  sub-registo (linhas, rondas, renovações, contactos, ligações, nomes de equipas, valores de listas…) tem forma
+  de ser corrigido no ecrã. A edição guarda sempre o valor anterior (histórico ou auditoria) e respeita as
+  regras de negócio e as permissões. Exceção: os próprios registos de auditoria/histórico, que não se alteram.
 - Identidade visual: usar apenas o logótipo aprovado (`documentacao/marca/`); nunca o redesenhar.
 
 ## Comandos

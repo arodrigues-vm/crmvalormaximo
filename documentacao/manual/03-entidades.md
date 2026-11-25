@@ -141,6 +141,7 @@ Construções Demonstração, na ficha da empresa aparece *Tem como gerente* Ana
 
 ![Relações de uma entidade](imagens/19-relacoes-lista.png)
 
+- Para corrigir uma relação (tipo ou observações), carregue em **Editar** ao lado dela.
 - Para remover uma relação, carregue em **✕** ao lado dela e confirme.
 - Se a outra entidade pertencer a um colega a que não tem acesso, verá apenas *«Entidade a que não tem
   acesso»*, sem nome nem dados.

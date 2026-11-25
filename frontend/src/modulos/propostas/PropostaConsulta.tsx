@@ -24,10 +24,15 @@ export function PropostaConsulta() {
   const [dialogo, setDialogo] = useState<null | 'ronda' | 'eliminar'>(null)
   const [ronda, setRonda] = useState(RONDA_VAZIA)
   const [errosRonda, setErrosRonda] = useState<Record<string, string[]>>({})
+  // Ronda a corrigir (D-42); null = nova ronda.
+  const [rondaEditar, setRondaEditar] = useState<Ronda | null>(null)
   const { data: p, error, isLoading } = useQuery({ queryKey: ['propostas', id], queryFn: () => propostasApi.obter(id) })
   const opcoes = useQuery({ queryKey: ['propostas', 'opcoes'], queryFn: propostasApi.opcoes, staleTime: 60_000 })
   const novaRonda = useMutation({
-    mutationFn: () => propostasApi.novaRonda(Number(id), rondaParaApi(ronda)),
+    mutationFn: () =>
+      rondaEditar
+        ? propostasApi.editarRonda(Number(id), rondaEditar.id, { ...rondaParaApi(ronda), data: rondaEditar.data })
+        : propostasApi.novaRonda(Number(id), rondaParaApi(ronda)),
     onSuccess: (r) => {
       qc.setQueryData(['propostas', id], r)
       qc.invalidateQueries({ queryKey: ['propostas', 'lista'] })
@@ -50,7 +55,28 @@ export function PropostaConsulta() {
   const emNegociacao = p.estado_categoria === 'negociacao'
   const ultima = p.rondas[p.rondas.length - 1]
 
+  const deRonda = (r: Ronda) => ({
+    autor: r.autor,
+    valor: String(Number(r.valor)),
+    sinal_valor: r.sinal_valor ? String(Number(r.sinal_valor)) : '',
+    sinal_unidade: r.sinal_unidade || 'percentagem',
+    modo_pagamento: r.modo_pagamento ? String(r.modo_pagamento) : '',
+    financiamento: r.financiamento ? String(r.financiamento) : '',
+    data_cpcv: r.data_cpcv ?? '',
+    data_escritura: r.data_escritura ?? '',
+    validade: r.validade ?? '',
+    condicoes: r.condicoes,
+  })
+
+  function abrirEdicao(r: Ronda) {
+    setRondaEditar(r)
+    setRonda(deRonda(r))
+    setErrosRonda({})
+    setDialogo('ronda')
+  }
+
   function abrirRonda() {
+    setRondaEditar(null)
     // A nova ronda parte da última (normalmente só muda o valor ou uma condição) e alterna quem propõe.
     setRonda(
       ultima
@@ -183,6 +209,14 @@ export function PropostaConsulta() {
               </dl>
               <p className="ajuda">
                 Registada por {r.criado_por_nome ?? '—'} em {momentoPt(r.criado_em)}
+                {p.acoes.editar && (
+                  <>
+                    {' '}
+                    <button type="button" className="ligacao-botao" onClick={() => abrirEdicao(r)}>
+                      Editar
+                    </button>
+                  </>
+                )}
               </p>
             </li>
           ))}
@@ -208,7 +242,7 @@ export function PropostaConsulta() {
       </Bloco>
 
       <Dialogo
-        titulo="Nova ronda / contraproposta"
+        titulo={rondaEditar ? `Editar ${rondaEditar.numero}.ª ronda` : 'Nova ronda / contraproposta'}
         aberto={dialogo === 'ronda'}
         aoFechar={() => setDialogo(null)}
         acoes={
@@ -217,13 +251,17 @@ export function PropostaConsulta() {
               Cancelar
             </button>
             <button className="botao-principal" disabled={novaRonda.isPending} onClick={() => novaRonda.mutate()}>
-              Registar ronda
+              {rondaEditar ? 'Guardar' : 'Registar ronda'}
             </button>
           </>
         }
       >
         <div className="formulario-dialogo">
-          <p className="ajuda">As rondas não se editam nem apagam: ficam todas no histórico da negociação.</p>
+          <p className="ajuda">
+            {rondaEditar
+              ? 'Corrija o que estiver errado. Os valores anteriores ficam registados na auditoria.'
+              : 'Cada ronda fica no histórico da negociação; se se enganar, pode corrigi-la depois.'}
+          </p>
           {errosRonda.detail && <p className="erro">{errosRonda.detail}</p>}
           <CamposRonda v={ronda} aoMudar={setRonda} opcoes={opcoes.data} erros={errosRonda} />
         </div>

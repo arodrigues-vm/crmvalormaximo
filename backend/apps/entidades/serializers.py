@@ -294,3 +294,9 @@ class RelacaoPedidoSerializer(serializers.Serializer):
     data_nascimento = serializers.DateField(
         required=False, allow_null=True, help_text="Data de aniversário da outra entidade (fica na ficha dela)."
     )
+
+
+class RelacaoEdicaoSerializer(serializers.Serializer):
+    tipo = serializers.IntegerField(required=False)
+    sentido = serializers.ChoiceField(choices=["direto", "inverso"], required=False, default="direto")
+    observacoes = serializers.CharField(required=False, allow_blank=True, max_length=255)

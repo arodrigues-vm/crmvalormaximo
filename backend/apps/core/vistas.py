@@ -56,6 +56,7 @@ class RegistoViewSet(
         "remover_ligacao": Operacao.EDITAR,
         "interacoes": Operacao.CONSULTAR,
         "anular_interacao": Operacao.EDITAR,
+        "editar_interacao": Operacao.EDITAR,
     }
 
     # Subclasses: base_queryset() e filtros(qs)
@@ -226,8 +227,10 @@ class RegistoViewSet(
         )
         return Response(self._ligacoes(obj), status=status.HTTP_201_CREATED)
 
-    @action(detail=True, methods=["delete"], url_path=r"ligacoes/(?P<ligacao_id>\d+)")
+    @extend_schema(request=LigacaoSerializer)
+    @action(detail=True, methods=["patch", "delete"], url_path=r"ligacoes/(?P<ligacao_id>\d+)")
     def remover_ligacao(self, request, pk=None, ligacao_id=None):
+        """PATCH corrige a ligação (tipo, título, endereço); DELETE remove-a. Ambos auditados (D-42)."""
         from apps.core.models import LigacaoExterna
 
         obj = self.get_object()
@@ -236,6 +239,17 @@ class RegistoViewSet(
         ).first()
         if lig is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
+        if request.method == "PATCH":
+            s = LigacaoSerializer(data=request.data, partial=True)
+            s.is_valid(raise_exception=True)
+            antes = {"tipo": lig.tipo.nome, "titulo": lig.titulo, "url": lig.url}
+            for k, v in s.validated_data.items():
+                setattr(lig, k, v)
+            lig.save()
+            depois = {"tipo": lig.tipo.nome, "titulo": lig.titulo, "url": lig.url}
+            registar(f"{self.nome_registo}.ligacao_alterada", modulo=self.modulo, objeto=obj, request=request,
+                     dados={"ligacao": lig.pk, "antes": antes, "depois": depois})  # fmt: skip
+            return Response(self._ligacoes(obj))
         dados = {"ligacao": lig.pk, "titulo": lig.titulo, "url": lig.url}
         lig.delete()
         registar(f"{self.nome_registo}.ligacao_removida", modulo=self.modulo, objeto=obj, request=request, dados=dados)
@@ -256,8 +270,12 @@ class RegistoViewSet(
                 "resumo": x.resumo,
                 "criado_por": x.criado_por.nome,
                 "anulada": x.anulada_em is not None,
+                "editada_em": x.editada_em,
+                "editada_por": x.editada_por.nome if x.editada_por_id else None,
             }
-            for x in Interacao.objects.filter(tipo_conteudo=ct, objeto_id=obj.pk).select_related("tipo", "criado_por")
+            for x in Interacao.objects.filter(tipo_conteudo=ct, objeto_id=obj.pk).select_related(
+                "tipo", "criado_por", "editada_por"
+            )
         ]
 
     @extend_schema(request=InteracaoSerializer)
@@ -286,6 +304,32 @@ class RegistoViewSet(
             dados={"interacao": i.pk, "tipo": i.tipo.nome},
         )
         return Response(self._interacoes(obj), status=status.HTTP_201_CREATED)
+
+    @extend_schema(request=InteracaoSerializer)
+    @action(detail=True, methods=["patch"], url_path=r"interacoes/(?P<interacao_id>\d+)")
+    def editar_interacao(self, request, pk=None, interacao_id=None):
+        """Corrige um contacto registado; o texto anterior fica na auditoria (D-42)."""
+        from django.utils import timezone
+
+        from apps.core.models import Interacao
+
+        obj = self.get_object()
+        i = Interacao.objects.filter(
+            pk=interacao_id, tipo_conteudo=ContentType.objects.get_for_model(obj), objeto_id=obj.pk
+        ).first()
+        if i is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        s = InteracaoSerializer(data=request.data, partial=True)
+        s.is_valid(raise_exception=True)
+        antes = {"tipo": i.tipo.nome, "momento": str(i.momento), "resumo": i.resumo}
+        for k, v in s.validated_data.items():
+            setattr(i, k, v)
+        i.editada_em, i.editada_por = timezone.now(), request.user
+        i.save()
+        depois = {"tipo": i.tipo.nome, "momento": str(i.momento), "resumo": i.resumo}
+        registar(f"{self.nome_registo}.interacao_alterada", modulo=self.modulo, objeto=obj, request=request,
+                 dados={"interacao": i.pk, "antes": antes, "depois": depois})  # fmt: skip
+        return Response(self._interacoes(obj))
 
     @action(detail=True, methods=["post"], url_path=r"interacoes/(?P<interacao_id>\d+)/anular")
     def anular_interacao(self, request, pk=None, interacao_id=None):

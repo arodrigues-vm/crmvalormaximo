@@ -41,8 +41,8 @@ Para registar uma contraproposta (ou uma nova oferta do comprador):
 2. O formulário vem preenchido com a ronda anterior e com **quem propõe** trocado. Altere o que mudou —
    normalmente o valor — e carregue em **Registar ronda**.
 
-As rondas **não se editam nem apagam**: o separador **Negociação** mostra todo o histórico, da mais recente
-para a mais antiga. O **valor atual** da proposta é o da última ronda.
+O separador **Negociação** mostra todas as rondas, da mais recente para a mais antiga. Se se enganou numa ronda,
+carregue em **Editar** junto dela: os valores anteriores ficam registados na auditoria. As rondas não se apagam. O **valor atual** da proposta é o da última ronda.
 
 ## 9.4 Estados
 

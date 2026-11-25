@@ -81,6 +81,10 @@ class Interacao(models.Model):
     resumo = models.TextField()
     criado_em = models.DateTimeField(auto_now_add=True)
     criado_por = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+")
+    editada_em = models.DateTimeField(null=True, blank=True)
+    editada_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT, related_name="+"
+    )
     anulada_em = models.DateTimeField(null=True, blank=True)
     anulada_por = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT, related_name="+"

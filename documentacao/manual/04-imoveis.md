@@ -167,6 +167,8 @@ para essa pasta.
   pastas apenas com quem deve ter acesso.
 - Remover uma ligação no CRM **não apaga** a pasta no OneDrive.
 
+Para corrigir uma ligação (tipo, título ou endereço), carregue em **Editar** ao lado dela.
+
 ## 4.6 Imóveis na ficha da entidade
 
 Na ficha de uma entidade, a secção **Imóveis (proprietária)** mostra os imóveis de que é proprietária e a

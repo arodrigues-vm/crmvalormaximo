@@ -35,6 +35,7 @@ class AngariacaoViewSet(RegistoViewSet):
     operacoes_extra = {
         **RegistoViewSet.operacoes_extra,
         "renovar": Operacao.EDITAR,
+        "editar_renovacao": Operacao.EDITAR,
         # D-28: correção excecional e reabertura por quem pode editar o CMI (com motivo e registo).
         "corrigir": Operacao.EDITAR,
         "situacao": Operacao.EDITAR,
@@ -179,6 +180,48 @@ class AngariacaoViewSet(RegistoViewSet):
                 dados={"ciclo": ciclo, "inicio": str(r.data_inicio), "fim": str(r.data_fim), "forma": r.forma},
             )
         return Response(self.get_serializer(self.recarregar(cmi)).data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(request=RenovarSerializer)
+    @action(detail=True, methods=["patch"], url_path=r"renovacoes/(?P<renovacao_id>\d+)")
+    def editar_renovacao(self, request, pk=None, renovacao_id=None):
+        """Corrige uma renovação (D-42). Mantém as regras: começa depois do ciclo anterior, não colide com o
+        ciclo seguinte nem com contratos exclusivos; recalcula a data fim de contrato; fica auditada."""
+        s = RenovarSerializer(data=request.data, partial=True)
+        s.is_valid(raise_exception=True)
+        d = s.validated_data
+        with transaction.atomic():
+            cmi = Angariacao.objects.select_for_update().get(pk=self.get_object().pk)
+            r = cmi.renovacoes.filter(pk=renovacao_id).first()
+            if r is None:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+            antes = {"forma": r.forma, "inicio": str(r.data_inicio), "prazo": r.prazo_meses, "obs": r.observacoes}
+            for k, v in d.items():
+                setattr(r, k, v)
+            anterior = cmi.renovacoes.filter(ciclo=r.ciclo - 1).first()
+            fim_anterior = anterior.data_fim if anterior else cmi.data_fim
+            if fim_anterior and r.data_inicio <= fim_anterior:
+                raise serializers.ValidationError(
+                    {"data_inicio": f"Tem de começar depois do fim do ciclo anterior ({fim_anterior:%d/%m/%Y})."}
+                )
+            fim = calcular_fim(r.data_inicio, r.prazo_meses)
+            seguinte = cmi.renovacoes.filter(ciclo=r.ciclo + 1).first()
+            if seguinte and fim >= seguinte.data_inicio:
+                raise serializers.ValidationError(
+                    {"prazo_meses": f"Sobrepõe-se ao ciclo seguinte (começa a {seguinte.data_inicio:%d/%m/%Y})."}
+                )
+            choques = conflitos(cmi, r.data_inicio, fim)
+            if choques:
+                raise serializers.ValidationError(
+                    {"data_inicio": f"Sobrepõe-se a contrato(s) exclusivo(s): {descrever_conflitos(choques)}."}
+                )
+            r.save()
+            cmi.recalcular_datas()
+            cmi.atualizado_por = request.user
+            cmi.save()
+            depois = {"forma": r.forma, "inicio": str(r.data_inicio), "prazo": r.prazo_meses, "obs": r.observacoes}
+            registar("angariacao.renovacao_alterada", modulo=self.modulo, objeto=cmi, request=request,
+                     dados={"ciclo": r.ciclo, "antes": antes, "depois": depois})  # fmt: skip
+        return Response(self.get_serializer(self.recarregar(cmi)).data)
 
     # Correção material ----------------------------------------------------------------
 
