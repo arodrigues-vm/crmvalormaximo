@@ -234,6 +234,26 @@ describe('Entidades', () => {
     expect(screen.getByRole('heading', { name: /Ativo/ })).toBeInTheDocument()
   })
 
+  it('segue a disposição do Administrador e esconde os dados pessoais das empresas (D-43)', async () => {
+    simularApi({
+      ...base,
+      'GET /api/entidades/7/': () => json({ ...ENTIDADE, tipo_pessoa: 'coletiva', nome_completo: 'Empresa Ensaio' }),
+      'GET /api/disposicoes/entidades/': () =>
+        json({
+          modulo: 'entidades',
+          blocos: [{ chave: 'identificacao', titulo: 'Identificação', campos: ['email', 'nome', 'nif'] }],
+        }),
+    })
+    desenhar('/entidades/7')
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: /Identificação/ }).closest('section')).toHaveTextContent(
+        /^.*Identificação.*Email.*Denominação.*NIPC/,
+      ),
+    )
+    expect(screen.queryByRole('heading', { name: /Dados pessoais/ })).toBeNull()
+    expect(screen.getByRole('heading', { name: /Contactos/ })).toBeInTheDocument()
+  })
+
   it('relações: mostra sem revelar entidades sem acesso e adiciona no sentido inverso', async () => {
     const pedidos = simularApi({
       ...base,

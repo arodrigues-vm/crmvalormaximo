@@ -1,9 +1,9 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { ErroApi } from '../../api/cliente'
-import { Bloco } from '../../componentes/Bloco'
+import { BlocosConfiguraveis } from '../../componentes/BlocosConfiguraveis'
 import { CampoResponsavel } from '../../componentes/CampoResponsavel'
 import { CampoTelefones, type TelefoneEditavel } from '../../componentes/CampoTelefones'
 import { CampoAreaTexto, CampoCaixa, CampoMultiplo, CampoSelecao, CampoTexto } from '../../componentes/campos'
@@ -14,6 +14,7 @@ import { useGuardaSaida } from '../../componentes/useGuardaSaida'
 import { procurarImoveis } from '../imoveis/api'
 import { entidadesApi, MOTIVOS, type Candidato, type Entidade, type RegistoLigado } from './api'
 import { CabecalhoFicha } from './EntidadeConsulta'
+import { ECRA_ENTIDADE, SO_SINGULAR } from './disposicao'
 
 interface Valores {
   tipo_pessoa: 'singular' | 'coletiva'
@@ -166,36 +167,6 @@ function paraApi(v: Valores) {
   }
 }
 
-const BLOCOS: Record<string, string[]> = {
-  identificacao: ['tipo_pessoa', 'nome', 'apelido', 'pais_fiscal', 'nif'],
-  contactos: ['email', 'telefones'],
-  morada: ['rua', 'numero_policia', 'complemento', 'codigo_postal', 'localidade', 'freguesia', 'zona_comercial'],
-  pessoais: [
-    'data_nascimento',
-    'estado_civil',
-    'regime_casamento',
-    'nacionalidade',
-    'documento_identificacao',
-    'naturalidade_freguesia',
-    'naturalidade_concelho',
-    'empresa',
-    'cargo',
-    'observacoes_pessoais',
-  ],
-  classificacao: [
-    'papeis',
-    'status',
-    'origem',
-    'quem_recomendou',
-    'imovel_contacto',
-    'visitou_imovel_contacto',
-    'motivo_nao_visitou',
-    'responsavel',
-  ],
-  dados: ['consentimento_marketing', 'consentimento_marketing_em', 'oposicao_marketing'],
-  observacoes: ['observacoes'],
-}
-
 export function EntidadeNova() {
   return <Formulario />
 }
@@ -248,7 +219,6 @@ function Formulario({ entidade }: { entidade?: Entidade }) {
   }
 
   const erro = (campo: string) => erros[campo] as string[] | undefined
-  const temErros = (bloco: string) => BLOCOS[bloco].some((c) => erros[c])
 
   async function gravar(confirmarDuplicado = false) {
     setAGravar(true)
@@ -300,6 +270,293 @@ function Formulario({ entidade }: { entidade?: Entidade }) {
     />
   )
 
+  const selecao = (campo: keyof Valores, rotulo: string, itens?: { id: number; nome: string }[]) => (
+    <CampoSelecao
+      rotulo={rotulo}
+      value={v[campo] as string}
+      vazio="—"
+      onChange={(e) => mudar(campo, e.target.value as never)}
+      opcoes={lista(itens)}
+      erro={erro(campo)}
+    />
+  )
+  const areaTexto = (campo: keyof Valores, rotulo: string) => (
+    <CampoAreaTexto
+      rotulo={rotulo}
+      value={v[campo] as string}
+      onChange={(e) => mudar(campo, e.target.value as never)}
+      erro={erro(campo)}
+    />
+  )
+
+  const avisoDuplicados =
+    sugestoes.length > 0 && !duplicados ? (
+      <div className="aviso-duplicados" role="status">
+        <strong>Possíveis duplicados:</strong>
+        <ul>
+          {sugestoes.map((c) => (
+            <li key={c.id}>
+              <Link to={`/entidades/${c.id}`} target="_blank">
+                {c.referencia} · {c.nome_completo}
+              </Link>{' '}
+              <small>({c.motivos.map((m) => MOTIVOS[m]).join(', ')})</small>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ) : null
+
+  function desenharCampo(c: string): ReactNode {
+    if (!singular && SO_SINGULAR.has(c)) return null
+    switch (c) {
+      case 'tipo_pessoa':
+        return (
+          <CampoSelecao
+            rotulo="Tipo de pessoa"
+            value={v.tipo_pessoa}
+            onChange={(e) => mudar('tipo_pessoa', e.target.value as Valores['tipo_pessoa'])}
+            opcoes={o?.tipos_pessoa ?? [{ valor: 'singular', nome: 'Pessoa singular' }]}
+            erro={erro('tipo_pessoa')}
+          />
+        )
+      case 'nome':
+        return (
+          <CampoTexto
+            rotulo={singular ? 'Nome' : 'Denominação social'}
+            required
+            value={v.nome}
+            onChange={(e) => mudar('nome', e.target.value)}
+            erro={erro('nome')}
+            autoFocus={!entidade}
+          />
+        )
+      case 'apelido':
+        return texto('apelido', 'Apelido')
+      case 'nif':
+        return (
+          <CampoTexto
+            rotulo={singular ? 'NIF' : 'NIPC'}
+            inputMode={v.pais_fiscal === 'PT' ? 'numeric' : 'text'}
+            value={v.nif}
+            onChange={(e) => mudar('nif', e.target.value)}
+            erro={erro('nif')}
+          />
+        )
+      case 'pais_fiscal':
+        return (
+          <CampoTexto
+            rotulo="País fiscal"
+            value={v.pais_fiscal}
+            maxLength={2}
+            onChange={(e) => mudar('pais_fiscal', e.target.value.toUpperCase())}
+            erro={erro('pais_fiscal')}
+            ajuda="Código ISO (PT, ES, FR…). O NIF só é validado para PT."
+          />
+        )
+      case 'telefones':
+        return (
+          <CampoTelefones
+            valores={v.telefones}
+            aoMudar={(t) => mudar('telefones', t)}
+            tipos={o?.tipos_telefone ?? []}
+            erros={erros.telefones}
+          />
+        )
+      case 'email':
+        return (
+          <CampoTexto
+            rotulo="Email"
+            type="email"
+            largo
+            value={v.email}
+            onChange={(e) => mudar('email', e.target.value)}
+            erro={erro('email')}
+          />
+        )
+      case 'rua':
+        return texto('rua', 'Rua', { largo: true })
+      case 'numero_policia':
+        return texto('numero_policia', 'N.º de polícia')
+      case 'complemento':
+        return (
+          <CampoTexto
+            rotulo="Complemento"
+            value={v.complemento}
+            onChange={(e) => mudar('complemento', e.target.value)}
+            erro={erro('complemento')}
+            ajuda="Andar, fração, lote…"
+          />
+        )
+      case 'codigo_postal':
+        return (
+          <CampoTexto
+            rotulo="Código postal"
+            placeholder="0000-000"
+            value={v.codigo_postal}
+            onChange={(e) => mudar('codigo_postal', e.target.value)}
+            erro={erro('codigo_postal')}
+          />
+        )
+      case 'localidade':
+        return texto('localidade', 'Localidade')
+      case 'freguesia':
+        return (
+          <SeletorLocalizacao
+            freguesia={v.freguesia}
+            atual={entidade?.freguesia === v.freguesia ? entidade?.localizacao : null}
+            aoMudar={(f) => mudar('freguesia', f)}
+          />
+        )
+      case 'zona_comercial':
+        return selecao('zona_comercial', 'Zona', o?.zonas_comerciais)
+      case 'data_nascimento':
+        return (
+          <CampoTexto
+            rotulo="Data de nascimento"
+            type="date"
+            value={v.data_nascimento}
+            onChange={(e) => mudar('data_nascimento', e.target.value)}
+            erro={erro('data_nascimento')}
+          />
+        )
+      case 'estado_civil':
+        return selecao('estado_civil', 'Estado civil', o?.estados_civis)
+      case 'regime_casamento':
+        return selecao('regime_casamento', 'Regime de casamento', o?.regimes_casamento)
+      case 'nacionalidade':
+        return texto('nacionalidade', 'Nacionalidade')
+      case 'documento_identificacao':
+        return texto('documento_identificacao', 'CC/Passaporte')
+      case 'naturalidade_freguesia':
+        return texto('naturalidade_freguesia', 'Freguesia de naturalidade')
+      case 'naturalidade_concelho':
+        return texto('naturalidade_concelho', 'Concelho de naturalidade')
+      case 'empresa':
+        return texto('empresa', 'Empresa')
+      case 'cargo':
+        return texto('cargo', 'Cargo')
+      case 'observacoes_pessoais':
+        return areaTexto('observacoes_pessoais', 'Observações (dados pessoais)')
+      case 'papeis':
+        return (
+          <CampoMultiplo
+            rotulo="Tipo de cliente"
+            opcoes={o?.papeis ?? []}
+            valores={v.papeis}
+            aoMudar={(p) => mudar('papeis', p)}
+            erro={erro('papeis')}
+          />
+        )
+      case 'status':
+        return (
+          <CampoSelecao
+            rotulo="Status"
+            value={v.status}
+            vazio={entidade ? undefined : 'Por omissão: Ativo'}
+            onChange={(e) => mudar('status', e.target.value)}
+            opcoes={lista(o?.status)}
+            erro={erro('status')}
+          />
+        )
+      case 'origem':
+        return (
+          <CampoSelecao
+            rotulo="Origem do contacto"
+            value={v.origem}
+            vazio="—"
+            onChange={(e) => mudar('origem', e.target.value)}
+            opcoes={lista(o?.origens)}
+            erro={erro('origem')}
+            ajuda={o && o.origens.length === 0 ? 'Sem origens configuradas (Configurações).' : undefined}
+          />
+        )
+      case 'responsavel':
+        return (
+          <CampoResponsavel
+            modulo="entidades"
+            valor={v.responsavel}
+            atual={entidade ? { id: entidade.responsavel, nome: entidade.responsavel_nome } : null}
+            aoMudar={(x) => mudar('responsavel', x)}
+            erro={erro('responsavel')}
+          />
+        )
+      case 'quem_recomendou':
+        return (
+          <SeletorPesquisavel
+            rotulo="Quem recomendou"
+            chave="entidades"
+            procurar={entidadesApi.procurar}
+            valor={v.quem_recomendou}
+            aoMudar={(x) => mudar('quem_recomendou', x)}
+            excluir={entidade ? [entidade.id] : []}
+            erro={erro('quem_recomendou')?.join(' ')}
+            placeholder="Escreva o nome, NIF ou referência"
+          />
+        )
+      case 'imovel_contacto':
+        return (
+          <SeletorPesquisavel
+            rotulo="Imóvel de contacto"
+            chave="imoveis"
+            procurar={procurarImoveis}
+            valor={v.imovel_contacto}
+            aoMudar={(x) => mudar('imovel_contacto', x)}
+            erro={erro('imovel_contacto')?.join(' ')}
+            placeholder="Ex.: 10 T3 Maia"
+          />
+        )
+      case 'visitou_imovel_contacto':
+        return (
+          <CampoSelecao
+            rotulo="Visitou o imóvel de contacto"
+            value={v.visitou_imovel_contacto}
+            vazio="—"
+            onChange={(e) => mudar('visitou_imovel_contacto', e.target.value as Valores['visitou_imovel_contacto'])}
+            opcoes={[
+              { valor: 'sim', nome: 'Sim' },
+              { valor: 'nao', nome: 'Não' },
+            ]}
+            erro={erro('visitou_imovel_contacto')}
+          />
+        )
+      case 'motivo_nao_visitou':
+        return v.visitou_imovel_contacto === 'nao' ? areaTexto('motivo_nao_visitou', 'Porque não visitou') : null
+      case 'consentimento_marketing':
+        return (
+          <CampoSelecao
+            rotulo="Consentimento de marketing"
+            value={v.consentimento_marketing}
+            onChange={(e) => mudar('consentimento_marketing', e.target.value)}
+            opcoes={o?.consentimentos ?? []}
+            erro={erro('consentimento_marketing')}
+          />
+        )
+      case 'consentimento_marketing_em':
+        return (
+          <CampoTexto
+            rotulo="Data do consentimento"
+            type="date"
+            value={v.consentimento_marketing_em}
+            onChange={(e) => mudar('consentimento_marketing_em', e.target.value)}
+            erro={erro('consentimento_marketing_em')}
+            required={v.consentimento_marketing === 'concedido'}
+          />
+        )
+      case 'oposicao_marketing':
+        return (
+          <CampoCaixa
+            rotulo="Oposição a marketing"
+            checked={v.oposicao_marketing}
+            onChange={(e) => mudar('oposicao_marketing', e.target.checked)}
+            ajuda="Prevalece sobre qualquer consentimento."
+          />
+        )
+      case 'observacoes':
+        return areaTexto('observacoes', 'Observações')
+    }
+    return null
+  }
+
   return (
     <form className="ficha ficha-edicao" onSubmit={submeter} noValidate>
       {entidade ? (
@@ -321,285 +578,24 @@ function Formulario({ entidade }: { entidade?: Entidade }) {
         </p>
       )}
 
-      <Bloco titulo="Identificação" forcarAberto={temErros('identificacao')}>
-        <div className="grelha-campos">
-          <CampoSelecao
-            rotulo="Tipo de pessoa"
-            value={v.tipo_pessoa}
-            onChange={(e) => mudar('tipo_pessoa', e.target.value as Valores['tipo_pessoa'])}
-            opcoes={o?.tipos_pessoa ?? [{ valor: 'singular', nome: 'Pessoa singular' }]}
-            erro={erro('tipo_pessoa')}
-          />
-          <CampoTexto
-            rotulo={singular ? 'Nome' : 'Denominação social'}
-            required
-            value={v.nome}
-            onChange={(e) => mudar('nome', e.target.value)}
-            erro={erro('nome')}
-            autoFocus={!entidade}
-          />
-          {singular && (
-            <CampoTexto
-              rotulo="Apelido"
-              value={v.apelido}
-              onChange={(e) => mudar('apelido', e.target.value)}
-              erro={erro('apelido')}
-            />
-          )}
-          <CampoTexto
-            rotulo={singular ? 'NIF' : 'NIPC'}
-            inputMode={v.pais_fiscal === 'PT' ? 'numeric' : 'text'}
-            value={v.nif}
-            onChange={(e) => mudar('nif', e.target.value)}
-            erro={erro('nif')}
-          />
-          <CampoTexto
-            rotulo="País fiscal"
-            value={v.pais_fiscal}
-            maxLength={2}
-            onChange={(e) => mudar('pais_fiscal', e.target.value.toUpperCase())}
-            erro={erro('pais_fiscal')}
-            ajuda="Código ISO (PT, ES, FR…). O NIF só é validado para PT."
-          />
-        </div>
-      </Bloco>
-
-      {sugestoes.length > 0 && !duplicados && (
-        <div className="aviso-duplicados" role="status">
-          <strong>Possíveis duplicados:</strong>
-          <ul>
-            {sugestoes.map((c) => (
-              <li key={c.id}>
-                <Link to={`/entidades/${c.id}`} target="_blank">
-                  {c.referencia} · {c.nome_completo}
-                </Link>{' '}
-                <small>({c.motivos.map((m) => MOTIVOS[m]).join(', ')})</small>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <Bloco titulo="Contactos" forcarAberto={temErros('contactos')}>
-        <div className="grelha-campos">
-          <CampoTelefones
-            valores={v.telefones}
-            aoMudar={(t) => mudar('telefones', t)}
-            tipos={o?.tipos_telefone ?? []}
-            erros={erros.telefones}
-          />
-          <CampoTexto
-            rotulo="Email"
-            type="email"
-            largo
-            value={v.email}
-            onChange={(e) => mudar('email', e.target.value)}
-            erro={erro('email')}
-          />
-        </div>
-      </Bloco>
-
-      <Bloco titulo="Morada" forcarAberto={temErros('morada')} abertoInicial={!!entidade?.rua || !entidade}>
-        <div className="grelha-campos">
-          <CampoTexto
-            rotulo="Rua"
-            largo
-            value={v.rua}
-            onChange={(e) => mudar('rua', e.target.value)}
-            erro={erro('rua')}
-          />
-          <CampoTexto
-            rotulo="N.º de polícia"
-            value={v.numero_policia}
-            onChange={(e) => mudar('numero_policia', e.target.value)}
-            erro={erro('numero_policia')}
-          />
-          <CampoTexto
-            rotulo="Complemento"
-            value={v.complemento}
-            onChange={(e) => mudar('complemento', e.target.value)}
-            erro={erro('complemento')}
-            ajuda="Andar, fração, lote…"
-          />
-          <CampoTexto
-            rotulo="Código postal"
-            placeholder="0000-000"
-            value={v.codigo_postal}
-            onChange={(e) => mudar('codigo_postal', e.target.value)}
-            erro={erro('codigo_postal')}
-          />
-          <CampoTexto
-            rotulo="Localidade"
-            value={v.localidade}
-            onChange={(e) => mudar('localidade', e.target.value)}
-            erro={erro('localidade')}
-          />
-          <SeletorLocalizacao
-            freguesia={v.freguesia}
-            atual={entidade?.freguesia === v.freguesia ? entidade?.localizacao : null}
-            aoMudar={(f) => mudar('freguesia', f)}
-          />
-          <CampoSelecao
-            rotulo="Zona"
-            value={v.zona_comercial}
-            vazio="—"
-            onChange={(e) => mudar('zona_comercial', e.target.value)}
-            opcoes={lista(o?.zonas_comerciais)}
-            erro={erro('zona_comercial')}
-          />
-        </div>
-      </Bloco>
-
-      {singular && (
-        <Bloco titulo="Dados pessoais" forcarAberto={temErros('pessoais')} abertoInicial={!entidade}>
-          <div className="grelha-campos">
-            <CampoTexto
-              rotulo="Data de nascimento"
-              type="date"
-              value={v.data_nascimento}
-              onChange={(e) => mudar('data_nascimento', e.target.value)}
-              erro={erro('data_nascimento')}
-            />
-            <CampoSelecao
-              rotulo="Estado civil"
-              value={v.estado_civil}
-              vazio="—"
-              onChange={(e) => mudar('estado_civil', e.target.value)}
-              opcoes={lista(o?.estados_civis)}
-              erro={erro('estado_civil')}
-            />
-            <CampoSelecao
-              rotulo="Regime de casamento"
-              value={v.regime_casamento}
-              vazio="—"
-              onChange={(e) => mudar('regime_casamento', e.target.value)}
-              opcoes={lista(o?.regimes_casamento)}
-              erro={erro('regime_casamento')}
-            />
-            {texto('nacionalidade', 'Nacionalidade')}
-            {texto('documento_identificacao', 'CC/Passaporte')}
-            {texto('naturalidade_freguesia', 'Freguesia de naturalidade')}
-            {texto('naturalidade_concelho', 'Concelho de naturalidade')}
-            {texto('empresa', 'Empresa')}
-            {texto('cargo', 'Cargo')}
-          </div>
-          <CampoAreaTexto
-            rotulo="Observações (dados pessoais)"
-            value={v.observacoes_pessoais}
-            onChange={(e) => mudar('observacoes_pessoais', e.target.value)}
-            erro={erro('observacoes_pessoais')}
-          />
-        </Bloco>
-      )}
-
-      <Bloco titulo="Classificação" forcarAberto={temErros('classificacao')}>
-        <div className="grelha-campos">
-          <CampoMultiplo
-            rotulo="Tipo de cliente"
-            opcoes={o?.papeis ?? []}
-            valores={v.papeis}
-            aoMudar={(p) => mudar('papeis', p)}
-            erro={erro('papeis')}
-          />
-          <CampoSelecao
-            rotulo="Status"
-            value={v.status}
-            vazio={entidade ? undefined : 'Por omissão: Ativo'}
-            onChange={(e) => mudar('status', e.target.value)}
-            opcoes={lista(o?.status)}
-            erro={erro('status')}
-          />
-          <CampoSelecao
-            rotulo="Origem do contacto"
-            value={v.origem}
-            vazio="—"
-            onChange={(e) => mudar('origem', e.target.value)}
-            opcoes={(o?.origens ?? []).map((x) => ({ valor: x.id, nome: x.nome }))}
-            erro={erro('origem')}
-            ajuda={o && o.origens.length === 0 ? 'Sem origens configuradas (Configurações).' : undefined}
-          />
-          <CampoResponsavel
-            modulo="entidades"
-            valor={v.responsavel}
-            atual={entidade ? { id: entidade.responsavel, nome: entidade.responsavel_nome } : null}
-            aoMudar={(x) => mudar('responsavel', x)}
-            erro={erro('responsavel')}
-          />
-          <SeletorPesquisavel
-            rotulo="Quem recomendou"
-            chave="entidades"
-            procurar={entidadesApi.procurar}
-            valor={v.quem_recomendou}
-            aoMudar={(x) => mudar('quem_recomendou', x)}
-            excluir={entidade ? [entidade.id] : []}
-            erro={erro('quem_recomendou')?.join(' ')}
-            placeholder="Escreva o nome, NIF ou referência"
-          />
-          <SeletorPesquisavel
-            rotulo="Imóvel de contacto"
-            chave="imoveis"
-            procurar={procurarImoveis}
-            valor={v.imovel_contacto}
-            aoMudar={(x) => mudar('imovel_contacto', x)}
-            erro={erro('imovel_contacto')?.join(' ')}
-            placeholder="Ex.: 10 T3 Maia"
-          />
-          <CampoSelecao
-            rotulo="Visitou o imóvel de contacto"
-            value={v.visitou_imovel_contacto}
-            vazio="—"
-            onChange={(e) => mudar('visitou_imovel_contacto', e.target.value as Valores['visitou_imovel_contacto'])}
-            opcoes={[
-              { valor: 'sim', nome: 'Sim' },
-              { valor: 'nao', nome: 'Não' },
-            ]}
-            erro={erro('visitou_imovel_contacto')}
-          />
-          {v.visitou_imovel_contacto === 'nao' && (
-            <CampoAreaTexto
-              rotulo="Porque não visitou"
-              value={v.motivo_nao_visitou}
-              onChange={(e) => mudar('motivo_nao_visitou', e.target.value)}
-              erro={erro('motivo_nao_visitou')}
-            />
-          )}
-        </div>
-      </Bloco>
-
-      <Bloco titulo="Proteção de dados" abertoInicial={false} forcarAberto={temErros('dados')}>
-        <div className="grelha-campos">
-          <CampoSelecao
-            rotulo="Consentimento de marketing"
-            value={v.consentimento_marketing}
-            onChange={(e) => mudar('consentimento_marketing', e.target.value)}
-            opcoes={o?.consentimentos ?? []}
-            erro={erro('consentimento_marketing')}
-          />
-          <CampoTexto
-            rotulo="Data do consentimento"
-            type="date"
-            value={v.consentimento_marketing_em}
-            onChange={(e) => mudar('consentimento_marketing_em', e.target.value)}
-            erro={erro('consentimento_marketing_em')}
-            required={v.consentimento_marketing === 'concedido'}
-          />
-          <CampoCaixa
-            rotulo="Oposição a marketing"
-            checked={v.oposicao_marketing}
-            onChange={(e) => mudar('oposicao_marketing', e.target.checked)}
-            ajuda="Prevalece sobre qualquer consentimento."
-          />
-        </div>
-      </Bloco>
-
-      <Bloco titulo="Observações" abertoInicial={!!v.observacoes} forcarAberto={temErros('observacoes')}>
-        <CampoAreaTexto
-          rotulo="Observações"
-          value={v.observacoes}
-          onChange={(e) => mudar('observacoes', e.target.value)}
-          erro={erro('observacoes')}
-        />
-      </Bloco>
+      <BlocosConfiguraveis
+        def={ECRA_ENTIDADE}
+        modo="editar"
+        campo={desenharCampo}
+        erros={erros}
+        depoisDoPrimeiro={avisoDuplicados}
+        abertoInicial={(b) =>
+          b.chave === 'morada'
+            ? !entidade || !!entidade.rua
+            : b.chave === 'pessoais'
+              ? !entidade
+              : b.chave === 'dados'
+                ? false
+                : b.chave === 'observacoes'
+                  ? !!v.observacoes
+                  : true
+        }
+      />
 
       <div className="barra-gravar">
         <button

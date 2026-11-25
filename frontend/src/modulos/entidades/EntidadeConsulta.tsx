@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { ErroApi } from '../../api/cliente'
 import { AcaoEmail, AcoesTelefone } from '../../componentes/AcoesContacto'
 import { formatarTelefone } from '../../componentes/formatar'
 import { Bloco } from '../../componentes/Bloco'
+import { BlocosConfiguraveis } from '../../componentes/BlocosConfiguraveis'
 import { Dado } from '../../componentes/campos'
 import { Dialogo } from '../../componentes/Dialogo'
 import { entidadesApi, NOMES_CAMPOS, type Entidade, type RegistoLigado } from './api'
@@ -13,6 +14,7 @@ import { ImoveisDaEntidade } from './ImoveisDaEntidade'
 import { NegociosDaEntidade } from './NegociosDaEntidade'
 import { useSessao } from '../../app/sessao'
 import { RelacoesEntidade } from './RelacoesEntidade'
+import { ECRA_ENTIDADE, SO_SINGULAR } from './disposicao'
 import { VisitasDoRegisto } from '../visitas/VisitasDoRegisto'
 
 const dataPt = (d: string | null) => (d ? new Date(`${d}T00:00:00`).toLocaleDateString('pt-PT') : null)
@@ -79,11 +81,142 @@ export function EntidadeConsulta() {
     return <p className="aviso">Entidade não encontrada ou sem acesso.</p>
   if (!e) return <p className="erro">Não foi possível carregar a entidade.</p>
 
-  const morada = [
-    [e.rua, e.numero_policia].filter(Boolean).join(', '),
-    e.complemento,
-    [e.codigo_postal, e.localidade].filter(Boolean).join(' '),
-  ].filter(Boolean)
+  const singular = e.tipo_pessoa === 'singular'
+  const ent = e
+  function desenharCampo(c: string): ReactNode {
+    if (!singular && SO_SINGULAR.has(c)) return null
+    switch (c) {
+      case 'tipo_pessoa':
+        return <Dado rotulo="Tipo">{singular ? 'Pessoa singular' : 'Pessoa coletiva'}</Dado>
+      case 'nome':
+        return <Dado rotulo={singular ? 'Nome' : 'Denominação'}>{ent.nome}</Dado>
+      case 'apelido':
+        return <Dado rotulo="Apelido">{ent.apelido}</Dado>
+      case 'nif':
+        return <Dado rotulo={singular ? 'NIF' : 'NIPC'}>{ent.nif}</Dado>
+      case 'pais_fiscal':
+        return <Dado rotulo="País fiscal">{ent.pais_fiscal}</Dado>
+      case 'telefones':
+        return (
+          <Dado rotulo="Telefones" largo>
+            {ent.telefones.length > 0 && (
+              <ul className="lista-contactos">
+                {ent.telefones.map((t) => (
+                  <li key={t.id}>
+                    <span>
+                      {formatarTelefone(t.numero_e164)}{' '}
+                      <small className="ajuda">
+                        {TIPOS_TEL[t.tipo]}
+                        {t.principal && ' · principal'}
+                      </small>
+                    </span>
+                    <AcoesTelefone e164={t.numero_e164} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Dado>
+        )
+      case 'email':
+        return (
+          <Dado rotulo="Email" largo>
+            {ent.email && (
+              <span className="lista-contactos-linha">
+                {ent.email} <AcaoEmail email={ent.email} />
+              </span>
+            )}
+          </Dado>
+        )
+      case 'rua':
+        return <Dado rotulo="Rua">{ent.rua}</Dado>
+      case 'numero_policia':
+        return <Dado rotulo="N.º de polícia">{ent.numero_policia}</Dado>
+      case 'complemento':
+        return <Dado rotulo="Complemento">{ent.complemento}</Dado>
+      case 'codigo_postal':
+        return <Dado rotulo="Código postal">{ent.codigo_postal}</Dado>
+      case 'localidade':
+        return <Dado rotulo="Localidade">{ent.localidade}</Dado>
+      case 'freguesia':
+        return (
+          <Dado rotulo="Localização administrativa" largo>
+            {ent.localizacao &&
+              `${ent.localizacao.freguesia}, ${ent.localizacao.concelho}, ${ent.localizacao.distrito}`}
+          </Dado>
+        )
+      case 'zona_comercial':
+        return <Dado rotulo="Zona">{ent.nomes.zona_comercial}</Dado>
+      case 'data_nascimento':
+        return <Dado rotulo="Data de nascimento">{dataPt(ent.data_nascimento)}</Dado>
+      case 'estado_civil':
+        return <Dado rotulo="Estado civil">{ent.nomes.estado_civil}</Dado>
+      case 'regime_casamento':
+        return <Dado rotulo="Regime de casamento">{ent.nomes.regime_casamento}</Dado>
+      case 'nacionalidade':
+        return <Dado rotulo="Nacionalidade">{ent.nacionalidade}</Dado>
+      case 'documento_identificacao':
+        return <Dado rotulo="CC/Passaporte">{ent.documento_identificacao}</Dado>
+      case 'naturalidade_freguesia':
+        return <Dado rotulo="Freguesia de naturalidade">{ent.naturalidade_freguesia}</Dado>
+      case 'naturalidade_concelho':
+        return <Dado rotulo="Concelho de naturalidade">{ent.naturalidade_concelho}</Dado>
+      case 'empresa':
+        return <Dado rotulo="Empresa">{ent.empresa}</Dado>
+      case 'cargo':
+        return <Dado rotulo="Cargo">{ent.cargo}</Dado>
+      case 'observacoes_pessoais':
+        return (
+          <Dado rotulo="Observações (dados pessoais)" largo>
+            {ent.observacoes_pessoais && <span className="texto-livre">{ent.observacoes_pessoais}</span>}
+          </Dado>
+        )
+      case 'papeis':
+        return <Dado rotulo="Tipo de cliente">{ent.papeis_nomes.join(', ')}</Dado>
+      case 'status':
+        return <Dado rotulo="Status">{ent.status_nome}</Dado>
+      case 'origem':
+        return <Dado rotulo="Origem do contacto">{ent.origem_nome}</Dado>
+      case 'responsavel':
+        return <Dado rotulo="Responsável">{ent.responsavel_nome}</Dado>
+      case 'quem_recomendou':
+        return (
+          <Dado rotulo="Quem recomendou">
+            {ent.quem_recomendou_dados && <Ligado d={ent.quem_recomendou_dados} caminho="/entidades" />}
+          </Dado>
+        )
+      case 'imovel_contacto':
+        return (
+          <Dado rotulo="Imóvel de contacto">
+            {ent.imovel_contacto_dados && <Ligado d={ent.imovel_contacto_dados} caminho="/imoveis" />}
+          </Dado>
+        )
+      case 'visitou_imovel_contacto':
+        return (
+          <Dado rotulo="Visitou o imóvel de contacto">
+            {ent.visitou_imovel_contacto === null ? null : ent.visitou_imovel_contacto ? 'Sim' : 'Não'}
+          </Dado>
+        )
+      case 'motivo_nao_visitou':
+        return ent.visitou_imovel_contacto === false ? (
+          <Dado rotulo="Porque não visitou" largo>
+            {ent.motivo_nao_visitou && <span className="texto-livre">{ent.motivo_nao_visitou}</span>}
+          </Dado>
+        ) : null
+      case 'consentimento_marketing':
+        return <Dado rotulo="Consentimento de marketing">{CONSENT[ent.consentimento_marketing]}</Dado>
+      case 'consentimento_marketing_em':
+        return <Dado rotulo="Data do consentimento">{dataPt(ent.consentimento_marketing_em)}</Dado>
+      case 'oposicao_marketing':
+        return <Dado rotulo="Oposição a marketing">{ent.oposicao_marketing ? 'Sim' : 'Não'}</Dado>
+      case 'observacoes':
+        return (
+          <Dado rotulo="Observações" largo>
+            {ent.observacoes && <span className="texto-livre">{ent.observacoes}</span>}
+          </Dado>
+        )
+    }
+    return null
+  }
 
   return (
     <div className="ficha">
@@ -105,98 +238,13 @@ export function EntidadeConsulta() {
         }
       />
 
-      <Bloco titulo="Identificação">
-        <dl className="grelha-dados">
-          <Dado rotulo="Tipo">{e.tipo_pessoa === 'singular' ? 'Pessoa singular' : 'Pessoa coletiva'}</Dado>
-          <Dado rotulo={e.tipo_pessoa === 'singular' ? 'Nome' : 'Denominação'}>{e.nome}</Dado>
-          {e.tipo_pessoa === 'singular' && <Dado rotulo="Apelido">{e.apelido}</Dado>}
-          <Dado rotulo="NIF/NIPC">{e.nif && `${e.nif}${e.pais_fiscal !== 'PT' ? ` (${e.pais_fiscal})` : ''}`}</Dado>
-        </dl>
-      </Bloco>
-
-      <Bloco titulo="Contactos">
-        <dl className="grelha-dados">
-          <Dado rotulo="Telefones" largo>
-            {e.telefones.length > 0 && (
-              <ul className="lista-contactos">
-                {e.telefones.map((t) => (
-                  <li key={t.id}>
-                    <span>
-                      {formatarTelefone(t.numero_e164)}{' '}
-                      <small className="ajuda">
-                        {TIPOS_TEL[t.tipo]}
-                        {t.principal && ' · principal'}
-                      </small>
-                    </span>
-                    <AcoesTelefone e164={t.numero_e164} />
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Dado>
-          <Dado rotulo="Email" largo>
-            {e.email && (
-              <span className="lista-contactos-linha">
-                {e.email} <AcaoEmail email={e.email} />
-              </span>
-            )}
-          </Dado>
-        </dl>
-      </Bloco>
-
-      <Bloco titulo="Morada">
-        <dl className="grelha-dados">
-          <Dado rotulo="Morada" largo>
-            {morada.length > 0 && morada.map((l) => <div key={l}>{l}</div>)}
-          </Dado>
-          <Dado rotulo="Zona">{e.nomes.zona_comercial}</Dado>
-          <Dado rotulo="Localização administrativa" largo>
-            {e.localizacao && `${e.localizacao.freguesia}, ${e.localizacao.concelho}, ${e.localizacao.distrito}`}
-          </Dado>
-        </dl>
-      </Bloco>
-
-      {e.tipo_pessoa === 'singular' && (
-        <Bloco titulo="Dados pessoais">
-          <dl className="grelha-dados">
-            <Dado rotulo="Data de nascimento">{dataPt(e.data_nascimento)}</Dado>
-            <Dado rotulo="Estado civil">{e.nomes.estado_civil}</Dado>
-            <Dado rotulo="Regime de casamento">{e.nomes.regime_casamento}</Dado>
-            <Dado rotulo="Nacionalidade">{e.nacionalidade}</Dado>
-            <Dado rotulo="CC/Passaporte">{e.documento_identificacao}</Dado>
-            <Dado rotulo="Freguesia de naturalidade">{e.naturalidade_freguesia}</Dado>
-            <Dado rotulo="Concelho de naturalidade">{e.naturalidade_concelho}</Dado>
-            <Dado rotulo="Empresa">{e.empresa}</Dado>
-            <Dado rotulo="Cargo">{e.cargo}</Dado>
-            <Dado rotulo="Observações" largo>
-              {e.observacoes_pessoais && <span className="texto-livre">{e.observacoes_pessoais}</span>}
-            </Dado>
-          </dl>
-        </Bloco>
-      )}
-
-      <Bloco titulo="Classificação">
-        <dl className="grelha-dados">
-          <Dado rotulo="Tipo de cliente">{e.papeis_nomes.join(', ')}</Dado>
-          <Dado rotulo="Status">{e.status_nome}</Dado>
-          <Dado rotulo="Origem do contacto">{e.origem_nome}</Dado>
-          <Dado rotulo="Quem recomendou">
-            <Ligado d={e.quem_recomendou_dados} caminho="/entidades" />
-          </Dado>
-          <Dado rotulo="Imóvel de contacto">
-            <Ligado d={e.imovel_contacto_dados} caminho="/imoveis" />
-          </Dado>
-          <Dado rotulo="Visitou o imóvel de contacto">
-            {e.visitou_imovel_contacto === null ? null : e.visitou_imovel_contacto ? 'Sim' : 'Não'}
-          </Dado>
-          {e.visitou_imovel_contacto === false && (
-            <Dado rotulo="Porque não visitou" largo>
-              {e.motivo_nao_visitou && <span className="texto-livre">{e.motivo_nao_visitou}</span>}
-            </Dado>
-          )}
-          <Dado rotulo="Responsável">{e.responsavel_nome}</Dado>
-        </dl>
-      </Bloco>
+      <BlocosConfiguraveis
+        def={ECRA_ENTIDADE}
+        modo="ver"
+        campo={desenharCampo}
+        abertoInicial={(b) => (b.chave === 'dados' ? false : b.chave === 'observacoes' ? !!e.observacoes : true)}
+        resumo={(b) => (b.chave === 'dados' ? CONSENT[e.consentimento_marketing] : null)}
+      />
 
       <Bloco titulo="Imóveis (proprietária)">
         <ImoveisDaEntidade entidadeId={e.id} />
@@ -216,18 +264,6 @@ export function EntidadeConsulta() {
 
       <Bloco titulo="Entidades relacionadas">
         <RelacoesEntidade entidadeId={e.id} podeEditar={e.acoes.editar} tipos={opcoes.data?.tipos_relacao ?? []} />
-      </Bloco>
-
-      <Bloco titulo="Proteção de dados" abertoInicial={false} resumo={CONSENT[e.consentimento_marketing]}>
-        <dl className="grelha-dados">
-          <Dado rotulo="Consentimento de marketing">{CONSENT[e.consentimento_marketing]}</Dado>
-          <Dado rotulo="Data do consentimento">{dataPt(e.consentimento_marketing_em)}</Dado>
-          <Dado rotulo="Oposição a marketing">{e.oposicao_marketing ? 'Sim' : 'Não'}</Dado>
-        </dl>
-      </Bloco>
-
-      <Bloco titulo="Observações" abertoInicial={!!e.observacoes}>
-        <p className="texto-livre">{e.observacoes || <span className="vazio">—</span>}</p>
       </Bloco>
 
       <Bloco titulo="Histórico" abertoInicial={false}>

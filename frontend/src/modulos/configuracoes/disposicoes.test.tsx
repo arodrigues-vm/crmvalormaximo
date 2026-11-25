@@ -18,10 +18,12 @@ describe('Disposição dos ecrãs (D-43)', () => {
     const pedidos = simularApi({
       '/api/auth/eu/': () => json(ADMIN),
       'GET /api/disposicoes/imoveis/': () => json({ modulo: 'imoveis', blocos: null }),
+      'GET /api/disposicoes/entidades/': () => json({ modulo: 'entidades', blocos: null }),
       'PUT /api/disposicoes/imoveis/': (_u, init) =>
         json({ modulo: 'imoveis', blocos: JSON.parse(String(init?.body)).blocos }),
     })
     desenhar('/configuracoes/disposicao')
+    fireEvent.change(await screen.findByLabelText('Módulo'), { target: { value: 'imoveis' } })
     fireEvent.click(await screen.findByRole('button', { name: 'Descer o separador Comercialização' }))
     const separadores = screen.getAllByLabelText(/^Separador \d+$/)
     expect(separadores[0]).toHaveValue('Identificação')
@@ -44,7 +46,7 @@ describe('Disposição dos ecrãs (D-43)', () => {
   it('só deixa remover separadores vazios', async () => {
     simularApi({
       '/api/auth/eu/': () => json(ADMIN),
-      'GET /api/disposicoes/imoveis/': () => json({ modulo: 'imoveis', blocos: null }),
+      'GET /api/disposicoes/entidades/': () => json({ modulo: 'entidades', blocos: null }),
     })
     desenhar('/configuracoes/disposicao')
     await screen.findByRole('button', { name: 'Acrescentar separador' })
