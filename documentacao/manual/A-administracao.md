@@ -80,4 +80,4 @@ Para voltar à disposição original do CRM, carregue em **Restaurar disposiçã
 As secções que mostram registos ligados (por exemplo *Angariações*, *Visitas*, *Ligações* e *Histórico*) não
 são campos: aparecem sempre no fim da ficha.
 
-![Disposição dos ecrãs](imagens/27-disposicao-ecras.png)
+![Disposição dos ecrãs](imagens/47-disposicao-ecras.png)
