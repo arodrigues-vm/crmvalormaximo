@@ -9,11 +9,12 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 
 from apps.configuracao.campos import opcoes_lista
+from apps.configuracao.personalizados import alteracoes as alteracoes_personalizados
 from apps.contas.models import Ambito, Operacao
 from apps.contas.permissoes import PermissaoModulo, ambito_efetivo, filtrar, pode_no_registo
 from apps.core.auditoria import registar
 from apps.core.validacao import normalizar_telefone
-from apps.core.vistas import valor_legivel
+from apps.core.vistas import PersonalizadosMixin, valor_legivel
 
 from .models import Entidade, RelacaoEntidade, TelefoneEntidade, TipoRelacao
 from .serializers import (
@@ -51,6 +52,7 @@ def _fotografia(e: Entidade) -> dict:
 
 
 class EntidadeViewSet(
+    PersonalizadosMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     mixins.CreateModelMixin,
@@ -176,10 +178,12 @@ class EntidadeViewSet(
             self._verificar_duplicados(s.validated_data)
         except _Duplicado as d:
             return d.resposta()
+        personalizados = self._personalizados(criacao=True)
         e = s.save(
             responsavel=s.validated_data.get("responsavel") or request.user,
             criado_por=request.user,
             atualizado_por=request.user,
+            campos_personalizados=personalizados,
         )
         registar("entidade.criada", modulo=MODULO, objeto=e, request=request, descricao=e.nome_completo)
         if s.validated_data.get("confirmar_duplicado"):
@@ -213,10 +217,14 @@ class EntidadeViewSet(
                     self._verificar_duplicados(s.validated_data, excluir_id=e.pk)
                 except _Duplicado as d:
                     return d.resposta()
+            personalizados = self._personalizados(e)
             antes = _fotografia(e)
-            e = s.save(atualizado_por=request.user)
+            cp_antes = dict(e.campos_personalizados or {})
+            e = s.save(atualizado_por=request.user, campos_personalizados=personalizados)
             depois = _fotografia(e)
             alteracoes = {c: [antes[c], depois[c]] for c in CAMPOS_AUDITADOS if antes[c] != depois[c]}
+            if cp_antes != personalizados:
+                alteracoes["campos_personalizados"] = [cp_antes, personalizados]
             registar("entidade.alterada", modulo=MODULO, objeto=e, request=request, dados=alteracoes)
             if e.responsavel != responsavel_antes:
                 registar(
@@ -288,15 +296,20 @@ class EntidadeViewSet(
             alteracoes = []
             if h.prev_record:
                 delta = h.diff_against(h.prev_record)
-                alteracoes = [
-                    {
-                        "campo": c.field,
-                        "antes": valor_legivel(Entidade, c.field, c.old),
-                        "depois": valor_legivel(Entidade, c.field, c.new),
-                    }
-                    for c in delta.changes
-                    if c.field not in ("versao", "atualizado_em", "atualizado_por")
-                ]
+                for c in delta.changes:
+                    if c.field in ("versao", "atualizado_em", "atualizado_por"):
+                        continue
+                    alteracoes.append(
+                        {
+                            "campo": c.field,
+                            "antes": valor_legivel(Entidade, c.field, c.old),
+                            "depois": valor_legivel(Entidade, c.field, c.new),
+                        }
+                    )
+                # Campos personalizados (não editáveis no modelo, por isso comparados aqui).
+                alteracoes += alteracoes_personalizados(
+                    MODULO, h.prev_record.campos_personalizados, h.campos_personalizados
+                )
             resultado.append(
                 {
                     "momento": h.history_date,

@@ -46,6 +46,11 @@ Não inventar regras de negócio, fiscais ou prazos legais. Em ambiguidade, apre
   fichas são desenhados pela disposição configurável (`BlocosConfiguraveis` + `DefinicaoEcra` do módulo, registada
   em `modulos/configuracoes/ecras.ts`), para o Administrador poder mudar a ordem dos separadores, o separador de
   cada campo e a sua posição. A consulta segue a mesma disposição da edição.
+- **Configurável tanto quanto possível, sem risco (D-44):** em todos os módulos, existentes e futuros, preferir
+  sempre configuração (listas, parâmetros, disposição, nomes, campos personalizados) a valores fixos no código.
+  Cada configuração é validada no servidor, auditada, usa chaves estáveis, preserva os dados existentes e nunca
+  altera a estrutura da base de dados nem contorna permissões/regras de negócio. Módulos novos têm de suportar
+  campos personalizados (`campos_personalizados` do `RegistoBase`) e nomes configuráveis.
 - Identidade visual: usar apenas o logótipo aprovado (`documentacao/marca/`); nunca o redesenhar.
 
 ## Comandos

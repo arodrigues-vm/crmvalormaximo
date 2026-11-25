@@ -102,6 +102,7 @@ class InteresseViewSet(_Contexto, RegistoViewSet):
         return Q(pk__in=[])
 
     modulo = "visitas"
+    ecra = "interesses"
     modelo = Interesse
     nome_registo = "interesse"
     campos_auditados = [

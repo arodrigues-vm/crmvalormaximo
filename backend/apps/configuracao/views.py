@@ -17,7 +17,7 @@ MODULO = "configuracoes"
 
 def _exigir_administrar(request):
     if not pode(request.user, MODULO, Operacao.ADMINISTRAR):
-        raise PermissionDenied("Só o Administrador pode alterar as listas de valores.")
+        raise PermissionDenied("Só o Administrador pode alterar as configurações.")
 
 
 def _lista_json(lista, incluir_inativos):
@@ -239,6 +239,24 @@ def _validar_blocos(blocos):
     return limpos
 
 
+def _validar_rotulos(rotulos):
+    """Nomes alterados: {chave: nome}. As chaves nunca mudam; só o texto apresentado."""
+    if rotulos is None:
+        return {}
+    if not isinstance(rotulos, dict) or len(rotulos) > 400:
+        raise serializers.ValidationError("Nomes inválidos.")
+    limpos = {}
+    for chave, nome in rotulos.items():
+        if not isinstance(chave, str) or not chave or len(chave) > 60:
+            raise serializers.ValidationError("Nomes inválidos.")
+        nome = str(nome or "").strip()
+        if len(nome) > 80:
+            raise serializers.ValidationError("Cada nome pode ter até 80 caracteres.")
+        if nome:
+            limpos[chave] = nome
+    return limpos
+
+
 @extend_schema(summary="Disposição dos ecrãs de um módulo")
 @api_view(["GET", "PUT", "DELETE"])
 @permission_classes([IsAuthenticated])
@@ -249,20 +267,232 @@ def disposicao(request, modulo):
 
     d = Disposicao.objects.filter(modulo=modulo).first()
     if request.method == "GET":
-        return Response({"modulo": modulo, "blocos": d.blocos if d else None})
+        return Response({"modulo": modulo, "blocos": d.blocos if d else None, "rotulos": d.rotulos if d else {}})
     _exigir_administrar(request)
     if request.method == "DELETE":
         if d:
             registar("disposicao.reposta", modulo=MODULO, objeto=d, request=request, dados={"antes": d.blocos})
             d.delete()
-        return Response({"modulo": modulo, "blocos": None})
+        return Response({"modulo": modulo, "blocos": None, "rotulos": {}})
     try:
         blocos = _validar_blocos(request.data.get("blocos"))
     except serializers.ValidationError as e:
         raise serializers.ValidationError({"blocos": e.detail}) from e
-    antes = d.blocos if d else None
+    try:
+        rotulos = _validar_rotulos(request.data.get("rotulos", {}))
+    except serializers.ValidationError as e:
+        raise serializers.ValidationError({"rotulos": e.detail}) from e
+    antes = {"blocos": d.blocos, "rotulos": d.rotulos} if d else None
     d, _ = Disposicao.objects.update_or_create(
-        modulo=modulo, defaults={"blocos": blocos, "atualizado_por": request.user}
+        modulo=modulo, defaults={"blocos": blocos, "rotulos": rotulos, "atualizado_por": request.user}
     )
-    registar("disposicao.alterada", modulo=MODULO, objeto=d, request=request, dados={"antes": antes, "depois": blocos})
-    return Response({"modulo": modulo, "blocos": d.blocos})
+    registar(
+        "disposicao.alterada",
+        modulo=MODULO,
+        objeto=d,
+        request=request,
+        dados={"antes": antes, "depois": {"blocos": blocos, "rotulos": rotulos}},
+    )
+    return Response({"modulo": modulo, "blocos": d.blocos, "rotulos": d.rotulos})
+
+
+# Campos personalizados (D-44) -----------------------------------------------------------------------
+
+
+class CampoPersonalizadoSerializer(serializers.Serializer):
+    ecra = serializers.ChoiceField(choices=[])
+    nome = serializers.CharField(max_length=80)
+    tipo = serializers.ChoiceField(choices=[])
+    obrigatorio = serializers.BooleanField(default=False)
+    ajuda = serializers.CharField(max_length=200, allow_blank=True, default="")
+    modulo_relacao = serializers.CharField(max_length=40, allow_blank=True, default="")
+
+    def __init__(self, *args, **kwargs):
+        from .models import CampoPersonalizado
+        from .personalizados import ECRAS
+
+        super().__init__(*args, **kwargs)
+        self.fields["ecra"].choices = list(ECRAS)
+        self.fields["tipo"].choices = CampoPersonalizado.TIPOS
+
+    def validate_nome(self, v):
+        v = v.strip()
+        if not v:
+            raise serializers.ValidationError("Indique o nome do campo.")
+        return v
+
+    def validate(self, d):
+        from .personalizados import ECRAS, TIPOS_RELACAO
+
+        if d["tipo"] in TIPOS_RELACAO:
+            if d.get("modulo_relacao") not in ECRAS:
+                raise serializers.ValidationError({"modulo_relacao": "Escolha o módulo a que o campo liga."})
+        else:
+            d["modulo_relacao"] = ""
+        return d
+
+
+class CampoPersonalizadoEdicaoSerializer(serializers.Serializer):
+    nome = serializers.CharField(max_length=80, required=False)
+    obrigatorio = serializers.BooleanField(required=False)
+    ajuda = serializers.CharField(max_length=200, allow_blank=True, required=False)
+    ativo = serializers.BooleanField(required=False)
+
+    def validate_nome(self, v):
+        v = v.strip()
+        if not v:
+            raise serializers.ValidationError("Indique o nome do campo.")
+        return v
+
+
+def _em_uso(c):
+    from .personalizados import modelo_do_ecra
+
+    return modelo_do_ecra(c.ecra).objects.filter(campos_personalizados__has_key=c.chave).count()
+
+
+def _campo_json(c, admin):
+    dados = {
+        "id": c.id,
+        "ecra": c.ecra,
+        "chave": c.chave,
+        "nome": c.nome,
+        "tipo": c.tipo,
+        "tipo_nome": c.get_tipo_display(),
+        "obrigatorio": c.obrigatorio,
+        "ajuda": c.ajuda,
+        "ativo": c.ativo,
+        "lista": c.lista.chave if c.lista else None,
+        "opcoes": [{"id": v.id, "nome": v.nome, "ativo": v.ativo} for v in c.lista.valores.all()] if c.lista else [],
+        "modulo_relacao": c.modulo_relacao,
+    }
+    if admin:
+        dados["em_uso"] = _em_uso(c)
+    return dados
+
+
+def _chave_nova(ecra, nome):
+    import re
+    import unicodedata
+
+    from .models import CampoPersonalizado
+
+    base = unicodedata.normalize("NFKD", nome).encode("ascii", "ignore").decode().lower()
+    base = "cp_" + (re.sub(r"[^a-z0-9]+", "_", base).strip("_")[:40] or "campo")
+    chave, n = base, 2
+    while CampoPersonalizado.objects.filter(ecra=ecra, chave=chave).exists():
+        chave, n = f"{base}_{n}", n + 1
+    return chave
+
+
+@extend_schema(summary="Campos personalizados de um ecrã", request=CampoPersonalizadoSerializer)
+@api_view(["GET", "POST"])
+@permission_classes([IsAuthenticated])
+def campos_personalizados(request):
+    from .models import CampoPersonalizado, Lista
+    from .personalizados import ECRAS, MAX_CAMPOS_POR_ECRA, TIPOS_LISTA
+
+    admin = pode(request.user, MODULO, Operacao.ADMINISTRAR)
+    if request.method == "GET":
+        ecra = request.query_params.get("ecra", "")
+        qs = CampoPersonalizado.objects.filter(ecra=ecra).select_related("lista").prefetch_related("lista__valores")
+        return Response(
+            {
+                "campos": [_campo_json(c, admin) for c in qs],
+                "tipos": [{"valor": v, "nome": n} for v, n in CampoPersonalizado.TIPOS],
+                "modulos": [{"valor": k, "nome": v[2]} for k, v in ECRAS.items()],
+            }
+        )
+    _exigir_administrar(request)
+    s = CampoPersonalizadoSerializer(data=request.data)
+    s.is_valid(raise_exception=True)
+    d = s.validated_data
+    if CampoPersonalizado.objects.filter(ecra=d["ecra"]).count() >= MAX_CAMPOS_POR_ECRA:
+        raise serializers.ValidationError({"nome": f"Máximo de {MAX_CAMPOS_POR_ECRA} campos por módulo."})
+    with transaction.atomic():
+        chave = _chave_nova(d["ecra"], d["nome"])
+        lista = None
+        if d["tipo"] in TIPOS_LISTA:
+            # As opções vêm sempre de uma lista configurável (D-34), editável em Listas de valores.
+            lista = Lista.objects.create(
+                chave=f"{d['ecra']}-{chave}"[:60],
+                nome=d["nome"],
+                modulo=d["ecra"],
+                descricao="Opções de um campo acrescentado pelo Administrador.",
+            )
+        c = CampoPersonalizado.objects.create(
+            ecra=d["ecra"],
+            chave=chave,
+            nome=d["nome"],
+            tipo=d["tipo"],
+            obrigatorio=d["obrigatorio"],
+            ajuda=d["ajuda"],
+            modulo_relacao=d["modulo_relacao"],
+            lista=lista,
+            criado_por=request.user,
+        )
+        registar("campo_personalizado.criado", modulo=MODULO, objeto=c, request=request, dados=_campo_json(c, False))
+    return Response(_campo_json(c, True), status=status.HTTP_201_CREATED)
+
+
+@extend_schema(summary="Alterar ou remover um campo personalizado", request=CampoPersonalizadoEdicaoSerializer)
+@api_view(["PATCH", "DELETE"])
+@permission_classes([IsAuthenticated])
+def campo_personalizado(request, pk):
+    from .models import CampoPersonalizado
+
+    _exigir_administrar(request)
+    c = CampoPersonalizado.objects.filter(pk=pk).select_related("lista").first()
+    if c is None:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == "DELETE":
+        em_uso = _em_uso(c)
+        if em_uso:
+            return Response(
+                {
+                    "detail": f"Este campo tem valores em {em_uso} registo(s). Para não perder dados, desative-o "
+                    "em vez de o remover.",
+                    "codigo": "campo_em_uso",
+                    "em_uso": em_uso,
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
+        with transaction.atomic():
+            registar(
+                "campo_personalizado.removido", modulo=MODULO, objeto=c, request=request, dados=_campo_json(c, False)
+            )
+            lista = c.lista
+            c.delete()
+            if lista:
+                lista.valores.all().delete()
+                lista.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    s = CampoPersonalizadoEdicaoSerializer(data=request.data)
+    s.is_valid(raise_exception=True)
+    antes = _campo_json(c, False)
+    for k, v in s.validated_data.items():
+        setattr(c, k, v)
+    c.save()
+    if c.lista and c.lista.nome != c.nome:
+        c.lista.nome = c.nome
+        c.lista.save(update_fields=["nome"])
+    registar(
+        "campo_personalizado.alterado",
+        modulo=MODULO,
+        objeto=c,
+        request=request,
+        dados={"antes": antes, "depois": _campo_json(c, False)},
+    )
+    return Response(_campo_json(c, True))
+
+
+@extend_schema(summary="Procurar registos para um campo de ligação")
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def procurar_registos(request):
+    from .personalizados import ECRAS, procurar
+
+    ecra = request.query_params.get("ecra", "")
+    if ecra not in ECRAS:
+        return Response([])
+    return Response(procurar(request.user, ecra, request.query_params.get("q", "")[:100]))

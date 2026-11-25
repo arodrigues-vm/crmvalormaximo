@@ -20,6 +20,11 @@ urlpatterns = [
     path("localizacao/", include("apps.localizacao.urls")),
     path("listas/", include("apps.configuracao.urls")),
     path("parametros/", configuracao_views.parametros, name="parametros"),
+    path("campos-personalizados/", configuracao_views.campos_personalizados, name="campos-personalizados"),
+    path(
+        "campos-personalizados/procurar/", configuracao_views.procurar_registos, name="campos-personalizados-procurar"
+    ),
+    path("campos-personalizados/<int:pk>/", configuracao_views.campo_personalizado, name="campo-personalizado"),
     path("disposicoes/<slug:modulo>/", configuracao_views.disposicao, name="disposicao"),
     path("parametros/<slug:chave>/", configuracao_views.alterar_parametro, name="parametro"),
 ]

@@ -43,6 +43,10 @@ class RegistoBase(models.Model):
         editable=False,
     )
 
+    # Valores dos campos acrescentados pelo Administrador (D-44): {chave: valor}. Guardados em JSON para que
+    # acrescentar campos nunca altere a estrutura da base de dados. Só a API valida e grava este campo.
+    campos_personalizados = models.JSONField(default=dict, blank=True, editable=False)
+
     objects = RegistoQuerySet.as_manager()
 
     class Meta:

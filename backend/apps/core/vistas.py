@@ -10,6 +10,8 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 
 from apps.configuracao.campos import CampoValorLista
+from apps.configuracao.personalizados import alteracoes as alteracoes_personalizados
+from apps.configuracao.personalizados import representar as representar_personalizados
 from apps.contas.models import Ambito, Operacao
 from apps.contas.permissoes import OPERACAO_POR_ACAO, PermissaoModulo, ambito_efetivo, filtrar, pode_no_registo
 from apps.core.auditoria import registar
@@ -34,7 +36,34 @@ class LigacaoSerializer(serializers.Serializer):
         return valor
 
 
+class PersonalizadosMixin:
+    """Campos personalizados (D-44) em qualquer conjunto de vistas de registos."""
+
+    # Ecrã dos campos personalizados e da disposição (D-43/D-44); por omissão, igual ao módulo.
+    ecra: str | None = None
+
+    @property
+    def ecra_atual(self):
+        return self.ecra or self.modulo
+
+    def get_serializer(self, *args, **kwargs):
+        classe = self.get_serializer_class()
+        if self.action != "list":
+            classe = com_personalizados(classe, self.ecra_atual)
+        kwargs.setdefault("context", self.get_serializer_context())
+        return classe(*args, **kwargs)
+
+    def _personalizados(self, obj=None, criacao=False):
+        from apps.configuracao.personalizados import validar_valores
+
+        dados = self.request.data.get("campos_personalizados") if hasattr(self.request.data, "get") else None
+        return validar_valores(
+            self.ecra_atual, dados, obj.campos_personalizados if obj else {}, self.request.user, criacao
+        )
+
+
 class RegistoViewSet(
+    PersonalizadosMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     mixins.CreateModelMixin,
@@ -102,10 +131,12 @@ class RegistoViewSet(
         s = self.get_serializer(data=request.data)
         s.is_valid(raise_exception=True)
         self.validar_responsavel(s.validated_data.get("responsavel"))
+        personalizados = self._personalizados(criacao=True)
         obj = s.save(
             responsavel=s.validated_data.get("responsavel") or request.user,
             criado_por=request.user,
             atualizado_por=request.user,
+            campos_personalizados=personalizados,
         )
         registar(f"{self.nome_registo}.criado", modulo=self.modulo, objeto=obj, request=request)
         return Response(self.get_serializer(self.recarregar(obj)).data, status=status.HTTP_201_CREATED)
@@ -131,10 +162,14 @@ class RegistoViewSet(
             s.is_valid(raise_exception=True)
             responsavel_antes = obj.responsavel
             self.validar_responsavel(s.validated_data.get("responsavel"), atual=responsavel_antes)
+            personalizados = self._personalizados(obj)
             antes = self._fotografia(obj)
-            obj = s.save(atualizado_por=request.user)
+            cp_antes = dict(obj.campos_personalizados or {})
+            obj = s.save(atualizado_por=request.user, campos_personalizados=personalizados)
             depois = self._fotografia(obj)
             alteracoes = {c: [antes[c], depois[c]] for c in self.campos_auditados if antes[c] != depois[c]}
+            if cp_antes != personalizados:
+                alteracoes["campos_personalizados"] = [cp_antes, personalizados]
             registar(f"{self.nome_registo}.alterado", modulo=self.modulo, objeto=obj, request=request, dados=alteracoes)
             if obj.responsavel != responsavel_antes:
                 registar(
@@ -170,15 +205,21 @@ class RegistoViewSet(
         for h in obj.historico.select_related("history_user").order_by("-history_date")[:100]:
             alteracoes = []
             if h.prev_record:
-                alteracoes = [
-                    {
-                        "campo": c.field,
-                        "antes": valor_legivel(self.modelo, c.field, c.old),
-                        "depois": valor_legivel(self.modelo, c.field, c.new),
-                    }
-                    for c in h.diff_against(h.prev_record).changes
-                    if c.field not in CAMPOS_IGNORADOS_HISTORICO
-                ]
+                alteracoes = []
+                for c in h.diff_against(h.prev_record).changes:
+                    if c.field in CAMPOS_IGNORADOS_HISTORICO:
+                        continue
+                    alteracoes.append(
+                        {
+                            "campo": c.field,
+                            "antes": valor_legivel(self.modelo, c.field, c.old),
+                            "depois": valor_legivel(self.modelo, c.field, c.new),
+                        }
+                    )
+                # Campos personalizados (não editáveis no modelo, por isso comparados aqui).
+                alteracoes += alteracoes_personalizados(
+                    self.ecra_atual, h.prev_record.campos_personalizados, h.campos_personalizados
+                )
             resultado.append(
                 {
                     "momento": h.history_date,
@@ -397,3 +438,29 @@ class AcoesPorRegisto(dict):
                 for op in (Operacao.EDITAR, Operacao.ELIMINAR, Operacao.TRANSFERIR)
             }
         return super().get(pk, default)
+
+
+_CLASSES_COM_PERSONALIZADOS: dict = {}
+
+
+def com_personalizados(base, ecra):
+    """Acrescenta à resposta de um registo os valores dos campos personalizados e os nomes legíveis (D-44)."""
+    if not (isinstance(base, type) and issubclass(base, serializers.BaseSerializer)):
+        return base
+    chave = (base, ecra)
+    if chave not in _CLASSES_COM_PERSONALIZADOS:
+
+        def to_representation(self, instance):
+            dados = super(nova, self).to_representation(instance)
+            if hasattr(instance, "campos_personalizados") and isinstance(dados, dict):
+                pedido = self.context.get("request")
+                valores = instance.campos_personalizados or {}
+                dados["campos_personalizados"] = valores
+                dados["campos_personalizados_nomes"] = (
+                    representar_personalizados(ecra, valores, pedido.user) if pedido else {}
+                )
+            return dados
+
+        nova = type(base.__name__, (base,), {"to_representation": to_representation, "__module__": base.__module__})
+        _CLASSES_COM_PERSONALIZADOS[chave] = nova
+    return _CLASSES_COM_PERSONALIZADOS[chave]

@@ -71,6 +71,8 @@ class Disposicao(models.Model):
 
     modulo = models.SlugField(max_length=40, unique=True)
     blocos = models.JSONField(default=list)
+    # Nomes alterados pelo Administrador (D-44): {chave_do_campo: "novo nome"}. A chave nunca muda.
+    rotulos = models.JSONField(default=dict, blank=True)
     atualizado_em = models.DateTimeField(auto_now=True)
     atualizado_por = models.ForeignKey(
         "contas.Utilizador", null=True, blank=True, on_delete=models.PROTECT, related_name="+"
@@ -84,6 +86,55 @@ class Disposicao(models.Model):
 
     def __str__(self):
         return self.modulo
+
+
+class CampoPersonalizado(models.Model):
+    """Campo acrescentado pelo Administrador a um ecrã (D-44), sem alterar a base de dados.
+
+    A `chave` é estável (gerada a partir do nome na criação e nunca muda); o `nome` pode mudar à vontade.
+    O tipo e o módulo relacionado não mudam depois de criado (para não invalidar valores já gravados).
+    Nunca se apaga um campo com valores: desativa-se (os valores ficam guardados e voltam se o reativar).
+    """
+
+    TIPOS = [
+        ("texto", "Texto"),
+        ("texto_longo", "Texto longo"),
+        ("inteiro", "Número inteiro"),
+        ("decimal", "Número decimal"),
+        ("moeda", "Valor em euros"),
+        ("data", "Data"),
+        ("email", "Email"),
+        ("url", "Link (endereço de site)"),
+        ("telefone", "Telefone"),
+        ("lista", "Lista suspensa (uma opção)"),
+        ("lista_multipla", "Lista suspensa (várias opções)"),
+        ("sim_nao", "Sim / Não"),
+        ("relacao", "Ligação a um registo de outro módulo"),
+        ("relacao_multipla", "Ligação a vários registos de outro módulo"),
+    ]
+
+    ecra = models.SlugField(max_length=40, help_text="Ecrã/módulo onde o campo aparece (igual à disposição).")
+    chave = models.SlugField(max_length=60)
+    nome = models.CharField(max_length=80)
+    tipo = models.CharField(max_length=20, choices=TIPOS)
+    obrigatorio = models.BooleanField(default=False)
+    ajuda = models.CharField(max_length=200, blank=True)
+    ativo = models.BooleanField(default=True)
+    lista = models.ForeignKey(Lista, null=True, blank=True, on_delete=models.PROTECT, related_name="+")
+    modulo_relacao = models.SlugField(max_length=40, blank=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    criado_por = models.ForeignKey("contas.Utilizador", null=True, on_delete=models.PROTECT, related_name="+")
+
+    historico = HistoricalRecords()
+
+    class Meta:
+        ordering = ["ecra", "criado_em"]
+        verbose_name = "campo personalizado"
+        verbose_name_plural = "campos personalizados"
+        constraints = [models.UniqueConstraint(fields=["ecra", "chave"], name="campo_personalizado_unico")]
+
+    def __str__(self):
+        return f"{self.ecra}: {self.nome}"
 
 
 class Parametro(models.Model):
