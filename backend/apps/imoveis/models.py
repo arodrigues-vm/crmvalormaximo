@@ -35,6 +35,17 @@ class Imovel(RegistoBase):
     # Listas configuráveis com categoria fixa (venda/arrendamento; ativo/inativo/arquivado).
     operacao = campo_lista("operacoes", verbose_name="operação")
     status = campo_lista("status_imovel", verbose_name="status")
+    # D-46: angariação própria (responsável = membro da Equipa, campo `responsavel`) ou de rede/externa
+    # (responsável = agente de `agente_responsavel`; o acesso continua com quem criou o imóvel).
+    angariacao = campo_lista("tipos_angariacao", verbose_name="angariação")
+    agente_responsavel = models.ForeignKey(
+        "agentes.Agente",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="+",
+        verbose_name="responsável (agente)",
+    )
     condicao_fisica = campo_lista("condicoes_fisicas", verbose_name="estado do imóvel")
     destino_imovel = campo_lista("destinos_imovel", verbose_name="destino do imóvel")
     ocupacao = campo_lista("ocupacoes_imovel", verbose_name="ocupação")
@@ -134,6 +145,11 @@ class Imovel(RegistoBase):
 
     def __str__(self):
         return self.referencia or f"Imóvel {self.pk}"
+
+    @property
+    def angariacao_propria(self) -> bool:
+        """Sem tipo indicado conta como própria (imóveis anteriores ao D-46)."""
+        return self.angariacao is None or self.angariacao.categoria == "propria"
 
     def save(self, *args, **kwargs):
         if self.elevadores_id:

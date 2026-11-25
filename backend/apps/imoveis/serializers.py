@@ -3,6 +3,7 @@ from decimal import Decimal
 from django.db import transaction
 from rest_framework import serializers
 
+from apps.agentes.models import Agente, nome_agente
 from apps.configuracao.campos import CampoValorLista
 from apps.configuracao.models import ValorLista
 from apps.contas.models import Utilizador
@@ -146,6 +147,10 @@ class ImovelSerializer(serializers.ModelSerializer):
     elevadores = CampoValorLista("quantidades", allow_null=True, required=False)
     freguesia = serializers.PrimaryKeyRelatedField(allow_null=True, required=False, queryset=Freguesia.objects.all())
     responsavel = serializers.PrimaryKeyRelatedField(required=False, queryset=Utilizador.objects.filter(is_active=True))
+    angariacao = CampoValorLista("tipos_angariacao", allow_null=True, required=False)
+    agente_responsavel = serializers.PrimaryKeyRelatedField(
+        allow_null=True, required=False, queryset=Agente.objects.ativos()
+    )
     proprietarios = ProprietarioEscritaSerializer(many=True, required=False, write_only=True)
     versao = serializers.IntegerField(required=False)
 
@@ -154,6 +159,9 @@ class ImovelSerializer(serializers.ModelSerializer):
     proprietarios_detalhe = serializers.SerializerMethodField()
     localizacao = serializers.SerializerMethodField()
     responsavel_nome = serializers.CharField(source="responsavel.nome", read_only=True)
+    agente_responsavel_nome = serializers.SerializerMethodField()
+    angariacao_propria = serializers.BooleanField(read_only=True)
+    responsavel_imovel_nome = serializers.SerializerMethodField()
     duplicado_de_referencia = serializers.CharField(source="duplicado_de.referencia", read_only=True, default=None)
     acoes = serializers.SerializerMethodField()
 
@@ -169,7 +177,9 @@ class ImovelSerializer(serializers.ModelSerializer):
             "certificado_energetico", "zonas_exteriores", "descricao", *LISTAS_D34, *CAMPOS_D34,
             "duplicado_de", "duplicado_de_referencia",
             "proprietarios", "proprietarios_detalhe", "responsavel", "responsavel_nome", "observacoes",
-            "nomes", "tem_fotografia", "criado_em", "atualizado_em", "versao", "eliminado_em", "acoes",
+            "angariacao", "angariacao_propria", "agente_responsavel", "agente_responsavel_nome",
+            "responsavel_imovel_nome", "nomes", "tem_fotografia", "criado_em", "atualizado_em", "versao",
+            "eliminado_em", "acoes",
         ]  # fmt: skip
         read_only_fields = [
             "referencia", "criado_em", "atualizado_em", "eliminado_em", "lugares_estacionamento", "elevador",
@@ -189,8 +199,16 @@ class ImovelSerializer(serializers.ModelSerializer):
             "operacao_categoria": o.operacao.categoria if o.operacao else None,
             "status": _nome(o.status),
             "status_categoria": o.status.categoria if o.status else None,
+            "angariacao": _nome(o.angariacao),
             **{c: _nome(getattr(o, c)) for c in LISTAS_D34},
         }
+
+    def get_agente_responsavel_nome(self, o) -> str | None:
+        return nome_agente(o.agente_responsavel)
+
+    def get_responsavel_imovel_nome(self, o) -> str | None:
+        """Quem responde pelo imóvel (D-46): membro da Equipa se a angariação é própria; senão, o agente."""
+        return o.responsavel.nome if o.angariacao_propria else nome_agente(o.agente_responsavel)
 
     def get_proprietarios_detalhe(self, o) -> list[dict]:
         visiveis = self.context.get("entidades_visiveis", set())
@@ -225,6 +243,18 @@ class ImovelSerializer(serializers.ModelSerializer):
         if valor and not (len(valor) == 8 and valor[:4].isdigit() and valor[4] == "-" and valor[5:].isdigit()):
             raise serializers.ValidationError("Use o formato 0000-000.")
         return valor
+
+    def validate(self, d):
+        d = super().validate(d)
+        angariacao = d.get("angariacao", getattr(self.instance, "angariacao", None))
+        propria = angariacao is None or angariacao.categoria == "propria"
+        if propria:
+            d["agente_responsavel"] = None  # na angariação própria o responsável é o da Equipa
+        elif not d.get("agente_responsavel", getattr(self.instance, "agente_responsavel", None)):
+            raise serializers.ValidationError(
+                {"agente_responsavel": "Na angariação de rede ou externa, escolha o responsável em Agentes."}
+            )
+        return d
 
     def validate_proprietarios(self, lista):
         visiveis = self.context.get("entidades_visiveis", set())

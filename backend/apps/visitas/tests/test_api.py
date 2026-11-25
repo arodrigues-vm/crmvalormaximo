@@ -142,12 +142,44 @@ def test_interesse_manual_unico(api, u, cliente, imovel):
     assert filtrado["count"] == 1
 
 
-def test_agentes_obrigatorios(api, u, cliente, imovel):
+def externo(entidade):
+    """Marca a entidade como «Cliente externo» (Tipo de cliente com essa categoria, D-46)."""
+    entidade.papeis.add(ValorLista.objects.get(lista__chave="papeis_entidade", categoria="cliente_externo"))
+    return entidade
+
+
+def test_responsaveis_vem_das_fichas(api, u, cliente, imovel, agentes, criar_utilizador):
+    """D-46: responsável pelo imóvel = o da ficha do imóvel; pela entidade = o da ficha da entidade."""
     api.force_authenticate(u)
+    url = reverse("visita-list")
+    r = api.post(url, {"entidade": cliente.pk, "imovel": imovel.pk, "data": str(HOJE)}, format="json")
+    assert r.status_code == 201, r.content
+    assert r.json()["consultor_imovel"] == u.pk and r.json()["consultor_comprador"] == u.pk
+    assert r.json()["responsavel_imovel_nome"] == u.nome and r.json()["agente_imovel"] is None
+    # Imóvel de angariação externa: o responsável é o agente indicado na ficha do imóvel.
+    imovel.angariacao_id = v("tipos_angariacao", "Externa")
+    imovel.save()
+    r = api.post(url, {"entidade": cliente.pk, "imovel": imovel.pk, "data": str(HOJE)}, format="json")
+    assert r.status_code == 400 and "imovel" in r.json()  # o imóvel ainda não tem agente
+    imovel.agente_responsavel = agentes.externo
+    imovel.save()
+    r = api.post(url, {"entidade": cliente.pk, "imovel": imovel.pk, "data": str(HOJE)}, format="json")
+    assert r.json()["agente_imovel"] == agentes.externo.pk and r.json()["consultor_imovel"] is None
+
+
+def test_agentes_obrigatorios_para_cliente_externo_e_imovel_nao_registado(api, u, cliente, imovel):
+    api.force_authenticate(u)
+    externo(cliente)
     r = api.post(
         reverse("visita-list"), {"entidade": cliente.pk, "imovel": imovel.pk, "data": str(HOJE)}, format="json"
     )
     assert r.status_code == 400 and "agente_comprador" in str(r.json())
+    r = api.post(
+        reverse("visita-list"),
+        {"entidade": cliente.pk, "imovel_descricao_livre": "Moradia", "data": str(HOJE)},
+        format="json",
+    )
+    assert "agente_imovel" in str(r.json())
 
 
 def test_imovel_nao_registado_e_cliente_externo(api, u, cliente, agentes):
@@ -165,7 +197,11 @@ def test_imovel_nao_registado_e_cliente_externo(api, u, cliente, agentes):
 
 
 def test_cliente_de_agente_externo_nao_cria_interesse(api, u, cliente, imovel, agentes):
+    externo(cliente)
     criar(api, u, cliente, imovel, agente_comprador=agentes.externo.pk)
     assert not Interesse.objects.exists()
-    criar(api, u, cliente, imovel)  # cliente acompanhado por nós
+    criar(api, u, cliente, imovel)  # cliente externo, mas acompanhado por um agente nosso
     assert Interesse.objects.count() == 1
+    outro = Entidade.objects.create(nome="Carla Ensaio", responsavel=u)
+    criar(api, u, outro, imovel)  # cliente nosso: o responsável vem da ficha e o interesse é automático
+    assert Interesse.objects.count() == 2

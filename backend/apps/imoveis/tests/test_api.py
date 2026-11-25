@@ -418,3 +418,26 @@ def test_duplicar_imovel(api, pessoas):
     assert RegistoAuditoria.objects.filter(acao="imovel.duplicado").count() == 1
     # Assistente não cria imóveis.
     assert como(api, pessoas.assist).post(url, {"confirmar": True}, format="json").status_code in (403, 404)
+
+
+def test_responsavel_conforme_angariacao(api, criar_utilizador):
+    """D-46: angariação própria → responsável da Equipa; rede/externa → responsável escolhido em Agentes."""
+    from apps.agentes.models import Agente
+    from apps.configuracao.models import ValorLista
+    from apps.contas.models import Perfil
+    from apps.imoveis.models import Imovel
+
+    u = criar_utilizador(Perfil.CONSULTOR)
+    api.force_authenticate(u)
+    i = Imovel.objects.create(responsavel=u)
+    agente = Agente.objects.create(nome="Agente Externo Ensaio", responsavel=u)
+    externa = ValorLista.objects.get(lista__chave="tipos_angariacao", categoria="externa").pk
+    propria = ValorLista.objects.get(lista__chave="tipos_angariacao", categoria="propria").pk
+    url = reverse("imovel-detail", args=[i.pk])
+    r = api.patch(url, {"versao": i.versao, "angariacao": externa}, format="json")
+    assert r.status_code == 400 and "agente_responsavel" in r.json()
+    r = api.patch(url, {"versao": i.versao, "angariacao": externa, "agente_responsavel": agente.pk}, format="json")
+    assert r.status_code == 200
+    assert r.json()["responsavel_imovel_nome"] == "Agente Externo Ensaio" and r.json()["responsavel"] == u.pk
+    r = api.patch(url, {"versao": r.json()["versao"], "angariacao": propria}, format="json")
+    assert r.json()["agente_responsavel"] is None and r.json()["responsavel_imovel_nome"] == u.nome

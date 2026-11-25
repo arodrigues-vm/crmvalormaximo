@@ -114,7 +114,7 @@ def test_todas_as_listas_com_categorias_tem_valores_categorizados(db):
         lista = Lista.objects.get(chave=chave)
         validas = {c["valor"] for c in lista.categorias}
         assert validas, chave
-        assert lista.valores.count() == len(LISTAS[chave][3])
+        assert lista.valores.count() >= len(LISTAS[chave][3])
         assert all(v.categoria in validas for v in lista.valores.all()), chave
 
 

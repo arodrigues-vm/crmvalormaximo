@@ -50,6 +50,12 @@ CAT_TIPO_AGENCIA = [
     {"valor": "externa", "nome": "Externa"},
 ]
 
+# D-46: «Cliente externo» (cliente de outra agência): nas visitas e propostas o responsável escolhe-se em Agentes.
+CAT_TIPO_CLIENTE = [
+    {"valor": "geral", "nome": "Tipo de cliente"},
+    {"valor": "cliente_externo", "nome": "Cliente externo (responsável escolhido em Agentes)"},
+]
+
 CAT_ESTADO_PROPOSTA = [
     {"valor": "negociacao", "nome": "Em negociação"},
     {"valor": "aceite", "nome": "Aceite (pode gerar transação)"},
@@ -69,6 +75,8 @@ CATEGORIAS = {
     "estados_visita": CAT_ESTADO_VISITA,
     "estados_proposta": CAT_ESTADO_PROPOSTA,
     "tipos_agencia": CAT_TIPO_AGENCIA,
+    "tipos_angariacao": CAT_TIPO_AGENCIA,
+    "papeis_entidade": CAT_TIPO_CLIENTE,
     "status_agentes": CAT_STATUS,
     "estados_interesse": CAT_ESTADO_INTERESSE,
 }
@@ -168,6 +176,12 @@ LISTAS = {
         "Tipos de agência",
         "agencias",
         "A categoria «Própria» identifica a nossa agência (ex.: interesses automáticos das visitas).",
+        [("Própria", "propria"), ("Rede", "rede"), ("Externa", "externa")],
+    ),
+    "tipos_angariacao": (
+        "Tipos de angariação",
+        "imoveis",
+        "D-46: com a categoria «Própria», o responsável do imóvel escolhe-se na Equipa; nas outras, em Agentes.",
         [("Própria", "propria"), ("Rede", "rede"), ("Externa", "externa")],
     ),
     "tipos_agente": ("Tipos de agente", "agentes", "", ["Consultor", "Agente da rede", "Agente externo"]),

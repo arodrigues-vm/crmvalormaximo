@@ -9,7 +9,7 @@ from apps.imoveis.models import Imovel
 from apps.procuras.models import Procura
 
 from .models import CRITERIOS_AVALIACAO, Interesse, Visita
-from .servicos import atualizar_interesse, valor_por_categoria
+from .servicos import atualizar_interesse, derivar_responsaveis, nome_responsavel, valor_por_categoria
 
 
 def _nome(v):
@@ -81,6 +81,9 @@ class VisitaSerializer(_Base):
     )
     agente_comprador_nome = serializers.SerializerMethodField()
     agente_imovel_nome = serializers.SerializerMethodField()
+    # D-46: quem responde pelo imóvel e pela entidade (membro da Equipa ou agente)
+    responsavel_imovel_nome = serializers.SerializerMethodField()
+    responsavel_comprador_nome = serializers.SerializerMethodField()
     procura = serializers.PrimaryKeyRelatedField(queryset=Procura.objects.ativos(), allow_null=True, required=False)
     acompanhantes = serializers.PrimaryKeyRelatedField(queryset=Entidade.objects.ativos(), many=True, required=False)
     estado = CampoValorLista("estados_visita", allow_null=True, required=False)
@@ -97,13 +100,21 @@ class VisitaSerializer(_Base):
         fields = [
             "id", "referencia", "imovel", "imovel_descricao", "imovel_descricao_livre", "imovel_localizacao",
             "agente_comprador", "agente_comprador_nome", "agente_imovel", "agente_imovel_nome",
+            "consultor_comprador", "consultor_imovel", "responsavel_imovel_nome", "responsavel_comprador_nome",
             "entidade", "entidade_nome", "acompanhantes",
             "acompanhantes_detalhe", "procura", "procura_referencia", "data", "hora_entrada", "hora_saida",
             "estado", "estado_nome", "estado_categoria", *CRITERIOS_AVALIACAO, "mais_gostou", "menos_gostou",
             "compraria", "responsavel", "responsavel_nome", "observacoes", "nomes",
             "criado_em", "atualizado_em", "versao", "eliminado_em", "acoes",
         ]  # fmt: skip
-        read_only_fields = ["referencia", "criado_em", "atualizado_em", "eliminado_em"]
+        read_only_fields = [
+            "consultor_comprador",
+            "consultor_imovel",
+            "referencia",
+            "criado_em",
+            "atualizado_em",
+            "eliminado_em",
+        ]
 
     def get_fields(self):
         campos = super().get_fields()
@@ -129,6 +140,12 @@ class VisitaSerializer(_Base):
 
     def get_agente_imovel_nome(self, o) -> str | None:
         return self._agente(o.agente_imovel)
+
+    def get_responsavel_imovel_nome(self, o) -> str | None:
+        return nome_responsavel(o.consultor_imovel, o.agente_imovel)
+
+    def get_responsavel_comprador_nome(self, o) -> str | None:
+        return nome_responsavel(o.consultor_comprador, o.agente_comprador)
 
     def get_nomes(self, o) -> dict:
         return {
@@ -163,9 +180,7 @@ class VisitaSerializer(_Base):
             raise serializers.ValidationError({"imovel": "Escolha o imóvel ou, se não estiver registado, descreva-o."})
         if val("imovel"):
             d["imovel_descricao"] = d["imovel_localizacao"] = ""  # com imóvel registado, não há descrição livre
-        for campo in ("agente_comprador", "agente_imovel"):
-            if not val(campo):
-                raise serializers.ValidationError({campo: "Indique o agente (registado em Agentes)."})
+        derivar_responsaveis(d, self.instance)
         procura = val("procura")
         if procura and procura.entidade_id != val("entidade").pk:
             raise serializers.ValidationError({"procura": "A procura tem de ser do mesmo cliente."})

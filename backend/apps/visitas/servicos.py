@@ -18,10 +18,63 @@ def valor_por_nome(chave: str, nome: str):
     return ValorLista.objects.filter(lista__chave=chave, nome=nome, ativo=True).first()
 
 
+def cliente_externo(entidade) -> bool:
+    """D-46: entidade com um «Tipo de cliente» da categoria «Cliente externo» (cliente de outra agência)."""
+    return entidade is not None and entidade.papeis.filter(categoria="cliente_externo").exists()
+
+
+def derivar_responsaveis(d: dict, instancia=None) -> dict:
+    """D-46 (visitas e propostas): o responsável pelo imóvel vem da ficha do imóvel (Equipa se a angariação é
+    própria; senão, o agente) e, se o imóvel não está registado, escolhe-se em Agentes. O responsável pela
+    entidade vem da ficha da entidade, exceto «Cliente externo», em que se escolhe em Agentes.
+
+    Numa edição só se recalcula quando o imóvel ou a entidade mudam (os já gravados ficam como estavam)."""
+    from rest_framework import serializers
+
+    val = lambda c: d.get(c, getattr(instancia, c, None))  # noqa: E731
+    imovel, entidade = val("imovel"), val("entidade")
+    mudou = lambda c: instancia is None or (c in d and d[c] != getattr(instancia, c))  # noqa: E731
+    erros = {}
+    if imovel is not None:
+        if mudou("imovel") or not (val("consultor_imovel") or val("agente_imovel")):
+            if imovel.angariacao_propria:
+                d["consultor_imovel"], d["agente_imovel"] = imovel.responsavel, None
+            elif imovel.agente_responsavel_id:
+                d["consultor_imovel"], d["agente_imovel"] = None, imovel.agente_responsavel
+            else:
+                erros["imovel"] = "Este imóvel não tem responsável. Indique-o na ficha do imóvel."
+        else:
+            d.pop("agente_imovel", None)  # vem da ficha do imóvel; não se escolhe à mão
+    else:
+        d["consultor_imovel"] = None
+        if not val("agente_imovel"):
+            erros["agente_imovel"] = "Indique o responsável pelo imóvel (registado em Agentes)."
+    if entidade is not None:
+        if cliente_externo(entidade):
+            d["consultor_comprador"] = None
+            if not val("agente_comprador"):
+                erros["agente_comprador"] = "Cliente externo: indique o responsável (registado em Agentes)."
+        elif mudou("entidade") or not (val("consultor_comprador") or val("agente_comprador")):
+            d["consultor_comprador"], d["agente_comprador"] = entidade.responsavel, None
+        else:
+            d.pop("agente_comprador", None)
+    if erros:
+        raise serializers.ValidationError(erros)
+    return d
+
+
+def nome_responsavel(consultor, agente) -> str | None:
+    from apps.agentes.models import nome_agente
+
+    return consultor.nome if consultor else nome_agente(agente)
+
+
 def cliente_da_agencia(visita: Visita) -> bool:
     """O comprador é acompanhado por nós quando o seu agente é um utilizador da aplicação ou pertence a uma
     agência de categoria «Própria». Clientes de agentes externos/da rede (muitas vezes registados como
     «Cliente externo») não geram interesses automáticos (D-37)."""
+    if visita.consultor_comprador_id:
+        return True  # cliente acompanhado por um membro da nossa Equipa (D-46)
     a = visita.agente_comprador
     if a is None:
         return False

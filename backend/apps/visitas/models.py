@@ -48,6 +48,16 @@ class Visita(RegistoBase):
         "agentes.Agente", null=True, on_delete=models.PROTECT, related_name="+",
         verbose_name="agente responsável pelo imóvel",
     )  # fmt: skip
+    # D-46: quando o responsável é da nossa Equipa (imóvel de angariação própria / cliente nosso), vem da ficha
+    # do imóvel / da entidade e fica guardado aqui; os agentes acima ficam para imóveis/clientes de fora.
+    consultor_comprador = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT, related_name="+",
+        verbose_name="responsável pela entidade (Equipa)",
+    )  # fmt: skip
+    consultor_imovel = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT, related_name="+",
+        verbose_name="responsável pelo imóvel (Equipa)",
+    )  # fmt: skip
     acompanhantes = models.ManyToManyField("entidades.Entidade", blank=True, related_name="+")
     procura = models.ForeignKey(
         "procuras.Procura", null=True, blank=True, on_delete=models.PROTECT, related_name="visitas"

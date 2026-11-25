@@ -15,6 +15,7 @@ from apps.core.vistas import RegistoViewSet
 from apps.imoveis.views import entidades_visiveis
 from apps.oportunidades.views import imoveis_visiveis
 from apps.visitas.models import Visita
+from apps.visitas.servicos import nome_responsavel
 
 from .models import Proposta, Ronda
 from .serializers import PropostaListaSerializer, PropostaSerializer, RondaSerializer, agente_nome, descricao_imovel
@@ -162,6 +163,8 @@ class PropostaViewSet(RegistoViewSet):
                 "agente_comprador_nome": agente_nome(visita.agente_comprador),
                 "agente_imovel": visita.agente_imovel_id,
                 "agente_imovel_nome": agente_nome(visita.agente_imovel),
+                "responsavel_imovel_nome": nome_responsavel(visita.consultor_imovel, visita.agente_imovel),
+                "responsavel_comprador_nome": nome_responsavel(visita.consultor_comprador, visita.agente_comprador),
                 "valor_sugerido": None
                 if not visita.imovel_id or visita.imovel.preco is None
                 else str(visita.imovel.preco),

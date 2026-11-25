@@ -83,3 +83,10 @@ class Agente(RegistoBase):
 
     def __str__(self):
         return self.nome
+
+
+def nome_agente(a) -> str | None:
+    """«Nome (Agência)» de um agente, para fichas e listas."""
+    if a is None:
+        return None
+    return f"{a.nome} ({a.agencia.nome})" if a.agencia_id else a.nome

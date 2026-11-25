@@ -88,6 +88,7 @@ class EntidadeSerializer(serializers.ModelSerializer):
     responsavel_nome = serializers.CharField(source="responsavel.nome", read_only=True)
     origem_nome = serializers.CharField(source="origem.nome", read_only=True, default=None)
     papeis_nomes = serializers.SerializerMethodField()
+    cliente_externo = serializers.SerializerMethodField()
     localizacao = serializers.SerializerMethodField()
     versao = serializers.IntegerField(required=False)
     confirmar_duplicado = serializers.BooleanField(write_only=True, required=False, default=False)
@@ -101,7 +102,8 @@ class EntidadeSerializer(serializers.ModelSerializer):
             "estado_civil", "regime_casamento", "nacionalidade", "documento_identificacao", "naturalidade_freguesia",
             "naturalidade_concelho", "empresa", "cargo", "observacoes_pessoais", "zona_comercial", "nomes",
             "rua", "numero_policia", "complemento", "codigo_postal", "localidade", "freguesia", "localizacao",
-            "papeis", "papeis_nomes", "origem", "origem_nome", "quem_recomendou", "quem_recomendou_dados",
+            "papeis", "papeis_nomes", "cliente_externo", "origem", "origem_nome", "quem_recomendou",
+            "quem_recomendou_dados",
             "imovel_contacto", "imovel_contacto_dados", "visitou_imovel_contacto", "motivo_nao_visitou",
             "responsavel", "responsavel_nome", "status", "status_nome", "status_categoria", "observacoes",
             "consentimento_marketing", "consentimento_marketing_em", "oposicao_marketing",
@@ -111,6 +113,10 @@ class EntidadeSerializer(serializers.ModelSerializer):
 
     def get_papeis_nomes(self, obj) -> list[str]:
         return [p.nome for p in obj.papeis.all()]
+
+    def get_cliente_externo(self, obj) -> bool:
+        """D-46: nas visitas e propostas, o responsável por um cliente externo escolhe-se em Agentes."""
+        return any(p.categoria == "cliente_externo" for p in obj.papeis.all())
 
     def get_localizacao(self, obj) -> dict | None:
         f = obj.freguesia

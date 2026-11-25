@@ -11,6 +11,7 @@ from apps.contas.models import Utilizador
 from apps.entidades.models import Entidade
 from apps.imoveis.models import Imovel
 from apps.visitas.models import Visita
+from apps.visitas.servicos import derivar_responsaveis, nome_responsavel
 
 from .models import Participante, Proposta, Ronda
 
@@ -127,6 +128,9 @@ class PropostaSerializer(PropostaListaSerializer):
     visita_referencia = serializers.CharField(source="visita.referencia", read_only=True, default=None)
     agente_comprador_nome = serializers.SerializerMethodField()
     agente_imovel_nome = serializers.SerializerMethodField()
+    # D-46: quem responde pelo imóvel e pela entidade (membro da Equipa ou agente)
+    responsavel_imovel_nome = serializers.SerializerMethodField()
+    responsavel_comprador_nome = serializers.SerializerMethodField()
     versao = serializers.IntegerField(required=False)
     acoes = serializers.SerializerMethodField()
 
@@ -135,12 +139,21 @@ class PropostaSerializer(PropostaListaSerializer):
         fields = [
             "id", "referencia", "visita", "visita_referencia", "imovel", "imovel_descricao", "imovel_localizacao",
             "imovel_descricao_completa", "entidade", "entidade_nome", "agente_comprador", "agente_comprador_nome",
-            "agente_imovel", "agente_imovel_nome", "estado", "estado_nome", "estado_categoria", "valor_atual",
+            "agente_imovel", "agente_imovel_nome",
+            "consultor_comprador", "consultor_imovel", "responsavel_imovel_nome", "responsavel_comprador_nome",
+            "estado", "estado_nome", "estado_categoria", "valor_atual",
             "ultima_ronda_autor", "participantes", "participantes_detalhe", "ronda_inicial", "rondas",
             "responsavel", "responsavel_nome", "observacoes", "criado_em", "atualizado_em", "versao",
             "eliminado_em", "acoes",
         ]  # fmt: skip
-        read_only_fields = ["referencia", "criado_em", "atualizado_em", "eliminado_em"]
+        read_only_fields = [
+            "consultor_comprador",
+            "consultor_imovel",
+            "referencia",
+            "criado_em",
+            "atualizado_em",
+            "eliminado_em",
+        ]
 
     def get_acoes(self, o) -> dict[str, bool]:
         return self.context.get("acoes", {}).get(o.pk, {})
@@ -150,6 +163,12 @@ class PropostaSerializer(PropostaListaSerializer):
 
     def get_agente_imovel_nome(self, o) -> str | None:
         return agente_nome(o.agente_imovel)
+
+    def get_responsavel_imovel_nome(self, o) -> str | None:
+        return nome_responsavel(o.consultor_imovel, o.agente_imovel)
+
+    def get_responsavel_comprador_nome(self, o) -> str | None:
+        return nome_responsavel(o.consultor_comprador, o.agente_comprador)
 
     def get_participantes_detalhe(self, o) -> list[dict]:
         visiveis = self.context.get("entidades_visiveis", set())
@@ -223,9 +242,7 @@ class PropostaSerializer(PropostaListaSerializer):
             raise serializers.ValidationError({"imovel": "Escolha o imóvel ou, se não estiver registado, descreva-o."})
         if val("imovel"):
             d["imovel_descricao"] = d["imovel_localizacao"] = ""
-        for campo in ("agente_comprador", "agente_imovel"):
-            if not val(campo):
-                raise serializers.ValidationError({campo: "Indique o agente (registado em Agentes)."})
+        derivar_responsaveis(d, self.instance)
         if not inst and "ronda_inicial" not in d:
             raise serializers.ValidationError({"ronda_inicial": "Indique o valor e as condições da proposta."})
         estado = val("estado")
