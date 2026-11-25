@@ -4,10 +4,11 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { ErroApi, pedido } from '../../api/cliente'
 import { Bloco } from '../../componentes/Bloco'
+import { BlocosConfiguraveis, Largo } from '../../componentes/BlocosConfiguraveis'
 import { CampoAreaTexto, CampoSelecao, CampoTexto, Dado } from '../../componentes/campos'
 import { Dialogo } from '../../componentes/Dialogo'
 import type { Registo } from '../../componentes/camposQualificacao'
-import { VerQualificacao } from '../../componentes/Qualificacao'
+import { VerCampoQ } from '../../componentes/Qualificacao'
 import { CabecalhoRegisto, HistoricoRegisto } from '../../componentes/Ficha'
 import { dataPt, formatarEuros, formatarPercentagem, momentoPt } from '../../componentes/formatar'
 import { LigacoesExternas } from '../../componentes/LigacoesExternas'
@@ -22,6 +23,7 @@ import {
   type Angariacao,
   type Renovacao,
 } from './api'
+import { ECRA_ANGARIACAO } from './disposicao'
 
 function remuneracao(a: Angariacao): string | null {
   const v = a.valor_remuneracao
@@ -92,6 +94,134 @@ export function AngariacaoConsulta() {
   const podeCorrigir = a.acoes.editar
   const emCurso = a.situacao === 'em_curso'
 
+  const cmi = a
+  function desenharCampo(c: string): ReactNode {
+    const q = CMI_ACOMPANHAMENTO.find((x) => x.campo === c)
+    if (q) return <VerCampoQ c={q} registo={cmi as unknown as Registo} />
+    switch (c) {
+      case 'imovel':
+        return (
+          <Dado rotulo="Imóvel">
+            <Link to={`/imoveis/${cmi.imovel}`}>
+              {cmi.imovel_referencia} · {cmi.imovel_descricao}
+            </Link>
+          </Dado>
+        )
+      case 'numero_contrato':
+        return <Dado rotulo="N.º do contrato">{cmi.numero_contrato}</Dado>
+      case 'operacao':
+        return <Dado rotulo="Tipo (operação)">{cmi.nomes.operacao}</Dado>
+      case 'regime':
+        return <Dado rotulo="Regime">{cmi.nomes.regime}</Dado>
+      case 'data_inicio':
+        return <Dado rotulo="Data de início">{dataPt(cmi.data_inicio)}</Dado>
+      case 'prazo_meses':
+        return <Dado rotulo="Prazo">{cmi.prazo_meses && `${cmi.prazo_meses} meses`}</Dado>
+      case 'data_fim':
+        return <Dado rotulo="Data fim de contrato">{dataPt(cmi.data_fim_vigente)}</Dado>
+      case 'tempo_restante':
+        return (
+          <Dado rotulo="Tempo restante">
+            {cmi.tempo_restante && (
+              <span className={`etiqueta etiqueta-tempo-${cmi.tempo_restante.cor}`}>
+                {textoTempo(cmi.tempo_restante)}
+              </span>
+            )}
+          </Dado>
+        )
+      case 'situacao':
+        return (
+          <Dado rotulo="Situação">
+            {cmi.nomes.situacao}
+            {cmi.situacao_motivo && <small className="ajuda"> — {cmi.situacao_motivo}</small>}
+          </Dado>
+        )
+      case 'responsavel':
+        return <Dado rotulo="Responsável">{cmi.responsavel_nome}</Dado>
+      case 'intervenientes':
+        return (
+          <Largo>
+            {cmi.intervenientes_detalhe.length === 0 ? (
+              <p className="ajuda">Sem partes registadas.</p>
+            ) : (
+              <ul className="lista-relacoes">
+                {cmi.intervenientes_detalhe.map((i) => (
+                  <li key={i.entidade}>
+                    {i.papel_nome && <span className="relacao-tipo">{i.papel_nome}</span>}
+                    {i.acessivel ? (
+                      <Link to={`/entidades/${i.entidade}`}>
+                        {i.nome_completo} <small className="ajuda">{i.referencia}</small>
+                      </Link>
+                    ) : (
+                      <span className="vazio">Entidade a que não tem acesso</span>
+                    )}
+                    {i.quota && <small className="ajuda">{formatarPercentagem(i.quota)}</small>}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Largo>
+        )
+      case 'modalidade_remuneracao':
+        return <Dado rotulo="Modalidade">{cmi.nomes.modalidade}</Dado>
+      case 'valor_remuneracao':
+        return <Dado rotulo="Remuneração">{remuneracao(cmi)}</Dado>
+      case 'valor_minimo_remuneracao':
+        return <Dado rotulo="Remuneração mínima">{formatarEuros(cmi.valor_minimo_remuneracao)}</Dado>
+      case 'taxa_iva':
+        return <Dado rotulo="Taxa de IVA">{formatarPercentagem(cmi.taxa_iva)}</Dado>
+      case 'remuneracao_inclui_iva':
+        return (
+          <Dado rotulo="Valores">
+            {cmi.remuneracao_inclui_iva === null
+              ? null
+              : cmi.remuneracao_inclui_iva
+                ? 'Com IVA incluído'
+                : 'Acresce IVA'}
+          </Dado>
+        )
+      case 'comissao_prevista':
+        return (
+          <Dado rotulo="Comissão prevista">
+            {cmi.valor_comissao_estimado && (
+              <>
+                {formatarEuros(cmi.valor_comissao_estimado)}{' '}
+                <small className="ajuda">
+                  ({cmi.valor_vendido ? 'sobre o valor vendido' : 'sobre o preço do imóvel'}
+                  {cmi.taxa_iva ? ', sem contar o IVA' : ''})
+                </small>
+              </>
+            )}
+          </Dado>
+        )
+      case 'momento_pagamento':
+        return <Dado rotulo="Momento do pagamento">{cmi.momento_pagamento_nome}</Dado>
+      case 'sinal_valor':
+        return (
+          <Dado rotulo="Sinal mínimo do comprador">
+            {cmi.sinal_valor === null
+              ? null
+              : cmi.sinal_unidade === 'euros'
+                ? formatarEuros(cmi.sinal_valor)
+                : formatarPercentagem(cmi.sinal_valor)}
+          </Dado>
+        )
+      case 'condicoes_pagamento':
+        return (
+          <Dado rotulo="Outras condições de pagamento" largo>
+            {cmi.condicoes_pagamento && <span className="texto-livre">{cmi.condicoes_pagamento}</span>}
+          </Dado>
+        )
+      case 'observacoes':
+        return (
+          <Dado rotulo="Observações" largo>
+            {cmi.observacoes && <span className="texto-livre">{cmi.observacoes}</span>}
+          </Dado>
+        )
+    }
+    return null
+  }
+
   return (
     <div className="ficha">
       <CabecalhoRegisto
@@ -107,68 +237,6 @@ export function AngariacaoConsulta() {
                 Eliminar
               </button>
             )}
-            {a.acoes.editar && (
-              <Link to={`/angariacoes/${a.id}/editar`} className="botao-principal">
-                Editar
-              </Link>
-            )}
-          </>
-        }
-      />
-
-      {a.alerta && (
-        <p className="alerta-cmi" role="status">
-          <strong>{textoAlerta(a.alerta)}</strong> ({dataPt(a.data_fim_vigente)}). Aviso de {a.alerta.limiar} dias.
-        </p>
-      )}
-      {a.estado === 'expirada' && (
-        <p className="alerta-cmi" role="status">
-          O contrato expirou em {dataPt(a.data_fim_vigente)}. Renove-o ou registe a situação (concluído/cancelado).
-        </p>
-      )}
-
-      <div className="ficha-topo">
-        <Link
-          to={`/imoveis/${a.imovel}`}
-          className="fotografia-imovel"
-          aria-label={`Abrir imóvel ${a.imovel_referencia}`}
-        >
-          {a.imovel_fotografia ? (
-            <img
-              src={urlFotografia(a.imovel_fotografia.imovel, a.imovel_fotografia.versao)}
-              alt={`Fotografia do imóvel ${a.imovel_referencia}`}
-            />
-          ) : (
-            <div className="fotografia-vazia">Imóvel sem fotografia</div>
-          )}
-        </Link>
-        <Bloco titulo="Contrato">
-          <dl className="grelha-dados">
-            <Dado rotulo="Imóvel">
-              <Link to={`/imoveis/${a.imovel}`}>
-                {a.imovel_referencia} · {a.imovel_descricao}
-              </Link>
-            </Dado>
-            <Dado rotulo="N.º do contrato">{a.numero_contrato}</Dado>
-            <Dado rotulo="Tipo (operação)">{a.nomes.operacao}</Dado>
-            <Dado rotulo="Regime">{a.nomes.regime}</Dado>
-            <Dado rotulo="Data de início">{dataPt(a.data_inicio)}</Dado>
-            <Dado rotulo="Prazo">{a.prazo_meses && `${a.prazo_meses} meses`}</Dado>
-            <Dado rotulo="Data fim de contrato">{dataPt(a.data_fim_vigente)}</Dado>
-            <Dado rotulo="Tempo restante">
-              {a.tempo_restante && (
-                <span className={`etiqueta etiqueta-tempo-${a.tempo_restante.cor}`}>
-                  {textoTempo(a.tempo_restante)}
-                </span>
-              )}
-            </Dado>
-            <Dado rotulo="Situação">
-              {a.nomes.situacao}
-              {a.situacao_motivo && <small className="ajuda"> — {a.situacao_motivo}</small>}
-            </Dado>
-            <Dado rotulo="Responsável">{a.responsavel_nome}</Dado>
-          </dl>
-          <div className="acoes-bloco">
             {a.acoes.editar && a.assinado && emCurso && (
               <button className="botao-principal" onClick={() => setDialogo('renovar')}>
                 Registar renovação
@@ -194,9 +262,48 @@ export function AngariacaoConsulta() {
                 Correção excecional
               </button>
             )}
-          </div>
-        </Bloco>
-      </div>
+            {a.acoes.editar && (
+              <Link to={`/angariacoes/${a.id}/editar`} className="botao-principal">
+                Editar
+              </Link>
+            )}
+          </>
+        }
+      />
+
+      {a.alerta && (
+        <p className="alerta-cmi" role="status">
+          <strong>{textoAlerta(a.alerta)}</strong> ({dataPt(a.data_fim_vigente)}). Aviso de {a.alerta.limiar} dias.
+        </p>
+      )}
+      {a.estado === 'expirada' && (
+        <p className="alerta-cmi" role="status">
+          O contrato expirou em {dataPt(a.data_fim_vigente)}. Renove-o ou registe a situação (concluído/cancelado).
+        </p>
+      )}
+
+      <BlocosConfiguraveis
+        def={ECRA_ANGARIACAO}
+        modo="ver"
+        campo={desenharCampo}
+        aoLadoDoPrimeiro={
+          <Link
+            to={`/imoveis/${a.imovel}`}
+            className="fotografia-imovel"
+            aria-label={`Abrir imóvel ${a.imovel_referencia}`}
+          >
+            {a.imovel_fotografia ? (
+              <img
+                src={urlFotografia(a.imovel_fotografia.imovel, a.imovel_fotografia.versao)}
+                alt={`Fotografia do imóvel ${a.imovel_referencia}`}
+              />
+            ) : (
+              <div className="fotografia-vazia">Imóvel sem fotografia</div>
+            )}
+          </Link>
+        }
+        abertoInicial={(b) => (b.chave === 'observacoes' ? !!a.observacoes : true)}
+      />
 
       <Bloco titulo="Ciclos de vigência">
         {!a.assinado ? (
@@ -227,66 +334,6 @@ export function AngariacaoConsulta() {
         )}
       </Bloco>
 
-      <Bloco titulo="Partes">
-        {a.intervenientes_detalhe.length === 0 ? (
-          <p className="ajuda">Sem partes registadas.</p>
-        ) : (
-          <ul className="lista-relacoes">
-            {a.intervenientes_detalhe.map((i) => (
-              <li key={i.entidade}>
-                {i.papel_nome && <span className="relacao-tipo">{i.papel_nome}</span>}
-                {i.acessivel ? (
-                  <Link to={`/entidades/${i.entidade}`}>
-                    {i.nome_completo} <small className="ajuda">{i.referencia}</small>
-                  </Link>
-                ) : (
-                  <span className="vazio">Entidade a que não tem acesso</span>
-                )}
-                {i.quota && <small className="ajuda">{formatarPercentagem(i.quota)}</small>}
-              </li>
-            ))}
-          </ul>
-        )}
-      </Bloco>
-
-      <Bloco titulo="Remuneração e pagamento">
-        <dl className="grelha-dados">
-          <Dado rotulo="Modalidade">{a.nomes.modalidade}</Dado>
-          <Dado rotulo="Remuneração">{remuneracao(a)}</Dado>
-          <Dado rotulo="Remuneração mínima">{formatarEuros(a.valor_minimo_remuneracao)}</Dado>
-          <Dado rotulo="Taxa de IVA">{formatarPercentagem(a.taxa_iva)}</Dado>
-          <Dado rotulo="Valores">
-            {a.remuneracao_inclui_iva === null ? null : a.remuneracao_inclui_iva ? 'Com IVA incluído' : 'Acresce IVA'}
-          </Dado>
-          <Dado rotulo="Comissão prevista">
-            {a.valor_comissao_estimado && (
-              <>
-                {formatarEuros(a.valor_comissao_estimado)}{' '}
-                <small className="ajuda">
-                  ({a.valor_vendido ? 'sobre o valor vendido' : 'sobre o preço do imóvel'}
-                  {a.taxa_iva ? ', sem contar o IVA' : ''})
-                </small>
-              </>
-            )}
-          </Dado>
-          <Dado rotulo="Momento do pagamento">{a.momento_pagamento_nome}</Dado>
-          <Dado rotulo="Sinal mínimo do comprador">
-            {a.sinal_valor === null
-              ? null
-              : a.sinal_unidade === 'euros'
-                ? formatarEuros(a.sinal_valor)
-                : formatarPercentagem(a.sinal_valor)}
-          </Dado>
-          <Dado rotulo="Outras condições de pagamento" largo>
-            {a.condicoes_pagamento && <span className="texto-livre">{a.condicoes_pagamento}</span>}
-          </Dado>
-        </dl>
-      </Bloco>
-
-      <Bloco titulo="Acompanhamento">
-        <VerQualificacao campos={CMI_ACOMPANHAMENTO} registo={a as unknown as Registo} />
-      </Bloco>
-
       <Bloco titulo="Documentos e ligações">
         <LigacoesExternas
           base={`/api/angariacoes/${a.id}/ligacoes/`}
@@ -312,10 +359,6 @@ export function AngariacaoConsulta() {
           </ul>
         </Bloco>
       )}
-
-      <Bloco titulo="Observações" abertoInicial={!!a.observacoes}>
-        <p className="texto-livre">{a.observacoes || <span className="vazio">—</span>}</p>
-      </Bloco>
 
       <Bloco titulo="Histórico" abertoInicial={false}>
         {() => (
