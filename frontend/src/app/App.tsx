@@ -18,6 +18,7 @@ import { ImovelEditar, ImovelNovo } from '../modulos/imoveis/ImovelFormulario'
 import { OportunidadeConsulta } from '../modulos/oportunidades/OportunidadeConsulta'
 import { OportunidadeEditar, OportunidadeNova } from '../modulos/oportunidades/OportunidadeFormulario'
 import { OportunidadesLista } from '../modulos/oportunidades/OportunidadesLista'
+import { EquipasLista, MembroConsulta, MembroEditar, MembroNovo, MembrosLista } from '../modulos/equipa/Equipa'
 import { PropostaConsulta } from '../modulos/propostas/PropostaConsulta'
 import { PropostaEditar, PropostaNova } from '../modulos/propostas/PropostaFormulario'
 import { PropostasLista } from '../modulos/propostas/PropostasLista'
@@ -137,6 +138,17 @@ export const rotas: RouteObject[] = [
         ],
       },
       { path: 'conta', element: <Conta /> },
+      {
+        path: 'equipa',
+        element: <ExigeModulo modulo="equipa" />,
+        children: [
+          { index: true, element: <MembrosLista /> },
+          { path: 'equipas', element: <EquipasLista /> },
+          { path: 'novo', element: <MembroNovo /> },
+          { path: ':id', element: <MembroConsulta /> },
+          { path: ':id/editar', element: <MembroEditar /> },
+        ],
+      },
       {
         path: 'visitas',
         element: <ExigeModulo modulo="visitas" />,

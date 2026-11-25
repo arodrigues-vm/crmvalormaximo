@@ -1,4 +1,52 @@
-# 18. Agentes e Agências
+# 18. Equipa, Agentes e Agências
+
+## 18.A Equipa
+
+A **Equipa** são as pessoas da agência que usam o CRM (consultores, responsáveis, assistentes,
+administradores). Cada membro tem uma conta individual para entrar. Abra **Equipa** no menu (secção
+*Organização*).
+
+### Ver a equipa
+
+- A lista mostra nome, perfil, equipa, função e contacto. Por omissão aparecem só os membros **ativos**; use o
+  filtro *Situação* para ver os desativados.
+- Pesquise pelo nome ou email e filtre por equipa ou perfil.
+- Todos podem consultar a lista; **só o Administrador** cria e altera membros.
+
+### Acrescentar um membro (Administrador)
+
+1. Carregue em **+ Novo membro**.
+2. Em **Dados profissionais**: nome, função, identificação profissional, NIF, telefone e **equipa**.
+3. Em **Acesso ao CRM**: o **email** com que vai entrar, o **perfil** (Administrador, Responsável de Equipa,
+   Consultor, Assistente — decide o que pode ver e fazer) e uma **palavra-passe inicial** (mínimo 12
+   caracteres). Entregue-a à pessoa de forma segura; ela pode mudá-la depois em «Esqueci-me da palavra-passe».
+4. Carregue em **Guardar**.
+
+### Alterar, desativar e repor os dois passos
+
+- **Editar** permite mudar os dados, o perfil, a equipa ou definir uma **nova palavra-passe**.
+- Quando alguém sai da agência, mude **Pode entrar no CRM** para *Não*: deixa de conseguir entrar, mas os
+  registos e o histórico ficam. Depois passe os registos dessa pessoa a outro responsável (ver abaixo).
+- Se alguém perder o telemóvel, use **Repor dois passos** na ficha do membro.
+- Não é possível desativar nem mudar o perfil da sua própria conta (para não ficar sem acesso por engano).
+
+### Equipas
+
+No separador **Equipas** cria e desativa as equipas (por exemplo, *Equipa Norte*). O Responsável de Equipa vê e
+gere os registos dos membros da sua equipa.
+
+### Responsável de cada registo
+
+Nas fichas de **Imóveis** e **Entidades**, o campo **Responsável** indica quem acompanha o registo. Ao criar,
+fica quem cria (*Eu próprio*). Para passar a outra pessoa, edite o registo e escolha-a na lista:
+
+- o **Administrador** pode escolher qualquer membro ativo;
+- o **Responsável de Equipa** escolhe entre os membros da sua equipa;
+- o **Consultor** não vê este campo (não passa registos a outros).
+
+A mudança fica no histórico do registo e na auditoria.
+
+# Agentes e Agências
 
 **Agentes** são profissionais imobiliários — da nossa agência ou de outras — com quem trabalhamos (por exemplo,
 nas visitas: o agente do comprador e o agente do imóvel). Um agente **não é** um utilizador da aplicação: não

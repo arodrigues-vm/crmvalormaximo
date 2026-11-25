@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { ErroApi } from '../../api/cliente'
 import { Bloco } from '../../componentes/Bloco'
+import { CampoResponsavel } from '../../componentes/CampoResponsavel'
 import { CampoTelefones, type TelefoneEditavel } from '../../componentes/CampoTelefones'
 import { CampoAreaTexto, CampoCaixa, CampoMultiplo, CampoSelecao, CampoTexto } from '../../componentes/campos'
 import { Dialogo } from '../../componentes/Dialogo'
@@ -32,6 +33,7 @@ interface Valores {
   papeis: number[]
   origem: string
   status: string
+  responsavel: string
   quem_recomendou: OpcaoPesquisa | null
   imovel_contacto: OpcaoPesquisa | null
   visitou_imovel_contacto: '' | 'sim' | 'nao'
@@ -70,6 +72,7 @@ const VAZIO: Valores = {
   papeis: [],
   origem: '',
   status: '',
+  responsavel: '',
   quem_recomendou: null,
   imovel_contacto: null,
   visitou_imovel_contacto: '',
@@ -120,6 +123,7 @@ function deEntidade(e: Entidade): Valores {
     papeis: e.papeis,
     origem: e.origem ? String(e.origem) : '',
     status: e.status ? String(e.status) : '',
+    responsavel: String(e.responsavel),
     quem_recomendou: ligado(e.quem_recomendou_dados),
     imovel_contacto: ligado(e.imovel_contacto_dados),
     visitou_imovel_contacto: e.visitou_imovel_contacto === null ? '' : e.visitou_imovel_contacto ? 'sim' : 'nao',
@@ -149,6 +153,7 @@ function paraApi(v: Valores) {
     consentimento_marketing_em: v.consentimento_marketing_em || null,
     origem: n(v.origem),
     status: n(v.status),
+    responsavel: v.responsavel ? Number(v.responsavel) : undefined,
     estado_civil: n(v.estado_civil),
     regime_casamento: n(v.regime_casamento),
     zona_comercial: n(v.zona_comercial),
@@ -513,6 +518,13 @@ function Formulario({ entidade }: { entidade?: Entidade }) {
             erro={erro('origem')}
             ajuda={o && o.origens.length === 0 ? 'Sem origens configuradas (Configurações).' : undefined}
           />
+          <CampoResponsavel
+            modulo="entidades"
+            valor={v.responsavel}
+            atual={entidade ? { id: entidade.responsavel, nome: entidade.responsavel_nome } : null}
+            aoMudar={(x) => mudar('responsavel', x)}
+            erro={erro('responsavel')}
+          />
           <SeletorPesquisavel
             rotulo="Quem recomendou"
             chave="entidades"
@@ -551,7 +563,6 @@ function Formulario({ entidade }: { entidade?: Entidade }) {
               erro={erro('motivo_nao_visitou')}
             />
           )}
-          {erro('responsavel') && <p className="campo-erro largo">{erro('responsavel')}</p>}
         </div>
       </Bloco>
 

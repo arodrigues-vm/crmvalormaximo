@@ -53,7 +53,7 @@ export const GRUPOS: GrupoModulos[] = [
   },
   {
     nome: 'Organização',
-    modulos: [m('equipa', 'Equipa'), m('agentes', 'Agentes', true), m('agencias', 'Agências', true)],
+    modulos: [m('equipa', 'Equipa', true), m('agentes', 'Agentes', true), m('agencias', 'Agências', true)],
   },
   { nome: 'Sistema', modulos: [m('glossario', 'Glossário'), m('configuracoes', 'Configurações', true)] },
 ]

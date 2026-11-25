@@ -12,6 +12,7 @@ import {
   type Opcoes,
   type Registo,
 } from '../../componentes/camposQualificacao'
+import { CampoResponsavel } from '../../componentes/CampoResponsavel'
 import { CabecalhoRegisto } from '../../componentes/Ficha'
 import { EditarQualificacao } from '../../componentes/Qualificacao'
 import { SeletorLocalizacao } from '../../componentes/SeletorLocalizacao'
@@ -46,6 +47,7 @@ interface ProprietarioEditavel {
 /** Operação, estado de comercialização, status, localização CAOP, zonas exteriores e proprietários têm
  * componentes próprios; todos os outros campos vêm das listas de campos por separador (`api.ts`). */
 interface Valores {
+  responsavel: string
   operacao: string
   estado_comercializacao: string
   status: string
@@ -58,6 +60,7 @@ interface Valores {
 const t = (v: string | number | null | undefined) => (v === null || v === undefined ? '' : String(v))
 
 const VAZIO: Valores = {
+  responsavel: '',
   operacao: '',
   estado_comercializacao: '',
   status: '',
@@ -69,6 +72,7 @@ const VAZIO: Valores = {
 
 function deImovel(i: Imovel): Valores {
   return {
+    responsavel: String(i.responsavel),
     operacao: t(i.operacao),
     estado_comercializacao: t(i.estado_comercializacao),
     status: t(i.status),
@@ -92,6 +96,7 @@ const num = (v: string) => (v.trim() === '' ? null : v.trim().replace(',', '.'))
 
 function paraApi(v: Valores) {
   return {
+    responsavel: v.responsavel ? Number(v.responsavel) : undefined,
     operacao: id(v.operacao),
     estado_comercializacao: id(v.estado_comercializacao),
     status: id(v.status),
@@ -245,6 +250,13 @@ function Formulario({ imovel }: { imovel?: Imovel }) {
             vazio={imovel ? undefined : 'Por omissão: ativo'}
             opcoes={comAtual(lista(o?.status), v.status, n?.status ?? null)}
             erro={erro('status')}
+          />
+          <CampoResponsavel
+            modulo="imoveis"
+            valor={v.responsavel}
+            atual={imovel ? { id: imovel.responsavel, nome: imovel.responsavel_nome } : null}
+            aoMudar={(x) => mudar('responsavel', x)}
+            erro={erro('responsavel')}
           />
         </div>
         {extras(IMOVEL_COMERCIALIZACAO)}

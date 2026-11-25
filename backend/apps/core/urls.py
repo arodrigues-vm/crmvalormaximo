@@ -7,6 +7,7 @@ from . import views
 urlpatterns = [
     path("saude/", views.saude, name="saude"),
     path("auth/", include("apps.contas.urls")),
+    path("equipa/", include("apps.contas.urls_equipa")),
     path("telefone/paises/", views.paises, name="telefone-paises"),
     path("", include("apps.entidades.urls")),
     path("", include("apps.imoveis.urls")),

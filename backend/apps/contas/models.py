@@ -94,6 +94,13 @@ class Utilizador(AbstractUser):
     funcao_comercial = models.CharField(
         "função comercial", max_length=80, blank=True, help_text="Informativa; não concede acessos."
     )
+    # Dados profissionais (Equipa, D-41)
+    identificacao_profissional = models.CharField(
+        "identificação profissional", max_length=60, blank=True, help_text="Ex.: n.º de cartão de consultor."
+    )
+    nif = models.CharField("NIF", max_length=20, blank=True)
+    telefone = models.CharField(max_length=30, blank=True)
+    telefone_e164 = models.CharField(max_length=20, blank=True, editable=False)
 
     first_name = None
     last_name = None
