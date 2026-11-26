@@ -3,21 +3,22 @@ import type { DefinicaoEcra } from '../../componentes/disposicao'
 /** Disposição de origem da tarefa de pós-venda; o Administrador pode alterá-la (D-43). */
 export const ECRA_TAREFA: DefinicaoEcra = {
   modulo: 'tarefas',
-  nome: 'Pós-Venda (tarefas)',
+  nome: 'Tarefas (gerais e de pós-venda)',
   padrao: [
     {
       chave: 'tarefa',
       titulo: 'Tarefa',
-      campos: ['titulo', 'transacao', 'cliente', 'imovel', 'estado', 'prioridade', 'prazo', 'responsavel'],
+      campos: ['titulo', 'transacao', 'origem', 'cliente', 'imovel', 'estado', 'prioridade', 'prazo', 'responsavel'],
     },
     { chave: 'descricao', titulo: 'Descrição', campos: ['descricao', 'categoria', 'modelo'] },
   ],
   rotulos: {
     titulo: 'Título',
-    transacao: 'Transação',
+    transacao: 'Transação (só no pós-venda)',
+    origem: 'Ligada a (só nas tarefas gerais)',
     cliente: 'Cliente (só na consulta)',
     imovel: 'Imóvel (só na consulta)',
-    estado: 'Estado',
+    estado: 'Estado (só na consulta)',
     prioridade: 'Prioridade',
     prazo: 'Prazo',
     responsavel: 'Responsável',

@@ -18,7 +18,7 @@ export function TarefasLista() {
   const { params, mudar, termo, setTermo, pagina, consulta } = useListaFiltrada()
   const navegar = useNavigate()
   const vista = params.get('vista') || 'abertas'
-  const pedidoLista: Record<string, string> = { ...consulta, vista }
+  const pedidoLista: Record<string, string> = { ...consulta, vista, tipo: 'pos_venda' }
   const lista = useQuery({
     queryKey: ['tarefas', 'lista', pedidoLista],
     queryFn: () => tarefasApi.listar(pedidoLista),
@@ -49,7 +49,7 @@ export function TarefasLista() {
           value={termo}
           onChange={(e) => setTermo(e.target.value)}
         />
-        {opcoes.data?.pode_criar && (
+        {opcoes.data?.pode_criar_pos_venda && (
           <Link to="/pos-venda/nova" className="botao-principal">
             Nova tarefa
           </Link>

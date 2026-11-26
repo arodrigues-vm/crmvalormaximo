@@ -21,6 +21,7 @@ import {
   QUALIFICACAO_PROPRIETARIO,
 } from './api'
 import { ECRA_OPORTUNIDADE } from './disposicao'
+import { TarefasOrigem } from '../tarefas/PosVendaTransacao'
 
 export function OportunidadeConsulta() {
   const { id = '' } = useParams()
@@ -194,6 +195,8 @@ export function OportunidadeConsulta() {
           tipos={opcoes.data?.tipos_interacao ?? []}
         />
       </Bloco>
+
+      <TarefasOrigem modulo="oportunidades" id={Number(id)} />
 
       <Bloco titulo="Histórico" abertoInicial={false}>
         {() => (

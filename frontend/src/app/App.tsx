@@ -19,6 +19,7 @@ import { ModelosTarefa } from '../modulos/configuracoes/ModelosTarefa'
 import { Parametros } from '../modulos/configuracoes/Parametros'
 import { TarefaConsulta } from '../modulos/tarefas/TarefaConsulta'
 import { TarefaEditar, TarefaNova } from '../modulos/tarefas/TarefaFormulario'
+import { TarefasCentral } from '../modulos/tarefas/TarefasCentral'
 import { TarefasLista } from '../modulos/tarefas/TarefasLista'
 import { ImoveisLista } from '../modulos/imoveis/ImoveisLista'
 import { ImovelConsulta } from '../modulos/imoveis/ImovelConsulta'
@@ -175,11 +176,21 @@ export const rotas: RouteObject[] = [
         ],
       },
       {
+        path: 'tarefas',
+        element: <ExigeModulo modulo="tarefas" />,
+        children: [
+          { index: true, element: <TarefasCentral /> },
+          { path: 'nova', element: <TarefaNova /> },
+          { path: ':id', element: <TarefaConsulta /> },
+          { path: ':id/editar', element: <TarefaEditar /> },
+        ],
+      },
+      {
         path: 'pos-venda',
         element: <ExigeModulo modulo="pos-venda" />,
         children: [
           { index: true, element: <TarefasLista /> },
-          { path: 'nova', element: <TarefaNova /> },
+          { path: 'nova', element: <TarefaNova posVenda /> },
           { path: ':id', element: <TarefaConsulta /> },
           { path: ':id/editar', element: <TarefaEditar /> },
         ],

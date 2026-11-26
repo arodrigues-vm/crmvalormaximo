@@ -52,13 +52,14 @@ No menu do lado esquerdo, carregue em **Pós-Venda**. Os separadores mostram:
 
 Na ficha da tarefa:
 
-- **Marcar como concluída** — o CRM regista a data e hora; **Reabrir** volta a pô-la por fazer;
+- **Marcar como concluída** — o CRM regista a data e hora; **Reabrir** volta a pô-la por fazer (pede o motivo);
+- **Cancelar tarefa** — quando deixou de fazer sentido (pede o motivo);
 - **Contactos e notas** — registe aqui os telefonemas e o que ficou combinado;
 - **Editar** — corrige qualquer campo (fica no Histórico).
 
 ## 12.5 Modelos de tarefa (Administrador)
 
-1. Vá a **Configurações → Modelos de tarefas**.
+1. Vá a **Configurações → Modelos de tarefas** e, em **Módulo**, escolha **Pós-Venda**.
 2. Para acrescentar: **+ Novo modelo**, escreva o nome, os **dias depois da escritura / contrato** e, se quiser,
    uma descrição (passa para a tarefa). Carregue em **Guardar**.
 3. Para mudar: **Editar**. Para deixar de propor: **Desativar** (as tarefas já criadas mantêm-se).

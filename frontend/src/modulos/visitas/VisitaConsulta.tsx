@@ -13,6 +13,7 @@ import { CabecalhoRegisto, HistoricoRegisto } from '../../componentes/Ficha'
 import { dataPt, momentoPt } from '../../componentes/formatar'
 import { ETIQUETA_VISITA, hora, NOMES_CAMPOS_VISITA, visitasApi } from './api'
 import { CRITERIOS_VISITA, ECRA_VISITA } from './disposicao'
+import { TarefasOrigem } from '../tarefas/PosVendaTransacao'
 
 export function VisitaConsulta() {
   const { id = '' } = useParams()
@@ -152,6 +153,8 @@ export function VisitaConsulta() {
         campo={desenharCampo}
         abertoInicial={(b) => (b.chave === 'observacoes' ? !!x.observacoes : true)}
       />
+
+      <TarefasOrigem modulo="visitas" id={Number(id)} />
 
       <Bloco titulo="Histórico" abertoInicial={false}>
         {() => (

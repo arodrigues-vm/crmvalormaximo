@@ -19,7 +19,13 @@ const OPCOES = {
   prioridades: [],
   categorias: [{ id: 7, nome: 'Pós-venda', categoria: 'pos_venda' }],
   tipos_interacao: [],
+  origens: [{ valor: 'entidades', nome: 'Entidades' }],
+  modulos_modelo: [
+    { valor: 'pos-venda', nome: 'Pós-Venda' },
+    { valor: 'entidades', nome: 'Entidades' },
+  ],
   pode_criar: true,
+  pode_criar_pos_venda: true,
 }
 
 const TAREFA = {
@@ -33,6 +39,11 @@ const TAREFA = {
   prioridade_nome: null,
   prazo: '2026-11-20',
   atrasada: true,
+  pos_venda: true,
+  origem: null,
+  origem_modulo: '',
+  origem_id: null,
+  motivo_estado: '',
   transacao: 9,
   transacao_referencia: 'TRA-000009',
   cliente_nome: 'Bruno Ensaio',
@@ -71,13 +82,14 @@ describe('Pós-Venda (D-50)', () => {
       '/api/auth/eu/': () => json(U),
       '/api/tarefas/opcoes/': () => json(OPCOES),
       'GET /api/tarefas/4/': () => json(TAREFA),
-      'PATCH /api/tarefas/4/': () => json({ ...TAREFA, estado: 3, estado_categoria: 'concluida', versao: 2 }),
+      'POST /api/tarefas/4/mudar-estado/': () =>
+        json({ ...TAREFA, estado: 3, estado_categoria: 'concluida', versao: 2 }),
     })
     desenhar('/pos-venda/4')
     expect(await screen.findByText('TRA-000009')).toBeInTheDocument()
     fireEvent.click(await screen.findByRole('button', { name: 'Marcar como concluída' }))
-    await waitFor(() => expect(pedidos.some((p) => p.metodo === 'PATCH')).toBe(true))
-    expect(pedidos.find((p) => p.metodo === 'PATCH')!.corpo).toEqual({ estado: 3, versao: 1 })
+    await waitFor(() => expect(pedidos.some((p) => p.metodo === 'POST')).toBe(true))
+    expect(pedidos.find((p) => p.metodo === 'POST')!.corpo).toEqual({ estado: 3, motivo: '' })
     expect(await screen.findByRole('button', { name: 'Reabrir' })).toBeInTheDocument()
   })
 
@@ -87,7 +99,19 @@ describe('Pós-Venda (D-50)', () => {
     const pedidos = simularApi({
       '/api/auth/eu/': () => json(admin),
       'GET /api/modelos-tarefa/': () =>
-        json([{ id: 1, nome: 'Mudança de contadores', descricao: '', dias_apos: 7, ativo: true, ordem: 1 }]),
+        json([
+          {
+            id: 1,
+            modulo: 'pos-venda',
+            modulo_nome: 'Pós-Venda',
+            nome: 'Mudança de contadores',
+            descricao: '',
+            dias_apos: 7,
+            ativo: true,
+            ordem: 1,
+          },
+        ]),
+      '/api/tarefas/opcoes/': () => json(OPCOES),
       'POST /api/modelos-tarefa/': () => json({ id: 2 }, 201),
     })
     desenhar('/configuracoes/modelos-tarefa')
@@ -97,7 +121,11 @@ describe('Pós-Venda (D-50)', () => {
     fireEvent.change(screen.getByLabelText('Dias depois da escritura / contrato'), { target: { value: '60' } })
     fireEvent.click(screen.getByRole('button', { name: 'Guardar' }))
     await waitFor(() => expect(pedidos.some((p) => p.metodo === 'POST')).toBe(true))
-    expect(pedidos.find((p) => p.metodo === 'POST')!.corpo).toMatchObject({ nome: 'Pedir testemunho', dias_apos: 60 })
+    expect(pedidos.find((p) => p.metodo === 'POST')!.corpo).toMatchObject({
+      modulo: 'pos-venda',
+      nome: 'Pedir testemunho',
+      dias_apos: 60,
+    })
   })
 })
 
@@ -139,5 +167,59 @@ describe('Pós-venda na transação (D-50)', () => {
     fireEvent.click(dialogo.getByRole('button', { name: 'Criar as tarefas marcadas' }))
     await waitFor(() => expect(pedidos.some((p) => p.metodo === 'POST')).toBe(true))
     expect(pedidos.find((p) => p.metodo === 'POST')!.corpo).toEqual({ transacao: 9, modelos: [1] })
+  })
+})
+
+const GERAL = {
+  ...TAREFA,
+  id: 8,
+  referencia: 'TAR-000008',
+  titulo: 'Ligar à Ana',
+  pos_venda: false,
+  transacao: null,
+  transacao_referencia: null,
+  cliente_nome: null,
+  estado: 3,
+  estado_nome: 'Concluída',
+  estado_categoria: 'concluida',
+  atrasada: false,
+  origem: { modulo: 'entidades', modulo_nome: 'Entidades', id: 5, titulo: 'ENT-000005 · Ana', caminho: '/entidades/5' },
+}
+
+describe('Tarefas gerais (D-52)', () => {
+  it('no quadro, reabrir uma tarefa concluída pede o motivo', async () => {
+    const pedidos = simularApi({
+      '/api/auth/eu/': () => json({ ...U, permissoes: { ...U.permissoes, tarefas: todas('atribuidos') } }),
+      '/api/tarefas/opcoes/': () => json(OPCOES),
+      '/api/tarefas/kanban/': () => json([GERAL]),
+      'POST /api/tarefas/8/mudar-estado/': () => json({ ...GERAL, estado: 1 }),
+    })
+    desenhar('/tarefas?modo=kanban')
+    const coluna = await screen.findByRole('listitem', { name: 'Concluída' })
+    expect(within(coluna).getByText('Ligar à Ana')).toBeInTheDocument()
+    expect(within(coluna).getByText('ENT-000005 · Ana')).toBeInTheDocument()
+    fireEvent.change(within(coluna).getByLabelText('Mover «Ligar à Ana» para'), { target: { value: '1' } })
+    const dialogo = within(await screen.findByRole('dialog'))
+    fireEvent.change(dialogo.getByLabelText('Motivo'), { target: { value: 'Cliente não atendeu' } })
+    fireEvent.click(dialogo.getByRole('button', { name: 'Confirmar' }))
+    await waitFor(() => expect(pedidos.some((p) => p.metodo === 'POST')).toBe(true))
+    expect(pedidos.find((p) => p.metodo === 'POST')!.corpo).toEqual({ estado: 1, motivo: 'Cliente não atendeu' })
+  })
+
+  it('nova tarefa a partir de uma ficha fica ligada a essa ficha', async () => {
+    const pedidos = simularApi({
+      '/api/auth/eu/': () => json({ ...U, permissoes: { ...U.permissoes, tarefas: todas('atribuidos') } }),
+      '/api/tarefas/opcoes/': () => json(OPCOES),
+      'POST /api/tarefas/': () => json({ ...GERAL, estado: 1 }, 201),
+      'GET /api/tarefas/8/': () => json({ ...GERAL, estado: 1 }),
+    })
+    desenhar('/tarefas/nova?origem_modulo=entidades&origem_id=5&origem_titulo=Ana')
+    expect(await screen.findByDisplayValue('Ana')).toBeDisabled()
+    fireEvent.change(screen.getByLabelText(/^Título/), { target: { value: 'Ligar à Ana' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar' }))
+    await waitFor(() => expect(pedidos.some((p) => p.metodo === 'POST')).toBe(true))
+    const corpo = pedidos.find((p) => p.metodo === 'POST')!.corpo as Record<string, unknown>
+    expect(corpo).toMatchObject({ titulo: 'Ligar à Ana', origem_modulo: 'entidades', origem_id: 5 })
+    expect(corpo).not.toHaveProperty('transacao')
   })
 })

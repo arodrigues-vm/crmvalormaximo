@@ -3,15 +3,19 @@ import { useState, type FormEvent } from 'react'
 
 import { ErroApi } from '../../api/cliente'
 import { CampoTexto } from '../../componentes/campos'
-import { modelosTarefaApi, type ModeloTarefa } from '../tarefas/api'
+import { modelosTarefaApi, tarefasApi, type ModeloTarefa } from '../tarefas/api'
 
 type Valores = { nome: string; descricao: string; dias_apos: string; ordem: string }
 const VAZIO: Valores = { nome: '', descricao: '', dias_apos: '0', ordem: '0' }
 
-/** Modelos de tarefa de pós-venda (D-50): propostos quando a transação fica «Concluída». */
+/** Modelos de tarefa por módulo (D-50, D-52): propostos ao concluir a transação (pós-venda) ou na ficha
+ * de cada módulo («Propor tarefas dos modelos»). Só se criam as tarefas confirmadas. */
 export function ModelosTarefa() {
   const qc = useQueryClient()
-  const { data = [], isLoading } = useQuery({ queryKey: ['modelos-tarefa'], queryFn: modelosTarefaApi.listar })
+  const [modulo, setModulo] = useState('pos-venda')
+  const { data: todos = [], isLoading } = useQuery({ queryKey: ['modelos-tarefa'], queryFn: modelosTarefaApi.listar })
+  const opcoes = useQuery({ queryKey: ['tarefas', 'opcoes'], queryFn: tarefasApi.opcoes, staleTime: 60_000 })
+  const data = todos.filter((m) => m.modulo === modulo)
   const [aEditar, setAEditar] = useState<number | 'novo' | null>(null)
   const [v, setV] = useState<Valores>(VAZIO)
   const [erros, setErros] = useState<Record<string, string[]>>({})
@@ -38,7 +42,13 @@ export function ModelosTarefa() {
   }
   function submeter(e: FormEvent) {
     e.preventDefault()
-    gravar.mutate({ nome: v.nome, descricao: v.descricao, dias_apos: Number(v.dias_apos), ordem: Number(v.ordem) })
+    gravar.mutate({
+      modulo,
+      nome: v.nome,
+      descricao: v.descricao,
+      dias_apos: Number(v.dias_apos),
+      ordem: Number(v.ordem),
+    })
   }
   if (isLoading) return <p className="a-carregar">A carregar…</p>
   const formulario = (
@@ -50,7 +60,7 @@ export function ModelosTarefa() {
         erro={erros.nome}
       />
       <CampoTexto
-        rotulo="Dias depois da escritura / contrato"
+        rotulo={modulo === 'pos-venda' ? 'Dias depois da escritura / contrato' : 'Dias depois de criada'}
         type="number"
         min={0}
         value={v.dias_apos}
@@ -85,10 +95,30 @@ export function ModelosTarefa() {
   return (
     <section className="bloco configuracao-lista">
       <div className="bloco-conteudo">
-        <h2 className="ficha-titulo">Modelos de tarefas de pós-venda</h2>
+        <h2 className="ficha-titulo">Modelos de tarefas</h2>
+        <label className="campo-compacto">
+          <span>Módulo</span>
+          <select
+            aria-label="Módulo"
+            value={modulo}
+            onChange={(e) => {
+              setModulo(e.target.value)
+              setAEditar(null)
+            }}
+          >
+            {(opcoes.data?.modulos_modelo ?? [{ valor: 'pos-venda', nome: 'Pós-Venda' }]).map((x) => (
+              <option key={x.valor} value={x.valor}>
+                {x.nome}
+              </option>
+            ))}
+          </select>
+        </label>
         <p className="ajuda">
-          Quando uma transação passa a «Concluída», o CRM propõe uma tarefa por cada modelo ativo; só se criam as que
-          forem confirmadas. Os modelos não se apagam: desative os que já não usa (as tarefas criadas mantêm-se).
+          {modulo === 'pos-venda'
+            ? 'Quando uma transação passa a «Concluída», o CRM propõe uma tarefa por cada modelo ativo; o prazo conta a partir da escritura / contrato.'
+            : 'Na ficha deste módulo, «Propor tarefas dos modelos» mostra estes modelos; o prazo conta a partir do dia em que a tarefa é criada.'}{' '}
+          Só se criam as tarefas confirmadas. Os modelos não se apagam: desative os que já não usa (as tarefas criadas
+          mantêm-se).
         </p>
         <ul className="lista-relacoes">
           {data.map((m) =>

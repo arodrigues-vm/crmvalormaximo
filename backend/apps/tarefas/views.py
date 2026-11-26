@@ -185,6 +185,7 @@ class TarefaViewSet(RegistoViewSet):
                 "categorias": opcoes_lista("categorias_tarefa"),
                 "tipos_interacao": opcoes_lista("tipos_interacao"),
                 "origens": [{"valor": k, "nome": n} for k, n in ORIGENS],
+                "modulos_modelo": [{"valor": k, "nome": n} for k, n in MODULOS_MODELO],
                 **self.permissoes_gerais(request),
                 "pode_criar": pode(u, MODULO_GERAL, Operacao.CRIAR),
                 "pode_criar_pos_venda": pode(u, MODULO, Operacao.CRIAR),

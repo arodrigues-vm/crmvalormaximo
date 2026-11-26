@@ -21,6 +21,7 @@ import { ECRA_IMOVEL, IMOVEL_SECUNDARIOS } from './disposicao'
 import { FotografiaImovel } from './FotografiaImovel'
 import { VisitasDoRegisto } from '../visitas/VisitasDoRegisto'
 import { useSessao } from '../../app/sessao'
+import { TarefasOrigem } from '../tarefas/PosVendaTransacao'
 
 const preenchido = (x: unknown) => x !== null && x !== undefined && x !== ''
 
@@ -195,6 +196,8 @@ export function ImovelConsulta() {
           {() => <ProcurasCompativeis imovelId={i.id} versao={i.versao} />}
         </Bloco>
       )}
+
+      <TarefasOrigem modulo="imoveis" id={Number(id)} />
 
       <Bloco titulo="Histórico" abertoInicial={false}>
         {() => (

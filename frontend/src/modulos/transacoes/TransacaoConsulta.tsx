@@ -18,6 +18,7 @@ import { ETIQUETA_TRANSACAO, NOMES_CAMPOS_TRANSACAO, SO_VENDA, transacoesApi, ty
 import { ECRA_TRANSACAO } from './disposicao'
 import { tarefasApi } from '../tarefas/api'
 import { DocumentosNegocio, PosVendaTransacao } from '../tarefas/PosVendaTransacao'
+import { TarefasOrigem } from '../tarefas/PosVendaTransacao'
 
 export function TransacaoConsulta() {
   const { id = '' } = useParams()
@@ -287,6 +288,8 @@ export function TransacaoConsulta() {
           tipos={opcoes.data?.tipos_interacao ?? []}
         />
       </Bloco>
+
+      <TarefasOrigem modulo="transacoes" id={Number(id)} />
 
       <Bloco titulo="Histórico" abertoInicial={false}>
         {() => (

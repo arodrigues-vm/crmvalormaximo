@@ -7,32 +7,38 @@ import { BlocosConfiguraveis } from '../../componentes/BlocosConfiguraveis'
 import { CampoAreaTexto, CampoSelecao, CampoTexto } from '../../componentes/campos'
 import { CampoResponsavel } from '../../componentes/CampoResponsavel'
 import { CabecalhoRegisto } from '../../componentes/Ficha'
-import { comoRegistoCp, usePersonalizados } from '../../componentes/personalizados'
+import { CAMINHOS, comoRegistoCp, procurarRegistos, usePersonalizados } from '../../componentes/personalizados'
+import { SeletorPesquisavel, type OpcaoPesquisa } from '../../componentes/SeletorPesquisavel'
 import { useGuardaSaida } from '../../componentes/useGuardaSaida'
 import { transacoesApi } from '../transacoes/api'
 import { tarefasApi, type Tarefa } from './api'
 import { ECRA_TAREFA } from './disposicao'
 
 type Valores = Record<
-  'titulo' | 'descricao' | 'transacao' | 'categoria' | 'estado' | 'prioridade' | 'prazo' | 'responsavel',
+  'titulo' | 'descricao' | 'transacao' | 'categoria' | 'prioridade' | 'prazo' | 'responsavel' | 'origem_modulo',
   string
->
+> & { origem: OpcaoPesquisa | null }
 
 const t = (v: string | number | null | undefined) => (v === null || v === undefined ? '' : String(v))
 
-export function TarefaNova() {
+/** Nova tarefa: de pós-venda (menu Pós-Venda ou ficha da transação) ou geral (menu Tarefas ou outra ficha). */
+export function TarefaNova({ posVenda = false }: { posVenda?: boolean }) {
   const [p] = useSearchParams()
+  const origemModulo = p.get('origem_modulo') ?? ''
+  const origemId = p.get('origem_id')
   return (
     <Formulario
+      posVenda={posVenda}
       inicial={{
         titulo: '',
         descricao: '',
-        transacao: p.get('transacao') ?? '',
+        transacao: posVenda ? (p.get('transacao') ?? '') : '',
         categoria: '',
-        estado: '',
         prioridade: '',
         prazo: '',
         responsavel: '',
+        origem_modulo: origemModulo,
+        origem: origemId ? { id: Number(origemId), titulo: p.get('origem_titulo') ?? `Registo ${origemId}` } : null,
       }}
     />
   )
@@ -48,21 +54,23 @@ export function TarefaEditar() {
     <Formulario
       key={data.versao}
       tarefa={data}
+      posVenda={data.pos_venda}
       inicial={{
         titulo: data.titulo,
         descricao: data.descricao,
-        transacao: String(data.transacao),
+        transacao: t(data.transacao),
         categoria: t(data.categoria),
-        estado: t(data.estado),
         prioridade: t(data.prioridade),
         prazo: t(data.prazo),
         responsavel: String(data.responsavel),
+        origem_modulo: data.origem_modulo,
+        origem: data.origem ? { id: data.origem.id, titulo: data.origem.titulo } : null,
       }}
     />
   )
 }
 
-function Formulario({ tarefa, inicial }: { tarefa?: Tarefa; inicial: Valores }) {
+function Formulario({ tarefa, posVenda, inicial }: { tarefa?: Tarefa; posVenda: boolean; inicial: Valores }) {
   const navegar = useNavigate()
   const qc = useQueryClient()
   const base0 = useMemo(() => inicial, [inicial])
@@ -77,9 +85,12 @@ function Formulario({ tarefa, inicial }: { tarefa?: Tarefa; inicial: Valores }) 
   const transacoes = useQuery({
     queryKey: ['transacoes', 'lista', { categoria: 'concluida', page_size: 'todas' }],
     queryFn: () => transacoesApi.listar({ categoria: 'concluida' }),
-    enabled: !tarefa,
+    enabled: !tarefa && posVenda,
   })
-  const mudar = (k: keyof Valores, x: string) => setV((a) => ({ ...a, [k]: x }))
+  const mudar = (k: Exclude<keyof Valores, 'origem'>, x: string) => setV((a) => ({ ...a, [k]: x }))
+  // A ficha de origem, quando a tarefa nasce de uma ficha (ex.: «+ Nova tarefa» na entidade), fica fixa.
+  const origemFixa = !tarefa && !!inicial.origem
+  const base = posVenda ? '/pos-venda' : '/tarefas'
   const o = opcoes.data
   const num = (x: string) => (x ? Number(x) : null)
 
@@ -91,13 +102,16 @@ function Formulario({ tarefa, inicial }: { tarefa?: Tarefa; inicial: Valores }) 
     const corpo: Record<string, unknown> = {
       titulo: v.titulo,
       descricao: v.descricao,
-      transacao: num(v.transacao),
       categoria: num(v.categoria),
-      estado: num(v.estado),
       prioridade: num(v.prioridade),
       prazo: v.prazo || null,
       responsavel: v.responsavel ? Number(v.responsavel) : undefined,
       campos_personalizados: cp.paraApi(),
+    }
+    if (posVenda) corpo.transacao = num(v.transacao)
+    else {
+      corpo.origem_modulo = v.origem ? v.origem_modulo : ''
+      corpo.origem_id = v.origem && v.origem_modulo ? v.origem.id : null
     }
     try {
       const r = tarefa
@@ -106,7 +120,7 @@ function Formulario({ tarefa, inicial }: { tarefa?: Tarefa; inicial: Valores }) 
       guarda.libertar()
       qc.invalidateQueries({ queryKey: ['tarefas'] })
       qc.setQueryData(['tarefas', String(r.id)], r)
-      navegar(`/pos-venda/${r.id}`, { replace: !tarefa })
+      navegar(`${base}/${r.id}`, { replace: !tarefa })
     } catch (err) {
       if (err instanceof ErroApi && err.estado === 400) {
         setErros(err.campos as Record<string, string[]>)
@@ -117,11 +131,7 @@ function Formulario({ tarefa, inicial }: { tarefa?: Tarefa; inicial: Valores }) 
     }
   }
 
-  const lista = (
-    k: 'categoria' | 'estado' | 'prioridade',
-    rotulo: string,
-    valores: { id: number; nome: string }[] = [],
-  ) => (
+  const lista = (k: 'categoria' | 'prioridade', rotulo: string, valores: { id: number; nome: string }[] = []) => (
     <CampoSelecao
       rotulo={rotulo}
       vazio="—"
@@ -143,7 +153,35 @@ function Formulario({ tarefa, inicial }: { tarefa?: Tarefa; inicial: Valores }) 
             erro={erros.titulo}
           />
         )
+      case 'origem':
+        if (posVenda) return null
+        return origemFixa ? (
+          <CampoTexto rotulo="Ligada a" value={v.origem?.titulo ?? ''} disabled readOnly />
+        ) : (
+          <>
+            <CampoSelecao
+              rotulo="Ligada a (módulo)"
+              vazio="— (tarefa solta, sem ficha)"
+              value={v.origem_modulo}
+              onChange={(e) => setV((a) => ({ ...a, origem_modulo: e.target.value, origem: null }))}
+              opcoes={(o?.origens ?? []).map((x) => ({ valor: x.valor, nome: x.nome }))}
+              erro={erros.origem_modulo}
+            />
+            {v.origem_modulo && (
+              <SeletorPesquisavel
+                key={v.origem_modulo}
+                rotulo="Registo"
+                chave={`origem-${v.origem_modulo}`}
+                procurar={procurarRegistos(v.origem_modulo)}
+                valor={v.origem}
+                aoMudar={(x) => setV((a) => ({ ...a, origem: x }))}
+                erro={erros.origem_id?.join(' ')}
+              />
+            )}
+          </>
+        )
       case 'transacao':
+        if (!posVenda) return null
         return tarefa ? (
           <CampoTexto rotulo="Transação" value={tarefa.transacao_referencia ?? ''} disabled readOnly />
         ) : (
@@ -161,8 +199,6 @@ function Formulario({ tarefa, inicial }: { tarefa?: Tarefa; inicial: Valores }) 
             ajuda="Só transações concluídas."
           />
         )
-      case 'estado':
-        return lista('estado', 'Estado', o?.estados)
       case 'prioridade':
         return lista('prioridade', 'Prioridade', o?.prioridades)
       case 'categoria':
@@ -180,7 +216,7 @@ function Formulario({ tarefa, inicial }: { tarefa?: Tarefa; inicial: Valores }) 
       case 'responsavel':
         return (
           <CampoResponsavel
-            modulo="pos-venda"
+            modulo={posVenda ? 'pos-venda' : 'tarefas'}
             valor={v.responsavel}
             atual={tarefa ? { id: tarefa.responsavel, nome: tarefa.responsavel_nome } : null}
             aoMudar={(x) => mudar('responsavel', x)}
@@ -198,10 +234,10 @@ function Formulario({ tarefa, inicial }: { tarefa?: Tarefa; inicial: Valores }) 
   return (
     <form className="ficha ficha-edicao" onSubmit={submeter} noValidate>
       <CabecalhoRegisto
-        modulo="Pós-Venda"
-        caminho="/pos-venda"
+        modulo={posVenda ? 'Pós-Venda' : 'Tarefas'}
+        caminho={base}
         referencia={tarefa?.referencia ?? 'Nova'}
-        titulo={tarefa ? 'Editar tarefa' : 'Nova tarefa de pós-venda'}
+        titulo={tarefa ? 'Editar tarefa' : posVenda ? 'Nova tarefa de pós-venda' : 'Nova tarefa'}
       />
       {erroGeral && (
         <p className="erro" role="alert">
@@ -214,7 +250,15 @@ function Formulario({ tarefa, inicial }: { tarefa?: Tarefa; inicial: Valores }) 
           type="button"
           className="botao-secundario"
           onClick={() =>
-            navegar(tarefa ? `/pos-venda/${tarefa.id}` : v.transacao ? `/transacoes/${v.transacao}` : '/pos-venda')
+            navegar(
+              tarefa
+                ? `${base}/${tarefa.id}`
+                : v.transacao
+                  ? `/transacoes/${v.transacao}`
+                  : origemFixa && v.origem
+                    ? `${CAMINHOS[v.origem_modulo]}/${v.origem.id}`
+                    : base,
+            )
           }
         >
           Cancelar

@@ -10,24 +10,38 @@ export interface TarefaResumo {
   estado: number | null
   estado_nome: string | null
   estado_categoria: string | null
+  prioridade: number | null
   prioridade_nome: string | null
   prazo: string | null
   atrasada: boolean
-  transacao: number
+  /** Tarefa de pós-venda (ligada a uma transação concluída); senão é uma tarefa geral (D-52). */
+  pos_venda: boolean
+  transacao: number | null
   transacao_referencia: string | null
   cliente_nome: string | null
+  origem: OrigemTarefa | null
+  responsavel: number
   responsavel_nome: string
   criado_em: string
+}
+
+export interface OrigemTarefa {
+  modulo: string
+  modulo_nome: string
+  id: number
+  titulo: string
+  caminho: string | null
 }
 
 export interface Tarefa extends TarefaResumo {
   descricao: string
   categoria: number | null
-  prioridade: number | null
+  origem_modulo: string
+  origem_id: number | null
   concluida_em: string | null
+  motivo_estado: string
   modelo_nome: string | null
   imovel_descricao: string | null
-  responsavel: number
   atualizado_em: string
   versao: number
   acoes: { editar: boolean; eliminar: boolean; transferir: boolean }
@@ -41,6 +55,8 @@ export interface ModeloProposto {
 }
 
 export interface ModeloTarefa extends ModeloProposto {
+  modulo: string
+  modulo_nome: string
   ativo: boolean
   ordem: number
 }
@@ -50,8 +66,16 @@ export interface OpcoesTarefa {
   prioridades: Opcao[]
   categorias: Opcao[]
   tipos_interacao: Opcao[]
+  origens: { valor: string; nome: string }[]
+  modulos_modelo: { valor: string; nome: string }[]
   pode_criar: boolean
+  pode_criar_pos_venda: boolean
 }
+
+/** A que se refere uma proposta de tarefas a partir de modelos: transação concluída ou ficha de origem. */
+export type AlvoModelos = { transacao: number } | { origem_modulo: string; origem_id: number }
+
+const paramsAlvo = (a: AlvoModelos) => new URLSearchParams(Object.entries(a).map(([k, v]) => [k, String(v)])).toString()
 
 export interface DocumentoNegocio {
   tipo: number
@@ -70,9 +94,12 @@ export const tarefasApi = {
   eliminar: (id: number) => pedido<null>(`${BASE}${id}/`, { method: 'DELETE' }),
   opcoes: () => pedido<OpcoesTarefa>(`${BASE}opcoes/`),
   historico: (id: number) => pedido<EntradaHistorico[]>(`${BASE}${id}/historico/`),
-  proposta: (transacao: number) => pedido<ModeloProposto[]>(`${BASE}proposta/?transacao=${transacao}`),
-  criarDeModelos: (transacao: number, modelos: number[]) =>
-    pedido<TarefaResumo[]>(`${BASE}criar-de-modelos/`, { json: { transacao, modelos } }),
+  kanban: (params: Record<string, string>) => pedido<TarefaResumo[]>(`${BASE}kanban/?${new URLSearchParams(params)}`),
+  mudarEstado: (id: number, estado: number, motivo = '') =>
+    pedido<Tarefa>(`${BASE}${id}/mudar-estado/`, { json: { estado, motivo } }),
+  proposta: (alvo: AlvoModelos) => pedido<ModeloProposto[]>(`${BASE}proposta/?${paramsAlvo(alvo)}`),
+  criarDeModelos: (alvo: AlvoModelos, modelos: number[]) =>
+    pedido<TarefaResumo[]>(`${BASE}criar-de-modelos/`, { json: { ...alvo, modelos } }),
   documentos: (transacao: number) => pedido<DocumentoNegocio[]>(`/api/transacoes/${transacao}/documentos/`),
 }
 
@@ -82,6 +109,14 @@ export const modelosTarefaApi = {
   atualizar: (id: number, dados: unknown) =>
     pedido<ModeloTarefa>(`/api/modelos-tarefa/${id}/`, { method: 'PATCH', json: dados }),
 }
+
+/** Mudar para este estado exige motivo? (reabrir uma tarefa fechada, ou cancelar). */
+export const pedeMotivo = (de: string | null, para: string | undefined) =>
+  para === 'cancelada' || (['concluida', 'cancelada'].includes(de ?? '') && ['aberta', 'em_curso'].includes(para ?? ''))
+
+/** Caminho da ficha: as de pós-venda ficam no menu Pós-Venda, as gerais no menu Tarefas. */
+export const caminhoTarefa = (t: { id: number; pos_venda: boolean }) =>
+  t.pos_venda ? `/pos-venda/${t.id}` : `/tarefas/${t.id}`
 
 export const ETIQUETA_TAREFA: Record<string, 'sucesso' | 'aviso' | 'neutra' | 'perigo'> = {
   aberta: 'aviso',
@@ -98,5 +133,7 @@ export const NOMES_CAMPOS_TAREFA: Record<string, string> = {
   prioridade: 'Prioridade',
   prazo: 'Prazo',
   transacao: 'Transação',
+  origem_modulo: 'Ligada a (módulo)',
+  origem_id: 'Ligada a (registo)',
   responsavel: 'Responsável',
 }

@@ -15,6 +15,7 @@ import { ETIQUETA_PROPOSTA, NOMES_CAMPOS_PROPOSTA, propostasApi, type Ronda } fr
 import { CamposRonda } from './CamposRonda'
 import { RONDA_VAZIA, rondaParaApi } from './ronda'
 import { ECRA_PROPOSTA } from './disposicao'
+import { TarefasOrigem } from '../tarefas/PosVendaTransacao'
 
 function sinal(r: Ronda) {
   if (r.sinal_valor === null) return null
@@ -276,6 +277,8 @@ export function PropostaConsulta() {
         </ol>
         {!emNegociacao && <p className="ajuda">A proposta já não está em negociação: não se acrescentam rondas.</p>}
       </Bloco>
+
+      <TarefasOrigem modulo="propostas" id={Number(id)} />
 
       <Bloco titulo="Histórico" abertoInicial={false}>
         {() => (

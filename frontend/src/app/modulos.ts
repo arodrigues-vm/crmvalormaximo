@@ -22,7 +22,10 @@ const m = (chave: string, nome: string, disponivel = false): Modulo => ({
 })
 
 export const GRUPOS: GrupoModulos[] = [
-  { nome: 'Geral', modulos: [m('dashboard', 'Dashboard', true), m('tarefas', 'Tarefas'), m('agenda', 'Agenda', true)] },
+  {
+    nome: 'Geral',
+    modulos: [m('dashboard', 'Dashboard', true), m('tarefas', 'Tarefas', true), m('agenda', 'Agenda', true)],
+  },
   {
     nome: 'Comercial',
     modulos: [

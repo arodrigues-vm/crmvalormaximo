@@ -5,26 +5,70 @@ import { Link } from 'react-router-dom'
 import { ErroApi } from '../../api/cliente'
 import { Dialogo } from '../../componentes/Dialogo'
 import { dataPt } from '../../componentes/formatar'
-import { ETIQUETA_TAREFA, tarefasApi } from './api'
+import { useSessao } from '../../app/sessao'
+import { Bloco } from '../../componentes/Bloco'
+import { caminhoTarefa, ETIQUETA_TAREFA, tarefasApi, type AlvoModelos } from './api'
 
 /** Bloco «Pós-venda» da ficha da transação concluída (D-50): tarefas e propostas a partir dos modelos. */
 export function PosVendaTransacao({ transacao, podeCriar }: { transacao: number; podeCriar: boolean }) {
+  return (
+    <TarefasDaFicha
+      alvo={{ transacao }}
+      filtro={{ transacao: String(transacao) }}
+      podeCriar={podeCriar}
+      novaHref={`/pos-venda/nova?transacao=${transacao}`}
+      vazio="Sem tarefas de pós-venda."
+    />
+  )
+}
+
+/** Bloco «Tarefas» das fichas dos módulos comerciais (D-52). */
+export function TarefasOrigem({ modulo, id }: { modulo: string; id: number }) {
+  const { pode } = useSessao()
+  if (!pode('tarefas')) return null
+  return (
+    <Bloco titulo="Tarefas">
+      <TarefasDaFicha
+        alvo={{ origem_modulo: modulo, origem_id: id }}
+        filtro={{ origem_modulo: modulo, origem_id: String(id), tipo: 'geral' }}
+        podeCriar={pode('tarefas', 'criar')}
+        novaHref={`/tarefas/nova?origem_modulo=${modulo}&origem_id=${id}`}
+        vazio="Sem tarefas."
+      />
+    </Bloco>
+  )
+}
+
+function TarefasDaFicha({
+  alvo,
+  filtro,
+  podeCriar,
+  novaHref,
+  vazio,
+}: {
+  alvo: AlvoModelos
+  filtro: Record<string, string>
+  podeCriar: boolean
+  novaHref: string
+  vazio: string
+}) {
   const qc = useQueryClient()
   const [aPropor, setAPropor] = useState(false)
+  const pedidoLista = { ...filtro, vista: 'todas' }
   const lista = useQuery({
-    queryKey: ['tarefas', 'lista', { transacao: String(transacao), vista: 'todas' }],
-    queryFn: () => tarefasApi.listar({ transacao: String(transacao), vista: 'todas' }),
+    queryKey: ['tarefas', 'lista', pedidoLista],
+    queryFn: () => tarefasApi.listar(pedidoLista),
   })
   const tarefas = lista.data?.results ?? []
   return (
     <div>
       {lista.isLoading && <p className="ajuda">A carregar…</p>}
-      {lista.data && tarefas.length === 0 && <p className="ajuda">Sem tarefas de pós-venda.</p>}
+      {lista.data && tarefas.length === 0 && <p className="ajuda">{vazio}</p>}
       {tarefas.length > 0 && (
         <ul className="lista-relacoes">
           {tarefas.map((x) => (
             <li key={x.id}>
-              <Link to={`/pos-venda/${x.id}`}>{x.titulo}</Link>
+              <Link to={caminhoTarefa(x)}>{x.titulo}</Link>
               <span className="relacao-tipo">
                 {x.prazo ? `Prazo: ${dataPt(x.prazo)}` : 'Sem prazo'} · {x.responsavel_nome}
               </span>
@@ -43,14 +87,14 @@ export function PosVendaTransacao({ transacao, podeCriar }: { transacao: number;
           <button type="button" className="botao-secundario" onClick={() => setAPropor(true)}>
             Propor tarefas dos modelos
           </button>
-          <Link to={`/pos-venda/nova?transacao=${transacao}`} className="botao-secundario">
+          <Link to={novaHref} className="botao-secundario">
             + Nova tarefa
           </Link>
         </div>
       )}
       {aPropor && (
         <DialogoPropor
-          transacao={transacao}
+          alvo={alvo}
           aoFechar={() => setAPropor(false)}
           aoCriar={() => {
             qc.invalidateQueries({ queryKey: ['tarefas'] })
@@ -62,28 +106,21 @@ export function PosVendaTransacao({ transacao, podeCriar }: { transacao: number;
   )
 }
 
-function DialogoPropor({
-  transacao,
-  aoFechar,
-  aoCriar,
-}: {
-  transacao: number
-  aoFechar: () => void
-  aoCriar: () => void
-}) {
+function DialogoPropor({ alvo, aoFechar, aoCriar }: { alvo: AlvoModelos; aoFechar: () => void; aoCriar: () => void }) {
   const proposta = useQuery({
-    queryKey: ['tarefas', 'proposta', transacao],
-    queryFn: () => tarefasApi.proposta(transacao),
+    queryKey: ['tarefas', 'proposta', alvo],
+    queryFn: () => tarefasApi.proposta(alvo),
     gcTime: 0,
   })
   const [escolhidos, setEscolhidos] = useState<number[] | null>(null)
   const marcados = escolhidos ?? (proposta.data ?? []).map((m) => m.id)
-  const criar = useMutation({ mutationFn: () => tarefasApi.criarDeModelos(transacao, marcados), onSuccess: aoCriar })
+  const criar = useMutation({ mutationFn: () => tarefasApi.criarDeModelos(alvo, marcados), onSuccess: aoCriar })
   const alternar = (id: number) =>
     setEscolhidos(marcados.includes(id) ? marcados.filter((x) => x !== id) : [...marcados, id])
+  const posVenda = 'transacao' in alvo
   return (
     <Dialogo
-      titulo="Propor tarefas de pós-venda"
+      titulo={posVenda ? 'Propor tarefas de pós-venda' : 'Propor tarefas dos modelos'}
       aberto
       aoFechar={aoFechar}
       acoes={
@@ -102,10 +139,19 @@ function DialogoPropor({
       }
     >
       {proposta.isLoading && <p className="ajuda">A carregar…</p>}
-      {proposta.data?.length === 0 && <p className="ajuda">Todos os modelos ativos já foram usados nesta transação.</p>}
+      {proposta.data?.length === 0 && (
+        <p className="ajuda">
+          Não há modelos por usar{posVenda ? ' nesta transação' : ' para esta ficha'}. Os modelos criam-se em
+          Configurações → Modelos de tarefas.
+        </p>
+      )}
       {!!proposta.data?.length && (
         <>
-          <p className="ajuda">O prazo de cada tarefa conta a partir da data da escritura / contrato.</p>
+          <p className="ajuda">
+            {posVenda
+              ? 'O prazo de cada tarefa conta a partir da data da escritura / contrato.'
+              : 'O prazo de cada tarefa conta a partir de hoje.'}
+          </p>
           <fieldset className="efeitos-propostos">
             <legend>Tarefas a criar (só as marcadas)</legend>
             {proposta.data.map((m) => (

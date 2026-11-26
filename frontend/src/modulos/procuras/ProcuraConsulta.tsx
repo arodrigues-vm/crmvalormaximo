@@ -24,6 +24,7 @@ import {
 } from './api'
 import { CorrespondenciasProcura } from './Correspondencias'
 import { ECRA_PROCURA } from './disposicao'
+import { TarefasOrigem } from '../tarefas/PosVendaTransacao'
 
 const IMP: Record<Importancia, string> = { obrigatorio: 'obrigatório', preferencial: 'preferencial' }
 
@@ -185,6 +186,8 @@ export function ProcuraConsulta() {
           tipos={opcoes.data?.tipos_interacao ?? []}
         />
       </Bloco>
+
+      <TarefasOrigem modulo="procuras" id={Number(id)} />
 
       <Bloco titulo="Histórico" abertoInicial={false}>
         {() => (

@@ -25,6 +25,7 @@ import {
   type Renovacao,
 } from './api'
 import { ECRA_ANGARIACAO } from './disposicao'
+import { TarefasOrigem } from '../tarefas/PosVendaTransacao'
 
 function remuneracao(a: Angariacao): string | null {
   const v = a.valor_remuneracao
@@ -361,6 +362,8 @@ export function AngariacaoConsulta() {
           </ul>
         </Bloco>
       )}
+
+      <TarefasOrigem modulo="angariacoes" id={Number(id)} />
 
       <Bloco titulo="Histórico" abertoInicial={false}>
         {() => (
