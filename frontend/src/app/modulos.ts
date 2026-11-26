@@ -56,7 +56,7 @@ export const GRUPOS: GrupoModulos[] = [
   {
     nome: 'Finanças e Análise',
     modulos: [
-      m('faturacao', 'Faturação e Comissões'),
+      m('faturacao', 'Faturação e Comissões', true),
       m('estatisticas', 'Estatísticas'),
       m('documentos', 'Documentos'),
     ],

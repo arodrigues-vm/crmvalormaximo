@@ -3,6 +3,8 @@ import { useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { ErroApi, pedido } from '../../api/cliente'
+import { useSessao } from '../../app/sessao'
+import { comissoesApi } from '../comissoes/api'
 import { Bloco } from '../../componentes/Bloco'
 import { BlocosConfiguraveis, Largo } from '../../componentes/BlocosConfiguraveis'
 import { CampoAreaTexto, CampoSelecao, CampoTexto, Dado } from '../../componentes/campos'
@@ -36,6 +38,15 @@ export function TransacaoConsulta() {
         .find((l) => l.chave === 'tipos_ligacao')
         ?.valores.filter((v) => v.ativo) ?? [],
     staleTime: 60_000,
+  })
+  const { pode } = useSessao()
+  const apurar = useMutation({
+    mutationFn: () => comissoesApi.apurar(Number(id)),
+    onSuccess: (c) => {
+      qc.invalidateQueries({ queryKey: ['transacoes', id] })
+      qc.setQueryData(['comissoes', String(c.id)], c)
+      navegar(`/faturacao/comissoes/${c.id}`)
+    },
   })
   const eliminar = useMutation({
     mutationFn: () => transacoesApi.eliminar(Number(id)),
@@ -196,6 +207,37 @@ export function TransacaoConsulta() {
         campo={desenharCampo}
         abertoInicial={(b) => (b.chave === 'observacoes' ? !!x.observacoes : true)}
       />
+
+      {(x.comissao || pode('faturacao', 'criar')) && (
+        <Bloco titulo="Comissão">
+          {x.comissao ? (
+            <p>
+              <Link to={`/faturacao/comissoes/${x.comissao.id}`}>{x.comissao.referencia}</Link> · comissão total:{' '}
+              <strong>{formatarEuros(x.comissao.valor_final) ?? 'por apurar'}</strong>
+            </p>
+          ) : (
+            <>
+              <p className="ajuda">
+                Ainda não foi apurada. O CRM calcula-a a partir do CMI e do valor acordado e propõe a repartição.
+              </p>
+              {apurar.error && (
+                <p className="erro" role="alert">
+                  {apurar.error instanceof ErroApi
+                    ? Object.values(apurar.error.campos).flat().join(' ') || apurar.error.message
+                    : 'Não foi possível apurar.'}
+                </p>
+              )}
+              <button
+                className="botao-principal"
+                disabled={apurar.isPending || x.estado_categoria === 'cancelada'}
+                onClick={() => apurar.mutate()}
+              >
+                Apurar comissão
+              </button>
+            </>
+          )}
+        </Bloco>
+      )}
 
       {x.efeitos_aplicados.length > 0 && (
         <Bloco titulo="Alterações feitas a outros registos" abertoInicial={false}>

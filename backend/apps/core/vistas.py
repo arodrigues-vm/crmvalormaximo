@@ -435,7 +435,7 @@ class AcoesPorRegisto(dict):
             kw = {"campo_partilhas": "partilhada_com"}
             self[pk] = {
                 op: pode_no_registo(self.u, self.modulo, op, obj, **kw)
-                for op in (Operacao.EDITAR, Operacao.ELIMINAR, Operacao.TRANSFERIR)
+                for op in (Operacao.EDITAR, Operacao.ELIMINAR, Operacao.TRANSFERIR, Operacao.APROVAR)
             }
         return super().get(pk, default)
 

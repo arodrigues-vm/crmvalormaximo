@@ -42,6 +42,7 @@ export const CAMINHOS: Record<string, string> = {
   interesses: '/visitas/interesses',
   propostas: '/propostas',
   transacoes: '/transacoes',
+  comissoes: '/faturacao/comissoes',
   agentes: '/agentes',
   agencias: '/agencias',
 }

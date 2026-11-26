@@ -16,8 +16,17 @@ export const ECRA_MEMBRO: DefinicaoEcra = {
       titulo: 'Acesso ao CRM',
       campos: ['email', 'perfil', 'ativo', 'password', 'mfa', 'ultimo_acesso', 'membro_desde'],
     },
+    {
+      chave: 'comissao',
+      titulo: 'Comissão habitual',
+      campos: ['comissao_modo', 'comissao_pct_angariacao', 'comissao_pct_venda', 'comissao_deducao'],
+    },
   ],
   rotulos: {
+    comissao_modo: 'Forma de cálculo da comissão',
+    comissao_pct_angariacao: '% sobre o lado da angariação',
+    comissao_pct_venda: '% sobre o lado da venda',
+    comissao_deducao: 'Valor fixo que fica para a agência',
     nome: 'Nome',
     funcao_comercial: 'Função',
     identificacao_profissional: 'Identificação profissional',

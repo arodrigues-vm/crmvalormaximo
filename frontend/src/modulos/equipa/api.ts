@@ -17,6 +17,11 @@ export interface Membro {
   mfa_ativa: boolean
   ultimo_acesso: string | null
   date_joined: string
+  /** D-48: comissão habitual (proposta em cada comissão). */
+  comissao_modo: '' | 'percentagem' | 'deducao'
+  comissao_pct_angariacao: string | null
+  comissao_pct_venda: string | null
+  comissao_deducao: string | null
 }
 
 export interface GrupoEquipa {

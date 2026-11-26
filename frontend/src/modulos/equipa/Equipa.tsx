@@ -7,11 +7,18 @@ import { BlocosConfiguraveis } from '../../componentes/BlocosConfiguraveis'
 import { CampoSelecao, CampoTexto, Dado } from '../../componentes/campos'
 import { Dialogo } from '../../componentes/Dialogo'
 import { CabecalhoRegisto } from '../../componentes/Ficha'
-import { formatarTelefone, momentoPt } from '../../componentes/formatar'
+import { formatarEuros, formatarPercentagem, formatarTelefone, momentoPt } from '../../componentes/formatar'
 import { Paginacao } from '../../componentes/Paginacao'
 import { useGuardaSaida } from '../../componentes/useGuardaSaida'
 import { useListaFiltrada } from '../../componentes/useListaFiltrada'
 import { equipaApi, type Membro } from './api'
+
+/** Formas de cálculo da comissão de um consultor (D-48). */
+const MODOS_COMISSAO: Record<string, string> = {
+  percentagem: 'Percentagem de cada lado',
+  deducao: 'Lado menos um valor fixo da agência',
+}
+const dec = (x: string) => (x.trim() ? x.trim().replace(',', '.') : null)
 import { ECRA_MEMBRO } from './disposicao'
 
 function Navegacao({ atual }: { atual: 'membros' | 'equipas' }) {
@@ -172,6 +179,20 @@ export function MembroConsulta() {
         return <Dado rotulo="Último acesso">{mb.ultimo_acesso && momentoPt(mb.ultimo_acesso)}</Dado>
       case 'membro_desde':
         return <Dado rotulo="Membro desde">{momentoPt(mb.date_joined)}</Dado>
+      case 'comissao_modo':
+        return <Dado rotulo="Forma de cálculo da comissão">{MODOS_COMISSAO[mb.comissao_modo]}</Dado>
+      case 'comissao_pct_angariacao':
+        return mb.comissao_modo === 'percentagem' ? (
+          <Dado rotulo="% sobre o lado da angariação">{formatarPercentagem(mb.comissao_pct_angariacao)}</Dado>
+        ) : null
+      case 'comissao_pct_venda':
+        return mb.comissao_modo === 'percentagem' ? (
+          <Dado rotulo="% sobre o lado da venda">{formatarPercentagem(mb.comissao_pct_venda)}</Dado>
+        ) : null
+      case 'comissao_deducao':
+        return mb.comissao_modo === 'deducao' ? (
+          <Dado rotulo="Valor fixo que fica para a agência">{formatarEuros(mb.comissao_deducao)}</Dado>
+        ) : null
       case 'nome':
         return <Dado rotulo="Nome">{mb.nome}</Dado>
     }
@@ -254,6 +275,10 @@ function FormularioMembro({ membro }: { membro?: Membro }) {
       telefone: membro?.telefone ?? '',
       ativo: membro ? (membro.ativo ? 'sim' : 'nao') : 'sim',
       password: '',
+      comissao_modo: membro?.comissao_modo ?? '',
+      comissao_pct_angariacao: membro?.comissao_pct_angariacao ? String(Number(membro.comissao_pct_angariacao)) : '',
+      comissao_pct_venda: membro?.comissao_pct_venda ? String(Number(membro.comissao_pct_venda)) : '',
+      comissao_deducao: membro?.comissao_deducao ? String(Number(membro.comissao_deducao)) : '',
     }),
     [membro],
   )
@@ -280,6 +305,10 @@ function FormularioMembro({ membro }: { membro?: Membro }) {
       nif: v.nif,
       telefone: v.telefone,
       ativo: v.ativo === 'sim',
+      comissao_modo: v.comissao_modo,
+      comissao_pct_angariacao: v.comissao_modo === 'percentagem' ? dec(v.comissao_pct_angariacao) : null,
+      comissao_pct_venda: v.comissao_modo === 'percentagem' ? dec(v.comissao_pct_venda) : null,
+      comissao_deducao: v.comissao_modo === 'deducao' ? dec(v.comissao_deducao) : null,
     }
     if (v.password) corpo.password = v.password
     try {
@@ -320,6 +349,48 @@ function FormularioMembro({ membro }: { membro?: Membro }) {
         )
       case 'nif':
         return <CampoTexto rotulo="NIF" value={v.nif} onChange={m('nif')} erro={erros.nif} />
+      case 'comissao_modo':
+        return (
+          <CampoSelecao
+            rotulo="Forma de cálculo da comissão"
+            vazio="— (indicar em cada comissão)"
+            value={v.comissao_modo}
+            onChange={m('comissao_modo')}
+            opcoes={Object.entries(MODOS_COMISSAO).map(([valor, nome]) => ({ valor, nome }))}
+            ajuda="O CRM propõe-na em cada comissão; lá pode ser mudada."
+          />
+        )
+      case 'comissao_pct_angariacao':
+        return v.comissao_modo === 'percentagem' ? (
+          <CampoTexto
+            rotulo="% sobre o lado da angariação"
+            inputMode="decimal"
+            value={v.comissao_pct_angariacao}
+            onChange={m('comissao_pct_angariacao')}
+            erro={erros.comissao_pct_angariacao}
+          />
+        ) : null
+      case 'comissao_pct_venda':
+        return v.comissao_modo === 'percentagem' ? (
+          <CampoTexto
+            rotulo="% sobre o lado da venda"
+            inputMode="decimal"
+            value={v.comissao_pct_venda}
+            onChange={m('comissao_pct_venda')}
+            erro={erros.comissao_pct_venda}
+          />
+        ) : null
+      case 'comissao_deducao':
+        return v.comissao_modo === 'deducao' ? (
+          <CampoTexto
+            rotulo="Valor fixo que fica para a agência (€)"
+            inputMode="decimal"
+            value={v.comissao_deducao}
+            onChange={m('comissao_deducao')}
+            erro={erros.comissao_deducao}
+            ajuda="O consultor recebe o lado da comissão menos este valor."
+          />
+        ) : null
       case 'telefone':
         return <CampoTexto rotulo="Telefone" value={v.telefone} onChange={m('telefone')} erro={erros.telefone} />
       case 'equipa':

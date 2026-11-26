@@ -19,7 +19,7 @@ As imagens usam apenas dados fictícios de demonstração.
 | 8 | [Visitas e Seguimento Compradores](08-visitas.md) | Disponível |
 | 9 | [Propostas](09-propostas.md) | Disponível |
 | 10 | [Transações](10-transacoes.md) | Disponível |
-| 11 | Faturação, comissões e recebimentos | Por escrever |
+| 11 | [Faturação e Comissões](11-faturacao.md) | Comissões disponíveis; faturação por escrever |
 | 12 | Pós-Venda e documentos | Por escrever |
 | 13 | Tarefas e Agenda | Por escrever |
 | 14 | Plano de Marketing de Imóveis | Por escrever |

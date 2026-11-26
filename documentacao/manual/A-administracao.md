@@ -53,6 +53,8 @@ Em **Configurações → Parâmetros** alteram-se parâmetros de funcionamento:
 
 - **Avisos de expiração do CMI:** dias antes do fim em que aparecem avisos (por omissão 120, 60 e 30).
   Escreva os valores separados por vírgulas e carregue em **Guardar**.
+- **Repartição da comissão: % do lado da angariação:** a percentagem da comissão total que o CRM propõe para o
+  lado da angariação (por omissão 50; o resto é do lado da venda). Pode ser mudada em cada comissão.
 - **Exigir início de sessão em dois passos aos Administradores:** *Sim* (por omissão e recomendado) ou *Não*.
   Com *Não*, os Administradores deixam de ser obrigados a usar o código do telemóvel e podem desligá-lo em
   **A minha conta** (capítulo 1). A alteração grava-se logo ao escolher e fica na auditoria.

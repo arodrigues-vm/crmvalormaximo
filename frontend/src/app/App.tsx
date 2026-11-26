@@ -23,6 +23,9 @@ import { EquipasLista, MembroConsulta, MembroEditar, MembroNovo, MembrosLista } 
 import { PropostaConsulta } from '../modulos/propostas/PropostaConsulta'
 import { PropostaEditar, PropostaNova } from '../modulos/propostas/PropostaFormulario'
 import { PropostasLista } from '../modulos/propostas/PropostasLista'
+import { ComissaoConsulta } from '../modulos/comissoes/ComissaoConsulta'
+import { ComissaoEditar } from '../modulos/comissoes/ComissaoFormulario'
+import { ComissoesLista } from '../modulos/comissoes/ComissoesLista'
 import { TransacaoConsulta } from '../modulos/transacoes/TransacaoConsulta'
 import { TransacaoEditar, TransacaoNova } from '../modulos/transacoes/TransacaoFormulario'
 import { TransacoesLista } from '../modulos/transacoes/TransacoesLista'
@@ -149,6 +152,15 @@ export const rotas: RouteObject[] = [
           { path: 'nova', element: <TransacaoNova /> },
           { path: ':id', element: <TransacaoConsulta /> },
           { path: ':id/editar', element: <TransacaoEditar /> },
+        ],
+      },
+      {
+        path: 'faturacao',
+        element: <ExigeModulo modulo="faturacao" />,
+        children: [
+          { index: true, element: <ComissoesLista /> },
+          { path: 'comissoes/:id', element: <ComissaoConsulta /> },
+          { path: 'comissoes/:id/editar', element: <ComissaoEditar /> },
         ],
       },
       { path: 'conta', element: <Conta /> },

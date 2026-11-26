@@ -90,3 +90,13 @@ Igual ao anterior, escolhendo o tipo **Rede** ou **Externa**.
 Por omissão, todos podem **consultar** agentes e agências. O **Consultor** pode **criar** agentes e agências e
 **editar os que criou**; o Responsável de Equipa e o Administrador editam todos. O Administrador pode alterar
 estas permissões.
+
+## Comissão habitual de cada membro
+
+Na ficha de cada membro da **Equipa** (botão **Editar**), o separador **Comissão habitual** define como o
+consultor costuma receber:
+
+- **Percentagem de cada lado** — indique a % sobre o lado da angariação e a % sobre o lado da venda;
+- **Lado menos um valor fixo da agência** — indique o valor (€) que fica para a agência.
+
+O CRM propõe estes valores sempre que se apura uma comissão (capítulo 11), onde podem ser mudados caso a caso.

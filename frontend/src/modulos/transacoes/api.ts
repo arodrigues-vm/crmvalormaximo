@@ -50,6 +50,8 @@ export interface Transacao extends TransacaoResumo {
   responsavel_comprador_nome: string | null
   participantes_detalhe: ParticipanteDetalhe[]
   efeitos_aplicados: EfeitoAplicado[]
+  /** D-48: comissão apurada desta transação. */
+  comissao?: { id: number; referencia: string; valor_final: string | null } | null
   responsavel: number
   observacoes: string
   atualizado_em: string
