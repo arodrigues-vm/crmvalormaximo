@@ -12,7 +12,11 @@ import { AngariacoesLista } from '../modulos/angariacoes/AngariacoesLista'
 import { Configuracoes } from '../modulos/configuracoes/Configuracoes'
 import { Disposicoes } from '../modulos/configuracoes/Disposicoes'
 import { ListasValores } from '../modulos/configuracoes/ListasValores'
+import { ModelosTarefa } from '../modulos/configuracoes/ModelosTarefa'
 import { Parametros } from '../modulos/configuracoes/Parametros'
+import { TarefaConsulta } from '../modulos/tarefas/TarefaConsulta'
+import { TarefaEditar, TarefaNova } from '../modulos/tarefas/TarefaFormulario'
+import { TarefasLista } from '../modulos/tarefas/TarefasLista'
 import { ImoveisLista } from '../modulos/imoveis/ImoveisLista'
 import { ImovelConsulta } from '../modulos/imoveis/ImovelConsulta'
 import { ImovelEditar, ImovelNovo } from '../modulos/imoveis/ImovelFormulario'
@@ -158,6 +162,16 @@ export const rotas: RouteObject[] = [
         ],
       },
       {
+        path: 'pos-venda',
+        element: <ExigeModulo modulo="pos-venda" />,
+        children: [
+          { index: true, element: <TarefasLista /> },
+          { path: 'nova', element: <TarefaNova /> },
+          { path: ':id', element: <TarefaConsulta /> },
+          { path: ':id/editar', element: <TarefaEditar /> },
+        ],
+      },
+      {
         path: 'faturacao',
         element: <ExigeModulo modulo="faturacao" />,
         children: [
@@ -227,6 +241,7 @@ export const rotas: RouteObject[] = [
               { path: 'listas', element: <ListasValores /> },
               { path: 'parametros', element: <Parametros /> },
               { path: 'disposicao', element: <Disposicoes /> },
+              { path: 'modelos-tarefa', element: <ModelosTarefa /> },
             ],
           },
         ],

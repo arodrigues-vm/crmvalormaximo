@@ -16,6 +16,8 @@ import { LigacoesExternas } from '../../componentes/LigacoesExternas'
 import { comoRegistoCp } from '../../componentes/personalizados'
 import { ETIQUETA_TRANSACAO, NOMES_CAMPOS_TRANSACAO, SO_VENDA, transacoesApi, type Transacao } from './api'
 import { ECRA_TRANSACAO } from './disposicao'
+import { tarefasApi } from '../tarefas/api'
+import { DocumentosNegocio, PosVendaTransacao } from '../tarefas/PosVendaTransacao'
 
 export function TransacaoConsulta() {
   const { id = '' } = useParams()
@@ -40,6 +42,11 @@ export function TransacaoConsulta() {
     staleTime: 60_000,
   })
   const { pode } = useSessao()
+  // Tipos de documento que se aplicam a esta operação (venda / arrendamento), D-50.
+  const documentos = useQuery({
+    queryKey: ['transacoes', Number(id), 'documentos'],
+    queryFn: () => tarefasApi.documentos(Number(id)),
+  })
   const apurar = useMutation({
     mutationFn: () => comissoesApi.apurar(Number(id)),
     onSuccess: (c) => {
@@ -256,11 +263,20 @@ export function TransacaoConsulta() {
         </Bloco>
       )}
 
+      {x.estado_categoria === 'concluida' && pode('pos-venda', 'consultar') && (
+        <Bloco titulo="Pós-venda">
+          <PosVendaTransacao transacao={x.id} podeCriar={pode('pos-venda', 'criar')} />
+        </Bloco>
+      )}
+
       <Bloco titulo="Documentos e ligações">
+        <DocumentosNegocio transacao={x.id} />
         <LigacoesExternas
           base={`/api/transacoes/${x.id}/ligacoes/`}
           podeEditar={x.acoes.editar}
           tipos={tiposLigacao.data ?? []}
+          tiposDocumento={documentos.data?.map((d) => ({ id: d.tipo, nome: d.nome })) ?? []}
+          aoMudar={() => qc.invalidateQueries({ queryKey: ['transacoes', x.id, 'documentos'] })}
         />
       </Bloco>
 

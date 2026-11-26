@@ -13,6 +13,9 @@ export function Configuracoes() {
         <NavLink to="/configuracoes/disposicao" role="tab">
           Disposição dos ecrãs
         </NavLink>
+        <NavLink to="/configuracoes/modelos-tarefa" role="tab">
+          Modelos de tarefas
+        </NavLink>
       </div>
       <Outlet />
     </div>

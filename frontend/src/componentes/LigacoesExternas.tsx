@@ -8,6 +8,8 @@ interface Ligacao {
   id: number
   tipo: number
   tipo_nome: string
+  tipo_documento?: number | null
+  tipo_documento_nome?: string | null
   titulo: string
   url: string
 }
@@ -17,6 +19,10 @@ interface Props {
   base: string
   podeEditar: boolean
   tipos: { id: number; nome: string }[]
+  /** Tipos de documento do negócio (D-50): quando indicados, cada ligação pode dizer que documento é. */
+  tiposDocumento?: { id: number; nome: string }[]
+  /** Chamado depois de cada alteração (ex.: atualizar a lista de verificação dos documentos). */
+  aoMudar?: () => void
 }
 
 /**
@@ -24,7 +30,7 @@ interface Props {
  * documentos, etc. O CRM guarda apenas o endereço; o acesso ao conteúdo depende das
  * permissões definidas no próprio serviço externo.
  */
-export function LigacoesExternas({ base, podeEditar, tipos }: Props) {
+export function LigacoesExternas({ base, podeEditar, tipos, tiposDocumento, aoMudar }: Props) {
   const qc = useQueryClient()
   const chave = ['ligacoes', base]
   const { data: ligacoes = [], isLoading } = useQuery({ queryKey: chave, queryFn: () => pedido<Ligacao[]>(base) })
@@ -32,13 +38,15 @@ export function LigacoesExternas({ base, podeEditar, tipos }: Props) {
   // Edição (D-42): reaproveita o mesmo formulário.
   const [aEditar, setAEditar] = useState<number | null>(null)
   const [tipo, setTipo] = useState('')
+  const [tipoDocumento, setTipoDocumento] = useState('')
   const [titulo, setTitulo] = useState('')
   const [url, setUrl] = useState('')
   const [erros, setErros] = useState<Record<string, string[]>>({})
 
   const criar = useMutation({
     mutationFn: () => {
-      const corpo = { tipo: Number(tipo), titulo, url: url.trim() }
+      const corpo: Record<string, unknown> = { tipo: Number(tipo), titulo, url: url.trim() }
+      if (tiposDocumento) corpo.tipo_documento = tipoDocumento ? Number(tipoDocumento) : null
       return aEditar
         ? pedido<Ligacao[]>(`${base}${aEditar}/`, { method: 'PATCH', json: corpo })
         : pedido<Ligacao[]>(base, { json: corpo })
@@ -48,15 +56,20 @@ export function LigacoesExternas({ base, podeEditar, tipos }: Props) {
       setAAdicionar(false)
       setAEditar(null)
       setTipo('')
+      setTipoDocumento('')
       setTitulo('')
       setUrl('')
       setErros({})
+      aoMudar?.()
     },
     onError: (e) => setErros(e instanceof ErroApi ? e.campos : { url: ['Não foi possível gravar.'] }),
   })
   const remover = useMutation({
     mutationFn: (id: number) => pedido<null>(`${base}${id}/`, { method: 'DELETE' }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: chave }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: chave })
+      aoMudar?.()
+    },
   })
 
   function submeter(e: FormEvent) {
@@ -81,6 +94,7 @@ export function LigacoesExternas({ base, podeEditar, tipos }: Props) {
           {ligacoes.map((l) => (
             <li key={l.id}>
               <span className="relacao-tipo">{l.tipo_nome}</span>
+              {l.tipo_documento_nome && <span className="relacao-tipo">{l.tipo_documento_nome}</span>}
               <a href={l.url} target="_blank" rel="noopener noreferrer">
                 {l.titulo} ↗
               </a>
@@ -91,6 +105,7 @@ export function LigacoesExternas({ base, podeEditar, tipos }: Props) {
                   aria-label={`Editar ligação ${l.titulo}`}
                   onClick={() => {
                     setTipo(String(l.tipo))
+                    setTipoDocumento(l.tipo_documento ? String(l.tipo_documento) : '')
                     setTitulo(l.titulo)
                     setUrl(l.url)
                     setErros({})
@@ -132,6 +147,16 @@ export function LigacoesExternas({ base, podeEditar, tipos }: Props) {
             opcoes={tipos.map((t) => ({ valor: t.id, nome: t.nome }))}
             erro={erros.tipo}
           />
+          {tiposDocumento && (
+            <CampoSelecao
+              rotulo="Documento do negócio"
+              vazio="— (nenhum em particular)"
+              value={tipoDocumento}
+              onChange={(e) => setTipoDocumento(e.target.value)}
+              opcoes={tiposDocumento.map((t) => ({ valor: t.id, nome: t.nome }))}
+              erro={erros.tipo_documento}
+            />
+          )}
           <CampoTexto
             rotulo="Título"
             value={titulo}
@@ -157,6 +182,7 @@ export function LigacoesExternas({ base, podeEditar, tipos }: Props) {
                 setAAdicionar(false)
                 setAEditar(null)
                 setTipo('')
+                setTipoDocumento('')
                 setTitulo('')
                 setUrl('')
               }}

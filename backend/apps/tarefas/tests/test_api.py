@@ -90,7 +90,11 @@ def test_sem_acesso_a_transacao(api, u, cenario, criar_utilizador, equipa_sul): 
 def test_modelos_so_o_administrador_altera(api, u, criar_utilizador):  # noqa: F811
     api.force_authenticate(u)
     url = reverse("modelo-tarefa-list")
-    assert len(api.get(url).json()) >= 3 or len(api.get(url).json()["results"]) >= 3
+    assert [m["nome"] for m in api.get(url).json()][:3] == [
+        "Mudança de contadores",
+        "Contacto de acompanhamento",
+        "Aniversário da compra",
+    ]
     assert api.post(url, {"nome": "Novo", "dias_apos": 10}, format="json").status_code == 403
     admin = criar_utilizador(Perfil.ADMINISTRADOR)
     api.force_authenticate(admin)

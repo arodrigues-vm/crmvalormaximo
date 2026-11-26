@@ -143,7 +143,8 @@ class ModeloTarefaViewSet(viewsets.ModelViewSet):
 
     serializer_class = ModeloTarefaSerializer
     permission_classes = [IsAuthenticated]
-    queryset = ModeloTarefa.objects.all()
+    queryset = ModeloTarefa.objects.order_by("ordem", "id")
+    pagination_class = None
     http_method_names = ["get", "post", "patch"]
 
     def _exigir_admin(self):

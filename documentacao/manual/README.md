@@ -20,7 +20,7 @@ As imagens usam apenas dados fictícios de demonstração.
 | 9 | [Propostas](09-propostas.md) | Disponível |
 | 10 | [Transações](10-transacoes.md) | Disponível |
 | 11 | [Faturação e Comissões](11-faturacao.md) | Disponível (comissões e faturação dos consultores) |
-| 12 | Pós-Venda e documentos | Por escrever |
+| 12 | [Pós-Venda](12-pos-venda.md) | Disponível |
 | 13 | Tarefas e Agenda | Por escrever |
 | 14 | Plano de Marketing de Imóveis | Por escrever |
 | 15 | Marketing de Entidades | Por escrever |
