@@ -115,6 +115,11 @@ class TarefaSerializer(TarefaListaSerializer):
         from .servicos import obter_origem, valor_categoria
 
         t = self.instance
+        if t is not None and t.inscricao_id:
+            # Tarefa de marketing de entidades: ligação à entidade e ao plano fixas.
+            for k in ("transacao", "origem_modulo", "origem_id", "categoria"):
+                d.pop(k, None)
+            return d
         if t is not None and t.plano_id:
             # Ocorrência do plano: designação literal do catálogo e ligação fixas; muda-se prazo, responsável…
             if "titulo" in d and d["titulo"] != t.titulo:
@@ -140,7 +145,9 @@ class TarefaSerializer(TarefaListaSerializer):
         categoria = d.get("categoria", t.categoria if t else None)
         if categoria is None:
             d["categoria"] = valor_categoria("categorias_tarefa", tipo)
-        elif categoria.categoria == "marketing" or (categoria.categoria == "pos_venda") != (tipo == "pos_venda"):
+        elif categoria.categoria in ("marketing", "marketing_entidades") or (categoria.categoria == "pos_venda") != (
+            tipo == "pos_venda"
+        ):
             raise serializers.ValidationError(
                 {"categoria": "Categoria de pós-venda só em tarefas de transações concluídas (e vice-versa)."}
             )

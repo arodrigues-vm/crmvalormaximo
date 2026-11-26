@@ -141,13 +141,15 @@ class TarefaViewSet(RegistoViewSet):
             qs = qs.filter(estado__categoria="concluida")
         tipo = p.get("tipo")
         if tipo == "geral":
-            qs = qs.filter(transacao__isnull=True, plano__isnull=True)
+            qs = qs.filter(transacao__isnull=True, plano__isnull=True, inscricao__isnull=True)
         elif tipo == "pos_venda":
             qs = qs.filter(transacao__isnull=False)
         elif tipo == "marketing":
-            qs = qs.filter(plano__isnull=False)
+            qs = qs.filter(Q(plano__isnull=False) | Q(inscricao__isnull=False))
         if p.get("plano"):
             qs = qs.filter(plano_id=p["plano"])
+        if p.get("inscricao"):
+            qs = qs.filter(inscricao_id=p["inscricao"])
         if p.get("transacao"):
             qs = qs.filter(transacao_id=p["transacao"])
         if p.get("origem_modulo"):
@@ -177,7 +179,12 @@ class TarefaViewSet(RegistoViewSet):
         return Response(TarefaListaSerializer(qs, many=True, context=self.get_serializer_context()).data)
 
     def destroy(self, request, *args, **kwargs):
-        if self.get_object().plano_id:
+        t = self.get_object()
+        if t.inscricao_id:
+            raise serializers.ValidationError(
+                {"detail": "As tarefas de marketing de entidades não se apagam: cancele-as ou termine o plano."}
+            )
+        if t.plano_id:
             raise serializers.ValidationError(
                 {"detail": "As tarefas do Plano de Marketing não se apagam: desmarque «Incluir» no plano."}
             )
@@ -233,6 +240,10 @@ class TarefaViewSet(RegistoViewSet):
             t.save()
             registar("tarefa.estado", modulo=t.modulo_permissoes, objeto=t, request=request,
                      dados={"de": antes, "para": novo.nome, "motivo": motivo})  # fmt: skip
+            if novo.categoria == "concluida" and t.inscricao_id:
+                from apps.marketing_entidades.servicos import repetir
+
+                repetir(t, request.user, request=request)
         return Response(TarefaSerializer(self.recarregar(t), context=self.get_serializer_context()).data)
 
     def _alvo(self, dados):

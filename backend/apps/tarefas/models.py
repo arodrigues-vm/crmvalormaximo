@@ -76,6 +76,13 @@ class Tarefa(RegistoBase):
     mk_numero = models.PositiveSmallIntegerField("n.º no catálogo", null=True, blank=True)
     mk_semana = models.PositiveSmallIntegerField("semana do plano", null=True, blank=True)
     incluida = models.BooleanField("incluída no plano", default=True)
+    # Tarefa de um plano de Marketing de Entidades (D-55): inscrição e tarefa-modelo de origem.
+    inscricao = models.ForeignKey(
+        "marketing_entidades.Inscricao", null=True, blank=True, on_delete=models.PROTECT, related_name="tarefas"
+    )
+    passo = models.ForeignKey(
+        "marketing_entidades.PassoPlano", null=True, blank=True, on_delete=models.PROTECT, related_name="+"
+    )
     modelo = models.ForeignKey(
         ModeloTarefa, null=True, blank=True, on_delete=models.SET_NULL, related_name="+",
         verbose_name="criada a partir do modelo",
@@ -108,7 +115,13 @@ class Tarefa(RegistoBase):
         return self.plano_id is not None
 
     @property
+    def marketing_entidades(self) -> bool:
+        return self.inscricao_id is not None
+
+    @property
     def modulo_permissoes(self) -> str:
+        if self.marketing_entidades:
+            return "marketing-entidades"
         if self.marketing:
             return "marketing-imoveis"
         return "pos-venda" if self.pos_venda else "tarefas"

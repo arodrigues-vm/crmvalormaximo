@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     "apps.tarefas",
     "apps.agenda",
     "apps.marketing",
+    "apps.marketing_entidades",
 ]
 
 MIDDLEWARE = [

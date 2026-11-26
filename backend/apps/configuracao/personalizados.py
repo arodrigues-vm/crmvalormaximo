@@ -46,6 +46,12 @@ ECRAS = {
         "Plano de Marketing de Imóveis",
         ["referencia"],
     ),
+    "marketing_entidades": (
+        "marketing_entidades.Inscricao",
+        "marketing-entidades",
+        "Marketing de Entidades (inscrições)",
+        ["referencia"],
+    ),
     "agenda": ("agenda.Compromisso", "agenda", "Agenda (compromissos)", ["referencia", "titulo"]),
     "tarefas": ("tarefas.Tarefa", "tarefas", "Tarefas (gerais e de pós-venda)", ["referencia", "titulo"]),
     "agentes": ("agentes.Agente", "agentes", "Agentes", ["referencia", "nome"]),
