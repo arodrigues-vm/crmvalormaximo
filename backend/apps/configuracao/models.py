@@ -163,6 +163,13 @@ PARAMETROS = {
         "Limiares de aviso; aprovados inicialmente: 120, 60 e 30 dias.",
         [120, 60, 30],
     ),
+    "comissao_reparticao_angariacao": (
+        "Repartição da comissão: % do lado da angariação",
+        "faturacao",
+        "Percentagem da comissão total que o CRM propõe para o lado da angariação (o resto é do lado da venda). "
+        "Pode ser mudada em cada comissão.",
+        50,
+    ),
     "mfa_obrigatoria": (
         "Exigir início de sessão em dois passos aos Administradores",
         "contas",

@@ -48,7 +48,8 @@ class MembroSerializer(serializers.ModelSerializer):
         fields = [
             "id", "nome", "email", "perfil", "perfil_nome", "equipa", "equipa_nome", "funcao_comercial",
             "identificacao_profissional", "nif", "telefone", "telefone_e164", "ativo", "password", "mfa_ativa",
-            "ultimo_acesso", "date_joined",
+            "ultimo_acesso", "date_joined", "comissao_modo", "comissao_pct_angariacao", "comissao_pct_venda",
+            "comissao_deducao",
         ]  # fmt: skip
         read_only_fields = ["telefone_e164", "date_joined"]
 
@@ -71,6 +72,11 @@ class MembroSerializer(serializers.ModelSerializer):
         return v
 
     def validate(self, d):
+        for c in ("comissao_pct_angariacao", "comissao_pct_venda"):
+            if d.get(c) is not None and not 0 <= d[c] <= 100:
+                raise serializers.ValidationError({c: "Indique uma percentagem entre 0 e 100."})
+        if d.get("comissao_deducao") is not None and d["comissao_deducao"] < 0:
+            raise serializers.ValidationError({"comissao_deducao": "O valor não pode ser negativo."})
         pedido = self.context["request"]
         nif = "".join((d.get("nif") or "").split())
         if "nif" in d:

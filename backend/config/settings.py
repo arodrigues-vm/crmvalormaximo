@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "apps.visitas",
     "apps.propostas",
     "apps.transacoes",
+    "apps.comissoes",
 ]
 
 MIDDLEWARE = [

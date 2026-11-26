@@ -33,6 +33,7 @@ ECRAS = {
     "interesses": ("visitas.Interesse", "visitas", "Seguimento Compradores", ["referencia"]),
     "propostas": ("propostas.Proposta", "propostas", "Propostas", ["referencia", "imovel_descricao_livre"]),
     "transacoes": ("transacoes.Transacao", "transacoes", "Transações", ["referencia", "imovel_descricao"]),
+    "comissoes": ("comissoes.Comissao", "faturacao", "Comissões", ["referencia"]),
     "agentes": ("agentes.Agente", "agentes", "Agentes", ["referencia", "nome"]),
     "agencias": ("agentes.Agencia", "agencias", "Agências", ["referencia", "nome"]),
 }

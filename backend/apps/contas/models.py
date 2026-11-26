@@ -101,6 +101,21 @@ class Utilizador(AbstractUser):
     nif = models.CharField("NIF", max_length=20, blank=True)
     telefone = models.CharField(max_length=30, blank=True)
     telefone_e164 = models.CharField(max_length=20, blank=True, editable=False)
+    # Comissão habitual do membro (D-48): o CRM propõe-na em cada comissão, onde pode ser mudada.
+    # «percentagem»: x% do lado da angariação e y% do lado da venda; «deducao»: o lado menos um valor fixo.
+    comissao_modo = models.CharField(
+        "forma de cálculo da comissão", max_length=12, blank=True,
+        choices=[("percentagem", "Percentagem de cada lado"), ("deducao", "Lado menos um valor fixo da agência")],
+    )  # fmt: skip
+    comissao_pct_angariacao = models.DecimalField(
+        "% sobre o lado da angariação", max_digits=5, decimal_places=2, null=True, blank=True
+    )
+    comissao_pct_venda = models.DecimalField(
+        "% sobre o lado da venda", max_digits=5, decimal_places=2, null=True, blank=True
+    )
+    comissao_deducao = models.DecimalField(
+        "valor fixo que fica para a agência (€)", max_digits=12, decimal_places=2, null=True, blank=True
+    )
 
     first_name = None
     last_name = None

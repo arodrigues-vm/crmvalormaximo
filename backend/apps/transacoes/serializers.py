@@ -70,6 +70,7 @@ class TransacaoSerializer(TransacaoListaSerializer):
     angariacao_descricao = serializers.SerializerMethodField()
     responsavel_imovel_nome = serializers.SerializerMethodField()
     responsavel_comprador_nome = serializers.SerializerMethodField()
+    comissao = serializers.SerializerMethodField()
     versao = serializers.IntegerField(required=False)
     acoes = serializers.SerializerMethodField()
 
@@ -81,7 +82,7 @@ class TransacaoSerializer(TransacaoListaSerializer):
             "angariacao_descricao", "operacao", "operacao_nome", "operacao_categoria", "estado", "estado_nome",
             "estado_categoria", "motivo_estado", "valor", "sinal_valor", "sinal_unidade", "data_cpcv_prevista",
             "data_cpcv", "data_escritura_prevista", "data_escritura", "responsavel_imovel_nome",
-            "responsavel_comprador_nome", "participantes", "participantes_detalhe", "efeitos_aplicados",
+            "responsavel_comprador_nome", "comissao", "participantes", "participantes_detalhe", "efeitos_aplicados",
             "responsavel", "responsavel_nome", "observacoes", "criado_em", "atualizado_em", "versao", "eliminado_em",
             "acoes",
         ]  # fmt: skip
@@ -113,6 +114,17 @@ class TransacaoSerializer(TransacaoListaSerializer):
 
     def get_responsavel_comprador_nome(self, o) -> str | None:
         return nome_responsavel(o.consultor_comprador, o.agente_comprador)
+
+    def get_comissao(self, o) -> dict | None:
+        """Comissão apurada para esta transação (D-48), se existir."""
+        c = getattr(o, "comissao", None)
+        if c is None or c.eliminado_em is not None:
+            return None
+        return {
+            "id": c.pk,
+            "referencia": c.referencia,
+            "valor_final": None if c.valor_final is None else str(c.valor_final),
+        }
 
     def get_acoes(self, o) -> dict[str, bool]:
         return self.context.get("acoes", {}).get(o.pk, {})

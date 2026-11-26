@@ -150,7 +150,18 @@ VALIDADORES_PARAMETROS = {
     # chave: função que valida e normaliza o valor (levanta ValidationError)
     "cmi_alertas_dias": lambda v: _lista_dias(v),
     "mfa_obrigatoria": lambda v: _sim_nao(v),
+    "comissao_reparticao_angariacao": lambda v: _percentagem(v),
 }
+
+
+def _percentagem(v):
+    try:
+        n = float(str(v).replace(",", "."))
+    except ValueError as e:
+        raise serializers.ValidationError("Indique uma percentagem entre 0 e 100.") from e
+    if not 0 <= n <= 100:
+        raise serializers.ValidationError("Indique uma percentagem entre 0 e 100.")
+    return int(n) if n == int(n) else round(n, 2)
 
 
 def _sim_nao(v):
