@@ -23,7 +23,7 @@ MODULO_GERAL = "tarefas"
 MODULO_MARKETING = "marketing-imoveis"
 NOMES_ORIGEM = dict(ORIGENS)
 ABERTAS = ("aberta", "em_curso")
-FECHADAS = ("concluida", "cancelada")
+FECHADAS = ("concluida", "cancelada", "substituida")
 
 
 def valor_categoria(chave, categoria):

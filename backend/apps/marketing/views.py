@@ -19,11 +19,24 @@ from .serializers import (
     CriarPlanoSerializer,
     DecidirRecalculoSerializer,
     IncluirSerializer,
+    NovoCicloSerializer,
     PedirRecalculoSerializer,
     PlanoListaSerializer,
     PlanoSerializer,
 )
-from .servicos import aplicar_recalculo, criar_plano, impedimento, previa, previa_recalculo
+from .servicos import (
+    ORIGENS_CICLO,
+    aplicar_recalculo,
+    criar_ciclo,
+    criar_plano,
+    data_base_origem,
+    impedimento,
+    impedimento_ciclo,
+    previa,
+    previa_ciclo,
+    previa_recalculo,
+    renovacao_sem_ciclo,
+)
 
 
 class PlanoMarketingViewSet(RegistoViewSet):
@@ -37,6 +50,9 @@ class PlanoMarketingViewSet(RegistoViewSet):
     operacoes_extra = {
         **RegistoViewSet.operacoes_extra,
         "previa": Operacao.CRIAR,
+        "situacao": Operacao.CONSULTAR,
+        "previa_ciclo": Operacao.CRIAR,
+        "novo_ciclo": Operacao.CRIAR,
         "incluir": Operacao.EDITAR,
         "previa_recalculo": Operacao.CONSULTAR,
         "pedir_recalculo": Operacao.EDITAR,
@@ -103,6 +119,47 @@ class PlanoMarketingViewSet(RegistoViewSet):
             plano = criar_plano(cmi, set(s.validated_data["excluidos"]), request.user, request=request)
         return Response(self.get_serializer(self.recarregar(plano)).data, status=status.HTTP_201_CREATED)
 
+    @extend_schema(parameters=[OpenApiParameter("angariacao", int, required=True)])
+    @action(detail=False, methods=["get"])
+    def situacao(self, request):
+        """O que se pode fazer neste CMI: plano inicial e/ou novo ciclo após renovação (sem gravar nada)."""
+        cmi = self._cmi(request.query_params.get("angariacao"))
+        r = renovacao_sem_ciclo(cmi)
+        return Response({
+            "plano_inicial": impedimento(cmi) is None,
+            "motivo_inicial": impedimento(cmi),
+            "novo_ciclo": {"renovacao": r.pk, "ciclo": r.ciclo, "data_inicio": r.data_inicio} if r else None,
+        })  # fmt: skip
+
+    @extend_schema(parameters=[OpenApiParameter("angariacao", int, required=True), OpenApiParameter("origem", str)])
+    @action(detail=False, methods=["get"], url_path="previa-ciclo")
+    def previa_ciclo(self, request):
+        """Prévia do novo ciclo após renovação (Cap. 19): origem escolhida e pendentes do ciclo anterior."""
+        cmi = self._cmi(request.query_params.get("angariacao"))
+        origem = request.query_params.get("origem") or "catalogo"
+        if origem not in ORIGENS_CICLO:
+            raise serializers.ValidationError({"origem": "Origem inválida."})
+        motivo = impedimento_ciclo(cmi)
+        if motivo:
+            return Response({"detail": motivo, "codigo": "impedido"}, status=status.HTTP_409_CONFLICT)
+        return Response(previa_ciclo(cmi, origem))
+
+    @extend_schema(request=NovoCicloSerializer)
+    @action(detail=False, methods=["post"], url_path="novo-ciclo")
+    def novo_ciclo(self, request):
+        """Cria o novo ciclo após confirmação expressa. Um só ciclo por renovação (bloqueio do CMI)."""
+        s = NovoCicloSerializer(data=request.data)
+        s.is_valid(raise_exception=True)
+        d = s.validated_data
+        cmi = self._cmi(d["angariacao"].pk)
+        with transaction.atomic():
+            cmi = Angariacao.objects.select_for_update().select_related("imovel__responsavel").get(pk=cmi.pk)
+            motivo = impedimento_ciclo(cmi)
+            if motivo:
+                raise serializers.ValidationError({"angariacao": motivo})
+            plano = criar_ciclo(cmi, set(d["excluidos"]), d["origem"], d["destino"], request.user, request=request)
+        return Response(self.get_serializer(self.recarregar(plano)).data, status=status.HTTP_201_CREATED)
+
     @extend_schema(request=IncluirSerializer)
     @action(detail=True, methods=["post"])
     def incluir(self, request, pk=None):
@@ -128,7 +185,7 @@ class PlanoMarketingViewSet(RegistoViewSet):
     def previa_recalculo(self, request, pk=None):
         """Prazos novos das ocorrências pendentes, pela data de início atual do CMI."""
         plano = self.get_object()
-        nova = plano.angariacao.data_inicio
+        nova = data_base_origem(plano)
         return Response({
             "data_base_atual": plano.data_base,
             "data_base_nova": nova,
@@ -143,7 +200,7 @@ class PlanoMarketingViewSet(RegistoViewSet):
         s.is_valid(raise_exception=True)
         with transaction.atomic():
             plano = PlanoMarketing.objects.select_for_update().get(pk=self.get_object().pk)
-            nova = plano.angariacao.data_inicio
+            nova = data_base_origem(plano)
             if not nova or nova == plano.data_base:
                 raise serializers.ValidationError(
                     {"detail": "A data de início do CMI é igual à data-base do plano: não há nada a recalcular."}

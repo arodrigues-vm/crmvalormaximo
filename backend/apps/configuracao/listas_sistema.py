@@ -96,6 +96,7 @@ CAT_ESTADO_TAREFA = [
     {"valor": "em_curso", "nome": "Em curso"},
     {"valor": "concluida", "nome": "Concluída"},
     {"valor": "cancelada", "nome": "Cancelada"},
+    {"valor": "substituida", "nome": "Não executada — plano substituído (só o CRM a usa, num novo ciclo)"},
 ]
 CAT_CATEGORIA_TAREFA = [
     {"valor": "pos_venda", "nome": "Pós-venda (ligada a uma transação concluída)"},
@@ -267,7 +268,13 @@ LISTAS = {
         "Estados de tarefa",
         "tarefas",
         "",
-        [("Por fazer", "aberta"), ("Em curso", "em_curso"), ("Concluída", "concluida"), ("Cancelada", "cancelada")],
+        [
+            ("Por fazer", "aberta"),
+            ("Em curso", "em_curso"),
+            ("Concluída", "concluida"),
+            ("Cancelada", "cancelada"),
+            ("Não executada — Plano substituído", "substituida"),
+        ],
     ),
     "categorias_tarefa": (
         "Categorias de tarefa",

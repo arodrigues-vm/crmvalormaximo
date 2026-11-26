@@ -141,7 +141,7 @@ def eventos(u, inicio: date, fim: date, pessoa=None, cancelados=False, marketing
         if pessoa:
             qs = qs.filter(responsavel_id=pessoa)
         if not cancelados:
-            qs = qs.exclude(estado__categoria="cancelada")
+            qs = qs.exclude(estado__categoria__in=("cancelada", "substituida"))
         for t in qs:
             cliente = t.transacao.entidade.nome_completo if t.transacao_id else ""
             saida.append(

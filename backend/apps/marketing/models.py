@@ -22,7 +22,16 @@ class PlanoMarketing(RegistoBase):
         "angariacoes.Angariacao", on_delete=models.PROTECT, related_name="planos_marketing", verbose_name="CMI"
     )
     ciclo = models.PositiveSmallIntegerField(default=1)
-    data_base = models.DateField("data-base (início do CMI)")
+    data_base = models.DateField("data-base (início do CMI ou da renovação)")
+    # Novo ciclo (F4-04, D-54): a renovação que o originou e o plano que substituiu.
+    renovacao = models.ForeignKey(
+        "angariacoes.Renovacao", null=True, blank=True, on_delete=models.PROTECT, related_name="planos_marketing"
+    )
+    plano_anterior = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.PROTECT, related_name="ciclos_seguintes"
+    )
+    origem_ciclo = models.CharField("origem das tarefas do ciclo", max_length=12, blank=True)
+    destino_pendentes = models.CharField("destino das pendentes do ciclo anterior", max_length=12, blank=True)
     ativo = models.BooleanField(default=True)
     observacoes = models.TextField(blank=True)
 

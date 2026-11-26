@@ -217,6 +217,10 @@ class TarefaViewSet(RegistoViewSet):
             t = Tarefa.objects.select_for_update().get(pk=self.get_object().pk)
             if not novo.ativo:
                 raise serializers.ValidationError({"estado": "Estado desativado."})
+            if novo.categoria == "substituida":
+                raise serializers.ValidationError(
+                    {"estado": "Este estado só é usado pelo CRM quando um novo ciclo de marketing substitui o plano."}
+                )
             if t.estado_id == novo.pk:
                 raise serializers.ValidationError({"estado": "A tarefa já está neste estado."})
             de = t.estado.categoria if t.estado else "aberta"

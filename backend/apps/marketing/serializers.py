@@ -51,9 +51,13 @@ class PlanoListaSerializer(serializers.ModelSerializer):
 
 class PlanoSerializer(PlanoListaSerializer):
     ocorrencias = serializers.SerializerMethodField()
-    angariacao_data_inicio = serializers.DateField(source="angariacao.data_inicio", read_only=True)
+    # Data de que o plano depende (início do CMI ou da renovação), para detetar correções (recálculo).
+    angariacao_data_inicio = serializers.SerializerMethodField()
     pedido_pendente = serializers.SerializerMethodField()
     pedidos = PedidoRecalculoSerializer(source="pedidos_recalculo", many=True, read_only=True)
+    plano_anterior_referencia = serializers.CharField(source="plano_anterior.referencia", read_only=True, default=None)
+    ciclos_seguintes = serializers.SerializerMethodField()
+    renovacao_data_inicio = serializers.DateField(source="renovacao.data_inicio", read_only=True, default=None)
     versao = serializers.IntegerField(required=False)
     acoes = serializers.SerializerMethodField()
 
@@ -61,6 +65,8 @@ class PlanoSerializer(PlanoListaSerializer):
         model = PlanoMarketing
         fields = [
             *PlanoListaSerializer.Meta.fields, "ocorrencias", "angariacao_data_inicio", "pedido_pendente", "pedidos",
+            "plano_anterior", "plano_anterior_referencia", "ciclos_seguintes", "renovacao", "renovacao_data_inicio",
+            "origem_ciclo", "destino_pendentes",
             "observacoes", "atualizado_em", "versao", "eliminado_em", "acoes",
         ]  # fmt: skip
         read_only_fields = [f for f in fields if f not in ("observacoes", "versao", "responsavel")]
@@ -69,6 +75,16 @@ class PlanoSerializer(PlanoListaSerializer):
     def get_ocorrencias(self, p) -> list[dict]:
         ts = sorted(self._tarefas(p), key=lambda t: t.mk_numero or 0)
         return TarefaListaSerializer(ts, many=True, context=self.context).data
+
+    def get_angariacao_data_inicio(self, p):
+        from .servicos import data_base_origem
+
+        d = data_base_origem(p)
+        return d.isoformat() if d else None
+
+    def get_ciclos_seguintes(self, p) -> list[dict]:
+        return [{"id": x.pk, "referencia": x.referencia, "ciclo": x.ciclo}
+                for x in p.ciclos_seguintes.filter(eliminado_em__isnull=True)]  # fmt: skip
 
     def get_pedido_pendente(self, p) -> dict | None:
         x = p.pedidos_recalculo.filter(estado=PedidoRecalculo.Estado.PENDENTE).first()
@@ -89,6 +105,11 @@ class CriarPlanoSerializer(serializers.Serializer):
     angariacao = serializers.PrimaryKeyRelatedField(queryset=Angariacao.objects.ativos())
     excluidos = serializers.ListField(child=serializers.IntegerField(min_value=1, max_value=45), required=False,
                                       default=list)  # fmt: skip
+
+
+class NovoCicloSerializer(CriarPlanoSerializer):
+    origem = serializers.ChoiceField(choices=["catalogo", "anterior"])
+    destino = serializers.ChoiceField(choices=["manter", "encerrar"])
 
 
 class IncluirSerializer(serializers.Serializer):
