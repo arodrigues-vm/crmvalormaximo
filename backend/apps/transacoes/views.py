@@ -31,6 +31,21 @@ from .servicos import aplicar_efeitos, efeitos_propostos, validar_mudanca
 SEM_ACESSO = "Entidade a que não tem acesso"
 
 
+def cmis_do_imovel(imovel_id) -> list[dict]:
+    """CMI do imóvel, para a escolha expressa na transação."""
+    if not imovel_id:
+        return []
+    return [
+        {
+            "id": c.pk,
+            "descricao": descricao_cmi(c),
+            "em_curso": c.situacao == Angariacao.Situacao.EM_CURSO,
+            "operacao": c.operacao_id,
+        }
+        for c in Angariacao.objects.ativos().filter(imovel_id=imovel_id).order_by("-criado_em")
+    ]
+
+
 class TransacaoViewSet(RegistoViewSet):
     modulo = "transacoes"
     modelo = Transacao
@@ -39,6 +54,7 @@ class TransacaoViewSet(RegistoViewSet):
         **RegistoViewSet.operacoes_extra,
         "previa": Operacao.CONSULTAR,
         "efeitos": Operacao.CONSULTAR,
+        "cmis": Operacao.CONSULTAR,
         "mudar_estado": Operacao.EDITAR,
     }
     campos_auditados = [
@@ -143,17 +159,7 @@ class TransacaoViewSet(RegistoViewSet):
             )
         ultima = p.ultima_ronda
         visiveis = entidades_visiveis(request.user)
-        cmis = []
-        if p.imovel_id:
-            cmis = [
-                {
-                    "id": c.pk,
-                    "descricao": descricao_cmi(c),
-                    "em_curso": c.situacao == Angariacao.Situacao.EM_CURSO,
-                    "operacao": c.operacao_id,
-                }
-                for c in Angariacao.objects.ativos().filter(imovel_id=p.imovel_id).order_by("-criado_em")
-            ]
+        cmis = cmis_do_imovel(p.imovel_id)
         em_curso = [c for c in cmis if c["em_curso"]]
         return Response(
             {
@@ -185,6 +191,11 @@ class TransacaoViewSet(RegistoViewSet):
                 ],
             }
         )
+
+    @action(detail=True, methods=["get"])
+    def cmis(self, request, pk=None):
+        """CMI do imóvel da transação (para mudar a escolha enquanto não estiver concluída)."""
+        return Response(cmis_do_imovel(self.get_object().imovel_id))
 
     @extend_schema(parameters=[OpenApiParameter("estado", int, required=True)])
     @action(detail=True, methods=["get"])

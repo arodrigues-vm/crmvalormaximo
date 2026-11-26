@@ -1700,3 +1700,22 @@ input.disposicao-campo-nome {
 input.disposicao-campo-nome:not(:placeholder-shown) {
   border-color: var(--dourado, #b8912f);
 }
+
+/* Mudar estado da transação: alterações propostas (D-47) */
+.efeitos-propostos {
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 12px 0 0;
+}
+.efeitos-propostos legend {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0 6px;
+}
+.efeitos-propostos .efeito-opcao {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 6px 0;
+}

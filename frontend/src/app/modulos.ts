@@ -41,7 +41,7 @@ export const GRUPOS: GrupoModulos[] = [
         permissao: 'visitas',
       },
       m('propostas', 'Propostas', true),
-      m('transacoes', 'Transações'),
+      m('transacoes', 'Transações', true),
       m('pos-venda', 'Pós-Venda'),
     ],
   },

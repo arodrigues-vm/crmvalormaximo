@@ -63,6 +63,8 @@ export interface Proposta extends PropostaResumo {
   estado: number | null
   participantes_detalhe: ParticipanteDetalhe[]
   rondas: Ronda[]
+  /** D-47: transação gerada a partir desta proposta. */
+  transacao?: { id: number; referencia: string } | null
   responsavel: number
   observacoes: string
   atualizado_em: string

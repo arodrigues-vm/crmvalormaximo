@@ -3,6 +3,7 @@ import { useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { ErroApi } from '../../api/cliente'
+import { useSessao } from '../../app/sessao'
 import { Bloco } from '../../componentes/Bloco'
 import { comoRegistoCp } from '../../componentes/personalizados'
 import { BlocosConfiguraveis, Largo } from '../../componentes/BlocosConfiguraveis'
@@ -21,6 +22,7 @@ function sinal(r: Ronda) {
 }
 
 export function PropostaConsulta() {
+  const { pode } = useSessao()
   const { id = '' } = useParams()
   const navegar = useNavigate()
   const qc = useQueryClient()
@@ -206,6 +208,18 @@ export function PropostaConsulta() {
               <button className="botao-secundario" onClick={abrirRonda}>
                 + Nova ronda / contraproposta
               </button>
+            )}
+            {p.transacao ? (
+              <Link to={`/transacoes/${p.transacao.id}`} className="botao-secundario">
+                Abrir transação {p.transacao.referencia}
+              </Link>
+            ) : (
+              p.estado_categoria === 'aceite' &&
+              pode('transacoes', 'criar') && (
+                <Link to={`/transacoes/nova?proposta=${p.id}`} className="botao-principal">
+                  Gerar Transação
+                </Link>
+              )
             )}
             {p.acoes.editar && (
               <Link to={`/propostas/${p.id}/editar`} className="botao-principal">

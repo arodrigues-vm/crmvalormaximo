@@ -16,9 +16,9 @@ As imagens usam apenas dados fictícios de demonstração.
 | 5 | [Angariações (CMI)](05-angariacoes.md) | Disponível |
 | 6 | [Oportunidades de Angariação](06-oportunidades.md) | Disponível |
 | 7 | [Procuras e correspondências](07-procuras.md) | Disponível |
-| 8 | [Visitas e interesses](08-visitas.md) | Disponível |
+| 8 | [Visitas e Seguimento Compradores](08-visitas.md) | Disponível |
 | 9 | [Propostas](09-propostas.md) | Disponível |
-| 10 | Transações | Por escrever |
+| 10 | [Transações](10-transacoes.md) | Disponível |
 | 11 | Faturação, comissões e recebimentos | Por escrever |
 | 12 | Pós-Venda e documentos | Por escrever |
 | 13 | Tarefas e Agenda | Por escrever |
