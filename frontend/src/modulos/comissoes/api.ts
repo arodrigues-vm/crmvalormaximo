@@ -53,6 +53,26 @@ export interface ResumoLado {
   agencia: string | null
 }
 
+export interface Prestacao {
+  id?: number
+  utilizador: number
+  utilizador_nome?: string
+  momento: 'cpcv' | 'escritura' | 'outro'
+  momento_nome?: string
+  percentagem: string | null
+  valor: string
+  data_prevista: string | null
+}
+
+export interface PagamentosConsultor {
+  utilizador: number
+  utilizador_nome: string
+  a_receber: string | null
+  faturado: string
+  pago: string
+  por_pagar: string
+}
+
 export interface Comissao extends ComissaoResumo {
   cmi_referencia: string
   cmi_versao: number | null
@@ -74,6 +94,9 @@ export interface Comissao extends ComissaoResumo {
   responsavel_comprador_nome: string | null
   beneficiarios: Beneficiario[]
   excecoes: Excecao[]
+  /** D-49: prestações e pagamentos aos consultores. */
+  prestacoes: Prestacao[]
+  pagamentos_consultores: PagamentosConsultor[]
   responsavel: number
   observacoes: string
   atualizado_em: string
@@ -101,6 +124,9 @@ export const comissoesApi = {
   historico: (id: number) => pedido<EntradaHistorico[]>(`${BASE}${id}/historico/`),
   recalcular: (id: number) => pedido<Comissao>(`${BASE}${id}/recalcular/`, { method: 'POST' }),
   pedirExcecao: (id: number, dados: unknown) => pedido<Comissao>(`${BASE}${id}/excecoes/`, { json: dados }),
+  propostaPrestacoes: (id: number) => pedido<Prestacao[]>(`${BASE}${id}/prestacoes/proposta/`),
+  gravarPrestacoes: (id: number, prestacoes: Prestacao[]) =>
+    pedido<Comissao>(`${BASE}${id}/prestacoes/`, { method: 'PUT', json: { prestacoes } }),
   decidirExcecao: (id: number, excecao: number, dados: unknown) =>
     pedido<Comissao>(`${BASE}${id}/excecoes/${excecao}/decidir/`, { json: dados }),
 }

@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { formatarEuros } from '../../componentes/formatar'
 import { Paginacao } from '../../componentes/Paginacao'
 import { useListaFiltrada } from '../../componentes/useListaFiltrada'
+import { NavegacaoFaturacao } from '../faturacao/NavegacaoFaturacao'
 import { comissoesApi } from './api'
 
 const VISTAS: [string, string][] = [
@@ -27,6 +28,7 @@ export function ComissoesLista() {
   })
   return (
     <div className="pagina-lista">
+      <NavegacaoFaturacao />
       <div className="separadores" role="tablist">
         {VISTAS.map(([v, n]) => (
           <button

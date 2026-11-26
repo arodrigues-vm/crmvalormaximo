@@ -95,7 +95,7 @@ class DocumentoSerializer(DocumentoListaSerializer):
 
     def get_prestacao_descricao(self, d) -> str | None:
         p = d.prestacao
-        return f"{p.get_momento_display()} · {p.valor} €" if p else None
+        return f"{p.get_momento_display()} · {p.valor:.2f} €".replace(".", ",") if p else None
 
     def get_acoes(self, d) -> dict[str, bool]:
         return self.context.get("acoes", {}).get(d.pk, {})

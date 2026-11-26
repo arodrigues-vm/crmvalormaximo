@@ -9,9 +9,17 @@ import { BlocosConfiguraveis, Largo } from '../../componentes/BlocosConfiguravei
 import { CampoAreaTexto, CampoTexto, Dado } from '../../componentes/campos'
 import { Dialogo } from '../../componentes/Dialogo'
 import { CabecalhoRegisto, HistoricoRegisto } from '../../componentes/Ficha'
-import { formatarEuros, formatarPercentagem, momentoPt } from '../../componentes/formatar'
+import { dataPt as dataPtCurta, formatarEuros, formatarPercentagem, momentoPt } from '../../componentes/formatar'
 import { comoRegistoCp } from '../../componentes/personalizados'
-import { comissoesApi, NOMES_CAMPOS_COMISSAO, NOMES_LADO, type Comissao, type Excecao, type Lado } from './api'
+import {
+  comissoesApi,
+  NOMES_CAMPOS_COMISSAO,
+  NOMES_LADO,
+  type Comissao,
+  type Excecao,
+  type Lado,
+  type Prestacao,
+} from './api'
 import { ECRA_COMISSAO } from './disposicao'
 
 const euros = (v: string | null) => formatarEuros(v) ?? '—'
@@ -256,6 +264,10 @@ export function ComissaoConsulta() {
         }
       />
 
+      <Bloco titulo="Pagamentos aos consultores">
+        <PagamentosConsultores c={c} aoAtualizar={atualizar} />
+      </Bloco>
+
       <Bloco titulo="Exceções ao valor" resumo={c.excecoes.length ? `${c.excecoes.length}` : undefined}>
         {c.excecoes.length === 0 ? (
           <p className="ajuda">
@@ -446,5 +458,137 @@ function DialogoDecisao({
         )}
       </div>
     </Dialogo>
+  )
+}
+
+/** D-49: por consultor, quanto recebe, quanto faturou à agência, quanto foi pago e as prestações. */
+function PagamentosConsultores({ c, aoAtualizar }: { c: Comissao; aoAtualizar: (c: Comissao) => void }) {
+  const [proposta, setProposta] = useState<Prestacao[] | null>(null)
+  const [erro, setErro] = useState<string | null>(null)
+  const propor = useMutation({
+    mutationFn: () => comissoesApi.propostaPrestacoes(c.id),
+    onSuccess: (p) => setProposta(p),
+  })
+  const gravar = useMutation({
+    mutationFn: () => comissoesApi.gravarPrestacoes(c.id, proposta ?? []),
+    onSuccess: (n) => {
+      aoAtualizar(n)
+      setProposta(null)
+    },
+    onError: (e) => setErro(e instanceof ErroApi ? Object.values(e.campos).flat().join(' ') || e.message : 'Falhou.'),
+  })
+  if (c.pagamentos_consultores.length === 0)
+    return <p className="ajuda">Sem consultores nesta comissão (indique-os em «Editar repartição»).</p>
+  return (
+    <>
+      <table className="tabela tabela-simples">
+        <thead>
+          <tr>
+            <th>Consultor</th>
+            <th>Recebe da comissão (sem IVA)</th>
+            <th>Faturado à agência (com IVA, menos retenção)</th>
+            <th>Pago</th>
+            <th>Por pagar</th>
+            <th />
+          </tr>
+        </thead>
+        <tbody>
+          {c.pagamentos_consultores.map((p) => (
+            <tr key={p.utilizador}>
+              <td data-rotulo="Consultor">{p.utilizador_nome}</td>
+              <td data-rotulo="Recebe">{euros(p.a_receber)}</td>
+              <td data-rotulo="Faturado">{euros(p.faturado)}</td>
+              <td data-rotulo="Pago">{euros(p.pago)}</td>
+              <td data-rotulo="Por pagar">
+                <strong>{euros(p.por_pagar)}</strong>
+              </td>
+              <td>
+                {c.acoes.editar && (
+                  <Link
+                    to={`/faturacao/documentos/novo?comissao=${c.id}&consultor=${p.utilizador}`}
+                    className="ligacao-botao"
+                  >
+                    Registar documento
+                  </Link>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p>
+        <Link to={`/faturacao/documentos?comissao=${c.id}`}>Ver os documentos e pagamentos desta comissão</Link>
+      </p>
+      <h4 className="subtitulo-bloco">Prestações</h4>
+      {c.prestacoes.length === 0 ? (
+        <p className="ajuda">Sem prestações definidas.</p>
+      ) : (
+        <ul className="lista-relacoes">
+          {c.prestacoes.map((p) => (
+            <li key={p.id}>
+              <strong>{p.utilizador_nome}</strong>
+              <span className="relacao-tipo">{p.momento_nome}</span>
+              <span>{euros(p.valor)}</span>
+              {p.data_prevista && <small className="ajuda">prevista {dataPtCurta(p.data_prevista)}</small>}
+              {c.acoes.editar && (
+                <Link
+                  to={`/faturacao/documentos/novo?comissao=${c.id}&consultor=${p.utilizador}&prestacao=${p.id}&valor=${Number(p.valor)}`}
+                  className="ligacao-botao"
+                >
+                  Registar documento
+                </Link>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      {c.acoes.editar && (
+        <div className="acoes-bloco">
+          <button className="botao-secundario" disabled={propor.isPending} onClick={() => propor.mutate()}>
+            {c.prestacoes.length ? 'Propor de novo as prestações' : 'Propor prestações'}
+          </button>
+        </div>
+      )}
+      {proposta && (
+        <Dialogo
+          titulo="Prestações propostas"
+          aberto
+          aoFechar={() => setProposta(null)}
+          acoes={
+            <>
+              <button className="botao-secundario" onClick={() => setProposta(null)}>
+                Cancelar
+              </button>
+              <button className="botao-principal" disabled={gravar.isPending} onClick={() => gravar.mutate()}>
+                Confirmar
+              </button>
+            </>
+          }
+        >
+          <div className="formulario-dialogo">
+            <p className="ajuda">
+              Calculadas segundo o momento de pagamento do CMI. Pode ajustar os valores antes de confirmar.
+              {c.prestacoes.length > 0 && ' As prestações atuais são substituídas.'}
+            </p>
+            {proposta.map((p, i) => (
+              <CampoTexto
+                key={i}
+                rotulo={`${p.utilizador_nome} · ${p.momento === 'cpcv' ? 'No CPCV' : 'Na escritura / contrato'} (€)`}
+                inputMode="decimal"
+                value={p.valor}
+                onChange={(e) =>
+                  setProposta(proposta.map((x, j) => (j === i ? { ...x, valor: e.target.value.replace(',', '.') } : x)))
+                }
+              />
+            ))}
+            {erro && (
+              <p className="erro" role="alert">
+                {erro}
+              </p>
+            )}
+          </div>
+        </Dialogo>
+      )}
+    </>
   )
 }

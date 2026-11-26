@@ -26,6 +26,9 @@ import { PropostasLista } from '../modulos/propostas/PropostasLista'
 import { ComissaoConsulta } from '../modulos/comissoes/ComissaoConsulta'
 import { ComissaoEditar } from '../modulos/comissoes/ComissaoFormulario'
 import { ComissoesLista } from '../modulos/comissoes/ComissoesLista'
+import { DocumentoConsulta } from '../modulos/faturacao/DocumentoConsulta'
+import { DocumentoEditar, DocumentoNovo } from '../modulos/faturacao/DocumentoFormulario'
+import { DocumentosLista } from '../modulos/faturacao/DocumentosLista'
 import { TransacaoConsulta } from '../modulos/transacoes/TransacaoConsulta'
 import { TransacaoEditar, TransacaoNova } from '../modulos/transacoes/TransacaoFormulario'
 import { TransacoesLista } from '../modulos/transacoes/TransacoesLista'
@@ -161,6 +164,10 @@ export const rotas: RouteObject[] = [
           { index: true, element: <ComissoesLista /> },
           { path: 'comissoes/:id', element: <ComissaoConsulta /> },
           { path: 'comissoes/:id/editar', element: <ComissaoEditar /> },
+          { path: 'documentos', element: <DocumentosLista /> },
+          { path: 'documentos/novo', element: <DocumentoNovo /> },
+          { path: 'documentos/:id', element: <DocumentoConsulta /> },
+          { path: 'documentos/:id/editar', element: <DocumentoEditar /> },
         ],
       },
       { path: 'conta', element: <Conta /> },

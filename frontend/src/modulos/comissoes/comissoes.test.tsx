@@ -92,6 +92,8 @@ const COMISSAO = {
       motivo_decisao: '',
     },
   ],
+  prestacoes: [],
+  pagamentos_consultores: [],
   responsavel: 5,
   observacoes: '',
   atualizado_em: '2026-11-26T11:00:00Z',
