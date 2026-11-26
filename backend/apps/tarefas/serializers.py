@@ -5,13 +5,15 @@ from apps.configuracao.campos import CampoValorLista
 from apps.contas.models import Utilizador
 from apps.transacoes.models import Transacao
 
-from .models import ModeloTarefa, Tarefa
+from .models import ORIGENS, ModeloTarefa, Tarefa
 
 
 class ModeloTarefaSerializer(serializers.ModelSerializer):
+    modulo_nome = serializers.CharField(source="get_modulo_display", read_only=True)
+
     class Meta:
         model = ModeloTarefa
-        fields = ["id", "nome", "descricao", "dias_apos", "ativo", "ordem"]
+        fields = ["id", "modulo", "modulo_nome", "nome", "descricao", "dias_apos", "ativo", "ordem"]
         read_only_fields = ["id"]
 
     def validate_nome(self, v):
@@ -29,13 +31,21 @@ class TarefaListaSerializer(serializers.ModelSerializer):
     cliente_nome = serializers.SerializerMethodField()
     responsavel_nome = serializers.CharField(source="responsavel.nome", read_only=True)
     atrasada = serializers.SerializerMethodField()
+    pos_venda = serializers.BooleanField(read_only=True)
+    origem = serializers.SerializerMethodField()
 
     class Meta:
         model = Tarefa
         fields = [
-            "id", "referencia", "titulo", "estado", "estado_nome", "estado_categoria", "prioridade_nome", "prazo",
-            "atrasada", "transacao", "transacao_referencia", "cliente_nome", "responsavel_nome", "criado_em",
+            "id", "referencia", "titulo", "estado", "estado_nome", "estado_categoria", "prioridade", "prioridade_nome",
+            "prazo", "atrasada", "pos_venda", "transacao", "transacao_referencia", "cliente_nome", "origem",
+            "responsavel", "responsavel_nome", "criado_em",
         ]  # fmt: skip
+
+    def get_origem(self, t) -> dict | None:
+        from .servicos import descrever_origem
+
+        return descrever_origem(self.context["request"].user, t) if "request" in self.context else None
 
     def get_cliente_nome(self, t) -> str | None:
         if not t.transacao_id:
@@ -49,9 +59,10 @@ class TarefaListaSerializer(serializers.ModelSerializer):
 
 
 class TarefaSerializer(TarefaListaSerializer):
-    transacao = serializers.PrimaryKeyRelatedField(queryset=Transacao.objects.ativos())
+    transacao = serializers.PrimaryKeyRelatedField(queryset=Transacao.objects.ativos(), allow_null=True, required=False)
     categoria = CampoValorLista("categorias_tarefa", allow_null=True, required=False)
-    estado = CampoValorLista("estados_tarefa", allow_null=True, required=False)
+    origem_modulo = serializers.ChoiceField(choices=ORIGENS, allow_blank=True, required=False)
+    origem_id = serializers.IntegerField(allow_null=True, required=False, min_value=1)
     prioridade = CampoValorLista("prioridades", allow_null=True, required=False)
     responsavel = serializers.PrimaryKeyRelatedField(required=False, queryset=Utilizador.objects.filter(is_active=True))
     modelo_nome = serializers.CharField(source="modelo.nome", read_only=True, default=None)
@@ -62,10 +73,13 @@ class TarefaSerializer(TarefaListaSerializer):
     class Meta:
         model = Tarefa
         fields = [
-            *TarefaListaSerializer.Meta.fields, "descricao", "categoria", "prioridade", "concluida_em", "modelo_nome",
-            "imovel_descricao", "responsavel", "atualizado_em", "versao", "eliminado_em", "acoes",
+            *TarefaListaSerializer.Meta.fields, "descricao", "categoria", "origem_modulo", "origem_id", "concluida_em",
+            "motivo_estado", "modelo_nome", "imovel_descricao", "atualizado_em", "versao", "eliminado_em", "acoes",
         ]  # fmt: skip
-        read_only_fields = ["referencia", "concluida_em", "criado_em", "atualizado_em", "eliminado_em"]
+        # O estado muda só pela ação expressa «mudar-estado» (concluir / reabrir com motivo).
+        read_only_fields = [
+            "referencia", "estado", "concluida_em", "motivo_estado", "criado_em", "atualizado_em", "eliminado_em",
+        ]  # fmt: skip
 
     def get_imovel_descricao(self, t) -> str | None:
         from apps.propostas.serializers import descricao_imovel
@@ -82,6 +96,8 @@ class TarefaSerializer(TarefaListaSerializer):
         return v
 
     def validate_transacao(self, tr):
+        if tr is None:
+            return tr
         if self.instance is not None and tr.pk == self.instance.transacao_id:
             return tr
         if tr.pk not in self.context.get("transacoes_visiveis", set()):
@@ -91,35 +107,55 @@ class TarefaSerializer(TarefaListaSerializer):
             raise serializers.ValidationError("As tarefas de pós-venda são de transações concluídas.")
         return tr
 
-    def _defaults(self, d):
-        from .servicos import valor_categoria
+    def validate(self, d):
+        from .servicos import obter_origem, valor_categoria
 
-        if not d.get("categoria"):
-            d["categoria"] = valor_categoria("categorias_tarefa", "pos_venda")
-        if not d.get("estado"):
-            d["estado"] = valor_categoria("estados_tarefa", "aberta")
+        t = self.instance
+        transacao = d.get("transacao", t.transacao if t else None)
+        if t is not None and "transacao" in d and (transacao is None) != (t.transacao_id is None):
+            raise serializers.ValidationError({"transacao": "Uma tarefa não passa entre Pós-Venda e Tarefas gerais."})
+        modulo = d.get("origem_modulo", t.origem_modulo if t else "") or ""
+        pk = d.get("origem_id", t.origem_id if t else None)
+        if transacao is not None:
+            if modulo or pk:
+                raise serializers.ValidationError({"origem_modulo": "As tarefas de pós-venda ligam-se só à transação."})
+        elif bool(modulo) != bool(pk):
+            raise serializers.ValidationError({"origem_id": "Escolha o módulo e o registo, ou nenhum."})
+        elif modulo and (t is None or (modulo, pk) != (t.origem_modulo, t.origem_id)):
+            if obter_origem(self.context["request"].user, modulo, pk) is None:
+                raise serializers.ValidationError({"origem_id": "Registo inexistente ou sem acesso."})
+        d["origem_modulo"], d["origem_id"] = modulo, pk or None
+        tipo = "pos_venda" if transacao is not None else "geral"
+        categoria = d.get("categoria", t.categoria if t else None)
+        if categoria is None:
+            d["categoria"] = valor_categoria("categorias_tarefa", tipo)
+        elif (categoria.categoria == "pos_venda") != (tipo == "pos_venda"):
+            raise serializers.ValidationError(
+                {"categoria": "Categoria de pós-venda só em tarefas de transações concluídas (e vice-versa)."}
+            )
         return d
 
     def create(self, d):
+        from .servicos import valor_categoria
+
         d.pop("versao", None)
-        return Tarefa.objects.create(**self._defaults(d))
+        return Tarefa.objects.create(**d, estado=valor_categoria("estados_tarefa", "aberta"))
 
     def update(self, t, d):
         d.pop("versao", None)
-        if "estado" in d and d["estado"] is None:
-            d.pop("estado")
-        novo = d.get("estado", t.estado)
-        concluida = bool(novo and novo.categoria == "concluida")
-        if concluida and not t.concluida_em:
-            t.concluida_em = timezone.now()
-        elif not concluida:
-            t.concluida_em = None
         for k, v in d.items():
             setattr(t, k, v)
         t.save()
         return t
 
 
+class MudarEstadoTarefaSerializer(serializers.Serializer):
+    estado = CampoValorLista("estados_tarefa")
+    motivo = serializers.CharField(required=False, allow_blank=True, default="")
+
+
 class CriarDeModelosSerializer(serializers.Serializer):
-    transacao = serializers.PrimaryKeyRelatedField(queryset=Transacao.objects.ativos())
+    transacao = serializers.PrimaryKeyRelatedField(queryset=Transacao.objects.ativos(), required=False)
+    origem_modulo = serializers.ChoiceField(choices=ORIGENS, required=False)
+    origem_id = serializers.IntegerField(required=False, min_value=1)
     modelos = serializers.PrimaryKeyRelatedField(queryset=ModeloTarefa.objects.filter(ativo=True), many=True)

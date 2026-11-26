@@ -41,7 +41,7 @@ ECRAS = {
         ["referencia", "numero"],
     ),
     "agenda": ("agenda.Compromisso", "agenda", "Agenda (compromissos)", ["referencia", "titulo"]),
-    "tarefas": ("tarefas.Tarefa", "pos-venda", "Pós-Venda (tarefas)", ["referencia", "titulo"]),
+    "tarefas": ("tarefas.Tarefa", "tarefas", "Tarefas (gerais e de pós-venda)", ["referencia", "titulo"]),
     "agentes": ("agentes.Agente", "agentes", "Agentes", ["referencia", "nome"]),
     "agencias": ("agentes.Agencia", "agencias", "Agências", ["referencia", "nome"]),
 }

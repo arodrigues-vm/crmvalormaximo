@@ -1,15 +1,28 @@
-"""Pós-venda: propostas de tarefas a partir dos modelos (D-50)."""
+"""Tarefas: serviço único para Tarefas gerais (D-52) e Pós-Venda (D-50).
+
+- Uma tarefa com `transacao` é de **pós-venda** (permissões do módulo «pos-venda»); as restantes são **gerais**
+  (módulo «tarefas»), soltas ou ligadas a uma ficha de um dos oito módulos comerciais.
+- Os modelos de tarefa são por módulo; só se criam as tarefas confirmadas.
+"""
 
 from datetime import timedelta
 
+from django.db.models import Q
+from django.utils import timezone
+
 from apps.configuracao.models import ValorLista
+from apps.configuracao.personalizados import modelo_do_ecra, registos_visiveis, titulo_registo
 from apps.contas.models import Ambito, Operacao
-from apps.contas.permissoes import ambito_efetivo
+from apps.contas.permissoes import ambito_efetivo, filtrar, pode
 from apps.core.auditoria import registar
 
-from .models import ModeloTarefa, Tarefa
+from .models import ORIGENS, ModeloTarefa, Tarefa
 
 MODULO = "pos-venda"
+MODULO_GERAL = "tarefas"
+NOMES_ORIGEM = dict(ORIGENS)
+ABERTAS = ("aberta", "em_curso")
+FECHADAS = ("concluida", "cancelada")
 
 
 def valor_categoria(chave, categoria):
@@ -22,10 +35,70 @@ def pode_criar(utilizador) -> bool:
     return ambito_efetivo(utilizador, MODULO, Operacao.CRIAR) != Ambito.NENHUM
 
 
+def visiveis(utilizador, operacao, qs):
+    """Tarefas a que o utilizador tem acesso: gerais pelo módulo «tarefas», de pós-venda pelo «pos-venda»."""
+    gerais = filtrar(utilizador, MODULO_GERAL, operacao, qs.filter(transacao__isnull=True),
+                     campo_partilhas="partilhada_com")  # fmt: skip
+    pv = filtrar(utilizador, MODULO, operacao, qs.filter(transacao__isnull=False), campo_partilhas="partilhada_com")
+    return qs.filter(Q(pk__in=gerais.values("pk")) | Q(pk__in=pv.values("pk")))
+
+
+def pode_algum(utilizador, operacao) -> bool:
+    return pode(utilizador, MODULO_GERAL, operacao) or pode(utilizador, MODULO, operacao)
+
+
 def modelos_por_usar(transacao):
-    """Modelos ativos que ainda não deram tarefa nesta transação."""
+    """Modelos de pós-venda ativos que ainda não deram tarefa nesta transação."""
     usados = set(transacao.tarefas.filter(eliminado_em__isnull=True).values_list("modelo_id", flat=True))
-    return [m for m in ModeloTarefa.objects.filter(ativo=True) if m.pk not in usados]
+    return [m for m in ModeloTarefa.objects.filter(ativo=True, modulo=MODULO) if m.pk not in usados]
+
+
+def obter_origem(utilizador, modulo, pk):
+    """Registo de origem, se existir e o utilizador o puder consultar; senão None."""
+    if modulo not in NOMES_ORIGEM or not pk or int(pk) not in registos_visiveis(utilizador, modulo, [int(pk)]):
+        return None
+    return modelo_do_ecra(modulo).objects.get(pk=pk)
+
+
+def descrever_origem(utilizador, t) -> dict | None:
+    if not t.origem_modulo or not t.origem_id:
+        return None
+    obj = obter_origem(utilizador, t.origem_modulo, t.origem_id)
+    return {
+        "modulo": t.origem_modulo,
+        "modulo_nome": NOMES_ORIGEM.get(t.origem_modulo, t.origem_modulo),
+        "id": t.origem_id,
+        "titulo": titulo_registo(obj) if obj else "Registo sem acesso",
+        "caminho": f"/{t.origem_modulo}/{t.origem_id}" if obj else None,
+    }
+
+
+def modelos_por_usar_origem(modulo, pk):
+    usados = set(Tarefa.objects.ativos().filter(origem_modulo=modulo, origem_id=pk).values_list("modelo_id", flat=True))
+    return [m for m in ModeloTarefa.objects.filter(ativo=True, modulo=modulo) if m.pk not in usados]
+
+
+def criar_de_modelo_origem(modulo, obj, modelo, utilizador, request=None) -> Tarefa:
+    """Tarefa geral a partir de um modelo do módulo: prazo = hoje + dias; responsável = o da ficha."""
+    responsavel = getattr(obj, "responsavel", None)
+    if responsavel is None or not responsavel.is_active:
+        responsavel = utilizador
+    t = Tarefa.objects.create(
+        titulo=modelo.nome,
+        descricao=modelo.descricao,
+        categoria=valor_categoria("categorias_tarefa", "geral"),
+        estado=valor_categoria("estados_tarefa", "aberta"),
+        prazo=timezone.localdate() + timedelta(days=modelo.dias_apos),
+        origem_modulo=modulo,
+        origem_id=obj.pk,
+        modelo=modelo,
+        responsavel=responsavel,
+        criado_por=utilizador,
+        atualizado_por=utilizador,
+    )
+    registar("tarefa.criado", modulo=MODULO_GERAL, objeto=t, request=request,
+             dados={"origem": f"Modelo «{modelo.nome}» de {titulo_registo(obj)}"})  # fmt: skip
+    return t
 
 
 def responsavel_omissao(transacao):

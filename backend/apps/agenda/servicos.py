@@ -16,6 +16,7 @@ from apps.contas.models import Ambito, Operacao
 from apps.contas.permissoes import ambito_efetivo, filtrar
 from apps.entidades.models import Entidade
 from apps.tarefas.models import Tarefa
+from apps.tarefas.servicos import pode_algum, visiveis
 from apps.visitas.models import Visita
 
 from .models import AvisoDispensado, Compromisso
@@ -66,6 +67,10 @@ def aniversario_em(nascimento: date, ano: int) -> date:
     if nascimento.month == 2 and nascimento.day == 29 and not calendar.isleap(ano):
         return date(ano, 2, 28)
     return nascimento.replace(year=ano)
+
+
+def caminho_tarefa(t) -> str:
+    return f"/pos-venda/{t.pk}" if t.transacao_id else f"/tarefas/{t.pk}"
 
 
 def _imovel(o) -> str:
@@ -128,8 +133,8 @@ def eventos(u, inicio: date, fim: date, pessoa=None, cancelados=False) -> list[d
                     _imovel(v),
                 )  # fmt: skip
             )
-    if _pode(u, "pos-venda"):
-        qs = filtrar(u, "pos-venda", Operacao.CONSULTAR, Tarefa.objects.ativos(), campo_partilhas="partilhada_com")
+    if pode_algum(u, Operacao.CONSULTAR):
+        qs = visiveis(u, Operacao.CONSULTAR, Tarefa.objects.ativos())
         qs = qs.filter(prazo__gte=inicio, prazo__lte=fim).select_related("estado", "responsavel", "transacao__entidade")
         if pessoa:
             qs = qs.filter(responsavel_id=pessoa)
@@ -144,7 +149,7 @@ def eventos(u, inicio: date, fim: date, pessoa=None, cancelados=False) -> list[d
                     t.titulo,
                     t.prazo,
                     estado=t.estado,
-                    caminho=f"/pos-venda/{t.pk}",
+                    caminho=caminho_tarefa(t),
                     responsavel=t.responsavel,
                     detalhe=cliente,
                 )  # fmt: skip
@@ -202,11 +207,11 @@ def avisos(u, agora: datetime | None = None) -> list[dict]:
                 cliente = v.entidade.nome_completo if v.entidade_id else ""
                 saida.append(_aviso(f"visita-{v.pk}-{m:%Y%m%d%H%M}", "visita", f"Visita · {cliente}".strip(" ·"), m,
                                     f"/visitas/{v.pk}"))  # fmt: skip
-    if _pode(u, "pos-venda"):
+    if pode_algum(u, Operacao.CONSULTAR):
         for t in Tarefa.objects.ativos().filter(
             Q(responsavel=u) | Q(partilhada_com=u), prazo=hoje
         ).filter(Q(estado__categoria__in=ABERTA) | Q(estado__isnull=True)).distinct():  # fmt: skip
-            saida.append(_aviso(f"tarefa-{t.pk}-{t.prazo:%Y%m%d}", "tarefa", t.titulo, None, f"/pos-venda/{t.pk}"))
+            saida.append(_aviso(f"tarefa-{t.pk}-{t.prazo:%Y%m%d}", "tarefa", t.titulo, None, caminho_tarefa(t)))
     dispensados = set(
         AvisoDispensado.objects.filter(utilizador=u, chave__in=[x["chave"] for x in saida]).values_list(
             "chave", flat=True

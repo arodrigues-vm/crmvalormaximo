@@ -14,14 +14,29 @@ from simple_history.models import HistoricalRecords
 from apps.configuracao.models import campo_lista
 from apps.core.modelos_base import RegistoBase
 
+# Fichas a que uma tarefa geral se pode ligar (D-52): os oito módulos comerciais.
+ORIGENS = [
+    ("entidades", "Entidades"),
+    ("imoveis", "Imóveis"),
+    ("angariacoes", "Angariações (CMI)"),
+    ("oportunidades", "Oportunidades de Angariação"),
+    ("procuras", "Procuras e Qualificação"),
+    ("visitas", "Visitas"),
+    ("propostas", "Propostas"),
+    ("transacoes", "Transações"),
+]
+MODULOS_MODELO = [("pos-venda", "Pós-Venda (transação concluída)"), *ORIGENS]
+
 
 class ModeloTarefa(models.Model):
-    """Tarefa-modelo de pós-venda, configurável pelo Administrador."""
+    """Tarefa-modelo configurável pelo Administrador, por módulo (D-50, D-52). No Pós-Venda o prazo conta da
+    escritura / contrato; nos outros módulos, do dia em que a tarefa é criada."""
 
+    modulo = models.CharField("módulo", max_length=30, choices=MODULOS_MODELO, default="pos-venda")
     nome = models.CharField(max_length=150)
     descricao = models.TextField("descrição", blank=True)
     dias_apos = models.PositiveIntegerField(
-        "prazo (dias depois da escritura / contrato)", default=0, validators=[MaxValueValidator(3650)]
+        "prazo (dias depois da escritura / contrato, ou da criação)", default=0, validators=[MaxValueValidator(3650)]
     )
     ativo = models.BooleanField(default=True)
     ordem = models.PositiveIntegerField(default=0)
@@ -47,6 +62,10 @@ class Tarefa(RegistoBase):
     prioridade = campo_lista("prioridades")
     prazo = models.DateField(null=True, blank=True)
     concluida_em = models.DateTimeField(null=True, blank=True, editable=False)
+    motivo_estado = models.TextField("motivo da última mudança de estado", blank=True)
+    # Tarefa geral ligada a uma ficha (opcional, D-52). O Pós-Venda usa o campo `transacao`.
+    origem_modulo = models.CharField("ligada a (módulo)", max_length=30, choices=ORIGENS, blank=True)
+    origem_id = models.PositiveBigIntegerField("ligada a (registo)", null=True, blank=True)
     transacao = models.ForeignKey(
         "transacoes.Transacao", null=True, blank=True, on_delete=models.PROTECT, related_name="tarefas"
     )
@@ -64,7 +83,19 @@ class Tarefa(RegistoBase):
         ordering = ["prazo", "id"]
         verbose_name = "tarefa"
         verbose_name_plural = "tarefas"
-        indexes = [models.Index(fields=["responsavel", "eliminado_em"]), models.Index(fields=["prazo"])]
+        indexes = [
+            models.Index(fields=["responsavel", "eliminado_em"]),
+            models.Index(fields=["prazo"]),
+            models.Index(fields=["origem_modulo", "origem_id"]),
+        ]
 
     def __str__(self):
         return self.referencia or self.titulo
+
+    @property
+    def pos_venda(self) -> bool:
+        return self.transacao_id is not None
+
+    @property
+    def modulo_permissoes(self) -> str:
+        return "pos-venda" if self.pos_venda else "tarefas"

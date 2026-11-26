@@ -65,10 +65,8 @@ def test_tarefa_manual_exige_transacao_concluida_e_regista_conclusao(api, u, cen
     d = r.json()
     assert d["estado_categoria"] == "aberta" and d["atrasada"] is True and d["responsavel_nome"] == u.nome
     assert [x["id"] for x in api.get(url, {"vista": "atrasadas"}).json()["results"]] == [d["id"]]
-    r = api.patch(
-        reverse("tarefa-detail", args=[d["id"]]),
-        {"estado": v("estados_tarefa", "Concluída").pk, "versao": d["versao"]},
-        format="json",
+    r = api.post(
+        reverse("tarefa-mudar-estado", args=[d["id"]]), {"estado": v("estados_tarefa", "Concluída").pk}, format="json"
     )
     assert r.status_code == 200, r.content
     assert r.json()["concluida_em"] and r.json()["atrasada"] is False
