@@ -64,7 +64,17 @@ CAT_ESTADO_PROPOSTA = [
     {"valor": "expirada", "nome": "Expirada"},
 ]
 
+# D-47: estados da transação. «cpcv» e «escritura» só se usam na venda.
+CAT_ESTADO_TRANSACAO = [
+    {"valor": "preparacao", "nome": "Em preparação"},
+    {"valor": "cpcv", "nome": "CPCV assinado (só venda)"},
+    {"valor": "escritura", "nome": "Escritura marcada (só venda)"},
+    {"valor": "concluida", "nome": "Concluída (escritura / contrato de arrendamento)"},
+    {"valor": "cancelada", "nome": "Cancelada"},
+]
+
 CATEGORIAS = {
+    "estados_transacao": CAT_ESTADO_TRANSACAO,
     "operacoes": CAT_OPERACAO,
     "status_imovel": CAT_STATUS,
     "status_entidade": CAT_STATUS,
@@ -183,6 +193,18 @@ LISTAS = {
         "imoveis",
         "D-46: com a categoria «Própria», o responsável do imóvel escolhe-se na Equipa; nas outras, em Agentes.",
         [("Própria", "propria"), ("Rede", "rede"), ("Externa", "externa")],
+    ),
+    "estados_transacao": (
+        "Estados de transação",
+        "transacoes",
+        "No arrendamento não há CPCV nem escritura: passa de «Em preparação» a «Concluída».",
+        [
+            ("Em preparação", "preparacao"),
+            ("CPCV assinado", "cpcv"),
+            ("Escritura marcada", "escritura"),
+            ("Concluída", "concluida"),
+            ("Cancelada", "cancelada"),
+        ],
     ),
     "tipos_agente": ("Tipos de agente", "agentes", "", ["Consultor", "Agente da rede", "Agente externo"]),
     "status_agentes": (

@@ -128,6 +128,7 @@ class PropostaSerializer(PropostaListaSerializer):
     visita_referencia = serializers.CharField(source="visita.referencia", read_only=True, default=None)
     agente_comprador_nome = serializers.SerializerMethodField()
     agente_imovel_nome = serializers.SerializerMethodField()
+    transacao = serializers.SerializerMethodField()
     # D-46: quem responde pelo imóvel e pela entidade (membro da Equipa ou agente)
     responsavel_imovel_nome = serializers.SerializerMethodField()
     responsavel_comprador_nome = serializers.SerializerMethodField()
@@ -141,7 +142,7 @@ class PropostaSerializer(PropostaListaSerializer):
             "imovel_descricao_completa", "entidade", "entidade_nome", "agente_comprador", "agente_comprador_nome",
             "agente_imovel", "agente_imovel_nome",
             "consultor_comprador", "consultor_imovel", "responsavel_imovel_nome", "responsavel_comprador_nome",
-            "estado", "estado_nome", "estado_categoria", "valor_atual",
+            "transacao", "estado", "estado_nome", "estado_categoria", "valor_atual",
             "ultima_ronda_autor", "participantes", "participantes_detalhe", "ronda_inicial", "rondas",
             "responsavel", "responsavel_nome", "observacoes", "criado_em", "atualizado_em", "versao",
             "eliminado_em", "acoes",
@@ -163,6 +164,11 @@ class PropostaSerializer(PropostaListaSerializer):
 
     def get_agente_imovel_nome(self, o) -> str | None:
         return agente_nome(o.agente_imovel)
+
+    def get_transacao(self, o) -> dict | None:
+        """Transação gerada a partir desta proposta (D-47), se existir."""
+        t = o.transacoes.filter(eliminado_em__isnull=True).first()
+        return {"id": t.pk, "referencia": t.referencia} if t else None
 
     def get_responsavel_imovel_nome(self, o) -> str | None:
         return nome_responsavel(o.consultor_imovel, o.agente_imovel)
