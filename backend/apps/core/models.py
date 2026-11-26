@@ -49,6 +49,15 @@ class LigacaoExterna(models.Model):
         related_name="+",
         limit_choices_to={"lista__chave": "tipos_ligacao"},
     )
+    # D-50: documento concreto do negócio (CPCV, escritura…), para a lista de verificação da transação.
+    tipo_documento = models.ForeignKey(
+        "configuracao.ValorLista",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="+",
+        limit_choices_to={"lista__chave": "tipos_documento_transacao"},
+    )
     titulo = models.CharField("título", max_length=150)
     url = models.URLField("endereço", max_length=1000)
     criado_em = models.DateTimeField(auto_now_add=True)

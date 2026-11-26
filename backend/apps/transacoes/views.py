@@ -55,6 +55,7 @@ class TransacaoViewSet(RegistoViewSet):
         "previa": Operacao.CONSULTAR,
         "efeitos": Operacao.CONSULTAR,
         "cmis": Operacao.CONSULTAR,
+        "documentos": Operacao.CONSULTAR,
         "mudar_estado": Operacao.EDITAR,
     }
     campos_auditados = [
@@ -193,6 +194,25 @@ class TransacaoViewSet(RegistoViewSet):
         )
 
     @action(detail=True, methods=["get"])
+    def documentos(self, request, pk=None):
+        """Lista de verificação dos documentos do negócio (D-50): por tipo, as ligações registadas ou «em falta».
+        Só os tipos que se aplicam à operação (venda / arrendamento)."""
+        from apps.configuracao.models import ValorLista
+
+        t = self.get_object()
+        ligacoes = self._ligacoes(t)
+        categoria = "arrendamento" if t.arrendamento else "venda"
+        tipos = ValorLista.objects.filter(
+            lista__chave="tipos_documento_transacao", ativo=True, categoria__in=("ambos", categoria)
+        ).order_by("ordem", "id")
+        return Response(
+            [
+                {"tipo": v.pk, "nome": v.nome, "ligacoes": [x for x in ligacoes if x["tipo_documento"] == v.pk]}
+                for v in tipos
+            ]
+        )
+
+    @action(detail=True, methods=["get"])
     def cmis(self, request, pk=None):
         """CMI do imóvel da transação (para mudar a escolha enquanto não estiver concluída)."""
         return Response(cmis_do_imovel(self.get_object().imovel_id))
@@ -222,10 +242,11 @@ class TransacaoViewSet(RegistoViewSet):
                 raise serializers.ValidationError({"estado": "Estado desativado."})
             cat = validar_mudanca(t, d["estado"], d)
             antes = t.estado.nome if t.estado else None
-            aplicar_efeitos(t, cat, d["efeitos"], request.user, request=request)
+            # As datas primeiro: as tarefas de pós-venda contam o prazo a partir da data da escritura.
             for c in ("data_cpcv", "data_escritura", "data_escritura_prevista"):
                 if c in d:
                     setattr(t, c, d[c])
+            aplicar_efeitos(t, cat, d["efeitos"], request.user, request=request)
             t.estado = d["estado"]
             t.motivo_estado = d.get("motivo", "")
             t.atualizado_por = request.user

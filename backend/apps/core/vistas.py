@@ -27,6 +27,7 @@ class InteracaoSerializer(serializers.Serializer):
 
 class LigacaoSerializer(serializers.Serializer):
     tipo = CampoValorLista("tipos_ligacao")
+    tipo_documento = CampoValorLista("tipos_documento_transacao", allow_null=True, required=False)
     titulo = serializers.CharField(max_length=150)
     url = serializers.URLField(max_length=1000)
 
@@ -237,8 +238,18 @@ class RegistoViewSet(
 
         ct = ContentType.objects.get_for_model(obj)
         return [
-            {"id": x.id, "tipo": x.tipo_id, "tipo_nome": x.tipo.nome, "titulo": x.titulo, "url": x.url}
-            for x in LigacaoExterna.objects.filter(tipo_conteudo=ct, objeto_id=obj.pk).select_related("tipo")
+            {
+                "id": x.id,
+                "tipo": x.tipo_id,
+                "tipo_nome": x.tipo.nome,
+                "tipo_documento": x.tipo_documento_id,
+                "tipo_documento_nome": x.tipo_documento.nome if x.tipo_documento_id else None,
+                "titulo": x.titulo,
+                "url": x.url,
+            }
+            for x in LigacaoExterna.objects.filter(tipo_conteudo=ct, objeto_id=obj.pk).select_related(
+                "tipo", "tipo_documento"
+            )
         ]
 
     @extend_schema(request=LigacaoSerializer)

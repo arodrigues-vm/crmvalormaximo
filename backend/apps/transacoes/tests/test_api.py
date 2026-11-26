@@ -127,7 +127,7 @@ def test_estados_e_efeitos_confirmaveis(api, u, cenario):
     assert r.status_code == 200 and r.json()["estado_nome"] == "CPCV assinado"
     assert mudar(api, t, "Concluída").status_code == 400  # falta a data da escritura
     efeitos = api.get(reverse("transacao-efeitos", args=[t["id"]]), {"estado": estado("Concluída")}).json()
-    assert {e["chave"] for e in efeitos} == {"imovel_estado", "cmi_concluir"}
+    assert {e["chave"] for e in efeitos if not e["chave"].startswith("tarefa_")} == {"imovel_estado", "cmi_concluir"}
     # Só se aplica o que foi confirmado: o CMI fica como estava.
     r = mudar(api, t, "Concluída", data_escritura=str(HOJE), efeitos=["imovel_estado"])
     assert r.status_code == 200, r.content

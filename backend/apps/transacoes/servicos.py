@@ -60,10 +60,25 @@ def efeitos_propostos(t, nova_categoria: str, utilizador) -> list[dict]:
                     "depois": Angariacao.Situacao.CONCLUIDA.label,
                 }
             )
+        # D-50: tarefas de pós-venda a partir dos modelos (só as confirmadas são criadas).
+        from apps.tarefas.servicos import modelos_por_usar, pode_criar
+
+        if pode_criar(utilizador):
+            marco = "assinatura do contrato" if t.arrendamento else "escritura"
+            for m in modelos_por_usar(t):
+                efeitos.append(
+                    {
+                        "chave": f"tarefa_{m.pk}",
+                        "descricao": f"Criar a tarefa de pós-venda «{m.nome}» "
+                        f"(prazo: {m.dias_apos} dias depois da {marco}).",
+                        "antes": None,
+                        "depois": m.nome,
+                    }
+                )
     elif atual in FINAIS and nova_categoria not in FINAIS:
         # Reabrir: propõe desfazer o que foi aplicado ao concluir.
         for e in t.efeitos_aplicados:
-            if e.get("revertido"):
+            if e.get("revertido") or e["chave"].startswith("tarefa_"):
                 continue
             efeitos.append(
                 {
@@ -132,6 +147,13 @@ def aplicar_efeitos(t, nova_categoria, escolhidos, utilizador, request=None):
             registar("angariacao.situacao", modulo="angariacoes", objeto=c, request=request,
                      dados={"de": "em_curso", "para": "concluida", "origem": t.referencia})  # fmt: skip
             aplicados.append({**e, "em": agora, "por": utilizador.nome, "revertido": False})
+        elif chave.startswith("tarefa_"):
+            # Tarefas de pós-venda: não ficam nos efeitos a desfazer (reabrir não altera tarefas, Cap. 15).
+            from apps.tarefas.models import ModeloTarefa
+            from apps.tarefas.servicos import criar_de_modelo
+
+            modelo = ModeloTarefa.objects.get(pk=int(chave.removeprefix("tarefa_")))
+            criar_de_modelo(t, modelo, utilizador, t.data_escritura, request=request)
         elif chave.startswith("desfazer_"):
             original = next(
                 a for a in aplicados if a["chave"] == chave.removeprefix("desfazer_") and not a["revertido"]

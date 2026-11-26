@@ -40,6 +40,7 @@ ECRAS = {
         "Documentos de consultores",
         ["referencia", "numero"],
     ),
+    "tarefas": ("tarefas.Tarefa", "pos-venda", "Pós-Venda (tarefas)", ["referencia", "titulo"]),
     "agentes": ("agentes.Agente", "agentes", "Agentes", ["referencia", "nome"]),
     "agencias": ("agentes.Agencia", "agencias", "Agências", ["referencia", "nome"]),
 }

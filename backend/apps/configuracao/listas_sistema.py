@@ -85,7 +85,27 @@ CAT_TIPO_DOCUMENTO = [
     {"valor": "credito", "nome": "Nota de crédito (reduz o valor a pagar)"},
 ]
 
+# D-50: tipos de documento da transação; a categoria diz a que operação se aplicam (lista de verificação).
+CAT_DOCUMENTO_TRANSACAO = [
+    {"valor": "ambos", "nome": "Venda e arrendamento"},
+    {"valor": "venda", "nome": "Só venda"},
+    {"valor": "arrendamento", "nome": "Só arrendamento"},
+]
+CAT_ESTADO_TAREFA = [
+    {"valor": "aberta", "nome": "Por fazer"},
+    {"valor": "em_curso", "nome": "Em curso"},
+    {"valor": "concluida", "nome": "Concluída"},
+    {"valor": "cancelada", "nome": "Cancelada"},
+]
+CAT_CATEGORIA_TAREFA = [
+    {"valor": "pos_venda", "nome": "Pós-venda (ligada a uma transação concluída)"},
+    {"valor": "geral", "nome": "Geral"},
+]
+
 CATEGORIAS = {
+    "tipos_documento_transacao": CAT_DOCUMENTO_TRANSACAO,
+    "estados_tarefa": CAT_ESTADO_TAREFA,
+    "categorias_tarefa": CAT_CATEGORIA_TAREFA,
     "momentos_pagamento_comissao": CAT_MOMENTO_PAGAMENTO,
     "tipos_documento_consultor": CAT_TIPO_DOCUMENTO,
     "estados_transacao": CAT_ESTADO_TRANSACAO,
@@ -219,6 +239,33 @@ LISTAS = {
             ("Concluída", "concluida"),
             ("Cancelada", "cancelada"),
         ],
+    ),
+    "tipos_documento_transacao": (
+        "Tipos de documento da transação",
+        "transacoes",
+        "Lista de verificação dos documentos do negócio (ligações para o OneDrive, D-26/D-50).",
+        [
+            ("CPCV", "venda"),
+            ("Escritura", "venda"),
+            ("Contrato de arrendamento", "arrendamento"),
+            ("Caderneta predial", "ambos"),
+            ("Certidão permanente", "ambos"),
+            ("Licença de utilização", "ambos"),
+            ("Certificado energético", "ambos"),
+            ("Ficha técnica de habitação", "venda"),
+        ],
+    ),
+    "estados_tarefa": (
+        "Estados de tarefa",
+        "tarefas",
+        "",
+        [("Por fazer", "aberta"), ("Em curso", "em_curso"), ("Concluída", "concluida"), ("Cancelada", "cancelada")],
+    ),
+    "categorias_tarefa": (
+        "Categorias de tarefa",
+        "tarefas",
+        "«Pós-venda» exige uma transação concluída (escritura ou contrato).",
+        [("Pós-venda", "pos_venda"), ("Geral", "geral")],
     ),
     "tipos_agente": ("Tipos de agente", "agentes", "", ["Consultor", "Agente da rede", "Agente externo"]),
     "status_agentes": (

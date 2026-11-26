@@ -20,6 +20,7 @@ urlpatterns = [
     path("", include("apps.transacoes.urls")),
     path("", include("apps.comissoes.urls")),
     path("", include("apps.faturacao.urls")),
+    path("", include("apps.tarefas.urls")),
     path("localizacao/", include("apps.localizacao.urls")),
     path("listas/", include("apps.configuracao.urls")),
     path("parametros/", configuracao_views.parametros, name="parametros"),
