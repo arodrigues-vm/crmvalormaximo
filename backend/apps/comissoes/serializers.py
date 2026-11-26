@@ -97,6 +97,8 @@ class ComissaoSerializer(ComissaoListaSerializer):
     responsavel_imovel_nome = serializers.SerializerMethodField()
     responsavel_comprador_nome = serializers.SerializerMethodField()
     responsavel = serializers.PrimaryKeyRelatedField(required=False, queryset=Utilizador.objects.filter(is_active=True))
+    prestacoes = serializers.SerializerMethodField()
+    pagamentos_consultores = serializers.SerializerMethodField()
     versao = serializers.IntegerField(required=False)
     acoes = serializers.SerializerMethodField()
 
@@ -106,7 +108,8 @@ class ComissaoSerializer(ComissaoListaSerializer):
             *ComissaoListaSerializer.Meta.fields, "cmi_referencia", "cmi_versao", "modalidade", "modalidade_nome",
             "taxa_ou_valor", "base_negocio", "minimo", "taxa_iva", "inclui_iva", "valor_calculado", "origem_nome",
             "iva", "total_com_iva", "pct_angariacao", "resumo", "operacao_categoria", "responsavel_imovel_nome",
-            "responsavel_comprador_nome", "beneficiarios", "excecoes", "responsavel", "observacoes",
+            "responsavel_comprador_nome", "beneficiarios", "excecoes", "prestacoes", "pagamentos_consultores",
+            "responsavel", "observacoes",
             "atualizado_em", "versao", "eliminado_em", "acoes",
         ]  # fmt: skip
         read_only_fields = [
@@ -138,6 +141,17 @@ class ComissaoSerializer(ComissaoListaSerializer):
 
     def get_acoes(self, c) -> dict[str, bool]:
         return self.context.get("acoes", {}).get(c.pk, {})
+
+    def get_prestacoes(self, c) -> list[dict]:
+        from apps.faturacao.serializers import PrestacaoSerializer
+
+        return PrestacaoSerializer(c.prestacoes.select_related("utilizador"), many=True).data
+
+    def get_pagamentos_consultores(self, c) -> list[dict]:
+        """D-49: por consultor, quanto recebe da comissão, quanto já faturou à agência e quanto foi pago."""
+        from apps.faturacao.servicos import resumo_consultores
+
+        return resumo_consultores(c)
 
     # Validação ------------------------------------------------------------------
 

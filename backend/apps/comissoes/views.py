@@ -38,6 +38,8 @@ class ComissaoViewSet(RegistoViewSet):
         "recalcular": Operacao.EDITAR,
         "pedir_excecao": Operacao.EDITAR,
         "decidir_excecao": Operacao.CONSULTAR,  # a permissão de aprovar verifica-se na própria ação
+        "proposta_prestacoes": Operacao.CONSULTAR,
+        "prestacoes": Operacao.EDITAR,
     }
     campos_auditados = [
         "valor_calculado", "valor_final", "origem", "pct_angariacao", "lado_angariacao_nosso", "lado_venda_nosso",
@@ -186,4 +188,39 @@ class ComissaoViewSet(RegistoViewSet):
                 c.save()
             registar("comissao.excecao_decidida", modulo=self.modulo, objeto=c, request=request,
                      dados={"excecao": e.pk, "decisao": e.estado, "motivo": e.motivo_decisao})  # fmt: skip
+        return Response(self.get_serializer(self.recarregar(c)).data)
+
+    # Prestações dos consultores (D-49) ------------------------------------------------------
+
+    @action(detail=True, methods=["get"], url_path="prestacoes/proposta")
+    def proposta_prestacoes(self, request, pk=None):
+        """Prestações propostas segundo o momento de pagamento do CMI. NÃO grava nada."""
+        from apps.faturacao.servicos import proposta_prestacoes
+
+        return Response(proposta_prestacoes(self.get_object()))
+
+    @action(detail=True, methods=["put"])
+    def prestacoes(self, request, pk=None):
+        """Grava as prestações confirmadas (substitui as anteriores; os documentos ligados ficam sem prestação)."""
+        from apps.faturacao.models import Prestacao
+        from apps.faturacao.serializers import PrestacaoSerializer
+
+        with transaction.atomic():
+            c = Comissao.objects.select_for_update().get(pk=self.get_object().pk)
+            s = PrestacaoSerializer(data=request.data.get("prestacoes", []), many=True)
+            s.is_valid(raise_exception=True)
+            consultores = set(c.beneficiarios.values_list("utilizador_id", flat=True))
+            if any(p["utilizador"].pk not in consultores for p in s.validated_data):
+                raise serializers.ValidationError({"prestacoes": "Só consultores que recebem parte desta comissão."})
+            antes = list(c.prestacoes.values("utilizador_id", "momento", "valor"))
+            c.prestacoes.all().delete()
+            for ordem, p in enumerate(s.validated_data):
+                Prestacao.objects.create(comissao=c, ordem=ordem, **p)
+            registar(
+                "comissao.prestacoes",
+                modulo=self.modulo,
+                objeto=c,
+                request=request,
+                dados={"antes": [{**a, "valor": str(a["valor"])} for a in antes], "depois": len(s.validated_data)},
+            )
         return Response(self.get_serializer(self.recarregar(c)).data)

@@ -73,7 +73,21 @@ CAT_ESTADO_TRANSACAO = [
     {"valor": "cancelada", "nome": "Cancelada"},
 ]
 
+# D-49: quanto da comissão se paga no CPCV (o resto na escritura). Usado para propor as prestações.
+CAT_MOMENTO_PAGAMENTO = [
+    {"valor": "cpcv_100", "nome": "100% no CPCV"},
+    {"valor": "cpcv_50", "nome": "50% no CPCV e 50% na escritura"},
+    {"valor": "escritura_100", "nome": "100% na escritura"},
+]
+CAT_TIPO_DOCUMENTO = [
+    {"valor": "fatura", "nome": "Fatura (fica a pagar)"},
+    {"valor": "recibo", "nome": "Recibo / fatura-recibo"},
+    {"valor": "credito", "nome": "Nota de crédito (reduz o valor a pagar)"},
+]
+
 CATEGORIAS = {
+    "momentos_pagamento_comissao": CAT_MOMENTO_PAGAMENTO,
+    "tipos_documento_consultor": CAT_TIPO_DOCUMENTO,
     "estados_transacao": CAT_ESTADO_TRANSACAO,
     "operacoes": CAT_OPERACAO,
     "status_imovel": CAT_STATUS,
@@ -256,7 +270,23 @@ LISTAS = {
         "Momentos de pagamento da comissão",
         "angariacoes",
         "",
-        ["100% no CPCV", "50% no CPCV e 50% na escritura", "100% na escritura"],
+        [
+            ("100% no CPCV", "cpcv_100"),
+            ("50% no CPCV e 50% na escritura", "cpcv_50"),
+            ("100% na escritura", "escritura_100"),
+        ],
+    ),
+    "tipos_documento_consultor": (
+        "Tipos de documento de consultor",
+        "faturacao",
+        "Documentos que os consultores emitem à agência pela sua parte da comissão (D-49).",
+        [("Fatura", "fatura"), ("Fatura-recibo", "recibo"), ("Recibo", "recibo"), ("Nota de crédito", "credito")],
+    ),
+    "meios_pagamento": (
+        "Meios de pagamento",
+        "faturacao",
+        "",
+        ["Transferência bancária", "Cheque", "Numerário", "MB WAY"],
     ),
     "tipos_ligacao": (
         "Tipos de ligação externa",
