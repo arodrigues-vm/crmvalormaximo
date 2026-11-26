@@ -69,6 +69,13 @@ class Tarefa(RegistoBase):
     transacao = models.ForeignKey(
         "transacoes.Transacao", null=True, blank=True, on_delete=models.PROTECT, related_name="tarefas"
     )
+    # Ocorrência do Plano de Marketing de Imóveis (D-53): n.º e semana do catálogo; «Incluir» por checkbox.
+    plano = models.ForeignKey(
+        "marketing.PlanoMarketing", null=True, blank=True, on_delete=models.PROTECT, related_name="tarefas"
+    )
+    mk_numero = models.PositiveSmallIntegerField("n.º no catálogo", null=True, blank=True)
+    mk_semana = models.PositiveSmallIntegerField("semana do plano", null=True, blank=True)
+    incluida = models.BooleanField("incluída no plano", default=True)
     modelo = models.ForeignKey(
         ModeloTarefa, null=True, blank=True, on_delete=models.SET_NULL, related_name="+",
         verbose_name="criada a partir do modelo",
@@ -97,5 +104,11 @@ class Tarefa(RegistoBase):
         return self.transacao_id is not None
 
     @property
+    def marketing(self) -> bool:
+        return self.plano_id is not None
+
+    @property
     def modulo_permissoes(self) -> str:
+        if self.marketing:
+            return "marketing-imoveis"
         return "pos-venda" if self.pos_venda else "tarefas"

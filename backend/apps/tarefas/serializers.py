@@ -32,13 +32,16 @@ class TarefaListaSerializer(serializers.ModelSerializer):
     responsavel_nome = serializers.CharField(source="responsavel.nome", read_only=True)
     atrasada = serializers.SerializerMethodField()
     pos_venda = serializers.BooleanField(read_only=True)
+    marketing = serializers.BooleanField(read_only=True)
+    plano_referencia = serializers.CharField(source="plano.referencia", read_only=True, default=None)
     origem = serializers.SerializerMethodField()
 
     class Meta:
         model = Tarefa
         fields = [
             "id", "referencia", "titulo", "estado", "estado_nome", "estado_categoria", "prioridade", "prioridade_nome",
-            "prazo", "atrasada", "pos_venda", "transacao", "transacao_referencia", "cliente_nome", "origem",
+            "prazo", "atrasada", "pos_venda", "marketing", "plano", "plano_referencia", "mk_numero", "mk_semana",
+            "incluida", "transacao", "transacao_referencia", "cliente_nome", "origem",
             "responsavel", "responsavel_nome", "criado_em",
         ]  # fmt: skip
 
@@ -79,6 +82,7 @@ class TarefaSerializer(TarefaListaSerializer):
         # O estado muda só pela ação expressa «mudar-estado» (concluir / reabrir com motivo).
         read_only_fields = [
             "referencia", "estado", "concluida_em", "motivo_estado", "criado_em", "atualizado_em", "eliminado_em",
+            "plano", "mk_numero", "mk_semana", "incluida",
         ]  # fmt: skip
 
     def get_imovel_descricao(self, t) -> str | None:
@@ -111,6 +115,13 @@ class TarefaSerializer(TarefaListaSerializer):
         from .servicos import obter_origem, valor_categoria
 
         t = self.instance
+        if t is not None and t.plano_id:
+            # Ocorrência do plano: designação literal do catálogo e ligação fixas; muda-se prazo, responsável…
+            if "titulo" in d and d["titulo"] != t.titulo:
+                raise serializers.ValidationError({"titulo": "A designação das tarefas do plano não se altera."})
+            for k in ("transacao", "origem_modulo", "origem_id", "categoria"):
+                d.pop(k, None)
+            return d
         transacao = d.get("transacao", t.transacao if t else None)
         if t is not None and "transacao" in d and (transacao is None) != (t.transacao_id is None):
             raise serializers.ValidationError({"transacao": "Uma tarefa não passa entre Pós-Venda e Tarefas gerais."})
@@ -129,7 +140,7 @@ class TarefaSerializer(TarefaListaSerializer):
         categoria = d.get("categoria", t.categoria if t else None)
         if categoria is None:
             d["categoria"] = valor_categoria("categorias_tarefa", tipo)
-        elif (categoria.categoria == "pos_venda") != (tipo == "pos_venda"):
+        elif categoria.categoria == "marketing" or (categoria.categoria == "pos_venda") != (tipo == "pos_venda"):
             raise serializers.ValidationError(
                 {"categoria": "Categoria de pós-venda só em tarefas de transações concluídas (e vice-versa)."}
             )

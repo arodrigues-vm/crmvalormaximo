@@ -86,6 +86,7 @@ class CompromissoViewSet(RegistoViewSet):
             OpenApiParameter("fim", str, required=True),
             OpenApiParameter("pessoa", int),
             OpenApiParameter("cancelados", bool),
+            OpenApiParameter("marketing", bool),
         ]
     )
     @action(detail=False, methods=["get"])
@@ -100,7 +101,12 @@ class CompromissoViewSet(RegistoViewSet):
             if not pessoa.isdigit() or int(pessoa) not in {x["id"] for x in pessoas_visiveis(request.user)}:
                 raise serializers.ValidationError({"pessoa": "Pessoa inválida ou sem acesso à sua agenda."})
             pessoa = int(pessoa)
-        return Response(eventos(request.user, inicio, fim, pessoa, cancelados=p.get("cancelados") in ("1", "true")))
+        return Response(
+            eventos(
+                request.user, inicio, fim, pessoa, cancelados=p.get("cancelados") in ("1", "true"),
+                marketing=p.get("marketing") in ("1", "true"),
+            )
+        )  # fmt: skip
 
     @action(detail=False, methods=["get"])
     def avisos(self, request):

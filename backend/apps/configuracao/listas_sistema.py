@@ -100,6 +100,7 @@ CAT_ESTADO_TAREFA = [
 CAT_CATEGORIA_TAREFA = [
     {"valor": "pos_venda", "nome": "Pós-venda (ligada a uma transação concluída)"},
     {"valor": "geral", "nome": "Geral"},
+    {"valor": "marketing", "nome": "Marketing de imóveis (ligada a um plano)"},
 ]
 
 CAT_ESTADO_COMPROMISSO = [
@@ -272,7 +273,7 @@ LISTAS = {
         "Categorias de tarefa",
         "tarefas",
         "«Pós-venda» exige uma transação concluída (escritura ou contrato).",
-        [("Pós-venda", "pos_venda"), ("Geral", "geral")],
+        [("Pós-venda", "pos_venda"), ("Geral", "geral"), ("Marketing de imóveis", "marketing")],
     ),
     "tipos_compromisso": (
         "Tipos de compromisso",

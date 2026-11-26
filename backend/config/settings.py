@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     "apps.faturacao",
     "apps.tarefas",
     "apps.agenda",
+    "apps.marketing",
 ]
 
 MIDDLEWARE = [

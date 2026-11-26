@@ -70,7 +70,7 @@ def aniversario_em(nascimento: date, ano: int) -> date:
 
 
 def caminho_tarefa(t) -> str:
-    return f"/pos-venda/{t.pk}" if t.transacao_id else f"/tarefas/{t.pk}"
+    return f"/pos-venda/{t.pk}" if t.transacao_id else f"/tarefas/{t.pk}"  # as do plano abrem em /tarefas
 
 
 def _imovel(o) -> str:
@@ -79,7 +79,7 @@ def _imovel(o) -> str:
     return descricao_imovel(o)
 
 
-def eventos(u, inicio: date, fim: date, pessoa=None, cancelados=False) -> list[dict]:
+def eventos(u, inicio: date, fim: date, pessoa=None, cancelados=False, marketing=False) -> list[dict]:
     """Acontecimentos entre `inicio` e `fim` (inclusive), ordenados. `pessoa`: id do utilizador ou None (todos
     os que o utilizador pode ver)."""
     saida = []
@@ -134,7 +134,9 @@ def eventos(u, inicio: date, fim: date, pessoa=None, cancelados=False) -> list[d
                 )  # fmt: skip
             )
     if pode_algum(u, Operacao.CONSULTAR):
-        qs = visiveis(u, Operacao.CONSULTAR, Tarefa.objects.ativos())
+        qs = visiveis(u, Operacao.CONSULTAR, Tarefa.objects.ativos().exclude(incluida=False))
+        if not marketing:
+            qs = qs.filter(plano__isnull=True)  # tarefas do Plano de Marketing só a pedido (D-53)
         qs = qs.filter(prazo__gte=inicio, prazo__lte=fim).select_related("estado", "responsavel", "transacao__entidade")
         if pessoa:
             qs = qs.filter(responsavel_id=pessoa)
@@ -208,7 +210,7 @@ def avisos(u, agora: datetime | None = None) -> list[dict]:
                 saida.append(_aviso(f"visita-{v.pk}-{m:%Y%m%d%H%M}", "visita", f"Visita · {cliente}".strip(" ·"), m,
                                     f"/visitas/{v.pk}"))  # fmt: skip
     if pode_algum(u, Operacao.CONSULTAR):
-        for t in Tarefa.objects.ativos().filter(
+        for t in Tarefa.objects.ativos().exclude(incluida=False).filter(
             Q(responsavel=u) | Q(partilhada_com=u), prazo=hoje
         ).filter(Q(estado__categoria__in=ABERTA) | Q(estado__isnull=True)).distinct():  # fmt: skip
             saida.append(_aviso(f"tarefa-{t.pk}-{t.prazo:%Y%m%d}", "tarefa", t.titulo, None, caminho_tarefa(t)))

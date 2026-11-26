@@ -40,6 +40,12 @@ ECRAS = {
         "Documentos de consultores",
         ["referencia", "numero"],
     ),
+    "marketing_imoveis": (
+        "marketing.PlanoMarketing",
+        "marketing-imoveis",
+        "Plano de Marketing de Imóveis",
+        ["referencia"],
+    ),
     "agenda": ("agenda.Compromisso", "agenda", "Agenda (compromissos)", ["referencia", "titulo"]),
     "tarefas": ("tarefas.Tarefa", "tarefas", "Tarefas (gerais e de pós-venda)", ["referencia", "titulo"]),
     "agentes": ("agentes.Agente", "agentes", "Agentes", ["referencia", "nome"]),

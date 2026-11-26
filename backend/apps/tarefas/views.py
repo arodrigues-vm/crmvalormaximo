@@ -110,7 +110,10 @@ class TarefaViewSet(RegistoViewSet):
         qs = self.base_queryset()
         qs = qs.na_lixeira() if self.action in ("lixeira", "restaurar") else qs.ativos()
         qs = visiveis(self.request.user, self.operacao_atual(), qs)
-        return self.filtros(qs) if self.action in ("list", "kanban") else qs
+        if self.action in ("list", "kanban"):
+            # Ocorrências do plano não incluídas (checkbox) ficam só no Plano de Marketing.
+            return self.filtros(qs.exclude(incluida=False))
+        return qs
 
     def base_queryset(self):
         return Tarefa.objects.select_related(
@@ -138,9 +141,13 @@ class TarefaViewSet(RegistoViewSet):
             qs = qs.filter(estado__categoria="concluida")
         tipo = p.get("tipo")
         if tipo == "geral":
-            qs = qs.filter(transacao__isnull=True)
+            qs = qs.filter(transacao__isnull=True, plano__isnull=True)
         elif tipo == "pos_venda":
             qs = qs.filter(transacao__isnull=False)
+        elif tipo == "marketing":
+            qs = qs.filter(plano__isnull=False)
+        if p.get("plano"):
+            qs = qs.filter(plano_id=p["plano"])
         if p.get("transacao"):
             qs = qs.filter(transacao_id=p["transacao"])
         if p.get("origem_modulo"):
@@ -154,7 +161,7 @@ class TarefaViewSet(RegistoViewSet):
     @extend_schema(
         parameters=[
             OpenApiParameter(n, str)
-            for n in ("pesquisa", "vista", "tipo", "transacao", "origem_modulo", "origem_id", "responsavel")
+            for n in ("pesquisa", "vista", "tipo", "transacao", "plano", "origem_modulo", "origem_id", "responsavel")
         ]
     )
     def list(self, request, *args, **kwargs):
@@ -168,6 +175,13 @@ class TarefaViewSet(RegistoViewSet):
             Q(estado__categoria__in=ABERTAS) | Q(estado__isnull=True) | Q(atualizado_em__gte=desde)
         )[:KANBAN_MAX]
         return Response(TarefaListaSerializer(qs, many=True, context=self.get_serializer_context()).data)
+
+    def destroy(self, request, *args, **kwargs):
+        if self.get_object().plano_id:
+            raise serializers.ValidationError(
+                {"detail": "As tarefas do Plano de Marketing não se apagam: desmarque «Incluir» no plano."}
+            )
+        return super().destroy(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
         modulo = MODULO if request.data.get("transacao") else MODULO_GERAL

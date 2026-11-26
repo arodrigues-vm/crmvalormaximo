@@ -20,6 +20,7 @@ from .models import ORIGENS, ModeloTarefa, Tarefa
 
 MODULO = "pos-venda"
 MODULO_GERAL = "tarefas"
+MODULO_MARKETING = "marketing-imoveis"
 NOMES_ORIGEM = dict(ORIGENS)
 ABERTAS = ("aberta", "em_curso")
 FECHADAS = ("concluida", "cancelada")
@@ -36,15 +37,17 @@ def pode_criar(utilizador) -> bool:
 
 
 def visiveis(utilizador, operacao, qs):
-    """Tarefas a que o utilizador tem acesso: gerais pelo módulo «tarefas», de pós-venda pelo «pos-venda»."""
-    gerais = filtrar(utilizador, MODULO_GERAL, operacao, qs.filter(transacao__isnull=True),
-                     campo_partilhas="partilhada_com")  # fmt: skip
-    pv = filtrar(utilizador, MODULO, operacao, qs.filter(transacao__isnull=False), campo_partilhas="partilhada_com")
-    return qs.filter(Q(pk__in=gerais.values("pk")) | Q(pk__in=pv.values("pk")))
+    """Tarefas a que o utilizador tem acesso, cada tipo pelo seu módulo: gerais («tarefas»), de pós-venda
+    («pos-venda») e do Plano de Marketing («marketing-imoveis»)."""
+    kw = {"campo_partilhas": "partilhada_com"}
+    gerais = filtrar(utilizador, MODULO_GERAL, operacao, qs.filter(transacao__isnull=True, plano__isnull=True), **kw)
+    pv = filtrar(utilizador, MODULO, operacao, qs.filter(transacao__isnull=False), **kw)
+    mk = filtrar(utilizador, MODULO_MARKETING, operacao, qs.filter(plano__isnull=False), **kw)
+    return qs.filter(Q(pk__in=gerais.values("pk")) | Q(pk__in=pv.values("pk")) | Q(pk__in=mk.values("pk")))
 
 
 def pode_algum(utilizador, operacao) -> bool:
-    return pode(utilizador, MODULO_GERAL, operacao) or pode(utilizador, MODULO, operacao)
+    return any(pode(utilizador, m, operacao) for m in (MODULO_GERAL, MODULO, MODULO_MARKETING))
 
 
 def modelos_por_usar(transacao):
