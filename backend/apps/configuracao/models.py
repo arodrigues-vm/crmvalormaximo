@@ -170,6 +170,19 @@ PARAMETROS = {
         "Pode ser mudada em cada comissão.",
         50,
     ),
+    "agenda_aviso_compromisso_horas": (
+        "Agenda: aviso dos compromissos (horas antes)",
+        "agenda",
+        "Quanto tempo antes de um compromisso aparece o aviso no sino. Aprovado inicialmente: 24 horas (1 dia).",
+        24,
+    ),
+    "agenda_aviso_visita_minutos": (
+        "Agenda: aviso das visitas (minutos antes)",
+        "agenda",
+        "Quanto tempo antes da hora de entrada de uma visita aparece o aviso (só visitas com hora). "
+        "Aprovado inicialmente: 60 minutos.",
+        60,
+    ),
     "mfa_obrigatoria": (
         "Exigir início de sessão em dois passos aos Administradores",
         "contas",

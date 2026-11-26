@@ -151,7 +151,19 @@ VALIDADORES_PARAMETROS = {
     "cmi_alertas_dias": lambda v: _lista_dias(v),
     "mfa_obrigatoria": lambda v: _sim_nao(v),
     "comissao_reparticao_angariacao": lambda v: _percentagem(v),
+    "agenda_aviso_compromisso_horas": lambda v: _inteiro(v, 1, 24 * 14),
+    "agenda_aviso_visita_minutos": lambda v: _inteiro(v, 5, 24 * 60),
 }
+
+
+def _inteiro(v, minimo, maximo):
+    try:
+        n = int(str(v).strip())
+    except ValueError as e:
+        raise serializers.ValidationError(f"Indique um número inteiro entre {minimo} e {maximo}.") from e
+    if not minimo <= n <= maximo:
+        raise serializers.ValidationError(f"Indique um número inteiro entre {minimo} e {maximo}.")
+    return n
 
 
 def _percentagem(v):

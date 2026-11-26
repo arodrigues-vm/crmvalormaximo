@@ -102,7 +102,14 @@ CAT_CATEGORIA_TAREFA = [
     {"valor": "geral", "nome": "Geral"},
 ]
 
+CAT_ESTADO_COMPROMISSO = [
+    {"valor": "agendado", "nome": "Agendado"},
+    {"valor": "concluido", "nome": "Concluído"},
+    {"valor": "cancelado", "nome": "Cancelado"},
+]
+
 CATEGORIAS = {
+    "estados_compromisso": CAT_ESTADO_COMPROMISSO,
     "tipos_documento_transacao": CAT_DOCUMENTO_TRANSACAO,
     "estados_tarefa": CAT_ESTADO_TAREFA,
     "categorias_tarefa": CAT_CATEGORIA_TAREFA,
@@ -266,6 +273,18 @@ LISTAS = {
         "tarefas",
         "«Pós-venda» exige uma transação concluída (escritura ou contrato).",
         [("Pós-venda", "pos_venda"), ("Geral", "geral")],
+    ),
+    "tipos_compromisso": (
+        "Tipos de compromisso",
+        "agenda",
+        "Compromissos criados na Agenda (D-51).",
+        ["Reunião", "Chamada", "Avaliação de imóvel", "Outro"],
+    ),
+    "estados_compromisso": (
+        "Estados de compromisso",
+        "agenda",
+        "Cancelar e reabrir são ações expressas, com motivo (Cap. 17).",
+        [("Agendado", "agendado"), ("Concluído", "concluido"), ("Cancelado", "cancelado")],
     ),
     "tipos_agente": ("Tipos de agente", "agentes", "", ["Consultor", "Agente da rede", "Agente externo"]),
     "status_agentes": (
