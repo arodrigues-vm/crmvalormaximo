@@ -92,9 +92,30 @@ export function PlanoConsulta() {
           </Dado>
         )
       case 'ciclo':
-        return <Dado rotulo="Ciclo">{p.ciclo === 1 ? 'Plano inicial' : `${p.ciclo}.º ciclo`}</Dado>
+        return (
+          <Dado rotulo="Ciclo">
+            {p.ciclo === 1 ? 'Plano inicial' : `${p.ciclo}.º ciclo (após renovação)`}
+            {!p.ativo && <span className="etiqueta etiqueta-neutra"> substituído</span>}
+            {p.plano_anterior && (
+              <small className="ajuda">
+                {' '}
+                · anterior: <Link to={`/marketing-imoveis/${p.plano_anterior}`}>{p.plano_anterior_referencia}</Link>
+              </small>
+            )}
+            {p.ciclos_seguintes.map((c) => (
+              <small key={c.id} className="ajuda">
+                {' '}
+                · seguinte: <Link to={`/marketing-imoveis/${c.id}`}>{c.referencia}</Link>
+              </small>
+            ))}
+          </Dado>
+        )
       case 'data_base':
-        return <Dado rotulo="Data-base (início do CMI)">{dataPt(p.data_base)}</Dado>
+        return (
+          <Dado rotulo={p.ciclo === 1 ? 'Data-base (início do CMI)' : 'Data-base (início da renovação)'}>
+            {dataPt(p.data_base)}
+          </Dado>
+        )
       case 'responsavel':
         return <Dado rotulo="Responsável">{p.responsavel_nome}</Dado>
       case 'progresso':
@@ -168,9 +189,9 @@ export function PlanoConsulta() {
           ) : (
             <>
               <p>
-                A data de início do CMI ({dataPt(p.angariacao_data_inicio!)}) é diferente da data-base do plano (
-                {dataPt(p.data_base)}). Os prazos das tarefas por fazer podem ser recalculados (as concluídas não
-                mudam).
+                A data de início do {p.ciclo === 1 ? 'CMI' : 'ciclo (renovação)'} ({dataPt(p.angariacao_data_inicio!)})
+                é diferente da data-base do plano ({dataPt(p.data_base)}). Os prazos das tarefas por fazer podem ser
+                recalculados (as concluídas não mudam).
               </p>
               {p.acoes.editar && (
                 <button className="botao-secundario" onClick={() => setDialogo('pedir')}>
@@ -207,6 +228,8 @@ export function PlanoConsulta() {
               .filter((t) => t.mk_semana === s.semana)
               .map((t) => {
                 const concluida = t.estado_categoria === 'concluida'
+                // Fechadas: concluída, cancelada ou encerrada por um novo ciclo («Não executada — Plano substituído»).
+                const fechada = ['concluida', 'cancelada', 'substituida'].includes(t.estado_categoria ?? '')
                 return (
                   <li key={t.id} className={t.incluida ? '' : 'excluida'}>
                     <label className="ocorrencia-incluir" title="Incluir no plano">
@@ -231,7 +254,7 @@ export function PlanoConsulta() {
                       </span>
                     )}
                     {t.incluida && t.atrasada && <span className="etiqueta etiqueta-perigo">Atrasada</span>}
-                    {t.incluida && p.acoes.editar && !concluida && (
+                    {t.incluida && p.acoes.editar && !fechada && (
                       <button
                         className="ligacao-botao"
                         disabled={estado.isPending}
@@ -240,7 +263,7 @@ export function PlanoConsulta() {
                         Concluir
                       </button>
                     )}
-                    {t.incluida && p.acoes.editar && concluida && (
+                    {t.incluida && p.acoes.editar && fechada && (
                       <button className="ligacao-botao" onClick={() => setDialogo({ reabrir: t })}>
                         Reabrir
                       </button>

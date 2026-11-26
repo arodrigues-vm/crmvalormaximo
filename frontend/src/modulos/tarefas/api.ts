@@ -130,6 +130,7 @@ export const ETIQUETA_TAREFA: Record<string, 'sucesso' | 'aviso' | 'neutra' | 'p
   em_curso: 'aviso',
   concluida: 'sucesso',
   cancelada: 'neutra',
+  substituida: 'neutra',
 }
 
 export const NOMES_CAMPOS_TAREFA: Record<string, string> = {

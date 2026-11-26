@@ -67,7 +67,30 @@ Os prazos das tarefas por fazer podem ser recalculados a partir da nova data; as
 
 Os pedidos ficam registados no bloco **Pedidos de recálculo** e no histórico.
 
-## 14.6 Eliminar um plano
+## 14.6 Renovação do CMI: novo ciclo de marketing
+
+Quando o CMI é renovado, o plano pode recomeçar com um **novo ciclo**, com referência e datas próprias. O CRM
+propõe-no, mas só o cria com a sua confirmação.
+
+1. Registe a renovação na ficha do CMI, como habitualmente.
+2. No bloco **Plano de Marketing** aparece a pergunta «O CMI foi renovado… Quer criar um novo ciclo de
+   marketing?». Carregue em **Novo ciclo de marketing**.
+3. Em **Origem das tarefas do novo ciclo** escolha:
+   - **Catálogo-padrão** — as 45 tarefas, todas marcadas; ou
+   - **Seleção do ciclo anterior** — ficam marcadas as que estavam incluídas no plano anterior.
+4. Em **Tarefas por fazer do plano anterior** escolha:
+   - **Manter ativas** — continuam por fazer no plano anterior; ou
+   - **Encerrar** — passam a «Não executada — Plano substituído».
+5. Se quiser, marque ou desmarque tarefas na lista. As datas contam a partir do início da renovação.
+6. Carregue em **Confirmar e criar o ciclo**.
+
+![Novo ciclo de marketing](imagens/61-novo-ciclo.png)
+
+O plano anterior fica guardado tal como estava (datas, tarefas concluídas, responsáveis e histórico), com a
+indicação «substituído» e a ligação para o ciclo seguinte. Cada renovação só dá um ciclo. Se a data de início da
+renovação for corrigida, o recálculo dos prazos (14.5) usa essa data.
+
+## 14.7 Eliminar um plano
 
 Só é possível enquanto nenhuma tarefa estiver concluída (o plano e as tarefas vão para a lixeira). Depois disso,
 use a caixa **Incluir** para ajustar o plano.

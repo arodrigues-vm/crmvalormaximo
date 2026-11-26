@@ -39,7 +39,7 @@ export function PlanosLista() {
             <tr>
               <th>Referência</th>
               <th>Imóvel</th>
-              <th>CMI</th>
+              <th>CMI / ciclo</th>
               <th>Início</th>
               <th>Semanas</th>
               <th>Concluídas</th>
@@ -56,7 +56,10 @@ export function PlanosLista() {
                 <td data-rotulo="Imóvel" className="celula-principal">
                   {x.imovel_descricao}
                 </td>
-                <td data-rotulo="CMI">{x.angariacao_referencia}</td>
+                <td data-rotulo="CMI / ciclo">
+                  {x.angariacao_referencia} · {x.ciclo === 1 ? 'inicial' : `${x.ciclo}.º ciclo`}
+                  {!x.ativo && <small className="ajuda"> · substituído</small>}
+                </td>
                 <td data-rotulo="Início">{dataPt(x.data_base)}</td>
                 <td data-rotulo="Semanas">
                   <Semanas ind={x.indicadores} compacto />

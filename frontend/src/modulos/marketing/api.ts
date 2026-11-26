@@ -42,11 +42,47 @@ export interface PlanoResumo {
   criado_em: string
 }
 
+export interface SituacaoPlano {
+  plano_inicial: boolean
+  motivo_inicial: string | null
+  novo_ciclo: { renovacao: number; ciclo: number; data_inicio: string } | null
+}
+
+export interface Opcao {
+  valor: string
+  nome: string
+}
+
+export interface PreviaCiclo {
+  angariacao: number
+  renovacao: number
+  ciclo: number
+  data_base: string
+  origem: string
+  responsavel_nome: string
+  anterior: {
+    id: number
+    referencia: string
+    ciclo: number
+    pendentes: { tarefa: number; numero: number; titulo: string; prazo: string | null }[]
+  }
+  ocorrencias: PreviaPlano['ocorrencias']
+  origens: Opcao[]
+  destinos: Opcao[]
+}
+
 export interface Plano extends PlanoResumo {
   ocorrencias: TarefaResumo[]
   angariacao_data_inicio: string | null
   pedido_pendente: PedidoRecalculo | null
   pedidos: PedidoRecalculo[]
+  plano_anterior: number | null
+  plano_anterior_referencia: string | null
+  ciclos_seguintes: { id: number; referencia: string; ciclo: number }[]
+  renovacao: number | null
+  renovacao_data_inicio: string | null
+  origem_ciclo: string
+  destino_pendentes: string
   observacoes: string
   atualizado_em: string
   versao: number
@@ -77,6 +113,11 @@ export const planosApi = {
   atualizar: (id: number, dados: unknown) => pedido<Plano>(`${BASE}${id}/`, { method: 'PATCH', json: dados }),
   eliminar: (id: number) => pedido<null>(`${BASE}${id}/`, { method: 'DELETE' }),
   historico: (id: number) => pedido<EntradaHistorico[]>(`${BASE}${id}/historico/`),
+  situacao: (angariacao: number) => pedido<SituacaoPlano>(`${BASE}situacao/?angariacao=${angariacao}`),
+  previaCiclo: (angariacao: number, origem: string) =>
+    pedido<PreviaCiclo>(`${BASE}previa-ciclo/?angariacao=${angariacao}&origem=${origem}`),
+  novoCiclo: (dados: { angariacao: number; origem: string; destino: string; excluidos: number[] }) =>
+    pedido<Plano>(`${BASE}novo-ciclo/`, { json: dados }),
   previa: (angariacao: number) => pedido<PreviaPlano>(`${BASE}previa/?angariacao=${angariacao}`),
   criar: (angariacao: number, excluidos: number[]) => pedido<Plano>(BASE, { json: { angariacao, excluidos } }),
   incluir: (id: number, tarefa: number, incluida: boolean) =>

@@ -364,7 +364,7 @@ export function AngariacaoConsulta() {
         </Bloco>
       )}
 
-      <PlanoBloco angariacao={Number(id)} />
+      <PlanoBloco angariacao={Number(id)} renovacoes={a.renovacoes.length} />
 
       <TarefasOrigem modulo="angariacoes" id={Number(id)} />
 
