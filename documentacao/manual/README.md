@@ -21,7 +21,7 @@ As imagens usam apenas dados fictícios de demonstração.
 | 10 | [Transações](10-transacoes.md) | Disponível |
 | 11 | [Faturação e Comissões](11-faturacao.md) | Disponível (comissões e faturação dos consultores) |
 | 12 | [Pós-Venda](12-pos-venda.md) | Disponível |
-| 13 | Tarefas e Agenda | Por escrever |
+| 13 | [Agenda e avisos](13-agenda.md) | Disponível (o capítulo das Tarefas gerais fica por escrever) |
 | 14 | Plano de Marketing de Imóveis | Por escrever |
 | 15 | Marketing de Entidades | Por escrever |
 | 16 | Dashboard e Estatísticas | Por escrever |

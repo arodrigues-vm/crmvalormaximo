@@ -12,6 +12,9 @@ import { AngariacoesLista } from '../modulos/angariacoes/AngariacoesLista'
 import { Configuracoes } from '../modulos/configuracoes/Configuracoes'
 import { Disposicoes } from '../modulos/configuracoes/Disposicoes'
 import { ListasValores } from '../modulos/configuracoes/ListasValores'
+import { Agenda } from '../modulos/agenda/Agenda'
+import { CompromissoConsulta } from '../modulos/agenda/CompromissoConsulta'
+import { CompromissoEditar, CompromissoNovo } from '../modulos/agenda/CompromissoFormulario'
 import { ModelosTarefa } from '../modulos/configuracoes/ModelosTarefa'
 import { Parametros } from '../modulos/configuracoes/Parametros'
 import { TarefaConsulta } from '../modulos/tarefas/TarefaConsulta'
@@ -159,6 +162,16 @@ export const rotas: RouteObject[] = [
           { path: 'nova', element: <TransacaoNova /> },
           { path: ':id', element: <TransacaoConsulta /> },
           { path: ':id/editar', element: <TransacaoEditar /> },
+        ],
+      },
+      {
+        path: 'agenda',
+        element: <ExigeModulo modulo="agenda" />,
+        children: [
+          { index: true, element: <Agenda /> },
+          { path: 'compromissos/novo', element: <CompromissoNovo /> },
+          { path: 'compromissos/:id', element: <CompromissoConsulta /> },
+          { path: 'compromissos/:id/editar', element: <CompromissoEditar /> },
         ],
       },
       {

@@ -47,6 +47,17 @@ export function Parametros() {
                 )
               }
             />
+          ) : typeof p.valor === 'number' ? (
+            <ParametroNumero
+              key={p.chave}
+              p={p}
+              aoGravar={(n) =>
+                qc.setQueryData(
+                  ['parametros'],
+                  data.map((x) => (x.chave === n.chave ? n : x)),
+                )
+              }
+            />
           ) : null,
         )}
       </div>
@@ -140,6 +151,55 @@ function ParametroSimNao({ p, aoGravar }: { p: Parametro; aoGravar: (p: Parametr
           <option value="sim">Sim</option>
           <option value="nao">Não</option>
         </select>
+      </div>
+      {ok && <p className="ajuda">Guardado.</p>}
+      {erro && (
+        <p className="erro" role="alert">
+          {erro}
+        </p>
+      )}
+    </div>
+  )
+}
+
+/** Parâmetro numérico (ex.: antecedência dos avisos da Agenda, repartição da comissão). */
+function ParametroNumero({ p, aoGravar }: { p: Parametro; aoGravar: (p: Parametro) => void }) {
+  const [texto, setTexto] = useState(String(p.valor))
+  const [erro, setErro] = useState<string | null>(null)
+  const [ok, setOk] = useState(false)
+  const gravar = useMutation({
+    mutationFn: () =>
+      pedido<Parametro>(`/api/parametros/${p.chave}/`, { method: 'PATCH', json: { valor: texto.trim() } }),
+    onSuccess: (n) => {
+      aoGravar(n)
+      setTexto(String(n.valor))
+      setErro(null)
+      setOk(true)
+    },
+    onError: (e) => {
+      setOk(false)
+      setErro(e instanceof ErroApi ? Object.values(e.campos).flat().join(' ') || e.message : 'Falha ao gravar.')
+    },
+  })
+  return (
+    <div className="parametro">
+      <label htmlFor={`p-${p.chave}`}>
+        <strong>{p.nome}</strong>
+      </label>
+      <p className="ajuda">{p.descricao}</p>
+      <div className="valor-novo">
+        <input
+          id={`p-${p.chave}`}
+          inputMode="decimal"
+          value={texto}
+          onChange={(e) => {
+            setTexto(e.target.value)
+            setOk(false)
+          }}
+        />
+        <button type="button" className="botao-principal" disabled={gravar.isPending} onClick={() => gravar.mutate()}>
+          Guardar
+        </button>
       </div>
       {ok && <p className="ajuda">Guardado.</p>}
       {erro && (

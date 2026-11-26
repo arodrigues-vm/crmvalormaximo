@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 
+import { Avisos } from '../modulos/agenda/Avisos'
 import { GRUPOS } from './modulos'
 import { useSessao } from './sessao'
 
@@ -74,6 +75,7 @@ export function Layout({ children }: { children: ReactNode }) {
           <h1>{atual?.nome ?? 'CRM Valor Máximo'}</h1>
           {utilizador && (
             <div className="utilizador">
+              {pode('agenda') && <Avisos />}
               <Link to="/conta" className="utilizador-nome" title="A minha conta">
                 {utilizador.nome}
                 <small>{utilizador.perfil_nome}</small>
