@@ -26,6 +26,7 @@ import {
 } from './api'
 import { ECRA_ANGARIACAO } from './disposicao'
 import { TarefasOrigem } from '../tarefas/PosVendaTransacao'
+import { PlanoBloco } from '../marketing/PlanoBloco'
 
 function remuneracao(a: Angariacao): string | null {
   const v = a.valor_remuneracao
@@ -362,6 +363,8 @@ export function AngariacaoConsulta() {
           </ul>
         </Bloco>
       )}
+
+      <PlanoBloco angariacao={Number(id)} />
 
       <TarefasOrigem modulo="angariacoes" id={Number(id)} />
 

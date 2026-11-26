@@ -8,7 +8,7 @@ Critérios completos: Especificação V1.4 §16 (em `fontes/`). Estados: Pendent
 | AT-02 | Partilha e transferência | F1-05/06 | `test_permissoes.py::TestFiltrar` (âmbitos; falta partilha/transferência) | Em curso |
 | AT-03 | Registos e vistas | F1-03; F2-04 | `entidades.test.tsx` (Consulta→Editar, guarda de saída, erros por bloco); falta Cartões/Kanban (F2-04) | Em curso |
 | AT-04 | CMI original e renovação | F2-03; F4-04 | `angariacoes/tests/test_api.py` (data original estável, correção material, ciclos de renovação); falta escolha de ciclo de marketing (F4-04) | Em curso |
-| AT-05 | Plano de marketing 45 | F4-03 | — | Pendente |
+| AT-05 | Plano de marketing 45 | F4-03 | `marketing/tests/test_api.py` (catálogo literal 45/8 semanas e repetições, offsets +0…+49, prévia com 45 marcadas, inclusão por checkbox, contadores e cores neutro/vermelho/amarelo/verde, sem duplicar, recálculo preserva concluídas) | Aprovado (testes automáticos) |
 | AT-06 | Dashboard e finanças | F3-08; F4-06 | — | Pendente |
 | AT-07 | Comissões, parciais, IVA e estornos | F3-07/08 | `apps/comissoes/tests/test_api.py` (cálculo, lados, consultores, exceções) e `apps/faturacao/tests/test_api.py` (prestações pelo CMI, IVA e retenção, duplicados, pagamentos parciais, excesso recusado, livro imutável, estornos com aprovação independente e saldo reservado, notas de crédito); `comissoes.test.tsx`, `faturacao.test.tsx` | Aprovado (testes automáticos) |
 | AT-08 | Proposta a partir de Visita | F3-04 | `apps/propostas/tests/test_api.py` (prévia sem gravar, participantes pré-preenchidos, confirmação, duplicados, acesso) | Aprovado (testes automáticos) |

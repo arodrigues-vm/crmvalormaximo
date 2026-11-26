@@ -31,6 +31,7 @@ export function Agenda() {
   const data = params.get('data') || hojeLisboa()
   const pessoa = params.get('pessoa') ?? String(utilizador?.id ?? '')
   const cancelados = params.get('cancelados') === '1'
+  const marketing = params.get('marketing') === '1'
   const mudar = (novo: Record<string, string>) =>
     setParams(
       (p) => {
@@ -48,6 +49,7 @@ export function Agenda() {
   const pedidoEventos: Record<string, string> = { inicio, fim }
   if (pessoa !== 'todas' && pessoa) pedidoEventos.pessoa = pessoa
   if (cancelados) pedidoEventos.cancelados = '1'
+  if (marketing) pedidoEventos.marketing = '1'
   const eventos = useQuery({
     queryKey: ['agenda', 'eventos', pedidoEventos],
     queryFn: () => agendaApi.eventos(pedidoEventos),
@@ -115,6 +117,14 @@ export function Agenda() {
               onChange={(e) => mudar({ cancelados: e.target.checked ? '1' : '' })}
             />
             <span>Mostrar cancelados</span>
+          </label>
+          <label className="campo-compacto">
+            <input
+              type="checkbox"
+              checked={marketing}
+              onChange={(e) => mudar({ marketing: e.target.checked ? '1' : '' })}
+            />
+            <span>Mostrar tarefas de marketing</span>
           </label>
           {opcoes.data?.pode_criar && (
             <Link

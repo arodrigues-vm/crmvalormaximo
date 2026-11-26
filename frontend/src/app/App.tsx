@@ -16,6 +16,9 @@ import { Agenda } from '../modulos/agenda/Agenda'
 import { CompromissoConsulta } from '../modulos/agenda/CompromissoConsulta'
 import { CompromissoEditar, CompromissoNovo } from '../modulos/agenda/CompromissoFormulario'
 import { ModelosTarefa } from '../modulos/configuracoes/ModelosTarefa'
+import { PlanoConsulta } from '../modulos/marketing/PlanoConsulta'
+import { PlanoEditar } from '../modulos/marketing/PlanoEditar'
+import { PlanosLista } from '../modulos/marketing/PlanosLista'
 import { Parametros } from '../modulos/configuracoes/Parametros'
 import { TarefaConsulta } from '../modulos/tarefas/TarefaConsulta'
 import { TarefaEditar, TarefaNova } from '../modulos/tarefas/TarefaFormulario'
@@ -173,6 +176,15 @@ export const rotas: RouteObject[] = [
           { path: 'compromissos/novo', element: <CompromissoNovo /> },
           { path: 'compromissos/:id', element: <CompromissoConsulta /> },
           { path: 'compromissos/:id/editar', element: <CompromissoEditar /> },
+        ],
+      },
+      {
+        path: 'marketing-imoveis',
+        element: <ExigeModulo modulo="marketing-imoveis" />,
+        children: [
+          { index: true, element: <PlanosLista /> },
+          { path: ':id', element: <PlanoConsulta /> },
+          { path: ':id/editar', element: <PlanoEditar /> },
         ],
       },
       {

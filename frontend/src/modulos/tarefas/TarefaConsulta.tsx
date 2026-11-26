@@ -73,8 +73,18 @@ export function TarefaConsulta() {
             <Link to={`/transacoes/${tf.transacao}`}>{tf.transacao_referencia}</Link>
           </Dado>
         ) : null
+      case 'plano':
+        return tf.marketing ? (
+          <Dado rotulo="Plano de marketing">
+            <Link to={`/marketing-imoveis/${tf.plano}`}>{tf.plano_referencia}</Link>
+            <small className="ajuda">
+              {' '}
+              · n.º {tf.mk_numero} · {tf.mk_semana}ª semana{tf.incluida ? '' : ' · não incluída'}
+            </small>
+          </Dado>
+        ) : null
       case 'origem':
-        if (tf.pos_venda) return null
+        if (tf.pos_venda || tf.marketing) return null
         return (
           <Dado rotulo="Ligada a">
             {tf.origem &&
@@ -137,7 +147,7 @@ export function TarefaConsulta() {
         }
         acoes={
           <>
-            {x.acoes.eliminar && (
+            {x.acoes.eliminar && !tf.marketing && (
               <button className="botao-secundario" onClick={() => setAEliminar(true)}>
                 Eliminar
               </button>

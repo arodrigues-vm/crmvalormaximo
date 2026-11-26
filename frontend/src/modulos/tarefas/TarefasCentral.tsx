@@ -25,6 +25,7 @@ const TIPOS: [string, string][] = [
   ['', 'Todas'],
   ['geral', 'Gerais'],
   ['pos_venda', 'Pós-venda'],
+  ['marketing', 'Marketing'],
 ]
 
 /** Tarefas (F4-01, D-52): lista central das tarefas gerais e de pós-venda, em Lista, Cartões ou Quadro. */
@@ -173,7 +174,13 @@ export function TarefasCentral() {
 }
 
 const ligadaA = (x: TarefaResumo) =>
-  x.pos_venda ? `Pós-venda · ${x.transacao_referencia ?? ''}` : x.origem ? x.origem.titulo : '—'
+  x.marketing
+    ? `Plano de marketing ${x.plano_referencia ?? ''} · ${x.mk_semana}ª semana`
+    : x.pos_venda
+      ? `Pós-venda · ${x.transacao_referencia ?? ''}`
+      : x.origem
+        ? x.origem.titulo
+        : '—'
 
 function EtiquetaEstado({ t }: { t: TarefaResumo }) {
   return t.estado_nome ? (

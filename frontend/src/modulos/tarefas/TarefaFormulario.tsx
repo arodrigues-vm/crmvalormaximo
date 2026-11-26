@@ -148,13 +148,15 @@ function Formulario({ tarefa, posVenda, inicial }: { tarefa?: Tarefa; posVenda: 
           <CampoTexto
             rotulo="Título"
             required
+            disabled={tarefa?.marketing}
+            ajuda={tarefa?.marketing ? 'Designação original do catálogo do plano (não se altera).' : undefined}
             value={v.titulo}
             onChange={(e) => mudar('titulo', e.target.value)}
             erro={erros.titulo}
           />
         )
       case 'origem':
-        if (posVenda) return null
+        if (posVenda || tarefa?.marketing) return null
         return origemFixa ? (
           <CampoTexto rotulo="Ligada a" value={v.origem?.titulo ?? ''} disabled readOnly />
         ) : (

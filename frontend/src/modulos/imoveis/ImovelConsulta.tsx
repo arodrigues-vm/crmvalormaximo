@@ -22,6 +22,7 @@ import { FotografiaImovel } from './FotografiaImovel'
 import { VisitasDoRegisto } from '../visitas/VisitasDoRegisto'
 import { useSessao } from '../../app/sessao'
 import { TarefasOrigem } from '../tarefas/PosVendaTransacao'
+import { PlanoBloco } from '../marketing/PlanoBloco'
 
 const preenchido = (x: unknown) => x !== null && x !== undefined && x !== ''
 
@@ -196,6 +197,8 @@ export function ImovelConsulta() {
           {() => <ProcurasCompativeis imovelId={i.id} versao={i.versao} />}
         </Bloco>
       )}
+
+      <PlanoBloco imovel={Number(id)} />
 
       <TarefasOrigem modulo="imoveis" id={Number(id)} />
 

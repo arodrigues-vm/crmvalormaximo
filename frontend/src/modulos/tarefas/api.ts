@@ -16,6 +16,13 @@ export interface TarefaResumo {
   atrasada: boolean
   /** Tarefa de pós-venda (ligada a uma transação concluída); senão é uma tarefa geral (D-52). */
   pos_venda: boolean
+  /** Ocorrência do Plano de Marketing de Imóveis (D-53). */
+  marketing: boolean
+  plano: number | null
+  plano_referencia: string | null
+  mk_numero: number | null
+  mk_semana: number | null
+  incluida: boolean
   transacao: number | null
   transacao_referencia: string | null
   cliente_nome: string | null

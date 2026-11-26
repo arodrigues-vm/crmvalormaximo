@@ -23,7 +23,7 @@ As imagens usam apenas dados fictícios de demonstração.
 | 12 | [Pós-Venda](12-pos-venda.md) | Disponível |
 | 13 | [Agenda e avisos](13-agenda.md) | Disponível |
 | 13B | [Tarefas](13b-tarefas.md) | Disponível |
-| 14 | Plano de Marketing de Imóveis | Por escrever |
+| 14 | [Plano de Marketing de Imóveis](14-marketing-imoveis.md) | Disponível (o novo ciclo após renovação fica para a F4-04) |
 | 15 | Marketing de Entidades | Por escrever |
 | 16 | Dashboard e Estatísticas | Por escrever |
 | 17 | Comunicação (email e WhatsApp) | Por escrever |

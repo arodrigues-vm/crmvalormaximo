@@ -12,6 +12,7 @@ import { ECRA_COMISSAO } from '../comissoes/disposicao'
 import { ECRA_DOCUMENTO } from '../faturacao/disposicao'
 import { ECRA_TAREFA } from '../tarefas/disposicao'
 import { ECRA_COMPROMISSO } from '../agenda/disposicao'
+import { ECRA_PLANO } from '../marketing/disposicao'
 import { ECRA_INTERESSE, ECRA_VISITA } from '../visitas/disposicao'
 
 /** Ecrãs com disposição configurável (D-43). Cada módulo novo acrescenta aqui a sua definição. */
@@ -29,6 +30,7 @@ export const ECRAS: DefinicaoEcra[] = [
   ECRA_DOCUMENTO,
   ECRA_TAREFA,
   ECRA_COMPROMISSO,
+  ECRA_PLANO,
   ECRA_AGENTE,
   ECRA_AGENCIA,
   ECRA_MEMBRO,
