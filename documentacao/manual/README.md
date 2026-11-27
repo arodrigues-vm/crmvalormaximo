@@ -24,7 +24,7 @@ As imagens usam apenas dados fictícios de demonstração.
 | 13 | [Agenda e avisos](13-agenda.md) | Disponível |
 | 13B | [Tarefas](13b-tarefas.md) | Disponível |
 | 14 | [Plano de Marketing de Imóveis](14-marketing-imoveis.md) | Disponível (inclui o novo ciclo após renovação) |
-| 15 | Marketing de Entidades | Por escrever |
+| 15 | [Marketing de Entidades](15-marketing-entidades.md) | Disponível |
 | 16 | Dashboard e Estatísticas | Por escrever |
 | 17 | Comunicação (email e WhatsApp) | Por escrever |
 | 18 | [Equipa, Agentes e Agências](18-agentes.md) | Disponível |

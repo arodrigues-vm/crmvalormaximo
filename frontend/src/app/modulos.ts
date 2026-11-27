@@ -52,7 +52,7 @@ export const GRUPOS: GrupoModulos[] = [
     nome: 'Marketing e Comunicação',
     modulos: [
       m('marketing-imoveis', 'Plano de Marketing de Imóveis', true),
-      m('marketing-entidades', 'Marketing de Entidades'),
+      m('marketing-entidades', 'Marketing de Entidades', true),
       m('comunicacao', 'Comunicação'),
     ],
   },

@@ -16,6 +16,9 @@ import { Agenda } from '../modulos/agenda/Agenda'
 import { CompromissoConsulta } from '../modulos/agenda/CompromissoConsulta'
 import { CompromissoEditar, CompromissoNovo } from '../modulos/agenda/CompromissoFormulario'
 import { ModelosTarefa } from '../modulos/configuracoes/ModelosTarefa'
+import { ConfigPlanos } from '../modulos/marketing-entidades/ConfigPlanos'
+import { InscricaoConsulta } from '../modulos/marketing-entidades/InscricaoConsulta'
+import { InscricoesLista } from '../modulos/marketing-entidades/InscricoesLista'
 import { PlanoConsulta } from '../modulos/marketing/PlanoConsulta'
 import { PlanoEditar } from '../modulos/marketing/PlanoEditar'
 import { PlanosLista } from '../modulos/marketing/PlanosLista'
@@ -179,6 +182,14 @@ export const rotas: RouteObject[] = [
         ],
       },
       {
+        path: 'marketing-entidades',
+        element: <ExigeModulo modulo="marketing-entidades" />,
+        children: [
+          { index: true, element: <InscricoesLista /> },
+          { path: ':id', element: <InscricaoConsulta /> },
+        ],
+      },
+      {
         path: 'marketing-imoveis',
         element: <ExigeModulo modulo="marketing-imoveis" />,
         children: [
@@ -278,6 +289,7 @@ export const rotas: RouteObject[] = [
               { path: 'parametros', element: <Parametros /> },
               { path: 'disposicao', element: <Disposicoes /> },
               { path: 'modelos-tarefa', element: <ModelosTarefa /> },
+              { path: 'marketing-entidades', element: <ConfigPlanos /> },
             ],
           },
         ],

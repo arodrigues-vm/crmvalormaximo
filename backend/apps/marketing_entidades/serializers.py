@@ -36,12 +36,22 @@ class PassoSerializer(serializers.ModelSerializer):
 
 class PlanoEntidadesSerializer(serializers.ModelSerializer):
     passos = PassoSerializer(many=True, required=False)
+    criterios_nomes = serializers.SerializerMethodField()
 
     class Meta:
         model = PlanoEntidades
-        fields = ["id", "nome", "descricao", "objetivo", "fundamento", "criterios", "gatilhos", "ativo", "ordem",
-                  "passos", "criado_em"]  # fmt: skip
+        fields = ["id", "nome", "descricao", "objetivo", "fundamento", "criterios", "criterios_nomes", "gatilhos",
+                  "ativo", "ordem", "passos", "criado_em"]  # fmt: skip
         read_only_fields = ["criado_em"]
+
+    def get_criterios_nomes(self, p) -> dict:
+        """Nomes legíveis dos valores escolhidos em cada critério (para mostrar no ecrã)."""
+        saida = {}
+        for chave, ids in (p.criterios or {}).items():
+            lista = CRITERIOS[chave][1]
+            qs = ValorLista.objects.filter(pk__in=ids) if lista else Concelho.objects.filter(pk__in=ids)
+            saida[chave] = [{"id": x.pk, "nome": x.nome} for x in qs]
+        return saida
 
     def validate_nome(self, v):
         v = v.strip()

@@ -16,6 +16,9 @@ export function Configuracoes() {
         <NavLink to="/configuracoes/modelos-tarefa" role="tab">
           Modelos de tarefas
         </NavLink>
+        <NavLink to="/configuracoes/marketing-entidades" role="tab">
+          Marketing de Entidades
+        </NavLink>
       </div>
       <Outlet />
     </div>

@@ -18,6 +18,7 @@ import { RelacoesEntidade } from './RelacoesEntidade'
 import { ECRA_ENTIDADE, SO_SINGULAR } from './disposicao'
 import { VisitasDoRegisto } from '../visitas/VisitasDoRegisto'
 import { TarefasOrigem } from '../tarefas/PosVendaTransacao'
+import { MarketingEntidadeBloco } from '../marketing-entidades/MarketingEntidadeBloco'
 
 const dataPt = (d: string | null) => (d ? new Date(`${d}T00:00:00`).toLocaleDateString('pt-PT') : null)
 const momentoPt = (d: string) =>
@@ -268,6 +269,8 @@ export function EntidadeConsulta() {
       <Bloco titulo="Entidades relacionadas">
         <RelacoesEntidade entidadeId={e.id} podeEditar={e.acoes.editar} tipos={opcoes.data?.tipos_relacao ?? []} />
       </Bloco>
+
+      <MarketingEntidadeBloco entidade={Number(id)} />
 
       <TarefasOrigem modulo="entidades" id={Number(id)} />
 

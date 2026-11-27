@@ -30,7 +30,7 @@ export function TarefasOrigem({ modulo, id }: { modulo: string; id: number }) {
     <Bloco titulo="Tarefas">
       <TarefasDaFicha
         alvo={{ origem_modulo: modulo, origem_id: id }}
-        filtro={{ origem_modulo: modulo, origem_id: String(id), tipo: 'geral' }}
+        filtro={{ origem_modulo: modulo, origem_id: String(id) }}
         podeCriar={pode('tarefas', 'criar')}
         novaHref={`/tarefas/nova?origem_modulo=${modulo}&origem_id=${id}`}
         vazio="Sem tarefas."
